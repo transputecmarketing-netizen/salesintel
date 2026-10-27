@@ -49,10 +49,10 @@ bgs.append(("08-glass", f'''<div class="bg" style="background:linear-gradient(16
  <div class="url" style="right:96px;top:92px;color:rgba(255,255,255,.7)">transputec.com</div></div>'''))
 # 9 Diagonal bands
 bgs.append(("09-bands", f'''<div class="bg" style="background:{NAVY}">
- <div style="position:absolute;left:-470px;top:-200px;width:600px;height:1600px;background:linear-gradient(180deg,#00B8DB,#155DFC);transform:rotate(14deg);opacity:.95"></div>
+ <div style="position:absolute;left:-640px;top:-200px;width:600px;height:1600px;background:linear-gradient(180deg,#00B8DB,#155DFC);transform:rotate(14deg);opacity:.95"></div>
  <div style="position:absolute;right:-300px;top:-240px;width:520px;height:1600px;background:linear-gradient(180deg,#155DFC,#00B8DB);transform:rotate(14deg);opacity:.9"></div>
- <img class="logo" src="../assets/logo-white.svg" style="left:150px;top:84px">
- <div class="tag" style="left:150px;bottom:96px;color:#fff;font-weight:500;font-size:28px;line-height:1.3">Predictable IT.<br>Predictable budget.</div></div>'''))
+ <img class="logo" src="../assets/logo-white.svg" style="left:96px;top:84px">
+ <div class="tag" style="left:96px;bottom:96px;color:#fff;font-weight:500;font-size:28px;line-height:1.3">Predictable IT.<br>Predictable budget.</div></div>'''))
 # 10 Waves
 bgs.append(("10-waves", f'''<div class="bg" style="background:{NAVY}">
  {blob(900,-300,1200,800,"rgba(21,93,252,.55)",120)}
