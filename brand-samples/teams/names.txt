@@ -1,0 +1,6 @@
+1-midnight
+2-dot-grid
+3-daylight
+4-horizon
+5-brand-blue
+6-bokeh
