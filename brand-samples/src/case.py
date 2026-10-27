@@ -320,7 +320,7 @@ def p15():
     <div style="margin-top:14mm;display:grid;grid-template-columns:1fr 1fr;gap:10mm">
       <div><div class="eyebrow">What was reported</div>
         <p style="margin-top:3mm">Wiz and Calif both say they used AI models in the research. Calif's write-up is blunt about the limits: <i>“No model is simply capable of unearthing ‘all bugs’ with simple prompts. At least for now.”</i> The bulk of the work relied on researchers who knew PHP's code and exploitation history well.<sup class="c">3,4</sup></p>
-        <p>Discovery was part of OpenAI and Wiz's Hack the Planet initiative.<sup class="c">4</sup></p></div>
+        <p>Calif's audit was part of OpenAI's Patch the Planet programme; TechCrunch calls it Hack the Planet. Calif dates its own audit to 30 July and its first report to PHP to 11 August, earlier than Wiz's 19 and 24 August, so two teams appear to have found overlapping bugs independently.<sup class="c">3,4</sup></p></div>
       <div><div class="eyebrow">Why it changes planning</div>
         <p style="margin-top:3mm">Old, widely used, memory-unsafe software is the likeliest place for the next discovery. TechCrunch cites the NSA's estimate that around 75% of actively exploited vulnerabilities abuse memory-related flaws.<sup class="c">4</sup></p>
         <p>If finding flaws gets cheaper for defenders, it gets cheaper for everyone. The honest planning assumption is shorter windows, not longer ones.</p></div></div>

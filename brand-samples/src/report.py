@@ -243,7 +243,7 @@ def p8():
     <div class="hair" style="margin:10mm 0 10mm"></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7mm">
       <div>{G('£5.74m',24,ls=-0.045)}<p style="font-size:8.6pt;margin-top:2.5mm">average UK breach cost in financial services, the costliest sector.<sup class="c">2</sup></p></div>
-      <div>{G('£498k',24,ls=-0.045)}<p style="font-size:8.6pt;margin-top:2.5mm">extra paid by organisations with high levels of unsanctioned AI use.<sup class="c">2</sup></p></div>
+      <div>{G('£498k',24,ls=-0.045)}<p style="font-size:8.6pt;margin-top:2.5mm">extra paid by organisations with high levels of unsanctioned AI use, among IBM's global findings.<sup class="c">2</sup></p></div>
       <div>{G('&lt;1 in 3',24,ls=-0.045)}<p style="font-size:8.6pt;margin-top:2.5mm">UK organisations use security automation extensively. The saving is on the table.<sup class="c">2</sup></p></div>
     </div>
     <div class="src" style="position:absolute;left:18mm;bottom:20mm">Source: IBM, Cost of a Data Breach Report 2025, UK edition. 600 organisations worldwide, March 2024 to February 2025.</div>'''
@@ -310,7 +310,7 @@ def p10():
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8mm">
       <div><h3>A plan on paper</h3><p style="margin-top:2.5mm;font-size:8.8pt">Having a document is the start. The organisations that recover quickly have run the plan: someone has been woken at 2am, the phone tree has been tried, and the backups have been restored somewhere other than the lab.</p></div>
       <div><h3>Suppliers are the blind spot</h3><p style="margin-top:2.5mm;font-size:8.8pt">Supplier compromise was the most common cause of UK breaches in IBM's data, yet only 15% of businesses review supplier risk.<sup class="c">1,2</sup></p></div>
-      <div><h3>AI arrived first, rules second</h3><p style="margin-top:2.5mm;font-size:8.8pt">Staff are already using AI tools. Fewer than a third of UK organisations have rules for it, and breaches involving heavy unsanctioned use cost £498,000 more.<sup class="c">2</sup></p></div>
+      <div><h3>AI arrived first, rules second</h3><p style="margin-top:2.5mm;font-size:8.8pt">Staff are already using AI tools. Fewer than a third of UK organisations have rules for it, and IBM's global findings put the extra cost of heavy unsanctioned use at £498,000.<sup class="c">2</sup></p></div>
     </div>
     <div class="card" style="margin-top:7mm;background:var(--navy);color:#fff;display:flex;gap:8mm;align-items:center;padding:5mm 6mm">
       <div class="eyebrow" style="color:var(--cyan);width:24mm">Our view</div>
@@ -494,7 +494,7 @@ def p10():
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8mm">
       <div><h3>A plan on paper</h3><p style="margin-top:2.5mm;font-size:8.8pt">Having a document is the start. The organisations that recover quickly have run the plan: someone has been woken at 2am, the phone tree has been tried, and the backups have been restored somewhere other than the lab.</p></div>
       <div><h3>Suppliers are the blind spot</h3><p style="margin-top:2.5mm;font-size:8.8pt">Supplier compromise was the most common cause of UK breaches in IBM's data, yet only 15% of businesses review supplier risk.<sup class="c">1,2</sup></p></div>
-      <div><h3>AI arrived first, rules second</h3><p style="margin-top:2.5mm;font-size:8.8pt">Staff are already using AI tools. Fewer than a third of UK organisations have rules for it, and breaches involving heavy unsanctioned use cost £498,000 more.<sup class="c">2</sup></p></div>
+      <div><h3>AI arrived first, rules second</h3><p style="margin-top:2.5mm;font-size:8.8pt">Staff are already using AI tools. Fewer than a third of UK organisations have rules for it, and IBM's global findings put the extra cost of heavy unsanctioned use at £498,000.<sup class="c">2</sup></p></div>
     </div>
     <div class="card" style="margin-top:7mm;background:var(--navy);color:#fff;display:flex;gap:8mm;align-items:center;padding:5mm 6mm">
       <div class="eyebrow" style="color:var(--cyan);width:24mm">Our view</div>

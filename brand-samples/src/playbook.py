@@ -170,7 +170,7 @@ def p9():
 
 
 def p10():
-    return play(10, "04", "Govern AI use", "£498k", "extra breach cost paid by UK organisations with high levels of unsanctioned AI use.²",
+    return play(10, "04", "Govern AI use", "£498k", "extra breach cost paid, on average, by organisations with high levels of unsanctioned AI use. IBM lists it among its global findings.²",
                 "Only 31% of UK organisations have policies to govern AI use, and 63% have no access controls for AI systems.² Staff are not waiting for the policy. They are already pasting work into tools.",
                 ["Which AI tools is the business already using, officially or not?", "What is the one kind of data nobody may put into them?", "Who owns this decision?"],
                 ["Ask each team which AI tools they use. Do not make it an interrogation.", "Publish a short approved list and a plain red-line list.", "Put access controls on the approved tools.", "Name one owner, with the authority to say no.", "Review the list every quarter."],

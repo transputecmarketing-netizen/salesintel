@@ -204,7 +204,7 @@ def p10():
     <div class="src" style="margin-top:6mm">IBM Cost of a Data Breach Report 2025, UK edition. UK respondents. Different questions; not additive.</div>
     <div class="hair" style="margin:10mm 0 8mm"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:9mm">
-      <div>{G("£498k", 30, ls=-0.045)}<p style="font-size:9pt;margin-top:3mm">more paid on average by UK organisations with high levels of unsanctioned AI use.<sup class="c">10</sup></p></div>
+      <div>{G("£498k", 30, ls=-0.045)}<p style="font-size:9pt;margin-top:3mm">more paid on average by organisations with high levels of unsanctioned AI use. IBM lists this among its global findings, not UK-only.<sup class="c">10</sup></p></div>
       <div><div class="eyebrow">UK NCSC guidance</div><p style="font-size:9pt;margin-top:3mm">The NCSC's secure AI development guidelines tell organisations to <i>assess and monitor the security of your AI supply chains across a system's life cycle</i>, to take models, libraries and external APIs from verified developers, and to <i>treat logs as sensitive data</i>.<sup class="c">11</sup></p></div></div>
     {src("Sources: 10 IBM UK newsroom. 11 NCSC, Guidelines for secure AI system development (2023). The guidance predates these incidents; its advice maps directly onto them.", "20mm")}'''
     return page(10, body, section="03 · The UK picture")

@@ -8,46 +8,46 @@ N = 12
 
 # (id, working title, short, headline, source line, evidence 1-5, fit 1-5, status, audience, service, format)
 IDEAS = [
-    (1, "The Token Problem", "Microsoft 365 identity attacks",
-     "AiTM phishing is 44.6% of identified phishing techniques; password attacks fell 26% year on year.",
-     "Microsoft Digital Defense Report 2026 (Microsoft telemetry)", 4.2, 4.6, "Built",
-     "IT and security leaders on Microsoft 365", "Modern Work and Security partner; managed identity", "Report"),
-    (2, "The 55%", "Ransomware recovery and backups",
-     "78% of UK victims recovered from backups, up from 39%; only 55% were fully back within a week.",
-     "Sophos State of Ransomware in the UK 2026 (UK n=120, vendor-commissioned)", 3.8, 4.3, "Built",
-     "MDs, finance and IT leaders", "Backup, DR and restore testing", "Report"),
-    (3, "Your MSP Is About to Be Regulated", "Cyber Security and Resilience Bill",
-     "The Bill extends network and information systems rules to managed service providers. It passed the Commons on 16 June 2026.",
-     "UK Parliament; Digital Policy Alert", 3.4, 4.9, "Built",
-     "Anyone buying managed IT", "ISO 27001 delivery; customer incident notification", "Report"),
-    (4, "What Copilot Can See", "Copilot readiness and oversharing",
-     "56% have Copilot fully deployed, up from 29%; 77% had a Microsoft 365 governance incident.",
-     "ShareGate State of Microsoft 365 2026 (vendor survey)", 3.0, 4.8, "Built",
-     "IT and finance leaders planning Copilot", "Microsoft Copilot consulting", "Report"),
-    (5, "Negative Seven", "Time to exploit",
-     "Mean time-to-exploit is estimated at minus seven days: attacks begin before a patch exists.",
-     "Mandiant M-Trends 2026 (500,000+ investigation hours)", 3.9, 4.0, "Next",
+    (1, "What Copilot Can See", "Copilot readiness and oversharing",
+     "56% have Copilot fully deployed, up from 29%; 77% had a Microsoft 365 governance incident; 29% say AI surfaced sensitive data.",
+     "ShareGate State of Microsoft 365 2026 and April survey (vendor surveys)", 3.0, 4.8, "Built",
+     "IT and finance leaders planning Copilot", "Microsoft Copilot consulting; Modern Work partner", "Report"),
+    (2, "The Keys to the Gateway", "The October 2026 AI incidents",
+     "One unrevoked master key started the LiteLLM attack chain; a bad release was live for under two hours on PyPI.",
+     "LiteLLM post-mortem; Datadog; StepSecurity; BleepingComputer", 4.1, 4.5, "Built",
+     "IT, security and engineering leaders", "Managed security; secrets and key hygiene", "Report"),
+    (3, "Agents Have Hands", "AI agent security and prompt injection",
+     "The NCSC says current models enforce no boundary between instructions and data. EchoLeak scored 9.3 and needed zero clicks.",
+     "NCSC blog, OWASP, NIST, CVE records", 3.8, 4.6, "Built",
+     "IT and security leaders adopting agents", "AI governance; least-privilege design", "Report"),
+    (4, "Found by Machines", "AI-assisted vulnerability discovery",
+     "AI helped find and weaponise PHP2Shell in hours; Mandiant estimates mean time to exploit at minus seven days, not attributed to AI.",
+     "Wiz, Calif, Mandiant M-Trends 2026, NCSC assessment", 3.9, 4.0, "Built",
      "IT leaders; pairs with the PHP2Shell case study", "Patching, vulnerability management, pen testing", "Report"),
-    (6, "The Supplier Blind Spot", "Third-party and supply-chain risk",
-     "Only 15% of UK businesses review immediate suppliers: 30% of medium and 48% of large.",
-     "Cyber Security Breaches Survey 2025/26 (government, n=2,112 businesses)", 4.6, 3.6, "Next",
-     "Procurement, risk and finance", "Supplier assurance, G-Cloud and TePAS credentials", "Report"),
-    (7, "Ready, Not Willing", "Mid-market AI adoption and skills",
-     "23% of mid-sized UK firms use AI, and 64% of those users say skills are the brake.",
-     "DSIT AI Adoption Research (fieldwork Feb to May 2025: refresh before use)", 3.5, 3.4, "Later",
-     "MDs and HR leaders", "Copilot training and adoption", "Report"),
-    (8, "What Insurers Now Ask", "Cyber insurance and claims",
-     "Marsh UK logged a record 668 claims notifications in 2025; ransomware encryption fell from 70% of extortion claims to 24%.",
-     "Marsh UK claims trends 2025 (broker's own book)", 3.2, 3.0, "Later",
-     "Finance directors", "Cyber Essentials Plus, controls evidence", "Report"),
-    (9, "Green Dashboard, Red Users", "Experience-level agreements",
+    (5, "The AI You Didn't Buy", "UK adoption, shadow AI, skills",
+     "23% of mid-sized UK firms use AI; 64% of those users say skills are the brake; the survey cannot see unofficial use.",
+     "DSIT AI Adoption Research (spring 2025); CSBS 2025/26; IBM UK", 4.4, 4.4, "Built",
+     "MDs, HR and IT leaders", "Copilot training and adoption; AI policy", "Report"),
+    (6, "Your MSP Is About to Be Regulated", "Cyber Security and Resilience Bill",
+     "Managed IT providers face a 24-hour incident clock and penalties up to the greater of £17m or 4% of turnover. The Bill is not yet law.",
+     "HL Bill 62 as amended on report; Hansard; GOV.UK", 4.6, 4.9, "Built",
+     "Anyone buying managed IT", "ISO 27001 delivery; incident notification", "Report"),
+    (7, "The Token Problem", "Microsoft 365 identity attacks",
+     "AiTM phishing is 44.6% of identified phishing techniques; password attacks fell 26% year on year.",
+     "Microsoft Digital Defense Report 2026 (Microsoft telemetry); fact sheet banked", 4.2, 4.6, "Next",
+     "IT and security leaders on Microsoft 365", "Modern Work and Security partner; managed identity", "Report"),
+    (8, "The 55%", "Ransomware recovery and backups",
+     "78% of UK victims recovered from backups, up from 39%; only 55% were fully back within a week.",
+     "Sophos State of Ransomware in the UK 2026 (UK n=120); fact sheet banked", 3.8, 4.3, "Next",
+     "MDs, finance and IT leaders", "Backup, DR and restore testing", "Report"),
+    (9, "Agent Sprawl", "Governing agents at scale",
+     "Gartner reportedly predicts 150,000 agents at an average Fortune 500 company by 2028, but we could not read the original.",
+     "Gartner via syndicated copies (unverified)", 2.0, 4.5, "Research",
+     "CIOs and risk leaders", "AI governance; agent inventory", "Report"),
+    (10, "Green Dashboard, Red Users", "Experience-level agreements",
      "No verifiable statistic found. The honest version needs original research.",
      "Proposal: survey Transputec clients and prospects", 1.2, 4.2, "Research",
      "IT leaders and service owners", "XLA service desk; fixed-fee model", "Original survey"),
-    (10, "The Hidden Footprint", "Sustainable IT and device lifecycle",
-     "62 million tonnes of e-waste in 2022; only 22.3% documented as recycled. UK business data still to source.",
-     "UNITAR and ITU Global E-waste Monitor 2024 (global)", 2.0, 3.2, "Research",
-     "Sustainability and procurement leads", "Device lifecycle, ISO 14001, ITAD", "Report"),
 ]
 
 STATUS_COL = {"Built": "#34C759", "Next": "#2C72DB", "Later": "#6B7A90", "Research": AMBER}
@@ -111,7 +111,7 @@ def p2():
     body = f'''{head("How we chose", "Three questions.<br>Ten topics.", "We screened a long list against what we could read at source, not what we could find in a search snippet.")}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9mm;margin-top:13mm">{cc}</div>
     <div class="card" style="margin-top:14mm;background:var(--navy);color:#fff"><div class="eyebrow" style="color:var(--cyan)">What we found</div>
-      <p style="font-size:9.6pt;margin-top:3mm;color:var(--slate)">Six topics have a statistic we read on the source page or PDF. Two rest on vendor surveys and are labelled as such. Two have no UK business figure we can stand behind, and are marked <b style="color:#fff;font-weight:600">Research</b>: they need original work before anyone reads them.</p></div>
+      <p style="font-size:9.6pt;margin-top:3mm;color:var(--slate)">Eight topics have a statistic we read on the source page or PDF. Several rest on vendor surveys and are labelled as such. Two are marked <b style="color:#fff;font-weight:600">Research</b>: one needs Gartner's original, the other needs our own survey, before anyone reads them. Sustainable IT, insurance and supplier risk are parked for a later round.</p></div>
     <div style="display:grid;grid-template-columns:1fr 2fr;gap:8mm;margin-top:11mm"><div class="eyebrow">Our standard</div>
       <p style="font-size:9.2pt">A number goes in a report only if we can name the source, the sample, the date and who paid for it. A claim we could not verify is flagged, softened or left out. A topic without a defensible headline is not published; it is researched first.</p></div>'''
     return page(2, body, section="How we chose")
@@ -123,7 +123,7 @@ def scatter():
     def x(v): return X0 + (X1 - X0) * (v - 1) / 4.2
     def y(v): return Y1 - (Y1 - Y0) * (v - 2.6) / 2.6
     o = [f'<svg viewBox="0 0 {W} {H}" width="{W}mm" height="{H}mm" style="display:block;overflow:visible">']
-    o.append(f'<rect x="{x(3.1)}" y="{Y0}" width="{X1-x(3.1)}" height="{y(3.8)-Y0}" rx="3" fill="url(#gh)" fill-opacity=".08"/>')
+    o.append(f'<rect x="{x(3.1)}" y="{Y0}" width="{X1-x(3.1)}" height="{y(3.8)-Y0}" rx="3" fill="#155DFC" fill-opacity=".07"/>')
     for v in (1, 2, 3, 4, 5):
         o.append(f'<line x1="{x(v)}" x2="{x(v)}" y1="{Y0}" y2="{Y1}" stroke="#E3E8F0" stroke-width=".25"/><text x="{x(v)}" y="{Y1+6}" text-anchor="middle" font-family="JetBrains Mono" font-size="2.6" fill="#6B7A90">{v}</text>')
     for v in (3, 4, 5):
@@ -142,12 +142,12 @@ def scatter():
 
 
 def p3():
-    key = ''.join(f'<span style="margin-right:6mm"><i style="display:inline-block;width:3mm;height:3mm;border-radius:50%;background:{c};margin-right:2mm;vertical-align:-.5mm"></i>{t}</span>' for t, c in [("Built in this batch", "#2C72DB"), ("Next", "#155DFC"), ("Later", "#C9D6EE"), ("Needs research", AMBER)])
+    key = ''.join(f'<span style="margin-right:6mm"><i style="display:inline-block;width:3mm;height:3mm;border-radius:50%;background:{c};margin-right:2mm;vertical-align:-.5mm"></i>{t}</span>' for t, c in [("Built", "#2C72DB"), ("Next", "#155DFC"), ("Later", "#C9D6EE"), ("Needs research", AMBER)])
     body = f'''{head("The map", "Where each idea sits.", "Our judgement on a five-point scale, based on what we could verify and how closely each topic matches Transputec's services. Numbers match the pages that follow.")}
     <div style="margin-top:9mm">{scatter()}</div>
     <div class="mono" style="font-size:6.6pt;letter-spacing:.1em;color:var(--mid);text-transform:uppercase;margin-top:3mm">{key}</div>
     <div style="display:grid;grid-template-columns:1fr 2fr;gap:8mm;margin-top:9mm"><div class="eyebrow">Reading it</div>
-      <p style="font-size:9pt">The top-right corner is where a report is both credible and commercially useful. Idea 9 has the right fit and the wrong evidence today; the fix is to run our own survey, not to borrow someone else's number.</p></div>'''
+      <p style="font-size:9pt">The top-right corner is where a report is both credible and commercially useful. Ideas 9 and 10 have the right fit and the wrong evidence today. The fix is to read the original source or run our own survey, not to borrow someone else's number.</p></div>'''
     return page(3, body, section="The map")
 
 
@@ -181,14 +181,14 @@ def pitch(n, ids, h):
 
 
 def p10():
-    steps = [("Weeks 1–2", "Publish", "Identity, Recovery, Resilience Bill and Copilot reports. Pair each with a one-page LinkedIn summary and a playbook play."), ("Weeks 3–6", "Verify and build", "Read Verizon DBIR and Gartner at source. Re-check the ABI claims figure. Build ideas 5 and 6."),
-             ("Weeks 7–10", "Commission", "Field a short client and prospect survey for ideas 9 and 7. Pull UK figures for idea 10."), ("Weeks 11–13", "Refresh", "Update the first four with new data. Retire anything a newer source supersedes.")]
+    steps = [("Weeks 1–2", "Publish", "The six built reports, AI first. Pair each with a one-page LinkedIn summary and a playbook play."), ("Weeks 3–6", "Build", "Publish The Token Problem and The 55%, whose fact sheets are already verified."),
+             ("Weeks 7–10", "Verify and commission", "Read Gartner's release at source for idea 9. Field a client and prospect survey for idea 10."), ("Weeks 11–13", "Refresh", "Update the first four with new data. Retire anything a newer source supersedes.")]
     cc = ''.join(f'''<div style="display:grid;grid-template-columns:34mm 1fr;gap:6mm;padding:7mm 0;border-bottom:.25mm solid var(--line)">
       <div><div class="mono" style="font-size:6.6pt;letter-spacing:.12em;color:var(--blue);text-transform:uppercase">{a}</div>{G(b, 20, ls=-0.04)}</div><p style="font-size:9.6pt">{c}</p></div>''' for a, b, c in steps)
     body = f'''{head("The plan", "A quarter, in four moves.")}
     <div style="margin-top:10mm;border-top:.35mm solid var(--navy)">{cc}</div>
     <div class="card" style="margin-top:9mm;background:var(--navy);color:#fff;display:flex;gap:7mm;align-items:center"><div class="eyebrow" style="color:var(--cyan);width:28mm">Decision</div>
-      <div style="font-size:10pt;line-height:1.55;color:var(--slate)">Which of the six unbuilt ideas should go next, and do you want to fund the client survey for idea 9?</div></div>'''
+      <div style="font-size:10pt;line-height:1.55;color:var(--slate)">Which of ideas 7 to 10 should go next, and do you want to fund the client survey for idea 10?</div></div>'''
     return page(10, body, section="The plan")
 
 
@@ -198,15 +198,15 @@ def p11():
     cc = ''.join(f'<div class="card" style="padding:7mm"><div class="mono" style="font-size:8pt;color:var(--blue)">{i+1:02d}</div><h3 style="margin:5mm 0 2mm;font-size:12.6pt">{a}</h3><p style="font-size:9pt">{b}</p></div>' for i, (a, b) in enumerate(rules))
     body = f'''{head("Our standard", "Six rules that protect<br>the brand.")}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:11mm">{cc}</div>
-    {src("These are the rules used on every document in this series, including the four built in this batch.", "20mm")}'''
+    {src("These are the rules used on every document in this series, including the six built so far.", "20mm")}'''
     return page(11, body, section="Our standard")
 
 
 def p12():
     wall = badge_wall(["iso", "msmw", "mssec", "aws", "cisco"], 6, h="19mm", gap="2.6mm", span={"iso": 2})
     body = bg_dark('<div class="glow" style="left:30mm;top:20mm;width:150mm;height:150mm;background:radial-gradient(circle,rgba(0,184,219,.2) 0%,rgba(0,184,219,0) 66%)"></div>') + f'''
-    <div style="position:absolute;left:50%;top:30mm;transform:translateX(-50%)">{dots(10,10,40,pitch=11,d=6.6)}
-      <div class="mono" style="text-align:center;font-size:6.6pt;letter-spacing:.18em;color:var(--cyan);margin-top:5mm;text-transform:uppercase">4 of 10 built · 6 to go</div></div>
+    <div style="position:absolute;left:50%;top:30mm;transform:translateX(-50%)">{dots(10,10,60,pitch=11,d=6.6)}
+      <div class="mono" style="text-align:center;font-size:6.6pt;letter-spacing:.18em;color:var(--cyan);margin-top:5mm;text-transform:uppercase">6 of 10 built · 4 to go</div></div>
     <div style="position:absolute;left:0;right:0;top:158mm;text-align:center">{logo("white","7.4mm").replace('display:block','display:block;margin:0 auto')}
       <div class="lede" style="margin-top:7mm;font-size:12.5pt;color:#fff">Predictable IT. Predictable budget.<br>Contracted outcomes.</div></div>
     <div style="position:absolute;left:18mm;right:18mm;bottom:20mm">{wall}<div class="hair" style="margin:7mm 0 5mm"></div>
