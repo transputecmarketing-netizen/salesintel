@@ -1,0 +1,143 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0}body{background:#000;width:1920px;height:1080px;overflow:hidden;position:relative}
+canvas{position:absolute;left:0;top:0}
+#grain{position:absolute;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>")}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 58%,rgba(0,0,0,.38) 100%)}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/jsm/"}}</script></head>
+<body><div id="vig"></div><div id="grain"></div>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+RectAreaLightUniformsLib.init();
+
+const S = new URLSearchParams(location.search).get('s') || 'lobby';
+const W = 1920, H = 1080;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const pm = new THREE.PMREMGenerator(renderer);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+const cam = new THREE.PerspectiveCamera(44, W / H, 0.05, 80);
+const CY = new THREE.Color('#00B8DB'), RY = new THREE.Color('#155DFC');
+
+async function logoTextures(px = 2400) {
+  const img = new Image(); img.src = '../../assets/logo-white.svg'; await img.decode();
+  const h = Math.round(px * 12.9 / 200), pad = 120;
+  const c = document.createElement('canvas'); c.width = px + pad * 2; c.height = h + pad * 2; const g = c.getContext('2d');
+  g.drawImage(img, pad, pad, px, h);
+  const sharp = new THREE.CanvasTexture(c); sharp.colorSpace = THREE.SRGBColorSpace; sharp.anisotropy = 8;
+  const c2 = document.createElement('canvas'); c2.width = c.width; c2.height = c.height; const g2 = c2.getContext('2d');
+  g2.filter = 'blur(26px)'; g2.drawImage(c, 0, 0); g2.drawImage(c, 0, 0); g2.globalCompositeOperation = 'source-in';
+  const lg = g2.createLinearGradient(0, 0, c2.width, 0); lg.addColorStop(0, '#00B8DB'); lg.addColorStop(1, '#155DFC'); g2.fillStyle = lg; g2.fillRect(0, 0, c2.width, c2.height);
+  const halo = new THREE.CanvasTexture(c2); halo.colorSpace = THREE.SRGBColorSpace;
+  return { sharp, halo, aspect: c.width / c.height };
+}
+function floor(y = 0, col = 0x22262f, rough = .42, refl = .14) {
+  const r = new Reflector(new THREE.PlaneGeometry(40, 40), { textureWidth: 1024, textureHeight: 576, color: 0x8a92a6 });
+  r.rotation.x = -Math.PI / 2; r.position.y = y; scene.add(r);
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: col, roughness: rough, metalness: .05, transparent: true, opacity: 1 - refl }));
+  f.rotation.x = -Math.PI / 2; f.position.y = y + .003; f.receiveShadow = true; scene.add(f);
+}
+function sign(tex, x, y, z, width, haloK = 1.4) {
+  const h = width / tex.aspect;
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(width * 1.04, h * 1.04), new THREE.MeshBasicMaterial({ map: tex.halo, transparent: true, blending: THREE.AdditiveBlending, opacity: haloK, depthWrite: false }));
+  halo.position.set(x, y, z + .005); scene.add(halo);
+  const letters = new THREE.Mesh(new THREE.PlaneGeometry(width, h), new THREE.MeshStandardMaterial({ map: tex.sharp, transparent: true, color: 0xf2f5fa, roughness: .35, metalness: .6, emissive: 0x9fb4d6, emissiveMap: tex.sharp, emissiveIntensity: .25 }));
+  letters.position.set(x, y, z + .06); letters.castShadow = true; scene.add(letters);
+}
+function downlight(x, y, z, tx, ty, tz, intensity = 30, col = 0xeef3ff) {
+  const s = new THREE.SpotLight(col, intensity, 9, .42, .85, 2); s.position.set(x, y, z); s.target.position.set(tx, ty, tz);
+  s.castShadow = true; s.shadow.mapSize.set(1024, 1024); s.shadow.bias = -.0004; scene.add(s, s.target);
+  const can = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, .02, 24), new THREE.MeshBasicMaterial({ color: 0xffffff })); can.position.set(x, y + .01, z); scene.add(can);
+}
+
+const tex = await logoTextures();
+let focus = 4.5;
+
+if (S === 'lobby' || S === 'lobby2') {
+  cam.position.set(.4, 1.32, 5.8); cam.lookAt(0, 1.62, -2.6);
+  const WALL_Z = -2.6, WH = 3.5, WW = 18;
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(WW, WH), new THREE.MeshStandardMaterial({ color: 0x080c16, roughness: .9 })).translateZ(WALL_Z - .07).translateY(WH / 2));
+  const fl = new THREE.MeshStandardMaterial({ color: 0x18233d, roughness: .55, metalness: .05 });
+  const n = Math.floor(WW / .11);
+  const flute = new THREE.InstancedMesh(new THREE.CylinderGeometry(.05, .05, WH, 20, 1, false, 0, Math.PI), fl, n);
+  const m = new THREE.Matrix4(); for (let i = 0; i < n; i++) { m.makeRotationY(-Math.PI / 2); m.setPosition(-WW / 2 + i * .11, WH / 2, WALL_Z); flute.setMatrixAt(i, m); }
+  flute.receiveShadow = true; scene.add(flute);
+  // ceiling with recessed linear slots running toward camera
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(WW, 12), new THREE.MeshStandardMaterial({ color: 0x1a1f2b, roughness: .95, emissive: 0x0b1020, emissiveIntensity: 1 })); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, WH, 3); scene.add(ceil);
+  for (const x of [-4.5, 4.5]) { const sl = new THREE.Mesh(new THREE.BoxGeometry(.05, .02, 9), new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff4e6').multiplyScalar(1.4) })); sl.position.set(x, WH - .01, 2); scene.add(sl);
+    const al = new THREE.RectAreaLight(0xfff1de, 3, .1, 9); al.position.set(x, WH - .03, 2); al.lookAt(x, 0, 2); scene.add(al); }
+  // cove slot washing the wall in brand colour
+  const slot = new THREE.Mesh(new THREE.BoxGeometry(WW, .03, .05), new THREE.MeshBasicMaterial({ color: new THREE.Color('#7fe3ff').multiplyScalar(1.3) })); slot.position.set(0, WH - .02, WALL_Z + .22); scene.add(slot);
+  for (const [x, c] of [[-4.5, CY], [4.5, RY]]) { const a = new THREE.RectAreaLight(c, 5, 9, .12); a.position.set(x, WH - .04, WALL_Z + .22); a.lookAt(x, 0, WALL_Z + .05); scene.add(a); }
+  for (const x of [-7.2, -4.8, -2.4, 0, 2.4, 4.8, 7.2]) downlight(x, WH - .02, WALL_Z + .42, x, .4, WALL_Z, 42, 0xfff0dc);
+  floor(0, 0x10141c, .3, .32);
+  sign(tex, -3.25, 2.38, WALL_Z + .07, 3.3, .32);
+  // reception desk: dark fluted front, pale stone top, brand underglow
+  const dx = 5.1, dz = -.2, DW = 3.6;
+  const body = new THREE.Mesh(new RoundedBoxGeometry(DW, 1.0, .85, 6, .04), new THREE.MeshStandardMaterial({ color: 0x0c1220, roughness: .5 })); body.position.set(dx, .52, dz); body.castShadow = body.receiveShadow = true; scene.add(body);
+  const nf = Math.floor(DW / .07); const ff = new THREE.InstancedMesh(new THREE.CylinderGeometry(.03, .03, .9, 14, 1, false, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x1d2a47, roughness: .45 }), nf);
+  for (let i = 0; i < nf; i++) { m.makeRotationY(-Math.PI / 2); m.setPosition(dx - DW / 2 + .04 + i * .07, .55, dz + .43); ff.setMatrixAt(i, m); } ff.receiveShadow = true; scene.add(ff);
+  const top = new THREE.Mesh(new RoundedBoxGeometry(DW + .2, .06, 1.0, 4, .02), new THREE.MeshStandardMaterial({ color: 0xe9e6e1, roughness: .28 })); top.position.set(dx, 1.05, dz); top.castShadow = true; scene.add(top);
+  const gl = new THREE.Mesh(new THREE.BoxGeometry(DW - .1, .015, .015), new THREE.MeshBasicMaterial({ color: new THREE.Color('#2C72DB').multiplyScalar(2.4) })); gl.position.set(dx, .05, dz + .47); scene.add(gl);
+  const al2 = new THREE.RectAreaLight(RY, 6, DW, .08); al2.position.set(dx, .04, dz + .5); al2.lookAt(dx, -1, dz + .5); scene.add(al2);
+  // monitor silhouette on desk
+  const mon = new THREE.Mesh(new RoundedBoxGeometry(.7, .42, .03, 3, .01), new THREE.MeshStandardMaterial({ color: 0x05070c, roughness: .3, metalness: .4 })); mon.position.set(dx - .6, 1.35, dz - .1); mon.rotation.y = -.3; scene.add(mon);
+  scene.add(new THREE.HemisphereLight(0x9fb4ff, 0x05070c, .08));
+  focus = 7.8;
+}
+if (S === 'board') {
+  cam.position.set(.6, 1.3, 5.0); cam.lookAt(-.5, 1.6, -3); cam.fov = 52; cam.updateProjectionMatrix();
+  // city beyond the glass
+  const city = new THREE.TextureLoader().load('../transputec-teams-15-london-dusk.png'); city.colorSpace = THREE.SRGBColorSpace;
+  await new Promise(r => { const i = new Image(); i.onload = r; i.src = '../transputec-teams-15-london-dusk.png'; });
+  const cityM = new THREE.MeshBasicMaterial({ map: city, toneMapped: true }); cityM.color.setScalar(.72);
+  const far = new THREE.Mesh(new THREE.PlaneGeometry(30, 16.9), cityM); far.position.set(0, 5.2, -16); far.scale.setScalar(1.15); scene.add(far);
+  const GZ = -3.2, WH = 3.4;
+  // mullions + transom
+  const mm = new THREE.MeshStandardMaterial({ color: 0x0a0d14, roughness: .4, metalness: .6 });
+  for (const x of [-6.6, -3.3, 0, 3.3, 6.6]) { const mu = new THREE.Mesh(new THREE.BoxGeometry(.09, WH, .14), mm); mu.position.set(x + .9, WH / 2, GZ); mu.castShadow = true; scene.add(mu); }
+  const tr = new THREE.Mesh(new THREE.BoxGeometry(20, .1, .14), mm); tr.position.set(0, .12, GZ); scene.add(tr);
+  // glass with faint reflection
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(20, WH), new THREE.MeshPhysicalMaterial({ color: 0x9fb4d6, transparent: true, opacity: .1, roughness: .05, metalness: .2, envMapIntensity: .6 })); glass.position.set(0, WH / 2, GZ + .02); scene.add(glass);
+  // left solid wall with signage
+  const lw = new THREE.Mesh(new THREE.BoxGeometry(.2, WH, 9), new THREE.MeshStandardMaterial({ color: 0x141b2c, roughness: .8 })); lw.position.set(-5.4, WH / 2, 1.2); lw.receiveShadow = true; scene.add(lw);
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(.05, 1.0, 2.6), new THREE.MeshStandardMaterial({ color: 0x0e1424, roughness: .35, metalness: .2 })); panel.position.set(-5.28, 2.1, -1.9); scene.add(panel);
+  const sg = sign; // reuse, rotated group
+  { const h = 2.2 / tex.aspect; const letters = new THREE.Mesh(new THREE.PlaneGeometry(2.2, h), new THREE.MeshStandardMaterial({ map: tex.sharp, transparent: true, color: 0xf2f5fa, roughness: .35, metalness: .6, emissive: 0x9fb4d6, emissiveMap: tex.sharp, emissiveIntensity: .3 }));
+    letters.position.set(-5.235, 2.1, -1.9); letters.rotation.y = Math.PI / 2; scene.add(letters);
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(2.3, h * 1.04), new THREE.MeshBasicMaterial({ map: tex.halo, transparent: true, blending: THREE.AdditiveBlending, opacity: .3, depthWrite: false })); halo.position.set(-5.245, 2.1, -1.9); halo.rotation.y = Math.PI / 2; scene.add(halo); }
+  // ceiling + linear pendant glow
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(20, 12), new THREE.MeshStandardMaterial({ color: 0x151a26, roughness: .95, emissive: 0x0a0e1a })); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, WH, 2); scene.add(ceil);
+  const pend = new THREE.Mesh(new THREE.BoxGeometry(4.2, .04, .07), new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff2e2').multiplyScalar(1.5) })); pend.position.set(.6, 2.75, -.6); scene.add(pend);
+  const pal = new THREE.RectAreaLight(0xfff0dc, 6, 4.2, .2); pal.position.set(.6, 2.73, -.6); pal.lookAt(.6, 0, .2); scene.add(pal);
+  const cred = new THREE.Mesh(new RoundedBoxGeometry(9, .55, .5, 4, .03), new THREE.MeshStandardMaterial({ color: 0x0b0f18, roughness: .35, metalness: .2 })); cred.position.set(1.6, .275, GZ + .45); cred.castShadow = cred.receiveShadow = true; scene.add(cred);
+  const ctop = new THREE.Mesh(new RoundedBoxGeometry(9.1, .04, .56, 3, .015), new THREE.MeshStandardMaterial({ color: 0xe6e2dc, roughness: .3 })); ctop.position.set(1.6, .57, GZ + .45); scene.add(ctop);
+  const cg = new THREE.Mesh(new THREE.BoxGeometry(8.8, .012, .012), new THREE.MeshBasicMaterial({ color: new THREE.Color('#00B8DB').multiplyScalar(2.2) })); cg.position.set(1.6, .02, GZ + .71); scene.add(cg);
+  const cal = new THREE.RectAreaLight(CY, 4, 8.8, .06); cal.position.set(1.6, .015, GZ + .74); cal.lookAt(1.6, -1, GZ + .74); scene.add(cal);
+  floor(0, 0x12161f, .5, .14);
+  const dusk = new THREE.DirectionalLight(0x5f8cff, .9); dusk.position.set(2, 3, -12); scene.add(dusk);
+  scene.add(new THREE.HemisphereLight(0x6b86c9, 0x05070c, .25));
+  focus = 8.5;
+}
+if (S === 'lobby2') { scene.scale.x = -1; scene.traverse(o => { if (o.isMesh && o.material && o.material.map === tex.sharp) o.scale.x = -1; if (o.isMesh && o.material && o.material.map === tex.halo) o.scale.x = -1; }); }
+const comp = new EffectComposer(renderer); comp.setSize(W, H);
+comp.addPass(new RenderPass(scene, cam));
+comp.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), .35, .5, .92));
+comp.addPass(new BokehPass(scene, cam, { focus, aperture: S === 'board' ? .0026 : .0016, maxblur: S === 'board' ? .008 : .0055 }));
+comp.addPass(new OutputPass());
+comp.render(); comp.render();
+window.__done = true;
+</script></body></html>
