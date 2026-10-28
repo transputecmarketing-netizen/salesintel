@@ -29,7 +29,7 @@ def build():
          ("Week 2", "Draft the acceptable use policy and choose approved tools.", "Policy drafted, tool shortlist agreed with IT and data protection."),
          ("Week 3", "Configure tools: sign-on, admin roles, data settings, logging.", "Security settings checked and signed off by IT."),
          ("Week 4", "Recruit champions, pick pilot use cases, set baselines.", "Champions named in each pilot team, use cases and measures agreed."),
-         ("Throughout", "Brief the leadership team and answer early questions.", "A short weekly note from the owner to leaders.")], "Days 1 to 30", widths="26mm 1fr 1fr")
+         ("Throughout", "Brief the leadership team, answer early questions and log decisions.", "A short weekly note from the owner to leaders, with decisions recorded.")], "Days 1 to 30", widths="26mm 1fr 1fr")
     b.dive("01", "shield", "Security settings to switch on first", "Business plans include controls that protect your data. They only work if someone configures them before the pilot begins.",
         [("Identity", "Connect the tool to single sign-on and multi-factor authentication. Remove access automatically when people leave."),
          ("Data", "Confirm business data is not used for model training. Set retention to match your policy."),
@@ -53,13 +53,15 @@ def build():
          ("AI owner", "Ongoing, with your provider.", "Admin settings, usage reports and how to run the pilot."),
          ("Champions", "Two hands-on sessions.", "Briefing an assistant well, checking output and coaching colleagues."),
          ("Pilot group", "Hands-on workshop plus drop-ins.", "Their own use cases, safe data handling and how to verify answers."),
+         ("Team leaders", "Short briefing, then regular check-ins.", "How to spot good use cases, support their people and review AI-assisted work."),
          ("Everyone else", "Short briefing before access.", "The policy, approved tools and where to get help.")], "Days 31 to 60", widths="34mm 34mm 1fr")
     b.compare("Communications plan", "What to say, and when to say it", "People fill silence with worry. A few clear messages at the right moments keep trust high.", ["Moment", "What to say", "Who says it"],
         [("The decision", "Why we are adopting AI, what it is for and what it is not for.", "Chief executive or managing director."),
          ("Policy launch", "The rules in plain English, and why they protect everyone.", "The AI owner, with IT."),
          ("Pilot start", "Who is involved, what they are testing and how to follow along.", "The AI owner and champions."),
          ("Pilot results", "What worked, what did not and what happens next.", "The AI owner, with real examples."),
-         ("Wider rollout", "When each team gets access, and what training comes with it.", "Team leaders, supported by champions.")], "Days 31 to 60")
+         ("Wider rollout", "When each team gets access, and what training comes with it.", "Team leaders, supported by champions."),
+         ("Day 90 and after", "What changed, what we learned and how AI will be supported from here.", "The executive sponsor.")], "Days 31 to 60")
 
     b.mark("03", "Days 61 to 90: Prove, scale, embed"); b.opener("03", "Days 61<br>to 90.", "Prove the value, extend what works and make AI part of the routine.", [("01", "Weeks 9 to 13"), ("02", "Deciding what scales"), ("03", "Roles and risks"), ("04", "What to tell the board")])
     b.flow("Weeks 9 to 13", "From pilot results to everyday use", "The final month turns evidence into decisions and decisions into habits.",
@@ -73,7 +75,8 @@ def build():
         "Score each use case on three things. Did it save meaningful time or improve quality against the baseline? Did people keep using it once the novelty wore off? And did it stay within the policy without constant supervision? A use case that passes all three is ready to scale. One that passes two may need better prompts or training. One that passes fewer should usually stop.",
         "Scaling works best in waves. Pick the next two or three teams, give each a named lead and a champion from the pilot, and repeat the training that worked. Resist giving everyone access on the same day. Support spreads thin, early problems multiply and the good stories get lost in the noise.",
         "Embedding is the step most rollouts skip. If a task now starts with an AI draft, the procedure should say so, along with who checks the output and what good looks like. Templates, prompt libraries and onboarding materials should be updated to match. That is how AI stops depending on enthusiasts and becomes part of the job.",
-        "Finally, keep the owner in place beyond day ninety. The plan ends, but the work does not. Models change, new features arrive and people move roles. A light quarterly rhythm of review, training and reporting keeps the gains from fading."],
+        "Finally, keep the owner in place beyond day ninety. The plan ends, but the work does not. Models change, new features arrive and people move roles. A light quarterly rhythm of review, training and reporting keeps the gains from fading.",
+        "Be honest about what you learned along the way. Some use cases will have disappointed, some risks will have proved smaller than feared and others larger. Recording those lessons, and sharing them openly, builds the credibility you will need when you ask for the next round of time and budget."],
         "Prove and scale", "Scale what passed the test. Fix what nearly did. Stop the rest.")
     b.table("Roles", "Who does what in the first 90 days", "Small teams can combine roles, but every one of these jobs needs a name against it.", ["Role", "Responsible for", "Time needed"],
         [("Executive sponsor", "Sets direction, removes blockers and champions the plan at the top.", "An hour a week, plus key meetings."),
