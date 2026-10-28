@@ -1,0 +1,73 @@
+<!doctype html><meta charset="utf-8"><style>
+@font-face{font-family:Poppins;font-weight:300;src:url(../../assets/fonts/poppins-300.woff2)}@font-face{font-family:Poppins;font-weight:500;src:url(../../assets/fonts/poppins-500.woff2)}@font-face{font-family:Poppins;font-weight:600;src:url(../../assets/fonts/poppins-600.woff2)}
+*{margin:0;padding:0}body{width:1920px;height:1080px;overflow:hidden;position:relative;background:#0A0F1A;font-family:Poppins;color:#fff}
+canvas{position:absolute;left:0;top:0}
+#grain{position:absolute;inset:0;opacity:.11;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+#ui{position:absolute;inset:0}
+.logo{position:absolute;height:34px}
+.tag{position:absolute;font-weight:500;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+</style><canvas id="c" width="1920" height="1080"></canvas><div id="grain"></div><div id="ui"></div>
+<script>
+const D = new URLSearchParams(location.search).get('d'), c = document.getElementById('c'), g = c.getContext('2d'), W = 1920, H = 1080;
+// ---- Transputec gradient system
+const SYS = {
+  G1: ['#0A0F1A', '#16336E', '#2C72DB'],          // Midnight
+  G2: ['#2C72DB', '#3B8BFF', '#A9CBFF'],          // Signal
+  G3: ['#0A0F1A', '#0B2A55', '#00B8DB'],          // Deep current
+  G4: ['#0A0F1A', '#155DFC', '#00B8DB'],          // Brand spectrum
+};
+function blob(x, y, r, col, a = 1) { const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.globalAlpha = a; g.fillStyle = rg; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
+function base(col = '#0A0F1A') { g.fillStyle = col; g.fillRect(0, 0, W, H); }
+function blur(px, fn) { const o = document.createElement('canvas'); o.width = W; o.height = H; const og = o.getContext('2d'); const keep = g; fn(og); g.save(); g.filter = `blur(${px}px)`; g.drawImage(o, 0, 0); g.restore(); }
+function ui(pos = 'tl', tag = '') { const u = document.getElementById('ui'); const L = { tl: 'left:72px;top:64px', tr: 'right:72px;top:64px', bl: 'left:72px;bottom:64px', br: 'right:72px;bottom:64px' }[pos];
+  u.innerHTML = `<img class="logo" src="../../assets/logo-white.svg" style="${L}">` + (tag ? `<div class="tag" style="${pos[1] === 'l' ? 'left' : 'right'}:72px;${pos[0] === 't' ? 'top:116px' : 'bottom:40px'}">${tag}</div>` : ''); }
+const R = { // designs
+  system() { base(); const u = document.getElementById('ui'); const names = { G1: 'Midnight', G2: 'Signal', G3: 'Deep current', G4: 'Brand spectrum' };
+    u.innerHTML = `<img class="logo" src="../../assets/logo-white.svg" style="left:96px;top:90px;height:30px"><div style="position:absolute;left:96px;top:170px;font-weight:600;font-size:64px;letter-spacing:-.03em">Gradient system</div><div style="position:absolute;left:96px;top:262px;font-weight:300;font-size:22px;color:#AEBACC">Four gradients. Every background in the set is built from these.</div>` + Object.entries(SYS).map(([k, v], i) => `<div style="position:absolute;left:${96 + i * 438}px;top:380px;width:410px"><div style="height:420px;border-radius:28px;background:linear-gradient(160deg,${v.join(',')});border:1px solid rgba(255,255,255,.12)"></div><div style="margin-top:26px;font-weight:600;font-size:26px">${k} · ${names[k]}</div><div style="margin-top:10px;font-size:16px;letter-spacing:.08em;color:#AEBACC">${v.join('  →  ')}</div></div>`).join(''); },
+  mesh() { base(); blur(150, o => { o.globalCompositeOperation = 'screen'; const p = (x, y, r, c) => { const rg = o.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); };
+      p(1500, 250, 820, '#155DFC'); p(1880, 760, 640, '#2C72DB'); p(1650, 1000, 520, '#3B8BFF'); p(1350, 520, 360, 'rgba(169,203,255,.8)'); p(900, 1150, 600, 'rgba(21,93,252,.55)'); p(200, 1000, 600, 'rgba(22,51,110,.8)'); });
+    g.globalCompositeOperation = 'screen'; blur(220, o => { const rg = o.createRadialGradient(1550, 450, 0, 1550, 450, 700); rg.addColorStop(0, 'rgba(59,139,255,.55)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); }); g.globalCompositeOperation = 'source-over';
+    const v = g.createLinearGradient(0, 0, W, 0); v.addColorStop(0, 'rgba(10,15,26,.75)'); v.addColorStop(.45, 'rgba(10,15,26,.1)'); v.addColorStop(1, 'rgba(10,15,26,0)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    ui('tl', 'Technology that works for you'); },
+  ribbon() { base(); blob(1500, 300, 1100, 'rgba(22,51,110,.7)');
+    for (let k = 0; k < 60; k++) { const t = k / 60; g.beginPath(); for (let x = -100; x <= W + 100; x += 10) { const y = 640 + Math.sin(x / 420 + t * 1.6) * 170 * (1 - t * .3) - t * 260 + Math.cos(x / 260 - t * 2) * 40; x < -90 ? g.moveTo(x, y) : g.lineTo(x, y); }
+      const lg = g.createLinearGradient(0, 0, W, 0); lg.addColorStop(0, 'rgba(21,93,252,0)'); lg.addColorStop(.35, `rgba(44,114,219,${.25 + .5 * t})`); lg.addColorStop(.7, `rgba(59,139,255,${.4 + .5 * t})`); lg.addColorStop(1, `rgba(0,184,219,${.2 + .6 * t})`);
+      g.strokeStyle = lg; g.lineWidth = 1.4; g.stroke(); }
+    blur(60, o => { const rg = o.createRadialGradient(1300, 420, 0, 1300, 420, 500); rg.addColorStop(0, 'rgba(59,139,255,.45)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); });
+    ui('tl', 'Managed IT · Cloud · Security'); },
+  horizon() { const lg = g.createLinearGradient(0, 0, 0, H); lg.addColorStop(0, '#0A0F1A'); lg.addColorStop(.55, '#0D1D3D'); lg.addColorStop(.78, '#1B4FA8'); lg.addColorStop(.86, '#3B8BFF'); lg.addColorStop(1, '#0A0F1A'); g.fillStyle = lg; g.fillRect(0, 0, W, H);
+    blur(90, o => { const rg = o.createRadialGradient(W / 2, 2560, 0, W / 2, 2560, 1100); rg.addColorStop(0, 'rgba(169,203,255,.9)'); rg.addColorStop(.3, 'rgba(59,139,255,.55)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.scale(1, .35); o.fillRect(0, 0, W, H * 3); });
+    const v = g.createLinearGradient(0, 0, 0, H); v.addColorStop(.9, 'rgba(10,15,26,0)'); v.addColorStop(1, 'rgba(10,15,26,.9)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    ui('tl'); },
+  fluted() { const src = document.createElement('canvas'); src.width = W; src.height = H; const s = src.getContext('2d');
+    s.fillStyle = '#0A0F1A'; s.fillRect(0, 0, W, H); s.filter = 'blur(120px)';
+    for (const [x, y, r, c] of [[1450, 380, 520, '#2C72DB'], [1700, 820, 420, '#00B8DB'], [1150, 900, 380, '#155DFC'], [1550, 260, 240, '#A9CBFF']]) { s.fillStyle = c; s.beginPath(); s.arc(x, y, r, 0, 7); s.fill(); }
+    const sw = 48; for (let x = 0; x < W; x += sw) { // reeded glass: each flute shows a compressed, offset slice
+      g.drawImage(src, x - sw * .9, 0, sw * 2.8, H, x, 0, sw, H);
+      const sh = g.createLinearGradient(x, 0, x + sw, 0); sh.addColorStop(0, 'rgba(255,255,255,.07)'); sh.addColorStop(.18, 'rgba(255,255,255,0)'); sh.addColorStop(.82, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.28)'); g.fillStyle = sh; g.fillRect(x, 0, sw, H); }
+    ui('tl', 'Technology that works for you'); },
+  glass() { base(); blur(130, o => { const p = (x, y, r, c) => { const rg = o.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); };
+      p(1500, 300, 700, '#2C72DB'); p(1800, 900, 600, 'rgba(0,184,219,.8)'); p(900, 1000, 600, 'rgba(21,93,252,.7)'); });
+    const u = document.getElementById('ui');
+    const pane = (l, t, w, h, r, a) => `<div style="position:absolute;left:${l}px;top:${t}px;width:${w}px;height:${h}px;border-radius:${r}px;backdrop-filter:blur(40px) saturate(140%);background:linear-gradient(140deg,rgba(255,255,255,${a}),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 40px 80px rgba(0,0,0,.3)"></div>`;
+    setTimeout(() => { u.innerHTML = pane(1340, 140, 420, 560, 40, .1) + pane(1520, 520, 300, 380, 36, .14) + pane(1180, 620, 260, 260, 130, .08) + u.innerHTML; }, 0);
+    ui('tl', 'Managed IT · Cloud · Security'); },
+  rings() { base(); blob(1920, 1080, 1300, 'rgba(22,51,110,.75)');
+    for (let i = 0; i < 26; i++) { const r = 220 + i * 46; const lg = g.createLinearGradient(1920 - r, 1080 - r, 1920, 1080); lg.addColorStop(0, `rgba(169,203,255,${.85 - i * .025})`); lg.addColorStop(.6, `rgba(59,139,255,${.8 - i * .022})`); lg.addColorStop(1, 'rgba(44,114,219,0)');
+      g.strokeStyle = lg; g.lineWidth = i % 4 === 0 ? 3 : 1.4; g.beginPath(); g.arc(1920, 1080, r, Math.PI, Math.PI * 1.5); g.stroke(); }
+    blur(80, o => { const rg = o.createRadialGradient(1920, 1080, 0, 1920, 1080, 420); rg.addColorStop(0, '#3B8BFF'); rg.addColorStop(.5, 'rgba(21,93,252,.6)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); });
+    ui('tl', 'Technology that works for you'); },
+  orb() { base(); blob(1500, 540, 1100, 'rgba(22,51,110,.55)');
+    const x = 1560, y = 560, r = 470; const sp = g.createRadialGradient(x - 170, y - 200, 20, x, y, r); sp.addColorStop(0, '#CFE2FF'); sp.addColorStop(.18, '#3B8BFF'); sp.addColorStop(.55, '#155DFC'); sp.addColorStop(.85, '#0B2A55'); sp.addColorStop(1, '#0A0F1A');
+    g.fillStyle = sp; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+    const rim = g.createRadialGradient(x + 140, y + 220, r * .6, x, y, r); rim.addColorStop(0, 'rgba(0,184,219,0)'); rim.addColorStop(.92, 'rgba(0,184,219,.45)'); rim.addColorStop(1, 'rgba(0,184,219,0)'); g.fillStyle = rim; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+    blur(120, o => { const rg = o.createRadialGradient(x, y + 80, 0, x, y + 80, 700); rg.addColorStop(0, 'rgba(44,114,219,.6)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = rg; o.fillRect(0, 0, W, H); });
+    ui('tl', 'Managed IT · Cloud · Security'); },
+  beam() { base(); blob(400, 0, 1300, 'rgba(22,51,110,.6)');
+    blur(70, o => { o.save(); o.translate(1250, -120); o.rotate(.42); const lg = o.createLinearGradient(-260, 0, 260, 0); lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(.5, 'rgba(21,93,252,.95)'); lg.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = lg; o.fillRect(-260, 0, 520, 1800);
+      o.translate(330, 60); const l2 = o.createLinearGradient(-120, 0, 120, 0); l2.addColorStop(0, 'rgba(0,0,0,0)'); l2.addColorStop(.5, 'rgba(169,203,255,.5)'); l2.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = l2; o.fillRect(-120, 0, 240, 1800); o.restore(); });
+    blur(4, o => { o.save(); o.translate(1250, -120); o.rotate(.42); o.fillStyle = 'rgba(207,226,255,.55)'; o.fillRect(-2, 0, 4, 1800); o.restore(); });
+    ui('tl', 'Technology that works for you'); },
+};
+(async () => { await document.fonts.ready; R[D](); await new Promise(r => setTimeout(r, 200)); window.__done = true; })();
+</script>
