@@ -339,13 +339,20 @@
                 L: { target: [520, 1560], handAngle: 78, hand: "soft", side: 1, fsU: 0.9 }, face: "laugh", body: { lean: -2.5 } },
     // talking hand: elbow at the side, forearm coming toward you, palm open
     explain:  { R: { shoulder: 9, elbow: 58, wrist: 22, hand: "soft", side: -1, beat: 1, fsF: 0.58 } },
+    // comfort: a hand laid on the chest, head tilted, as if to say "I'm with you"
+    heart:    { R: { target: [700, 1270], handAngle: -100, hand: "flat", side: 1, fsU: 0.75, fsF: 0.8, elbowOut: 0.3 }, body: { tilt: -5, lean: 1.5 } },
+    // calm: both palms facing down, lowered slowly, "it's okay, breathe"
+    calm:     { R: { target: [985, 1545], handAngle: 64, hand: "flat", side: 1, fsF: 0.72, elbowOut: 0.6 },
+                L: { target: [305, 1555], handAngle: -64, hand: "flat", side: 1, fsF: 0.72, elbowOut: 0.6 }, body: { lean: 1 } },
+    // listen: leaning in, head tilted, hand loosely at the chin
+    listen:   { L: { target: [560, 1080], handAngle: 170, hand: "soft", side: 1, z: "top", fsU: 0.62 }, body: { tilt: 6, lean: 2 } },
     // shy: hands clasped behind the back, a little twist and sway
     shy:      { R: { target: [700, 1600], handAngle: -40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 },
                 L: { target: [610, 1610], handAngle: 40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 }, face: "shy", body: { twist: -0.35, tilt: -6 } },
     behind:   { R: { target: [700, 1600], handAngle: -40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 },
                 L: { target: [610, 1610], handAngle: 40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 }, body: { lean: -1 } }
   };
-  const PUBLIC_GESTURES = ["none", "wave", "hello", "hi5", "idea", "count2", "thumbsUp", "point", "think", "cheer", "shrug", "belly", "explain", "shy", "behind"];
+  const PUBLIC_GESTURES = ["none", "wave", "hello", "hi5", "idea", "count2", "thumbsUp", "point", "think", "cheer", "shrug", "belly", "explain", "shy", "behind", "heart", "calm", "listen"];
 
   // Mouth shapes for lip sync: [open, width]
   const VISEME = {
@@ -389,6 +396,18 @@
     const label = valence > 0.45 ? (arousal > 0.6 ? "excited" : "happy") : valence < -0.45 ? (arousal > 0.6 ? "upset" : "sad") : arousal < 0.3 ? "calm" : "neutral";
     return { valence, arousal, label };
   }
+  // Which gesture answers a feeling: comfort for sadness, calm for upset,
+  // a thumbs up for good news, a cheer for big news, a listening lean otherwise.
+  function Mascot_gestureFor(user) {
+    switch (user.label) {
+      case "sad": return "heart";
+      case "upset": return "calm";
+      case "happy": return Math.random() < 0.5 ? "thumbsUp" : "hi5";
+      case "excited": return "cheer";
+      case "calm": return null;
+      default: return "listen";
+    }
+  }
   // How the mascot answers a feeling: it shares joy and lifts it a little,
   // and meets sadness gently, softer and calmer, rather than copying it.
   function empathize(user) {
@@ -408,6 +427,8 @@
     think:    (side, g) => (side === "L" ? [[0.9, 0.1, { el: g.el + 6 }], [1.0, 0.14, { el: g.el }], [1.3, 0.1, { el: g.el + 6 }], [1.4, 0.16, { el: g.el }]] : []),
     belly:    (side, g) => [[0.55, 0.1, { wr: g.wr + 12 }], [0.65, 0.12, { wr: g.wr }], [0.8, 0.1, { wr: g.wr + 12 }], [0.9, 0.16, { wr: g.wr }]],
     explain:  (side, g) => (side === "R" ? [[0.55, 0.12, { wr: g.wr - 14, pop: 1.5 }], [0.67, 0.22, { wr: g.wr }]] : []),
+    heart:    (side, g) => (side === "R" ? [[0.8, 0.5, { wr: g.wr + 6 }], [1.3, 0.6, { wr: g.wr }]] : []),           // a slow, soft press
+    calm:     (side, g) => [[0.6, 0.55, { sh: g.sh + (side === "R" ? 4 : -4), wr: g.wr + 8 }], [1.15, 0.6, { sh: g.sh, wr: g.wr }], [1.75, 0.55, { sh: g.sh + (side === "R" ? 4 : -4) }], [2.3, 0.6, { sh: g.sh }]],
     shrug:    (side, g) => [[0.6, 0.12, { wr: g.wr + 10, pop: 1.5 }], [0.72, 0.22, { wr: g.wr }]]
   };
 
@@ -891,7 +912,13 @@
     // feeling of the conversation), not to a fixed default face.
     _restFace() { if (this.mood) this.feel(this.mood.valence, this.mood.arousal); else this.express("smile"); }
     // Read the user's words, then answer their feeling with empathy.
-    mirror(text) { const user = readEmotion(text), m = empathize(user); this.feel(m.valence, m.arousal); return { user, mascot: m }; }
+    mirror(text, { gesture = true } = {}) {
+      const user = readEmotion(text), m = empathize(user);
+      this.feel(m.valence, m.arousal);
+      const g = gesture ? Mascot_gestureFor(user) : null;
+      if (g) this.gesture(g, { hold: g === "cheer" ? 2.2 : 3 });
+      return { user, mascot: m, gesture: g };
+    }
 
     blink() { this.blinkT = 0; return this; }
     wink(side = "R") {
@@ -1033,7 +1060,17 @@
       if (this.talk) { if (this.talk.utterance && root.speechSynthesis) root.speechSynthesis.cancel(); this.talk.done(); }
       return this;
     }
-    setMouthOpen(level) { this.mouthOverride = level == null ? null : clamp(level, 0, 1); return this; }
+    // Drive speech from a native voice engine: loudness 0..1 and, optionally,
+    // brightness 0..1 (how "ee"-like versus "oo"-like the sound is). Call it
+    // every frame or audio chunk; null ends speech.
+    setMouthOpen(level, brightness) {
+      this.mouthOverride = level == null ? null : clamp(level, 0, 1);
+      this.mouthBright = brightness == null ? null : clamp(brightness, 0, 1);
+      if (level == null && this.opts.talkGestures && this.gestureName === "none") this._applyArm("R", REST.R);
+      else if (level != null && !this._speakingArm && this.opts.talkGestures && this.gestureName === "none" && (this.mood?.valence ?? 0) > -0.4) this._applyArm("R", GESTURES.explain.R);
+      this._speakingArm = level != null;
+      return this;
+    }
     lipSync(audioEl) {
       const Ctx = root.AudioContext || root.webkitAudioContext;
       if (!Ctx) return this;
@@ -1041,13 +1078,18 @@
       const src = ctx.createMediaElementSource(audioEl);
       const an = ctx.createAnalyser(); an.fftSize = 512;
       src.connect(an); an.connect(ctx.destination);
-      const buf = new Uint8Array(an.fftSize);
+      const buf = new Uint8Array(an.fftSize), spec = new Uint8Array(an.frequencyBinCount);
       this._analyser = () => {
         an.getByteTimeDomainData(buf);
         let sum = 0; for (const v of buf) sum += (v - 128) * (v - 128);
+        // brightness: the spectral centroid of the voice band
+        an.getByteFrequencyData(spec);
+        let w = 0, tot = 0; for (let i = 2; i < spec.length * 0.6; i++) { w += spec[i] * i; tot += spec[i]; }
+        this._bright = tot > 0 ? clamp((w / tot / (spec.length * 0.6) - 0.12) / 0.3, 0, 1) : 0.5;
         return clamp(Math.sqrt(sum / buf.length) / 30, 0, 1);
       };
-      audioEl.addEventListener("ended", () => { this._analyser = null; this.setMouthOpen(null); });
+      if (this.opts.talkGestures && this.gestureName === "none") this._applyArm("R", GESTURES.explain.R);
+      audioEl.addEventListener("ended", () => { this._analyser = null; this._bright = null; this.setMouthOpen(null); });
       return this;
     }
     showRig(on = true) { this.parts.rig.style.display = on ? "" : "none"; this.rigOn = on; if (on && !this.rigNodes) this._buildRig(); return this; }
@@ -1562,9 +1604,22 @@
           s.width.set(lerp(e.width, lerp(cur[1], nx[1], k * 0.6), 0.85));
         }
       } else if (this._analyser || this.mouthOverride != null) {
+        // Speech rhythm from real audio. A syllable is a rise in loudness:
+        // each one nods the head and beats the hand, bigger for stressed
+        // ones. Bright sounds (ee, s) widen the mouth; dark ones (oo, o) round it.
         const lvl = this._analyser ? this._analyser() : this.mouthOverride;
-        s.open.set(lvl * 0.85); s.width.set(lerp(e.width, 0.9, lvl));
-        if (lvl > 0.5 && Math.random() < 0.05) this.beat = 0.8;
+        const bright = this._bright != null ? this._bright : (this.mouthBright ?? 0.5);
+        s.open.set(lvl * 0.85);
+        s.width.set(lerp(lerp(0.62, 1.18, bright), e.width, 0.25));
+        s.teeth.set(lvl > 0.15 ? smooth((bright - 0.55) / 0.3) : 0);
+        const env = (this._env = (this._env ?? 0) + (lvl - (this._env ?? 0)) * (1 - Math.exp(-dt / 0.12)));
+        if (!calm && lvl > 0.18 && lvl > env * 1.35 && T - (this._lastOnset || 0) > 0.14) {
+          this._lastOnset = T;
+          const stress = clamp((lvl - 0.18) * 1.6, 0, 1);
+          s.nod.kick(-(30 + stress * 60) * (0.55 + (this.mood?.arousal ?? 0.45)));
+          this.beat = 0.5 + stress;
+          if (stress > 0.6) { s.browShow.set(Math.max(e.browShow, 0.6)); this._later(0.2, () => s.browShow.set(e.browShow)); }
+        }
       } else if (this.laughT <= 0) {
         want("width", e.width);
       }

@@ -28,6 +28,12 @@ buddy.feel(out.valence, out.arousal);
 buddy.say(out.reply, { speak: true });   // voice follows the mood
 ```
 
+He answers with his body too: `mirror()` picks a gesture for the feeling (a hand on the heart for sadness, palms-down calm for upset, a thumbs up or hi-5 for good news, a cheer for big news, a listening lean otherwise). Pass `{ gesture: false }` to skip it.
+
+Speech rhythm: with real voice audio (`lipSync(audioElement)`, or `setMouthOpen(level, brightness)` from a native engine), each syllable (a rise in loudness) nods the head and beats the talking hand, more for stressed ones; bright sounds widen the mouth and show teeth, dark ones round it.
+
+Running it on a phone with a local model: see [MOBILE.md](MOBILE.md).
+
 Agents use the `mascot_feel` tool: pass `valence` and `arousal` from their own read of the conversation, or `user_text` to read and mirror it.
 
 ## Use it in a page
@@ -142,7 +148,7 @@ How the body is built:
 | Legs and shoes | `#legL` `#legR` `#shoeL` `#shoeR` | knee bend from planted feet, jumps |
 
 Expressions: smile, neutral, happy, laugh, surprised, sad, thinking, shy, sleepy, angry.
-Gestures: wave, hello, hi5, idea, count2, thumbsUp, point, think, cheer, shrug, belly, explain, shy, behind, none.
+Gestures: wave, hello, hi5, idea, count2, thumbsUp, point, think, cheer, shrug, belly, explain, shy, behind, heart, calm, listen, none.
 Actions: blink, wink, nod, shakeHead, wiggleEars, hop, bounce, poke, laughBurst, stretch.
 
 ## ASCII mascot
