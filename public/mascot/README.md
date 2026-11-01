@@ -59,10 +59,16 @@ How the drawing holds up in motion:
 - **A sleeve that fits.** The near sleeve morphs from the sketch's shape at rest into one that hugs the arm as it lifts.
 - **Small truths.** Blinks close fast, hold, and open slowly. The crease at the base of the thumb shows when the palm faces you. Teeth show on "ee", "s" and "f" sounds.
 
+Squash, stretch and soft body:
+
+- **Squash and stretch, volume preserved.** A jump squashes on the crouch, stretches on take-off, rounds out at the top and squashes on landing; laughs squash with each "ha", surprise stretches him up. It squashes about the feet on the ground and about the middle in the air, and stays subtle (8 to 12%). `bounce` is a springy bounce in place; agents can drive `body.squash` directly.
+- **Soft body.** Elastic springs driven by real velocity: the chest lags behind the hips and wobbles back, the trunk compresses and rebounds, the head squashes slightly on quick nods and landings, and fingers flop back when the hand moves fast.
+
 How the hands are built:
 
 - **In 3D, then projected.** Each hand is modelled with x across the palm, y along the fingers and z out of the back, and turned on the forearm before it is drawn. Face-on, a curl foreshortens and the part that folds behind the hand is left out; edge-on, the curl shows as a real C-shaped bend. A hanging hand is seen mostly from the side, palm toward the thigh, as a real one is.
 - **Three joints per finger.** Fingers curl progressively from the knuckle, their tips draw together as they close, creases appear at bent joints, and each finger tapers to a rounded tip.
+- **The right hand on each arm.** The near arm carries his left hand and the far arm his right, its mirror image, so a thumb is never on the impossible side.
 - **An opposable thumb.** It abducts in the palm plane and swings across toward the palm as the hand closes.
 - **An oval wrist.** It thins as the hand turns edge-on, and the forearm flows into the heel of the hand without a step.
 - **A real wave.** The forearm rocks from the elbow, the wrist follows a quarter-beat late, the hand turns a little on each pass, and the fingers ripple one after another.
@@ -91,8 +97,8 @@ How the body is built:
 | Legs and shoes | `#legL` `#legR` `#shoeL` `#shoeR` | knee bend from planted feet, jumps |
 
 Expressions: smile, neutral, happy, laugh, surprised, sad, thinking, shy, sleepy, angry.
-Gestures: wave, hello, hi5, idea, count2, thumbsUp, point, think, cheer, shrug, belly, explain, shy, none.
-Actions: blink, wink, nod, shakeHead, wiggleEars, hop, poke, laughBurst, stretch.
+Gestures: wave, hello, hi5, idea, count2, thumbsUp, point, think, cheer, shrug, belly, explain, shy, behind, none.
+Actions: blink, wink, nod, shakeHead, wiggleEars, hop, bounce, poke, laughBurst, stretch.
 
 ## Agent hooks
 

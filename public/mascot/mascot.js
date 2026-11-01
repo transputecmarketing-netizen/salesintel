@@ -33,7 +33,7 @@
   const NS = "http://www.w3.org/2000/svg";
   const DEG = Math.PI / 180;
   const VIEWS = {
-    full: [40, 110, 1220, 2470],
+    full: [40, 40, 1220, 2540],
     bust: [100, 160, 1160, 1270]
   };
   let uidCounter = 0;
@@ -285,7 +285,7 @@
   };
 
   const HANDS = {
-    relaxed: { fingers: [0.86, 0.79, 0.73, 0.67], thumb: 0.85, thumbAngle: -20, spread: 0.08 },
+    relaxed: { fingers: [0.95, 0.9, 0.85, 0.8], thumb: 0.9, thumbAngle: -18, spread: 0.06 },
     open:    { fingers: [1, 1, 1, 1], thumb: 1, thumbAngle: -58, spread: 0.65 },
     flat:    { fingers: [1, 1, 1, 1], thumb: 0.95, thumbAngle: -30, spread: 0.12 },
     fist:    { fingers: [0, 0, 0, 0], thumb: 0.55, thumbAngle: -14, spread: 0 },
@@ -299,8 +299,8 @@
   // relative) or an IK target for the wrist plus an absolute hand angle.
   const REST = {
     // a hanging hand is seen mostly from the side, palm toward the thigh
-    R: { shoulder: 0, elbow: -8, wrist: -4, hand: "relaxed", side: 0.5, z: "mid" },
-    L: { shoulder: -26, elbow: 22, wrist: 8, hand: "relaxed", side: 0.5, z: "mid" }
+    R: { shoulder: 0, elbow: -8, wrist: -4, hand: "relaxed", side: 0.72, z: "mid" },
+    L: { shoulder: -26, elbow: 22, wrist: 6, hand: "relaxed", side: 0.72, z: "mid" }
   };
   const GESTURES = {
     none: {},
@@ -311,18 +311,25 @@
     count2:   { R: { target: [980, 1000], handAngle: 176, hand: "two", side: -1, fsU: 0.6 } },
     thumbsUp: { R: { target: [930, 1160], handAngle: -88, hand: "thumbUp", side: 1, fsU: 0.6, fsF: 0.6, elbowOut: 1.2 }, face: "happy" },
     point:    { R: { target: [1090, 930], handAngle: 140, hand: "point", side: -1, fsU: 0.8 }, body: { lean: 1, twist: 0.45 }, look: [9, -4] },
-    think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 }, face: "thinking", body: { twist: -0.3, lean: 1 } },
+    // the classic: one hand at the chin, the other arm across the chest holding that elbow
+    think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 },
+                R: { target: [560, 1330], handAngle: -84, hand: "soft", side: 1, fsU: 0.92, fsF: 0.82, elbowOut: 0.3 }, face: "thinking", body: { twist: -0.3, lean: 1 } },
     cheer:    { R: { target: [1010, 640], handAngle: 184, hand: "open", side: -1, wave: 0.35 },
-                L: { target: [300, 650], handAngle: 176, hand: "open", side: 1, wave: 0.35, z: "back" }, face: "laugh", body: { hop: true } },
+                L: { target: [300, 650], handAngle: 176, hand: "open", side: -1, wave: 0.35, z: "back" }, face: "laugh", body: { hop: true } },
     shrug:    { R: { target: [1055, 1440], handAngle: 118, hand: "soft", side: -1 },
                 L: { target: [265, 1455], handAngle: -112, hand: "soft", side: -1 }, face: "neutral", body: { shrug: 28, tilt: 7 } },
-    belly:    { R: { target: [745, 1575], handAngle: -76, hand: "soft", side: 1 }, face: "laugh" },
+    // laughing: both hands on the belly, leaning back into it
+    belly:    { R: { target: [745, 1575], handAngle: -76, hand: "soft", side: 1 },
+                L: { target: [520, 1560], handAngle: 78, hand: "soft", side: 1, fsU: 0.9 }, face: "laugh", body: { lean: -2.5 } },
     // talking hand: elbow at the side, forearm coming toward you, palm open
     explain:  { R: { shoulder: 9, elbow: 58, wrist: 22, hand: "soft", side: -1, beat: 1, fsF: 0.58 } },
-    shy:      { R: { target: [700, 1620], handAngle: -60, hand: "soft", side: 1 },
-                L: { target: [640, 1640], handAngle: 60, hand: "soft", side: 1, z: "top" }, face: "shy" }
+    // shy: hands clasped behind the back, a little twist and sway
+    shy:      { R: { target: [700, 1600], handAngle: -40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 },
+                L: { target: [610, 1610], handAngle: 40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 }, face: "shy", body: { twist: -0.35, tilt: -6 } },
+    behind:   { R: { target: [700, 1600], handAngle: -40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 },
+                L: { target: [610, 1610], handAngle: 40, hand: "relaxed", side: 1, z: "back", fsF: 0.75 }, body: { lean: -1 } }
   };
-  const PUBLIC_GESTURES = ["none", "wave", "hello", "hi5", "idea", "count2", "thumbsUp", "point", "think", "cheer", "shrug", "belly", "explain", "shy"];
+  const PUBLIC_GESTURES = ["none", "wave", "hello", "hi5", "idea", "count2", "thumbsUp", "point", "think", "cheer", "shrug", "belly", "explain", "shy", "behind"];
 
   // Mouth shapes for lip sync: [open, width]
   const VISEME = {
@@ -331,6 +338,10 @@
     w: [0.3, 0.58], r: [0.28, 0.78], l: [0.36, 1], t: [0.24, 1.05], d: [0.26, 1.02], n: [0.22, 1],
     s: [0.16, 1.15], z: [0.16, 1.15], c: [0.2, 1.08], k: [0.3, 0.98], g: [0.3, 0.98], h: [0.42, 1], j: [0.25, 0.9]
   };
+
+  // The T-shirt's sides: fuller at the chest, in at the waist, flaring at the hem.
+  const TORSO_SIDES = "M440,1110 C406,1220 390,1330 392,1440 C392,1560 382,1690 368,1786 M778,1110 C806,1210 814,1330 806,1450 C800,1560 806,1690 816,1786";
+  const TORSO_HEM = "M368,1786 C500,1810 700,1810 816,1786";
 
   // How much of the upper teeth each sound shows.
   const TEETH = { e: 0.7, i: 0.9, y: 0.6, s: 1, z: 1, c: 0.8, t: 0.6, d: 0.5, n: 0.3, l: 0.4, f: 1, v: 1, j: 0.6 };
@@ -367,10 +378,12 @@
     const g = el("g", { id: "mascot" }, svg);
     const parts = {};
     parts.shadow = el("ellipse", { class: "shadow", cx: 615, cy: P.ground, rx: 300, ry: 22 }, g);
-    parts.layerBack = el("g", { id: "layerBack" }, g);
+    // everything that squashes lives in one group; the shadow stays on the floor
+    const body = parts.squash = el("g", { id: "squash" }, g);
+    parts.layerBack = el("g", { id: "layerBack" }, body);
 
     // ---- legs, trousers and shoes (rebuilt every frame)
-    const legs = parts.legs = el("g", { id: "legs" }, g);
+    const legs = parts.legs = el("g", { id: "legs" }, body);
     parts.pelvis = el("path", { class: "solid", id: "pelvis",
       d: "M410,1740 L812,1740 L822,1885 C760,1915 470,1915 404,1885 Z" }, legs);
     parts.shoeL = el("g", { id: "shoeL" }, legs);
@@ -390,7 +403,7 @@
     }
 
     // ---- torso
-    const torso = parts.torso = el("g", { id: "torso" }, g);
+    const torso = parts.torso = el("g", { id: "torso" }, body);
     parts.shirt = el("path", { class: "paper", id: "shirt" }, torso);
     parts.torsoSides = el("path", { class: "ink", id: "torsoSides",
       d: "M440,1110 C420,1230 398,1340 384,1420 C374,1520 372,1660 376,1786 M778,1110 C784,1350 792,1560 804,1786" }, torso);
@@ -399,12 +412,12 @@
     parts.shoulderLine = el("path", { class: "ink", id: "shoulders" }, torso);
     parts.collar = el("path", { class: "ink", id: "collar" }, torso);
 
-    parts.layerMid = el("g", { id: "layerMid" }, g);
-    parts.neckFill = el("path", { class: "paper", id: "neckFill" }, g);
-    parts.neck = el("path", { class: "ink", id: "neck" }, g);
+    parts.layerMid = el("g", { id: "layerMid" }, body);
+    parts.neckFill = el("path", { class: "paper", id: "neckFill" }, body);
+    parts.neck = el("path", { class: "ink", id: "neck" }, body);
 
     // ---- head
-    const head = parts.head = el("g", { id: "head" }, g);
+    const head = parts.head = el("g", { id: "head" }, body);
     el("path", { class: "paper", id: "faceFill",
       d: "M370,566 C342,578 324,606 327,638 C330,668 344,690 362,702 L383,705 C392,760 430,808 490,830 C515,840 532,850 541,866 L698,844 C715,805 760,775 790,750 L800,762 C852,760 888,735 893,697 C898,662 880,630 845,628 L845,540 L381,520 Z" }, head);
     parts.earL = el("g", { id: "earL" }, head);
@@ -447,8 +460,8 @@
     el("path", { class: "solid", id: "capBrim",
       d: "M207,470 C204,425 245,388 300,386 C340,386 380,405 420,420 L702,512 C716,518 714,532 698,532 L300,537 C250,537 210,512 207,470 Z" }, cap);
 
-    parts.layerTop = el("g", { id: "layerTop" }, g);
-    parts.rig = el("g", { id: "rigOverlay", style: "display:none" }, g);
+    parts.layerTop = el("g", { id: "layerTop" }, body);
+    parts.rig = el("g", { id: "rigOverlay", style: "display:none" }, body);
     return { svg, parts };
   }
 
@@ -506,7 +519,8 @@
     "body.sway":    { key: "sway", min: -40, max: 40, about: "Weight shift left (-) or right (+), in drawing px. Knees follow." },
     "body.bob":     { key: "bob", min: -200, max: 70, about: "Body height: positive crouches, negative rises." },
     "shoulders.shrug": { key: "shrug", min: -15, max: 35, about: "Shoulder lift: negative droops." },
-    "feet.lift":    { key: "feetLift", min: 0, max: 160, about: "Lifts both feet off the ground, for jumps." }
+    "feet.lift":    { key: "feetLift", min: 0, max: 160, about: "Lifts both feet off the ground, for jumps." },
+    "body.squash":  { key: "squash", min: -0.25, max: 0.3, about: "Squash and stretch, volume preserved: positive squashes (shorter, wider), negative stretches (taller, thinner). Normally automatic." }
   };
   const FINGER_NAMES = ["index", "middle", "ring", "little"];
   for (const [name, S] of [["right", "R"], ["left", "L"]]) {
@@ -521,7 +535,7 @@
       PARAMS[`hand.${name}.${f2}`] = { key: `f${i}${S}`, min: 0, max: 1, about: `${f2} finger: 0 curled into the palm, 1 straight.` };
     });
   }
-  const ACTIONS = ["blink", "wink", "nod", "shakeHead", "wiggleEars", "hop", "poke", "laughBurst", "stretch"];
+  const ACTIONS = ["blink", "wink", "nod", "shakeHead", "wiggleEars", "hop", "bounce", "poke", "laughBurst", "stretch"];
 
   const TOOLS = [
     { name: "mascot_express", description: "Set the facial expression; the body posture follows (a sad face droops the shoulders, surprise jolts). Optionally return to the resting smile after hold_seconds.",
@@ -580,6 +594,9 @@
         lean: S(0, 40, 9), sway: S(0, 28, 8), bob: S(0, 150, 15), shrug: S(0, 110, 15),
         hipTilt: S(0, 26, 8), twist: S(0, 38, 9), teeth: S(0, 260, 29),
         swingR: S(0, 55, 4.3), swingL: S(0, 55, 4.3),   // arms hang like pendulums
+        // squash & stretch and soft-body: elastic, so they overshoot and jiggle back
+        squash: S(0, 240, 8.5), headSq: S(0, 300, 9), softX: S(0, 70, 4.6), softY: S(0, 170, 6.5),
+        flopR: S(0, 170, 8.5), flopL: S(0, 170, 8.5),
         feetLift: S(0, 230, 19), footTilt: S(0, 200, 16), view: S(0, 50, 13)
       };
       for (const side of ["R", "L"]) {
@@ -618,6 +635,7 @@
       this.nextShift = 3 + Math.random() * 3;
       this.nextFidget = 6 + Math.random() * 5;
       this.saccade = [0, 0];
+      this.addSq = 0; this.prevLift = 0;
       this.idleTurn = 0; this.idleTilt = 0; this.idleLook = null; this.nextIdle = 2 + Math.random() * 2;
       this.wavePhase = 0;
       this.shakeT = 0;
@@ -716,7 +734,7 @@
       this.s.earPerk.set(name === "surprised" ? 1 : 0);
       if (name === "happy") this.wiggleEars();
       if (name === "laugh") this.laughBurst();
-      if (name === "surprised" && !instant) { this.s.bob.kick(-420); this.s.shrug.kick(260); this.blink(); }
+      if (name === "surprised" && !instant) { this.s.bob.kick(-420); this.s.shrug.kick(260); this.blink(); this.s.squash.kick(-1); this.s.headSq.kick(-0.9); }
       clearTimeout(this._exprHold);
       if (hold) this._exprHold = setTimeout(() => this.express("smile"), hold * 1000);
       this._emit("state", this.getState());
@@ -780,13 +798,28 @@
       if (this.opts.reducedMotion) { this.s.bob.kick(-200); return this; }
       const s = this.s;
       const a = this.add;
-      s.bob.set(42); a.shrug = -6; a.nod = 4;
-      this._later(0.13, () => { s.bob.set(-175); s.feetLift.set(125); s.footTilt.set(16); a.shrug = 10; a.nod = -5; });
-      this._later(0.42, () => { s.bob.set(38); s.feetLift.set(0); s.footTilt.set(0); a.shrug = -4; a.nod = 5; });
-      this._later(0.62, () => { s.bob.set(0); a.shrug = 0; a.nod = 0; });
+      // anticipation: squash down; launch: stretch up; apex: round again;
+      // landing: squash hard and let the elastic jiggle settle it
+      s.bob.set(38); a.shrug = -6; a.nod = 4; this.addSq = 0.07;
+      this._later(0.14, () => { s.bob.set(-120); s.feetLift.set(88); s.footTilt.set(14); a.shrug = 9; a.nod = -4; this.addSq = -0.07; });
+      this._later(0.3, () => { this.addSq = 0; });
+      this._later(0.43, () => { s.bob.set(32); s.feetLift.set(0); s.footTilt.set(0); a.shrug = -4; a.nod = 4; this.addSq = 0.08; s.squash.kick(0.9); });
+      this._later(0.58, () => { this.addSq = 0; });
+      this._later(0.64, () => { s.bob.set(0); a.shrug = 0; a.nod = 0; });
       return this;
     }
     laughBurst(seconds = 1.6) { this.laughT = Math.max(this.laughT, seconds); return this; }
+    // A springy bounce in place, feet on the ground: squash, stretch, settle.
+    bounce(times = 3) {
+      if (this.opts.reducedMotion) return this;
+      for (let i = 0; i < times; i++) {
+        const k = 1 - i * 0.28;
+        this._later(i * 0.34, () => { this.addSq = 0.07 * k; this.s.bob.set(26 * k); });
+        this._later(i * 0.34 + 0.17, () => { this.addSq = -0.05 * k; this.s.bob.set(-12 * k); });
+      }
+      this._later(times * 0.34, () => { this.addSq = 0; this.s.bob.set(0); });
+      return this;
+    }
     stretch() {
       const prev = this.gestureName;
       this.gesture("cheer");
@@ -1308,6 +1341,28 @@
         s["lag" + side].set(clamp(-this.foreVel[side] * 0.075, -32, 32));
       }
 
+      // Squash & stretch: crouching squashes, fast vertical motion stretches
+      // along the direction of travel, actions add their own, and a landing
+      // kicks the elastic so it jiggles. Volume is preserved when drawn.
+      if (!("squash" in this.held)) {
+        const crouch = Math.max(0, s.bob.value) / 1000;
+        const speed = clamp(Math.abs(s.bob.velocity) / 5000, 0, 0.05) * (s.feetLift.value > 8 ? 1 : 0.4);
+        let laughSq = 0;
+        if (this.laughT > 0 && this.laughPh) laughSq = Math.abs(Math.sin(this.laughPh)) * 0.035;
+        s.squash.set(calm ? 0 : clamp(this.addSq + crouch - speed + laughSq, -0.09, 0.12));
+      }
+      if (this.prevLift > 40 && s.feetLift.value < 12 && !calm) s.squash.kick(0.7);
+      this.prevLift = s.feetLift.value;
+      // Soft body: the upper body lags behind the hips and wobbles back, the
+      // trunk compresses and rebounds, the head squashes on quick moves, and
+      // fingers flop back when the hand moves fast.
+      if (!calm) {
+        s.softX.set(clamp(-s.sway.velocity * 0.07 - s.twist.velocity * 5, -10, 10));
+        s.softY.set(clamp(s.bob.velocity * 0.009, -9, 10));
+        s.headSq.set(clamp(-s.nod.velocity * 0.0006 + s.bob.velocity * 0.00025 + (this.laughT > 0 ? 0.015 : 0), -0.045, 0.05));
+        for (const side of ["R", "L"]) s["flop" + side].set(clamp(-Math.abs(this.foreVel[side]) * 0.0016, -0.32, 0));
+      }
+
       // secondary motion: hair, cap button lag behind the head
       const headVel = s.tilt.velocity + s.turn.velocity * 0.6 + s.nod.velocity * 0.3 + s.lean.velocity;
       s.fringe.set(-headVel * 0.12); s.lock.set(-headVel * 0.16);
@@ -1325,6 +1380,13 @@
       this.viewBox = VIEWS.full.map((v, i) => lerp(v, VIEWS.bust[i], vt));
       this.svg.setAttribute("viewBox", this.viewBox.map(f).join(" "));
 
+      // squash & stretch for the whole figure, volume preserved: it squashes
+      // about the feet on the ground and about its middle in the air
+      const q = s.squash.value, air = clamp(s.feetLift.value / 80, 0, 1);
+      const sqY = 1 - q, sqX = 1 / Math.sqrt(Math.max(0.5, sqY)) * (1 + 0.12 * q);
+      const pivY = lerp(P.ground, 1650 + s.bob.value, air), pivX = 615 + s.sway.value * 0.5;
+      parts.squash.setAttribute("transform", `translate(${f(pivX)} ${f(pivY)}) scale(${sqX.toFixed(4)} ${sqY.toFixed(4)}) translate(${f(-pivX)} ${f(-pivY)})`);
+
       // body transform: breathing scales the torso from the hips, then lean, sway, bob
       const breath = this.breath;
       const sy = 1 + breath * 0.016;
@@ -1338,10 +1400,12 @@
       const bodyPt = ([x, y]) => {
         const h = clamp((hip[1] - y) / 850, 0, 1);
         const rib = smooth((h - 0.35) / 0.4);
-        const px = x + (x - hip[0]) * breath * 0.012 * rib + twist * 36 * h;
+        // soft body: the chest lags sideways and the trunk compresses and widens
+        const soft = s.softY.value * h;
+        const px = x + (x - hip[0]) * (breath * 0.012 * rib + soft * 0.0016) + twist * 36 * h + s.softX.value * h * h;
         const ang = lean * (0.35 + 0.65 * h) + hipTilt * (1 - smooth(h / 0.35)) - hipTilt * 0.55 * smooth(h);
-        const q = rotAround([px, hip[1] + (y - hip[1]) * sy], hip, ang);
-        return [q[0] + sway * (1 - 0.45 * h), q[1] + bob];
+        const qq = rotAround([px, hip[1] + (y - hip[1]) * sy + soft], hip, ang);
+        return [qq[0] + sway * (1 - 0.45 * h), qq[1] + bob];
       };
       this.bodyPt = bodyPt;
 
@@ -1350,17 +1414,17 @@
       const shR = [866, 1008 - upR], shL = [446, 1058 - upL];
       parts.shoulderLine.setAttribute("d", mapPath(
         `M716,932 C766.4,944 ${f(821.8)},${f(969 - upR * 0.5)} ${pt(shR)} M548,1003 C512,1012 ${f(478)},${f(1030 - upL * 0.5)} ${pt(shL)}`, bodyPt));
-      parts.torsoSides.setAttribute("d", mapPath("M440,1110 C420,1230 398,1340 384,1420 C374,1520 372,1660 376,1786 M778,1110 C784,1350 792,1560 804,1786", bodyPt));
-      parts.hem.setAttribute("d", mapPath("M376,1786 C500,1806 700,1806 804,1786", bodyPt));
+      parts.torsoSides.setAttribute("d", mapPath(TORSO_SIDES, bodyPt));
+      parts.hem.setAttribute("d", mapPath(TORSO_HEM, bodyPt));
       parts.collar.setAttribute("d", mapPath("M697,941 L541,983 L551,1030 L722,969", bodyPt));
       // fabric gathers at the waist on the side the hip pushes up
       const gather = clamp(hipTilt / 4.5, -1, 1);
       parts.folds.setAttribute("d", mapPath(gather < 0
         ? "M800,1712 C786,1716 774,1722 766,1730"
         : "M380,1712 C394,1716 406,1722 414,1730", bodyPt));
-      parts.folds.setAttribute("opacity", smooth((Math.abs(gather) - 0.25) / 0.5).toFixed(2));
+      parts.folds.setAttribute("opacity", "0");
       parts.shirt.setAttribute("d", mapPath(
-        `M556,975 L716,932 C766.4,944 821.8,${f(969 - upR * 0.5)} ${pt(shR)} L800,1060 L778,1110 C784,1350 792,1560 804,1786 C700,1806 500,1806 376,1786 C372,1660 374,1520 384,1420 C398,1340 420,1230 440,1110 L${pt(shL)} C478,${f(1030 - upL * 0.5)} 512,1012 548,1003 Z`, bodyPt));
+        `M556,975 L716,932 C766.4,944 821.8,${f(969 - upR * 0.5)} ${pt(shR)} L800,1060 L778,1110 C806,1210 814,1330 806,1450 C800,1560 806,1690 816,1786 C700,1810 500,1810 368,1786 C382,1690 392,1560 392,1440 C390,1330 406,1220 440,1110 L${pt(shL)} C478,${f(1030 - upL * 0.5)} 512,1012 548,1003 Z`, bodyPt));
 
       // legs from planted feet
       this._renderLegs(bodyPt);
@@ -1370,8 +1434,11 @@
       const tilt = s.tilt.value + s.turn.value * 0.08 + lean * 0.45;
       const hx = hp[0] - P.headPivot[0] + s.turn.value * 0.6;
       const hy = hp[1] - P.headPivot[1] + s.nod.value * 0.9;
-      parts.head.setAttribute("transform", `translate(${f(hx)} ${f(hy)}) rotate(${f(tilt)} ${P.headPivot[0]} ${P.headPivot[1]})`);
-      const headPt = (q) => add(rotAround(q, P.headPivot, tilt), [hx, hy]);
+      // the head is soft too: it squashes about the neck and springs back
+      const hq = s.headSq.value, hsy = 1 - hq, hsx = 1 / Math.sqrt(Math.max(0.6, hsy));
+      const [hpx2, hpy2] = P.headPivot;
+      parts.head.setAttribute("transform", `translate(${f(hx)} ${f(hy)}) rotate(${f(tilt)} ${hpx2} ${hpy2}) translate(${hpx2} ${hpy2}) scale(${hsx.toFixed(4)} ${hsy.toFixed(4)}) translate(${-hpx2} ${-hpy2})`);
+      const headPt = (q) => add(rotAround([hpx2 + (q[0] - hpx2) * hsx, hpy2 + (q[1] - hpy2) * hsy], P.headPivot, tilt), [hx, hy]);
       this.headPt = headPt;
       parts.face.setAttribute("transform", `translate(${f(s.turn.value * 1.1)} ${f(s.nod.value * 0.8)})`);
       parts.cap.setAttribute("transform", `translate(${f(-s.turn.value * 0.25)} ${f(-s.nod.value * 0.2)})`);
@@ -1504,7 +1571,7 @@
       parts.pocket.setAttribute("d", `M${pt(pk)} q-14,40 8,70`);
       // shadow shrinks while airborne
       const sc = 1 - clamp(lift / 260, 0, 0.45);
-      parts.shadow.setAttribute("rx", f(300 * sc)); parts.shadow.setAttribute("cx", f(615 + s.sway.value * 0.4));
+      parts.shadow.setAttribute("rx", f(300 * sc * (1 + Math.max(0, s.squash.value) * 0.9))); parts.shadow.setAttribute("cx", f(615 + s.sway.value * 0.4));
       this.legPts = legs;
     }
 
@@ -1576,8 +1643,11 @@
       let fx = sd + 0.14 * sn;                       // a little perspective keeps edge-on fingers apart
       if (Math.abs(fx) < 0.3) fx = 0.3 * (fx < 0 ? -1 : 1);
       const H = frame(W, handAng);
-      const hmap = (x, y) => H(x * fx * A.hs, y * A.hs);
-      const h3 = (q) => H((q[0] * fx + q[2] * sn) * A.hs, q[1] * A.hs);
+      // handedness: the near arm carries his left hand, the far arm his right,
+      // its mirror image; "side" then means the same for both (1 back, -1 palm)
+      const hand = side === "R" ? 1 : -1;
+      const hmap = (x, y) => H(x * fx * hand * A.hs, y * A.hs);
+      const h3 = (q) => H((q[0] * fx * hand + q[2] * sn) * A.hs, q[1] * A.hs);
       arm.palm.setAttribute("d", HAND.palm.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(hmap(+x, +y))));
       const v3 = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
       const n3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
@@ -1614,7 +1684,7 @@
       for (let i = 0; i < 4; i++) {
         const fg = arm.fingers[i];
         // in a wave the fingers ripple one after another behind the wrist
-        const ext = clamp(s[`f${i}${side}`].value + (amp ? Math.sin(ph - 1.6 - i * 0.45) * 0.13 * amp : 0), 0, 1);
+        const ext = clamp(s[`f${i}${side}`].value + s["flop" + side].value * (0.6 + i * 0.15) + (amp ? Math.sin(ph - 1.6 - i * 0.45) * 0.13 * amp : 0), 0, 1);
         const curl = 1 - ext;
         const beta = (HAND.fan[i] + spread * HAND.spreadFan[i]) * (1 - 0.5 * curl) * DEG;
         const sb = Math.sin(beta), cb = Math.cos(beta);
