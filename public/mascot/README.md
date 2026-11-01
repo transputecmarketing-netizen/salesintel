@@ -67,6 +67,7 @@ Squash, stretch and soft body:
 How the hands are built:
 
 - **In 3D, then projected.** Each hand is modelled with x across the palm, y along the fingers and z out of the back, and turned on the forearm before it is drawn. Face-on, a curl foreshortens and the part that folds behind the hand is left out; edge-on, the curl shows as a real C-shaped bend. A hanging hand is seen mostly from the side, palm toward the thigh, as a real one is.
+- **One silhouette, drawn like an illustrator would.** Palm, thumb and fingers are a single outline (they share the skin union), fingers taper to round pads, and a short line appears only between fingers that touch, stopping before the palm. A relaxed hand hangs straight down in line with the forearm, palm toward the thigh.
 - **Three joints per finger.** Fingers curl progressively from the knuckle, their tips draw together as they close, creases appear at bent joints, and each finger tapers to a rounded tip.
 - **The right hand on each arm.** The near arm carries his left hand and the far arm his right, its mirror image, so a thumb is never on the impossible side.
 - **An opposable thumb.** It abducts in the palm plane and swings across toward the palm as the hand closes.

@@ -299,8 +299,10 @@
   // relative) or an IK target for the wrist plus an absolute hand angle.
   const REST = {
     // a hanging hand is seen mostly from the side, palm toward the thigh
-    R: { shoulder: 0, elbow: -8, wrist: -4, hand: "relaxed", side: 0.72, z: "mid" },
-    L: { shoulder: -26, elbow: 22, wrist: 6, hand: "relaxed", side: 0.72, z: "mid" }
+    // A relaxed arm: the hand hangs straight down in line with the forearm,
+    // no bend at the wrist, palm toward the thigh, thumb to the front.
+    R: { shoulder: 0, elbow: -3, wrist: 3, hand: "relaxed", side: 0.45, z: "mid" },
+    L: { shoulder: -26, elbow: 24, wrist: 2, hand: "relaxed", side: 0.45, z: "mid" }
   };
   const GESTURES = {
     none: {},
@@ -361,6 +363,8 @@
       .mascot-svg .u-front{fill:var(--mascot-paper,#ffffff);stroke:none}
       .mascot-svg .shadow{fill:var(--mascot-ink,#1543e6);opacity:.1}
       /* bright outside, dim inside: inner details are lighter and thinner than the silhouette */
+      .mascot-svg .ink.sep{stroke-width:7}
+      .mascot-svg.is-hairline .ink.sep{stroke-width:1.4px}
       .mascot-svg .ink.lo{stroke:color-mix(in srgb,var(--mascot-ink,#1543e6) 60%,var(--mascot-paper,#fff));stroke-width:6.5}
       .mascot-svg .ink,.mascot-svg .solid,.mascot-svg .skin{transition:stroke 260ms cubic-bezier(.32,.72,0,1),fill 260ms cubic-bezier(.32,.72,0,1)}
       /* hairline: the same drawing in fine, non-scaling lines, solids drawn as outlines */
@@ -473,6 +477,8 @@
     const skinL = el("g", { id: `${uid}-lower${side}` }, defs);
     const upper = el("path", {}, skinU), elbow = el("circle", {}, skinU);
     const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
+    // fingers are part of the skin union, so palm, thumb and fingers share one clean silhouette
+    const digits = [0, 1, 2, 3].map(() => el("path", {}, skinL));
     // straight arm: both groups merge into one outline under the sleeve
     el("use", { href: `#${uid}-upper${side}`, class: "u-back" }, g);
     const lowerBack = el("use", { href: `#${uid}-lower${side}`, class: "u-back" }, g);
@@ -486,15 +492,12 @@
     const crease = el("path", { class: "ink lo", opacity: 0 }, g);
     const fingersG = el("g", {}, g);
     const palmLine = el("path", { class: "ink lo", opacity: 0 }, fingersG);
-    const fingers = [];
-    for (let i = 3; i >= 0; i--) {
-      const fg = el("g", {}, fingersG);
-      fingers[i] = { fill: el("path", { class: "paper" }, fg), line: el("path", { class: "ink" }, fg), crease: el("path", { class: "ink lo" }, fg) };
-    }
+    // short lines between fingers that touch; they stop before the palm
+    const seps = el("path", { class: "ink sep" }, fingersG);
     const sleeveFill = el("path", { class: "paper", d: A.sleeve.fill }, sleeve);
     const sleeveInner = el("path", { class: "ink", d: A.sleeve.inner }, sleeve);
     const sleeveOuter = el("path", { class: "ink", d: A.sleeve.outer }, sleeve);
-    return { g, upper, elbow, elbow2, fore, palm, thumb, fingers, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
+    return { g, upper, elbow, elbow2, fore, palm, thumb, digits, seps, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
   }
 
   // ------------------------------------------------------------ agent hooks
@@ -1651,16 +1654,17 @@
       arm.palm.setAttribute("d", HAND.palm.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(hmap(+x, +y))));
       const v3 = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
       const n3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
-      // A jointed digit: a chain of 3-D points, drawn as one organic outline
-      // with a rounded tip. Returns the fill (closed) and the line (open at
-      // the base, so it melts into the palm).
+      // A jointed digit: a chain of 3-D points drawn as one organic outline
+      // that tapers to a round pad at the tip. Its base sits inside the palm,
+      // and the skin union merges it into the hand's single silhouette.
       const digit = (chain, radii) => {
         const P2 = chain.map(h3), R2 = radii.map((r) => r * A.hs);
-        const last = P2[P2.length - 1], prev = P2[P2.length - 2], u = unit(sub(last, prev));
-        P2.push(add(last, mul(u, R2[R2.length - 1] * 0.62))); R2.push(R2[R2.length - 1] * 0.5);
-        const L = limb(P2, R2);
-        const line = spline(L.plus, true) + ` L${pt(L.minus[L.minus.length - 1])}` + spline(L.minus.slice().reverse(), false);
-        return { L, line, fill: line + " Z" };
+        const L = limb(P2, R2), n = P2.length - 1;
+        const C = P2[n], r = R2[n], u = unit(sub(P2[n], P2[n - 1]));
+        const a = L.plus[n], b = L.minus[n], na = unit(sub(a, C)), k = 0.552 * r, tip = add(C, mul(u, r));
+        const cap = ` C${pt(add(a, mul(u, k)))} ${pt(add(tip, mul(na, k)))} ${pt(tip)}` +
+          ` C${pt(add(tip, mul(na, -k)))} ${pt(add(b, mul(u, k)))} ${pt(b)}`;
+        return { P2, R2, d: `${spline(L.plus, true)}${cap}${spline(L.minus.slice().reverse(), false)} Z` };
       };
 
       // thumb: abducts in the palm plane, and swings across toward the palm
@@ -1672,7 +1676,7 @@
       const t1 = v3(tb, t0d, tLen * 0.5);
       const t1d = n3([t0d[0] + tc * 0.75, t0d[1], t0d[2] - tc * 0.6]);
       const t2 = v3(t1, t1d, tLen * 0.42);
-      arm.thumb.setAttribute("d", digit([v3(tb, t0d, -12), tb, t1, t2], [19, 19, 18, 16]).fill);
+      arm.thumb.setAttribute("d", digit([v3(tb, t0d, -16), tb, t1, t2], [24, 21, 18, 15.5]).d);
       // when the palm faces us, the crease at the base of the thumb shows
       arm.palmLine.setAttribute("d", `M${pt(hmap(-30, 30))} Q${pt(hmap(-10, 62))} ${pt(hmap(-14, 104))}`);
       arm.palmLine.setAttribute("opacity", smooth((-sd - 0.35) / 0.4).toFixed(2));
@@ -1681,43 +1685,52 @@
       // tips drawing together as they close. Seen face-on, the part that
       // folds behind the hand is left out; seen edge-on, the whole curl shows.
       const spread = s["spread" + side].value, frontal = Math.abs(sd) > 0.55;
+      const drawn = [];
       for (let i = 0; i < 4; i++) {
-        const fg = arm.fingers[i];
         // in a wave the fingers ripple one after another behind the wrist
         const ext = clamp(s[`f${i}${side}`].value + s["flop" + side].value * (0.6 + i * 0.15) + (amp ? Math.sin(ph - 1.6 - i * 0.45) * 0.13 * amp : 0), 0, 1);
         const curl = 1 - ext;
         const beta = (HAND.fan[i] + spread * HAND.spreadFan[i]) * (1 - 0.5 * curl) * DEG;
         const sb = Math.sin(beta), cb = Math.cos(beta);
         const flex = [3 + curl * 82, 6 + curl * 96, 4 + curl * 62];
-        const segs = [0.47, 0.31, 0.22].map((k) => k * HAND.lengths[i]);
+        const segs = [0.47, 0.31, 0.22].map((q) => q * HAND.lengths[i]);
         const k = [HAND.knuckles[i][0], HAND.knuckles[i][1], 0];
-        const chain = [v3(k, [sb, cb, 0], -12), k], radii = [16.5, 16.5];
+        // fingers taper a little toward the pad; the little finger is slimmer
+        const r0 = i === 3 ? 14.5 : 16.2;
+        const chain = [v3(k, [sb, cb, 0], -22), k], radii = [r0 + 1, r0];
         let p = k, cum = 0;
-        const joints = [];
         for (let j = 0; j < 3; j++) {
           cum += flex[j];
           const c = Math.cos(cum * DEG);
           if (frontal && c < 0.06) break;           // folded out of sight behind the hand
           p = v3(p, [sb * c, cb * c, -Math.sin(cum * DEG)], segs[j]);
-          chain.push(p); radii.push(16 - j * 1.1);
-          joints.push(flex[j]);
+          chain.push(p); radii.push(r0 * (0.95 - j * 0.06));
         }
-        if (chain.length < 3) { chain.push(v3(k, [sb, cb, 0], 10)); radii.push(16); }
+        if (chain.length < 3) { chain.push(v3(k, [sb, cb, 0], 9)); radii.push(r0); }
         const D = digit(chain, radii);
-        fg.fill.setAttribute("d", D.fill);
-        fg.line.setAttribute("d", D.line);
-        // creases where a joint bends toward us
-        let cd = "", co = 0;
-        joints.forEach((fl, j) => {
-          const a = D.L.plus[j + 2], b = D.L.minus[j + 2];
-          if (!a || !b || j === 0) return;
-          const m = lerp2(a, b, 0.5), w = 0.32;
-          cd += ` M${pt(lerp2(m, a, 1 - w))} L${pt(lerp2(m, b, 1 - w))}`;
-          co = Math.max(co, smooth((fl - 28) / 40));
-        });
-        fg.crease.setAttribute("d", cd || "M0,0");
-        fg.crease.setAttribute("opacity", co.toFixed(2));
+        arm.digits[i].setAttribute("d", D.d);
+        drawn.push(D);
       }
+      // where two neighbouring fingers touch, one short line between them,
+      // from just above the knuckles to before the shorter fingertip
+      let sepD = "";
+      for (let i = 0; i < 3; i++) {
+        const A1 = drawn[i], B1 = drawn[i + 1], n = Math.min(A1.P2.length, B1.P2.length) - 1;
+        if (n < 2) continue;
+        const gap = len(sub(A1.P2[2], B1.P2[2])), touch = (A1.R2[2] + B1.R2[2]) * 1.3;
+        if (gap > touch) continue;
+        const mid = [];
+        for (let j = 1; j <= n; j++) mid.push(lerp2(A1.P2[j], B1.P2[j], 0.5));
+        const endR = Math.min(A1.R2[n], B1.R2[n]);
+        const last = mid[mid.length - 1], dir = unit(sub(last, mid[mid.length - 2]));
+        mid[mid.length - 1] = add(last, mul(dir, -endR * 0.9));
+        mid[0] = add(mid[0], mul(unit(sub(mid[1], mid[0])), 10 * A.hs));
+        // too short to read as a line (a folded finger): leave it out rather than draw a dot
+        let run = 0; for (let j = 1; j < mid.length; j++) run += len(sub(mid[j], mid[j - 1]));
+        if (run < 24 * A.hs) continue;
+        sepD += spline(mid, true);
+      }
+      arm.seps.setAttribute("d", sepD || "M0,0");
 
       // sleeve rides the upper arm; its inner seam only shows once the arm lifts
       if (A.sleeveTube) {
