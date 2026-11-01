@@ -41,6 +41,8 @@ The motion follows the rules behind [Hairline](https://hairline.lucasmarkes.com)
 - **The loop sleeps** while the figure is offscreen or the tab is hidden.
 - **Same options as Hairline**: `intensity` (how strongly he answers the cursor), `theme` ("auto", "light", "dark"), `label`, `onRead` (a short caption such as `rest`, `wave` or `talking` whenever it changes) and `play` (a self-running tour until a pointer arrives). Change them later with `rig.update({...})`.
 
+Where a character differs from Hairline's objects: a figure of a tray should settle dead still, but a person should not. So the head, posture and hand keep a little overshoot, the wrist and fingers ride springs that start after the arm and settle with a small bounce, the arms swing like pendulums when the body shifts, breathing is visible in the chest, shoulders and head, and an idle mind picks one small action every few seconds: a glance away, finding you again with a smile, a curious tilt, pressed lips, a lifted brow, a weight shift, a look at his own hand, and now and then a stretch. With someone present he keeps to quiet, attentive ones.
+
 How the motion is made to feel human rather than mechanical:
 
 - **Joints break in sequence.** The shoulder leads, the elbow follows, the wrist and fingers arrive last and overshoot. Big swings start with a small anticipation the other way.

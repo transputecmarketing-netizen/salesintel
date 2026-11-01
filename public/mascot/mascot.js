@@ -210,6 +210,8 @@
     set(t) { this.segs = null; this.target = t; return this; }
     snap(v) { this.segs = null; this.value = this.target = v; this.velocity = 0; return this; }
     kick(v) { this.velocity += v; return this; }
+    // wait out a stagger, then let the spring carry it there (overshoot and settle)
+    aim(to, delay = 0) { this.segs = [{ to, wait: delay / 1000, spring: true }]; this.target = to; return this; }
     go(to, ms = 700, delay = 0, queue = false) {
       const seg = { to, dur: Math.max(0.001, ms / 1000), wait: delay / 1000, from: null, t: 0 };
       if (queue && this.segs) this.segs.push(seg); else this.segs = [seg];
@@ -224,6 +226,7 @@
           seg.wait -= dt; this.value += this.velocity * dt; this.velocity *= Math.exp(-dt * 10);
           return this.value;
         }
+        if (seg.spring) { this.segs = null; this.target = seg.to; return this.step(dt); }
         if (seg.from == null) seg.from = this.value;
         seg.t += dt;
         const prev = this.value;
@@ -570,11 +573,12 @@
         lookX: S(0, 420, 34), lookY: S(0, 420, 34),      // eyes are fast; the head follows
         cornerL: S(-3, 150, 15), cornerR: S(-3, 150, 15),
         brow: S(0, 150, 16), browTilt: S(0, 150, 16), browShow: S(0, 130, 18), blush: S(0, 60, 14),
-        tilt: S(0, 100, 18), turn: S(0, 100, 18), nod: S(0, 150, 21),
+        tilt: S(0, 100, 13), turn: S(0, 100, 13.5), nod: S(0, 150, 17),
         earL: S(0, 260, 9), earR: S(0, 260, 9), earPerk: S(0, 120, 14),
         fringe: S(0, 70, 5), lock: S(0, 60, 4), button: S(0, 160, 6),
-        lean: S(0, 40, 11.4), sway: S(0, 28, 9.5), bob: S(0, 150, 19), shrug: S(0, 110, 18.9),
-        hipTilt: S(0, 26, 9.2), twist: S(0, 38, 11), teeth: S(0, 260, 29),
+        lean: S(0, 40, 9), sway: S(0, 28, 8), bob: S(0, 150, 15), shrug: S(0, 110, 15),
+        hipTilt: S(0, 26, 8), twist: S(0, 38, 9), teeth: S(0, 260, 29),
+        swingR: S(0, 55, 4.3), swingL: S(0, 55, 4.3),   // arms hang like pendulums
         feetLift: S(0, 230, 19), footTilt: S(0, 200, 16), view: S(0, 50, 13)
       };
       for (const side of ["R", "L"]) {
@@ -582,17 +586,17 @@
         // proximal joints are heavy and calm, distal ones light and lively
         this.s["sh" + side] = S(r.shoulder);
         this.s["el" + side] = S(r.elbow);
-        this.s["wr" + side] = S(r.wrist);
+        this.s["wr" + side] = S(r.wrist, 110, 12);
         this.s["lag" + side] = S(0, 150, 13.5);   // wrist drag from forearm speed: real mass, a little bounce
         this.s["lift" + side] = S(0, 95, 11);     // one-sided shoulder lift
-        this.s["side" + side] = S(r.side, 120, 16);
-        this.s["spread" + side] = S(h.spread, 150, 15);
-        this.s["thumb" + side] = S(h.thumb, 160, 15);
-        this.s["thumbAng" + side] = S(h.thumbAngle, 160, 15);
+        this.s["side" + side] = S(r.side, 120, 14);
+        this.s["spread" + side] = S(h.spread, 150, 13);
+        this.s["thumb" + side] = S(h.thumb, 160, 14);
+        this.s["thumbAng" + side] = S(h.thumbAngle, 160, 14);
         this.s["wave" + side] = S(0, 60, 12);
         this.s["fsU" + side] = S(1, 110, 15);   // upper arm foreshortening (pointing at the camera)
         this.s["fsF" + side] = S(1, 140, 16);
-        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 150, 22);
+        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 150, 13);
       }
 
       this.expression = "smile";
@@ -613,6 +617,7 @@
       this.nextShift = 3 + Math.random() * 3;
       this.nextFidget = 6 + Math.random() * 5;
       this.saccade = [0, 0];
+      this.idleTurn = 0; this.idleTilt = 0; this.idleLook = null; this.nextIdle = 2 + Math.random() * 2;
       this.wavePhase = 0;
       this.shakeT = 0;
       this.laughT = 0;
@@ -1014,6 +1019,30 @@
     _go(spring, to, ms, delay = 0, queue = false) {
       if (this.opts.reducedMotion) spring.snap(to); else spring.go(to, ms, delay, queue);
     }
+    _aim(spring, to, delay = 0) { if (this.opts.reducedMotion) spring.snap(to); else spring.aim(to, delay); }
+
+    // One small idle action. With someone present, only quiet, attentive ones.
+    _idleAct(alone) {
+      const s = this.s, e = EXPRESSIONS[this.expression];
+      const look = (x, y, sec) => { this.idleLook = [x, y]; this.idleTurn = x * 0.7; if (Math.hypot(x, y) > 5 && Math.random() < 0.6) this.blink(); this._later(sec, () => { this.idleLook = null; this.idleTurn = 0; }); };
+      const acts = alone ? [
+        [3, () => look((Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 5), (Math.random() - 0.6) * 6, 1 + Math.random() * 1.4)],   // glance away
+        [2, () => { look(0, 0, 2); this._go(s.smile, e.smile + 0.25, 420); this._go(s.happy, Math.min(1, e.happy + 0.35), 420, 60); this._later(1.6, () => { this._go(s.smile, e.smile, 700); this._go(s.happy, e.happy, 700); }); }], // finds you, smiles
+        [2, () => { this.idleTilt = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 3); this._later(1.4 + Math.random(), () => { this.idleTilt = 0; }); }], // curious tilt
+        [1.5, () => { this._go(s.width, 0.82, 260); this._go(s.smile, e.smile - 0.3, 260); this._later(0.7, () => { this._go(s.width, e.width, 500); this._go(s.smile, e.smile, 500); }); }], // presses lips
+        [1, () => { this._go(s.browShow, 0.7, 240); this._go(s.brow, -8, 240); this._later(0.9, () => { this._go(s.brow, e.brow, 600); this._go(s.browShow, e.browShow, 600); }); }], // a lifted brow
+        [2.5, () => { this.idleSway = (Math.random() - 0.5) * 34; }],                                                     // shifts weight
+        [1, () => { look(7, 7, 1.8); this._applyArm("R", { shoulder: 6, elbow: -46, wrist: -18, hand: "soft", side: 1, z: "mid" }); this._later(1.7, () => { if (this.gestureName === "none") this._applyArm("R", REST.R); }); }], // looks at his hand
+        [0.35, () => this.stretch()]
+      ] : [
+        [3, () => { this.blink(); }],
+        [2, () => { this.idleTilt = (Math.random() < 0.5 ? -1 : 1) * 4; this._later(1.2, () => { this.idleTilt = 0; }); }],
+        [2, () => { this._go(s.smile, e.smile + 0.2, 380); this._later(1.2, () => this._go(s.smile, e.smile, 600)); }],
+        [1, () => { this.add.nod = 5; this._later(0.25, () => { this.add.nod = 0; }); }]
+      ];
+      let r = Math.random() * acts.reduce((t, x) => t + x[0], 0);
+      for (const [w, fn] of acts) { if ((r -= w) <= 0) { fn(); break; } }
+    }
 
     // A greeting is a whole-body event, not an arm animation: eyes find you,
     // brows flash, the head tilts toward the hand, the shoulder rises, weight
@@ -1079,11 +1108,14 @@
         g("fsU", Math.min(pose.fsU ?? 1, 0.88), 300, t0);
         g("fsU", pose.fsU ?? 1, 520, 0, true);
       } else { g("fsF", pose.fsF ?? 1, 650, t0 + STEP); g("fsU", pose.fsU ?? 1, 700, t0); }
-      g("wr", clamp(wrap(wrist), -95, 95), 600, t0 + 2 * STEP);
-      g("side", pose.side ?? 1, 560, t0 + 2 * STEP);
-      g("thumb", h.thumb, 520, t0 + 2.5 * STEP); g("thumbAng", h.thumbAngle, 520, t0 + 2.5 * STEP); g("spread", h.spread, 520, t0 + 2.5 * STEP);
-      const unfurl = h.fingers.reduce((a, v, i) => a + v - s[`f${i}${side}`].target, 0) > 0;
-      h.fingers.forEach((v, i) => g(`f${i}`, v, 480, t0 + 3 * STEP + (unfurl ? i : 3 - i) * 35));
+      // the hand has its own mass: wrist and fingers ride springs that start
+      // after the arm, so they overshoot a touch and settle, like a real hand
+      const a = (key, to, delay) => this._aim(s[key + side], to, delay);
+      a("wr", clamp(wrap(wrist), -95, 95), t0 + 3 * STEP);
+      a("side", pose.side ?? 1, t0 + 2 * STEP);
+      a("thumb", h.thumb, t0 + 3.5 * STEP); a("thumbAng", h.thumbAngle, t0 + 3.5 * STEP); a("spread", h.spread, t0 + 3.5 * STEP);
+      const unfurl = h.fingers.reduce((acc, v, i) => acc + v - s[`f${i}${side}`].target, 0) > 0;
+      h.fingers.forEach((v, i) => a(`f${i}`, v, t0 + 4 * STEP + (unfurl ? i : 3 - i) * 40));
       g("wave", pose.wave || 0, 500, pose.wave ? t0 + 420 : 0);
       for (const k of ["sh", "el", "wr", "side", "spread", "thumb", "thumbAng", "f0", "f1", "f2", "f3"]) delete this.held[k + side];
       this.armPose[side] = pose;
@@ -1157,6 +1189,14 @@
         if (b >= 0.25) this.blinkT = null;
       }
 
+      // An idle mind. Left alone he is never still: every few seconds he does
+      // one small thing a person would do, then settles.
+      const quiet = !this.talk && this.gestureName === "none" && !(this._lastPointer && performance.now() - this._lastPointer < 2500) && this.laughT <= 0;
+      if (this.opts.idle && !calm) {
+        this.nextIdle -= dt;
+        if (this.nextIdle <= 0) { this.nextIdle = 2.4 + Math.random() * 3.6; if (quiet || Math.random() < 0.35) this._idleAct(quiet); }
+      }
+
       // breathing: quick inhale, slow exhale, rate drifting; an occasional sigh
       const nz = this.nz, T = this.t;
       if (!calm) {
@@ -1174,12 +1214,15 @@
 
       // posture drifts like a person standing, never like a metronome
       const talking = !!this.talk, energy = talking ? 1.8 : 1;
-      want("sway", this.idleSway + (calm ? 0 : nz.sway(T * 0.11) * 7));
-      want("lean", this.base.lean + (calm ? 0 : nz.lean(T * 0.09) * 0.8));
-      want("shrug", this.base.shrug + this.add.shrug + this.breath * 2.2);
+      want("sway", this.idleSway + (calm ? 0 : nz.sway(T * 0.11) * 11));
+      want("lean", this.base.lean + (calm ? 0 : nz.lean(T * 0.09) * 1.3));
+      want("shrug", this.base.shrug + this.add.shrug + this.breath * 4.5);
       // contrapposto: the hip over the standing leg rises, the shoulders answer
       want("hipTilt", clamp(-s.sway.value * 0.17, -5.5, 5.5));
-      want("twist", this.base.twist + (calm ? 0 : nz.lean(T * 0.07 + 40) * 0.08) + this.attention * 0.12);
+      want("twist", this.base.twist + (calm ? 0 : nz.lean(T * 0.07 + 40) * 0.15) + this.attention * 0.14);
+      // arms hang from the shoulders: when the body moves, they swing a little
+      s.swingR.set(clamp(-s.sway.velocity * 0.11 - s.lean.velocity * 0.9 - s.bob.velocity * 0.01, -9, 9));
+      s.swingL.set(clamp(-s.sway.velocity * 0.11 - s.lean.velocity * 0.9 + s.bob.velocity * 0.01, -9, 9));
       const post = this.posture || {};
 
       // gaze and attention
@@ -1192,13 +1235,14 @@
         this.attention = clamp(dx, -1, 1);
       }
       if (this.exprLook && (this.exprLook[0] || this.exprLook[1]) && !p) { lx = this.exprLook[0]; ly = this.exprLook[1]; }
+      if (this.idleLook && !p) { lx = this.idleLook[0]; ly = this.idleLook[1]; }
       want("lookX", lx); want("lookY", ly);
       // the head follows the eyes a beat later, and only part of the way
       this.turnLag += (turn - this.turnLag) * (1 - Math.exp(-dt / 0.24));
-      let headTurn = this.turnLag + (calm ? 0 : nz.turn(T * 0.13) * 2 * energy);
+      let headTurn = this.turnLag + this.idleTurn + (calm ? 0 : nz.turn(T * 0.13) * 3.2 * energy);
       if (this.shakeT > 0) { this.shakeT -= dt; headTurn += Math.sin(this.t * 19) * 12 * clamp(this.shakeT * 3, 0, 1); }
       want("turn", headTurn);
-      want("tilt", this.base.tilt + this.add.tilt + this.attention * 1.5 + (calm ? 0 : nz.tilt(T * 0.12) * 1.6 * energy));
+      want("tilt", this.base.tilt + this.add.tilt + this.idleTilt + this.attention * 1.5 + (calm ? 0 : nz.tilt(T * 0.12) * 2.6 * energy));
 
       // laughing comes in uneven "ha-ha" bursts that shake the shoulders and
       // bounce the body, with the head thrown back a little
@@ -1218,7 +1262,7 @@
         if (!this.talk) s.open.set(EXPRESSIONS[this.expression].open);
       }
       this._laughWas = this.laughT > 0;
-      want("nod", this.base.nod + this.add.nod + nodExtra + (calm ? 0 : nz.nod(T * 0.1) * 1.2 * energy));
+      want("nod", this.base.nod + this.add.nod + nodExtra - this.breath * 1.4 + (calm ? 0 : nz.nod(T * 0.1) * 2 * energy));
 
       // talking director: visemes, head beats, hand beats, prosody
       const e = EXPRESSIONS[this.expression];
@@ -1282,7 +1326,7 @@
 
       // body transform: breathing scales the torso from the hips, then lean, sway, bob
       const breath = this.breath;
-      const sy = 1 + breath * 0.008;
+      const sy = 1 + breath * 0.016;
       const hip = P.hip, lean = s.lean.value, sway = s.sway.value, bob = s.bob.value;
       const hipTilt = s.hipTilt.value, twist = s.twist.value;
       // The torso is not a board. The spine curves (the chest leans more than
@@ -1477,8 +1521,10 @@
       // little on each pass, and the shoulder joins in slightly.
       const amp = waveAmp * (0.85 + 0.25 * this.nz.hand(this.t * 0.9 + (side === "L" ? 9 : 0)));
       const drag = clamp(s["sh" + side].velocity * 0.05, -12, 12);
-      const shAng = s["sh" + side].value + lean * 0.7 + Math.sin(ph + 0.7) * 3 * amp + (calm ? 0 : this.breath * 0.8);
-      const elAng = s["el" + side].value + Math.sin(ph) * 13 * amp - drag * 0.6 - beat * 8;
+      const hang = Math.max(0, 1 - Math.abs(wrap(s["sh" + side].value - REST[side].shoulder)) / 40); // pendulum only when hanging
+      const sw = s["swing" + side].value * hang;
+      const shAng = s["sh" + side].value + lean * 0.7 + sw + Math.sin(ph + 0.7) * 3 * amp + (calm ? 0 : this.breath * 1.6);
+      const elAng = s["el" + side].value + Math.sin(ph) * 13 * amp - drag * 0.6 - beat * 8 + sw * 0.7;
       const wrAng = s["wr" + side].value + Math.sin(ph - 1.25) * 24 * amp + s["lag" + side].value + beat * 7;
       const foreAng = shAng + elAng, handAng = foreAng + wrAng;
       if (this.prevFore[side] != null && this._dt) this.foreVel[side] = wrap(foreAng - this.prevFore[side]) / this._dt;
