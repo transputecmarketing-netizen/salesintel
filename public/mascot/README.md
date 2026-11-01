@@ -9,6 +9,27 @@ A line-art mascot traced to SVG and rigged head to toe for animation, with hooks
 | `demo.html` | Playground with expression, gesture and action controls, a talk box and an agent console. |
 | `mcp-server.mjs` | Zero-dependency MCP server that relays agent tool calls to the page showing the mascot. |
 
+## Emotion: a mascot that feels with you
+
+The goal is a companion people talk to, whose face, body and voice reflect how they feel. Two numbers drive everything:
+
+- **valence**, -1 (sad) to 1 (happy)
+- **arousal**, 0 (calm) to 1 (excited)
+
+`rig.feel(valence, arousal)` maps them continuously onto the smile and mouth corners, eye openness and happy eyes, brow height and worried tilt, blush, posture (shoulders droop and the head bows when low, it opens up and bounces when high), how much and how often it moves, breathing rate and the speaking voice (rate, pitch and volume when `speak: true`). There are no fixed faces, only a smooth space between them. After any gesture or timed expression it returns to the current mood, not to a default smile.
+
+Mirroring with empathy: `rig.mirror(userText)` reads the user's feeling and answers it the way a friend would. It shares joy and lifts it a little, and meets sadness gently (softer and calmer), rather than copying it. `Mascot.readEmotion(text)` is a small keyword reader for the demo; in the app a local on-device model replaces it by returning the same shape:
+
+```js
+// what the local model returns alongside its reply
+{ "reply": "I'm sorry. That sounds really hard.", "valence": -0.7, "arousal": 0.3 }
+
+buddy.feel(out.valence, out.arousal);
+buddy.say(out.reply, { speak: true });   // voice follows the mood
+```
+
+Agents use the `mascot_feel` tool: pass `valence` and `arousal` from their own read of the conversation, or `user_text` to read and mirror it.
+
 ## Use it in a page
 
 ```html
@@ -137,7 +158,7 @@ Agents can look at him with the `mascot_ascii` tool, which returns the current f
 
 ## Agent hooks
 
-Ten MCP-shaped tools, each with a JSON schema, in `Mascot.tools`:
+Twelve MCP-shaped tools, each with a JSON schema, in `Mascot.tools`:
 
 | Tool | Purpose |
 |---|---|
@@ -148,6 +169,8 @@ Ten MCP-shaped tools, each with a JSON schema, in `Mascot.tools`:
 | `mascot_look` | Aim gaze and head, or release to the cursor |
 | `mascot_set` | Set any of 43 named rig points directly, such as `mouth.open`, `body.lean` or `hand.right.elbow` |
 | `mascot_perform` | Run a timed sequence of the calls above |
+| `mascot_feel` | Set the mood (valence, arousal), or mirror the user's text with empathy |
+| `mascot_ascii` | See the current frame as ASCII text |
 | `mascot_view` | Switch between full body and the original bust framing |
 | `mascot_get_state` | Read the expression, gesture and every point's live value |
 | `mascot_list_params` | List every rig point with its range and meaning |

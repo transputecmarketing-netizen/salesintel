@@ -117,7 +117,7 @@
 <div class="wrap">
   <header>
     <h1>Blue Cap Mascot</h1>
-    <p>Your sketch, traced to SVG and rigged head to toe, moving on Hairline's two clocks: near-critical springs for anything that follows you, a 700 ms lift curve for every change, staggered joint by joint. Real shoulders, elbows, wrists and fingers, legs that bend at the knee, a jaw that drops when he talks. Left alone he breathes, blinks, shifts his weight and glances around; click him and he laughs.</p>
+    <p>A mascot that feels with you. Tell him how you are and he reads it: softer and quieter when you are low, brighter and bouncier when you are happy, in his face, brows, posture, movement and voice. Your sketch, traced to SVG and rigged head to toe, moving on Hairline's two clocks: near-critical springs for anything that follows you, a 700 ms lift curve for every change, staggered joint by joint. Real shoulders, elbows, wrists and fingers, legs that bend at the knee, a jaw that drops when he talks. Left alone he breathes, blinks, shifts his weight and glances around; click him and he laughs.</p>
   </header>
 
   <div class="main">
@@ -144,6 +144,15 @@
     </div>
 
     <div class="panel">
+      <div class="group talk">
+        <h2>Chat with him</h2>
+        <form id="chat" class="row" style="flex-wrap:nowrap">
+          <input id="msg" type="text" autocomplete="off" aria-label="Message to the mascot" placeholder="Tell him how your day went" style="flex:1;min-width:0;font:15px var(--font-body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px">
+          <button class="primary" type="submit">Send</button>
+        </form>
+        <div class="chips" id="tryLines"></div>
+        <p id="read" style="margin:0;color:var(--muted);font-size:13px">He reads how you feel and answers it: gentle and quiet when you are low, bright and bouncy when you are happy.</p>
+      </div>
       <div class="group">
         <h2>Face</h2>
         <div class="chips" id="expressions"></div>
@@ -337,6 +346,36 @@
   }
 
   // A short greeting so the first view shows him moving.
+  // Chat: read the user's feeling, answer it with empathy, reply in that mood.
+  // In the app a local model writes the reply and returns the same feeling numbers.
+  const REPLIES = {
+    sad: ["I'm sorry. That sounds really hard. I'm here with you.", "That's a lot to carry. Want to talk it through slowly?"],
+    upset: ["That sounds stressful. Let's take one slow breath together.", "I hear you. We can sort this out one piece at a time."],
+    calm: ["Nice and easy. I like this pace.", "Sounds like a quiet one. That's okay."],
+    neutral: ["I'm listening. Tell me more?", "Got it. What's on your mind?"],
+    happy: ["That's lovely! I'm really happy for you.", "Aw, that made me smile."],
+    excited: ["Yes! That's amazing, well done!", "Wow! That's huge, I'm so proud of you!"]
+  };
+  const readEl = document.getElementById("read");
+  function chat(text) {
+    const r = buddy.mirror(text);
+    const pick = REPLIES[r.user.label][Math.floor(Math.random() * 2)];
+    readEl.textContent = `You seem ${r.user.label} (feeling ${r.user.valence.toFixed(2)}, energy ${r.user.arousal.toFixed(2)}). He answers ${r.mascot.valence < 0 ? "gently" : "brightly"}.`;
+    setTimeout(() => buddy.say(pick, { speak: document.getElementById("voice").checked }), 450);
+  }
+  document.getElementById("chat").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const box = document.getElementById("msg"), text = box.value.trim();
+    if (!text) return;
+    chat(text); box.value = "";
+  });
+  ["I failed my exam and I feel so alone", "Kind of tired today", "I passed!!! so happy", "Thanks, that was fun :)"].forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button"; b.textContent = t;
+    b.addEventListener("click", () => chat(t));
+    document.getElementById("tryLines").appendChild(b);
+  });
+
   // Framing toggle
   const stage = document.getElementById("stage");
   document.querySelectorAll(".seg button[data-view]").forEach((b) => b.addEventListener("click", () => {
