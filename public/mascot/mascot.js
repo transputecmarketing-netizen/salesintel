@@ -323,9 +323,9 @@
     wave:     { R: { target: [1085, 1075], handAngle: 182, hand: "open", side: -1, wave: 1 }, face: "happy" },
     hello:    { R: { target: [1050, 660], handAngle: 188, hand: "open", side: -1, wave: 1 }, face: "happy", body: { lean: -1.5 } },
     hi5:      { R: { target: [1060, 1010], handAngle: 180, hand: "flat", side: -1 }, face: "happy" },
-    idea:     { R: { target: [975, 1000], handAngle: 174, hand: "point", side: -1, fsU: 0.6 }, face: "surprised", faceAfter: "happy" },
-    count2:   { R: { target: [980, 1000], handAngle: 176, hand: "two", side: -1, fsU: 0.6 } },
-    thumbsUp: { R: { target: [930, 1160], handAngle: -88, hand: "thumbUp", side: 1, fsU: 0.6, fsF: 0.6, elbowOut: 1.2 }, face: "happy" },
+    idea:     { R: { target: [1050, 1090], handAngle: 182, hand: "point", side: -1, fsU: 0.95, fsF: 0.85, elbowOut: 0.2 }, face: "surprised", faceAfter: "happy" },
+    count2:   { R: { target: [1055, 1090], handAngle: 182, hand: "two", side: -1, fsU: 0.95, fsF: 0.85, elbowOut: 0.2 } },
+    thumbsUp: { R: { target: [1040, 1150], handAngle: -95, hand: "thumbUp", side: 1, fsU: 0.95, fsF: 0.75, elbowOut: 0.2 }, face: "happy" },
     point:    { R: { target: [1100, 1060], handAngle: 116, hand: "point", side: -1, fsU: 0.9 }, body: { lean: 1, twist: 0.45 }, look: [9, -4] },
     // the classic: one hand at the chin, the other arm across the chest holding that elbow
     think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 },
@@ -565,7 +565,7 @@
     const skinU = el("g", { id: `${uid}-upper${side}` }, defs);
     const skinL = el("g", { id: `${uid}-lower${side}` }, defs);
     const upper = el("path", {}, skinU), elbow = el("circle", {}, skinU);
-    const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), wristC = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
+    const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), wristC = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), bridge = el("path", {}, skinL), thumb = el("path", {}, skinL);
     // fingers are part of the skin union, so palm, thumb and fingers share one clean silhouette
     const digits = [0, 1, 2, 3].map(() => el("path", {}, skinL));
     // straight arm: both groups merge into one outline under the sleeve
@@ -586,7 +586,7 @@
     const sleeveFill = el("path", { class: "paper seal", d: A.sleeve.fill }, sleeve);
     const sleeveInner = el("path", { class: "ink", d: A.sleeve.inner }, sleeve);
     const sleeveOuter = el("path", { class: "ink", d: A.sleeve.outer }, sleeve);
-    return { g, upper, elbow, elbow2, wristC, fore, palm, thumb, digits, seps, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
+    return { g, upper, elbow, elbow2, wristC, fore, palm, bridge, thumb, digits, seps, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
   }
 
   // ------------------------------------------------------------ agent hooks
@@ -1957,12 +1957,17 @@
       const rW2 = Math.max(rW * 0.96, palmHalf * 0.94);
       // the wrist end is rounded: with a bent wrist a flat end would poke its corners past the palm
       arm.wristC.setAttribute("cx", f(W2[0])); arm.wristC.setAttribute("cy", f(W2[1])); arm.wristC.setAttribute("r", f(rW2));
+      let foreEdge = [];
       if (!isFolded) {
-        arm.upper.setAttribute("d", limb([ua, Um, E, Fm, W, W2], [rU, rU * 1.03, rE, rF, rW, rW2], true).d);
+        const LU = limb([ua, Um, E, Fm, W, W2], [rU, rU * 1.03, rE, rF, rW, rW2], true);
+        arm.upper.setAttribute("d", LU.d);
+        foreEdge = [3, 4, 5].flatMap((i) => [LU.plus[i], LU.minus[i]]);
         arm.elbow.setAttribute("r", 0); arm.elbow2.setAttribute("r", 0); arm.fore.setAttribute("d", "M0,0");
       } else {
         arm.upper.setAttribute("d", limb([ua, Um, E], [rU, rU * 1.03, rE], true).d);
-        arm.fore.setAttribute("d", limb([E, Fm, W, W2], [rE, rF, rW, rW2], true).d);
+        const LF = limb([E, Fm, W, W2], [rE, rF, rW, rW2], true);
+        arm.fore.setAttribute("d", LF.d);
+        foreEdge = [1, 2, 3].flatMap((i) => [LF.plus[i], LF.minus[i]]);
         for (const c of [arm.elbow, arm.elbow2]) { c.setAttribute("cx", f(E[0])); c.setAttribute("cy", f(E[1])); }
         arm.elbow.setAttribute("r", f(rE)); arm.elbow2.setAttribute("r", f(rE * 0.97));
       }
@@ -2001,6 +2006,22 @@
       const hmap = (x, y) => H(x * fx * hand * hsc * cxs, y * hsc * cy);
       const h3 = (q) => H((q[0] * fx * hand + q[2] * sn) * hsc * cxs, q[1] * hsc * cy);
       arm.palm.setAttribute("d", HAND.palm.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(hmap(+x, +y))));
+      // The wrist: the forearm and the heel of the hand rarely have the same
+      // width, and where they meet the outline would step. A tapered bridge,
+      // the convex hull of the forearm's cross-section and the palm's heel,
+      // joins them in one smooth line, the way a drawn wrist narrows.
+      {
+        // the forearm's own outline from mid-forearm to the wrist, inset a hair
+        // so the hull never bulges past it, plus the palm's heel
+        const pts = foreEdge.map((q, i) => lerp2(q, foreEdge[i ^ 1], 0.02)).concat([hmap(-55, 6), hmap(55, 6), hmap(-60, 34), hmap(60, 34)]);
+        pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+        const lo = [], hi = [];
+        for (const q of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+        for (const q of pts.slice().reverse()) { while (hi.length > 1 && cr(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); }
+        const hull = lo.slice(0, -1).concat(hi.slice(0, -1));
+        arm.bridge.setAttribute("d", "M" + hull.map(pt).join(" L") + " Z");
+      }
       const v3 = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
       const n3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
       // A jointed digit: a chain of 3-D points drawn as one organic outline
