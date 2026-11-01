@@ -59,6 +59,10 @@
     R: {
       // the arm only shows below the sleeve, so it starts well inside it
       S: [812, 1080], Lu: 400, Lf: 290, start: 200, r0: 104, rE: 84, rW: 58, ox: -10, hs: 1,
+      // the sleeve morphs from the sketch's shape (rest) to one that hugs the
+      // arm (tube) as the arm lifts; both share one point structure
+      sleeveRest: [[53.9, -72.2], [83.3, -46.4], [107.6, -14.4], [122, 24], [143, 80], [148, 170], [139, 242], [134, 278], [-118, 278], [-122, 242], [-124, 150], [-123, 64], [-113, 12], [-96, -58], [-22, -96]],
+      sleeveTube: [[30, -66], [60, -56], [88, -30], [96, 12], [102, 70], [100, 140], [96, 205], [92, 238], [-98, 238], [-102, 205], [-106, 140], [-108, 70], [-102, 10], [-90, -46], [-28, -80]],
       sleeve: {
         outer: "M53.9,-72.2 C83.3,-46.4 107.6,-14.4 122,24 C143,80 148,170 139,242 L134,278 L-118,278 L-122,242 L139,242",
         inner: "M-122,242 C-124,150 -123,64 -113,12 C-96,-58 -22,-96 53.9,-72.2",
@@ -131,6 +135,43 @@
     } else if (!openBase) s.push("Z");
     return s.join(" ");
   }
+  // Smooth spline (Catmull-Rom as cubic Beziers) through a list of points.
+  function spline(pts, move) {
+    let d = move ? `M${pt(pts[0])}` : "";
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      d += ` C${pt(add(p1, mul(sub(p2, p0), 1 / 6)))} ${pt(sub(p2, mul(sub(p3, p1), 1 / 6)))} ${pt(p2)}`;
+    }
+    return d;
+  }
+  // An organic limb: one continuous outline around a chain of points with a
+  // radius profile. At each bend the outside swells to a soft point and the
+  // inside pinches, so elbows and knees read as joints rather than pipes.
+  function limb(P, R) {
+    const n = P.length, plus = [], minus = [];
+    for (let i = 0; i < n; i++) {
+      const a = i > 0 ? sub(P[i], P[i - 1]) : sub(P[1], P[0]);
+      const b = i < n - 1 ? sub(P[i + 1], P[i]) : sub(P[n - 1], P[n - 2]);
+      const ua = mul(a, 1 / (len(a) || 1)), ub = mul(b, 1 / (len(b) || 1));
+      let t = add(ua, ub); const tl = len(t);
+      t = tl < 1e-3 ? ua : mul(t, 1 / tl);
+      const nrm = [t[1], -t[0]];
+      let rp = R[i], rm = R[i];
+      if (i > 0 && i < n - 1) {
+        const cosHalf = Math.sqrt((1 + clamp(ua[0] * ub[0] + ua[1] * ub[1], -1, 1)) / 2);
+        if (cosHalf < 0.985) {
+          const inner = R[i] * Math.max(0.3, cosHalf), outer = R[i] / Math.max(0.64, cosHalf);
+          if (ua[0] * ub[1] - ua[1] * ub[0] < 0) { rp = inner; rm = outer; } else { rm = inner; rp = outer; }
+        }
+      }
+      plus.push(add(P[i], mul(nrm, rp))); minus.push(add(P[i], mul(nrm, -rm)));
+    }
+    return { plus, minus, d: `${spline(plus, true)} L${pt(minus[n - 1])}${spline(minus.slice().reverse(), false)} Z` };
+  }
+  const mapPath = (d, fn) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(fn([+x, +y])));
+  const lerp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+  const unit = (v) => mul(v, 1 / (len(v) || 1));
+
   // Two-bone IK. Returns absolute upper angle and relative elbow angle.
   function solveIK(S, W, L1, L2, prefer) {
     const v = sub(W, S), D = clamp(len(v), Math.abs(L1 - L2) + 1, L1 + L2 - 1);
@@ -224,14 +265,15 @@
     idea:     { R: { target: [975, 1000], handAngle: 174, hand: "point", side: -1, fsU: 0.6 }, face: "surprised", faceAfter: "happy" },
     count2:   { R: { target: [980, 1000], handAngle: 176, hand: "two", side: -1, fsU: 0.6 } },
     thumbsUp: { R: { target: [930, 1160], handAngle: -88, hand: "thumbUp", side: 1, fsU: 0.6, fsF: 0.6, elbowOut: 1.2 }, face: "happy" },
-    point:    { R: { target: [1090, 930], handAngle: 140, hand: "point", side: -1, fsU: 0.8 }, body: { lean: 1 }, look: [9, -4] },
-    think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 }, face: "thinking" },
+    point:    { R: { target: [1090, 930], handAngle: 140, hand: "point", side: -1, fsU: 0.8 }, body: { lean: 1, twist: 0.45 }, look: [9, -4] },
+    think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 }, face: "thinking", body: { twist: -0.3, lean: 1 } },
     cheer:    { R: { target: [1010, 640], handAngle: 184, hand: "open", side: -1, wave: 0.35 },
                 L: { target: [300, 650], handAngle: 176, hand: "open", side: 1, wave: 0.35, z: "back" }, face: "laugh", body: { hop: true } },
     shrug:    { R: { target: [1055, 1440], handAngle: 118, hand: "soft", side: -1 },
                 L: { target: [265, 1455], handAngle: -112, hand: "soft", side: -1 }, face: "neutral", body: { shrug: 28, tilt: 7 } },
     belly:    { R: { target: [745, 1575], handAngle: -76, hand: "soft", side: 1 }, face: "laugh" },
-    explain:  { R: { target: [1000, 1350], handAngle: -138, hand: "soft", side: -1, beat: 1, fsU: 0.75, fsF: 0.85, elbowOut: 1 } },
+    // talking hand: elbow at the side, forearm coming toward you, palm open
+    explain:  { R: { shoulder: 9, elbow: 58, wrist: 22, hand: "soft", side: -1, beat: 1, fsF: 0.58 } },
     shy:      { R: { target: [700, 1620], handAngle: -60, hand: "soft", side: 1 },
                 L: { target: [640, 1640], handAngle: 60, hand: "soft", side: 1, z: "top" }, face: "shy" }
   };
@@ -244,6 +286,9 @@
     w: [0.3, 0.58], r: [0.28, 0.78], l: [0.36, 1], t: [0.24, 1.05], d: [0.26, 1.02], n: [0.22, 1],
     s: [0.16, 1.15], z: [0.16, 1.15], c: [0.2, 1.08], k: [0.3, 0.98], g: [0.3, 0.98], h: [0.42, 1], j: [0.25, 0.9]
   };
+
+  // How much of the upper teeth each sound shows.
+  const TEETH = { e: 0.7, i: 0.9, y: 0.6, s: 1, z: 1, c: 0.8, t: 0.6, d: 0.5, n: 0.3, l: 0.4, f: 1, v: 1, j: 0.6 };
 
   // ------------------------------------------------------------ drawing
   function buildSVG(uid) {
@@ -279,6 +324,8 @@
     parts.legCut = el("path", { class: "cut", "stroke-width": 8 }, legs);
     parts.hemR = el("path", { class: "cut", "stroke-width": 6 }, legs);
     parts.pocket = el("path", { class: "cut", "stroke-width": 7 }, legs);
+    parts.kneeL = el("path", { class: "cut", "stroke-width": 6 }, legs);
+    parts.kneeR = el("path", { class: "cut", "stroke-width": 6 }, legs);
     for (const shoe of [parts.shoeL, parts.shoeR]) {
       el("path", { class: "skin", d: "M40,-24 C60,-6 66,34 60,60 L-136,60 C-176,60 -186,28 -158,10 C-120,-8 -70,-8 -34,-28 Z" }, shoe);
       el("path", { class: "solid", d: "M64,42 C66,58 62,74 52,76 L-138,76 C-174,76 -190,60 -176,42 Z" }, shoe);
@@ -288,11 +335,12 @@
     // ---- torso
     const torso = parts.torso = el("g", { id: "torso" }, g);
     parts.shirt = el("path", { class: "paper", id: "shirt" }, torso);
-    el("path", { class: "ink", id: "torsoSides",
+    parts.torsoSides = el("path", { class: "ink", id: "torsoSides",
       d: "M440,1110 C420,1230 398,1340 384,1420 C374,1520 372,1660 376,1786 M778,1110 C784,1350 792,1560 804,1786" }, torso);
-    el("path", { class: "ink", id: "hem", d: "M376,1786 C500,1806 700,1806 804,1786" }, torso);
+    parts.hem = el("path", { class: "ink", id: "hem" }, torso);
+    parts.folds = el("path", { class: "ink", id: "shirtFolds", "stroke-width": 6, opacity: 0 }, torso);
     parts.shoulderLine = el("path", { class: "ink", id: "shoulders" }, torso);
-    el("path", { class: "ink", id: "collar", d: "M697,941 L541,983 L551,1030 L722,969" }, torso);
+    parts.collar = el("path", { class: "ink", id: "collar" }, torso);
 
     parts.layerMid = el("g", { id: "layerMid" }, g);
     parts.neckFill = el("path", { class: "paper", id: "neckFill" }, g);
@@ -353,7 +401,7 @@
     const skinU = el("g", { id: `${uid}-upper${side}` }, defs);
     const skinL = el("g", { id: `${uid}-lower${side}` }, defs);
     const upper = el("path", {}, skinU), elbow = el("circle", {}, skinU);
-    const fore = el("path", {}, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
+    const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
     // straight arm: both groups merge into one outline under the sleeve
     el("use", { href: `#${uid}-upper${side}`, class: "u-back" }, g);
     const lowerBack = el("use", { href: `#${uid}-lower${side}`, class: "u-back" }, g);
@@ -364,16 +412,18 @@
     const folded = el("g", { style: "display:none" }, g);
     el("use", { href: `#${uid}-lower${side}`, class: "u-back" }, folded);
     el("use", { href: `#${uid}-lower${side}`, class: "u-front" }, folded);
+    const crease = el("path", { class: "ink", "stroke-width": 7, opacity: 0 }, g);
     const fingersG = el("g", {}, g);
+    const palmLine = el("path", { class: "ink", "stroke-width": 6, opacity: 0 }, fingersG);
     const fingers = [];
     for (let i = 3; i >= 0; i--) {
       const fg = el("g", {}, fingersG);
       fingers[i] = { fill: el("path", { class: "paper" }, fg), line: el("path", { class: "ink" }, fg), crease: el("path", { class: "ink", "stroke-width": 7 }, fg) };
     }
-    el("path", { class: "paper", d: A.sleeve.fill }, sleeve);
+    const sleeveFill = el("path", { class: "paper", d: A.sleeve.fill }, sleeve);
     const sleeveInner = el("path", { class: "ink", d: A.sleeve.inner }, sleeve);
-    el("path", { class: "ink", d: A.sleeve.outer }, sleeve);
-    return { g, upper, elbow, fore, palm, thumb, fingers, sleeve, sleeveInner, lowerBack, lowerFront, folded };
+    const sleeveOuter = el("path", { class: "ink", d: A.sleeve.outer }, sleeve);
+    return { g, upper, elbow, elbow2, fore, palm, thumb, fingers, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
   }
 
   // ------------------------------------------------------------ agent hooks
@@ -465,6 +515,7 @@
         earL: S(0, 260, 9), earR: S(0, 260, 9), earPerk: S(0, 120, 14),
         fringe: S(0, 70, 5), lock: S(0, 60, 4), button: S(0, 160, 6),
         lean: S(0, 40, 9), sway: S(0, 28, 8), bob: S(0, 150, 13), shrug: S(0, 110, 12),
+        hipTilt: S(0, 26, 8), twist: S(0, 38, 9), teeth: S(0, 260, 24),
         feetLift: S(0, 230, 19), footTilt: S(0, 200, 16), view: S(0, 50, 13)
       };
       for (const side of ["R", "L"]) {
@@ -512,7 +563,8 @@
       this.attention = 0;
       // noise channels for posture, head drift, breathing and hands
       this.nz = {}; ["sway", "lean", "tilt", "nod", "turn", "breath", "hand", "laugh", "wave", "talk"].forEach((k, i) => { this.nz[k] = makeNoise(11 + i * 13); });
-      this.base = { lean: 0, tilt: 0, nod: 0, shrug: 0 };   // set by expressions and gestures
+      this.base = { lean: 0, tilt: 0, nod: 0, shrug: 0, twist: 0 };
+      this.lid = 1; this.blinkT = null;   // set by expressions and gestures
       this.add = { shrug: 0, nod: 0, tilt: 0 };             // short-lived offsets from actions
       this.breathPhase = 0; this.breath = 0; this.breathAmp = 1; this.nextSigh = 16 + Math.random() * 14;
       this.turnLag = 0; this.greetToken = 0; this.armToken = { R: 0, L: 0 }; this.foreVel = { R: 0, L: 0 }; this.prevFore = {};
@@ -572,6 +624,7 @@
       const b = g.body || {}, post = this.posture || {};
       // each gesture starts from the expression's own posture
       this.base.lean = post.lean || 0; this.base.tilt = post.tilt || 0; this.base.shrug = post.shrug || 0;
+      this.base.twist = b.twist ?? 0;
       if (b.lean != null) this.base.lean = b.lean;
       if (b.shrug != null) this.base.shrug = b.shrug;
       if (b.tilt != null) this.base.tilt = b.tilt;
@@ -592,7 +645,7 @@
       return this;
     }
 
-    blink() { this.s.blink.set(0); this._later(0.075, () => this.s.blink.set(1)); return this; }
+    blink() { this.blinkT = 0; return this; }
     wink(side = "R") {
       const s = this.s["wink" + side];
       s.set(0); this.s.smile.kick(5); this.s.tilt.kick(30);
@@ -689,6 +742,7 @@
           this.talk = null;
           this.s.open.set(EXPRESSIONS[this.expression].open);
           this.s.width.set(EXPRESSIONS[this.expression].width);
+          this.s.teeth.set(0);
           if (this.opts.talkGestures && this.gestureName === "none" && tk.autoGesture) this._applyArm("R", REST.R);
           this._emit("speechend", { text: raw });
           resolve();
@@ -849,7 +903,7 @@
       this.exprLook = [0, 0];
       s.browShow.set(0.9); s.brow.set(-13);                                  // eyebrow flash
       this._later(0.42, live(() => { s.brow.set(EXPRESSIONS[this.expression].brow); s.browShow.set(EXPRESSIONS[this.expression].browShow); }));
-      this._later(0.08, live(() => { this.base.tilt = name === "hello" ? 7 : 5.5; this.base.lean = name === "hi5" ? 2 : -1.6; this.idleSway = -10; }));
+      this._later(0.08, live(() => { this.base.tilt = name === "hello" ? 7 : 5.5; this.base.lean = name === "hi5" ? 2 : -1.6; this.idleSway = -14; this.base.twist = 0.4; }));
       this._later(0.12, live(() => s.liftR.set(name === "hello" ? 16 : 11)));
       this._later(0.3, live(() => { s.open.set(0.38); s.width.set(0.95); }));     // "hi"
       this._later(0.55, live(() => s.open.set(EXPRESSIONS[this.expression].open)));
@@ -964,6 +1018,13 @@
           this.nextFidget = 7 + Math.random() * 6;
         }
       }
+      // blink curve: lids fall fast, hold a moment, lift more slowly
+      if (this.blinkT != null) {
+        const b = (this.blinkT += dt);
+        this.lid = b < 0.055 ? 1 - smooth(b / 0.055) : b < 0.095 ? 0 : b < 0.25 ? smooth((b - 0.095) / 0.155) : 1;
+        if (b >= 0.25) this.blinkT = null;
+      }
+
       // breathing: quick inhale, slow exhale, rate drifting; an occasional sigh
       const nz = this.nz, T = this.t;
       if (!calm) {
@@ -984,6 +1045,9 @@
       want("sway", this.idleSway + (calm ? 0 : nz.sway(T * 0.11) * 7));
       want("lean", this.base.lean + (calm ? 0 : nz.lean(T * 0.09) * 0.8));
       want("shrug", this.base.shrug + this.add.shrug + this.breath * 2.2);
+      // contrapposto: the hip over the standing leg rises, the shoulders answer
+      want("hipTilt", clamp(-s.sway.value * 0.17, -5.5, 5.5));
+      want("twist", this.base.twist + (calm ? 0 : nz.lean(T * 0.07 + 40) * 0.08) + this.attention * 0.12);
       const post = this.posture || {};
 
       // gaze and attention
@@ -1050,6 +1114,7 @@
           const cur = u.shape || [0, e.width], nx = (next && next.shape) || cur;
           const k = smooth((tk.t - u.t) / Math.max(0.001, u.dur) - 0.4);
           s.open.set(Math.max(lerp(cur[0], nx[0], k * 0.6), e.open * 0.4));
+          s.teeth.set(TEETH[u.ch] || 0);
           s.width.set(lerp(e.width, lerp(cur[1], nx[1], k * 0.6), 0.85));
         }
       } else if (this._analyser || this.mouthOverride != null) {
@@ -1087,19 +1152,38 @@
       const breath = this.breath;
       const sy = 1 + breath * 0.008;
       const hip = P.hip, lean = s.lean.value, sway = s.sway.value, bob = s.bob.value;
+      const hipTilt = s.hipTilt.value, twist = s.twist.value;
+      // The torso is not a board. The spine curves (the chest leans more than
+      // the pelvis), the pelvis tilts over the standing leg while the
+      // shoulders tilt the other way, the chest twists toward what he is
+      // doing, the pelvis carries the weight shift more than the chest, and
+      // breathing widens the ribcage.
       const bodyPt = ([x, y]) => {
-        const q = rotAround([x, hip[1] + (y - hip[1]) * sy], hip, lean);
-        return [q[0] + sway, q[1] + bob];
+        const h = clamp((hip[1] - y) / 850, 0, 1);
+        const rib = smooth((h - 0.35) / 0.4);
+        const px = x + (x - hip[0]) * breath * 0.012 * rib + twist * 36 * h;
+        const ang = lean * (0.35 + 0.65 * h) + hipTilt * (1 - smooth(h / 0.35)) - hipTilt * 0.55 * smooth(h);
+        const q = rotAround([px, hip[1] + (y - hip[1]) * sy], hip, ang);
+        return [q[0] + sway * (1 - 0.45 * h), q[1] + bob];
       };
-      parts.torso.setAttribute("transform", `translate(${f(sway)} ${f(bob)}) rotate(${f(lean)} ${hip[0]} ${hip[1]}) translate(0 ${f(hip[1] * (1 - sy))}) scale(1 ${sy.toFixed(4)})`);
+      this.bodyPt = bodyPt;
 
       // shoulders: shrug lifts both, breathing nudges them
       const shrug = s.shrug.value, upR = shrug + s.liftR.value, upL = shrug * 0.8 + s.liftL.value;
       const shR = [866, 1008 - upR], shL = [446, 1058 - upL];
-      parts.shoulderLine.setAttribute("d",
-        `M716,932 C766.4,944 ${f(821.8)},${f(969 - upR * 0.5)} ${pt(shR)} M548,1003 C512,1012 ${f(478)},${f(1030 - upL * 0.5)} ${pt(shL)}`);
-      parts.shirt.setAttribute("d",
-        `M556,975 L716,932 C766.4,944 821.8,${f(969 - upR * 0.5)} ${pt(shR)} L800,1060 L778,1110 C784,1350 792,1560 804,1786 C700,1806 500,1806 376,1786 C372,1660 374,1520 384,1420 C398,1340 420,1230 440,1110 L${pt(shL)} C478,${f(1030 - upL * 0.5)} 512,1012 548,1003 Z`);
+      parts.shoulderLine.setAttribute("d", mapPath(
+        `M716,932 C766.4,944 ${f(821.8)},${f(969 - upR * 0.5)} ${pt(shR)} M548,1003 C512,1012 ${f(478)},${f(1030 - upL * 0.5)} ${pt(shL)}`, bodyPt));
+      parts.torsoSides.setAttribute("d", mapPath("M440,1110 C420,1230 398,1340 384,1420 C374,1520 372,1660 376,1786 M778,1110 C784,1350 792,1560 804,1786", bodyPt));
+      parts.hem.setAttribute("d", mapPath("M376,1786 C500,1806 700,1806 804,1786", bodyPt));
+      parts.collar.setAttribute("d", mapPath("M697,941 L541,983 L551,1030 L722,969", bodyPt));
+      // fabric gathers at the waist on the side the hip pushes up
+      const gather = clamp(hipTilt / 4.5, -1, 1);
+      parts.folds.setAttribute("d", mapPath(gather < 0
+        ? "M800,1712 C786,1716 774,1722 766,1730"
+        : "M380,1712 C394,1716 406,1722 414,1730", bodyPt));
+      parts.folds.setAttribute("opacity", smooth((Math.abs(gather) - 0.25) / 0.5).toFixed(2));
+      parts.shirt.setAttribute("d", mapPath(
+        `M556,975 L716,932 C766.4,944 821.8,${f(969 - upR * 0.5)} ${pt(shR)} L800,1060 L778,1110 C784,1350 792,1560 804,1786 C700,1806 500,1806 376,1786 C372,1660 374,1520 384,1420 C398,1340 420,1230 440,1110 L${pt(shL)} C478,${f(1030 - upL * 0.5)} 512,1012 548,1003 Z`, bodyPt));
 
       // legs from planted feet
       this._renderLegs(bodyPt);
@@ -1140,7 +1224,7 @@
     _renderFace() {
       const s = this.s, parts = this.parts;
       const lx = s.lookX.value, ly = s.lookY.value;
-      const open = clamp(s.blink.value, 0, 1);
+      const open = clamp(this.lid, 0, 1);
       const sq = clamp(s.squeeze.value, 0, 1);
       const eye = (cx, cy, wink) => {
         const k = clamp(s.happy.value, 0, 1);
@@ -1184,7 +1268,7 @@
       const d = `M${pt(M(-hw, cL))} Q${pt(M(0, upper))} ${pt(M(hw, cR))} Q${pt(M(0, lower))} ${pt(M(-hw, cL))} Z`;
       parts.mouth.setAttribute("d", d);
       parts.mouthClip.setAttribute("d", d);
-      const teethH = 12 * smooth((op - 0.22) / 0.3) * (1 - round * 1.2);
+      const teethH = Math.max(12 * smooth((op - 0.22) / 0.3), 10 * s.teeth.value * smooth(op / 0.12)) * (1 - round * 1.2);
       const upperMid = (upper + corner) / 2;
       parts.teeth.setAttribute("d", teethH > 0.5
         ? `M${pt(M(-hw, cL - 6))} Q${pt(M(0, upper - 6))} ${pt(M(hw, cR - 6))} L${pt(M(hw, cR + teethH))} Q${pt(M(0, upperMid + teethH + 4))} ${pt(M(-hw, cL + teethH))} Z`
@@ -1202,7 +1286,7 @@
     _renderLegs(bodyPt) {
       const s = this.s, parts = this.parts;
       parts.legs.setAttribute("data-lift", f(s.feetLift.value));
-      parts.pelvis.setAttribute("transform", `translate(${f(s.sway.value)} ${f(s.bob.value)}) rotate(${f(s.lean.value * 0.4)} ${P.hip[0]} ${P.hip[1]})`);
+      parts.pelvis.setAttribute("d", mapPath("M410,1740 L812,1740 L822,1885 C760,1915 470,1915 404,1885 Z", bodyPt));
       const lift = s.feetLift.value;
       const legs = {};
       for (const side of ["L", "R"]) {
@@ -1212,23 +1296,33 @@
         const ik = solveIK(H, A, LEG.Lt, LEG.Ls, (a, b) => a[0] < b[0]);
         const K = add(H, mul(dirOf(ik.shoulder), LEG.Lt));
         const A2 = add(K, mul(dirOf(ik.fore), LEG.Ls));
-        legs[side] = { H, K, A: A2, up: ik.shoulder, fore: ik.fore };
-        const d = taper(H, K, LEG.r0, LEG.rK) + " " + taper(K, A2, LEG.rK, LEG.rA) +
-          ` M${pt(add(K, [-LEG.rK, 0]))} a${LEG.rK},${LEG.rK} 0 1,0 ${LEG.rK * 2},0 a${LEG.rK},${LEG.rK} 0 1,0 ${-LEG.rK * 2},0` +
-          ` M${pt(add(H, [-LEG.r0, 0]))} a${LEG.r0},${LEG.r0} 0 1,0 ${LEG.r0 * 2},0 a${LEG.r0},${LEG.r0} 0 1,0 ${-LEG.r0 * 2},0`;
-        parts["leg" + side].setAttribute("d", d);
+        // thigh swells at the front, calf at the back; the knee is a soft point
+        const uT = unit(sub(K, H)), uS = unit(sub(A2, K));
+        const fwdT = [uT[1], -uT[0]][0] < 0 ? [uT[1], -uT[0]] : [-uT[1], uT[0]];
+        const fwdS = [uS[1], -uS[0]][0] < 0 ? [uS[1], -uS[0]] : [-uS[1], uS[0]];
+        const top = add(H, mul(uT, -40));
+        const Tm = add(add(H, mul(sub(K, H), 0.42)), mul(fwdT, 7));
+        const Cm = add(add(K, mul(sub(A2, K), 0.3)), mul(fwdS, -9));
+        const L = limb([top, Tm, K, Cm, A2], [LEG.r0, LEG.r0 * 0.97, LEG.rK, LEG.rK * 0.97, LEG.rA]);
+        legs[side] = { H, K, A: A2, up: ik.shoulder, fore: ik.fore, outline: L, fwdS, fwdT };
+        parts["leg" + side].setAttribute("d", L.d);
+        // fabric folds behind the knee when it bends
+        const bend = Math.abs(wrap(ik.fore - ik.shoulder));
+        const back = mul(fwdT, -1), kb = add(K, mul(back, LEG.rK * 0.15));
+        // one soft fold line tucked into the back of the knee
+        const kf = add(K, mul(back, LEG.rK * 0.55));
+        parts["knee" + side].setAttribute("d", `M${pt(add(kf, mul(uT, -30)))} Q${pt(add(kf, mul(back, -10)))} ${pt(add(kf, mul(uS, 26)))}`);
+        parts["knee" + side].setAttribute("opacity", smooth((bend - 20) / 22).toFixed(2));
         parts["shoe" + side].setAttribute("transform", `translate(${pt(A2)}) rotate(${f(s.footTilt.value * (side === "L" ? 1.2 : 1))})`);
         // rolled hem just above the shoe
         const n = perpOf(ik.fore), hemC = add(A2, mul(dirOf(ik.fore), -30));
         parts["hem" + side].setAttribute("d", `M${pt(add(hemC, mul(n, -LEG.rA * 0.85)))} L${pt(add(hemC, mul(n, LEG.rA * 0.85)))}`);
       }
       // a paper line along the near leg's inner edge separates it from the far leg
-      const R = legs.R, nU = perpOf(R.up), nF = perpOf(R.fore);
-      const side = nU[0] < 0 ? 1 : -1; // pick the normal that points screen-left
-      const e1 = add(add(R.H, mul(dirOf(R.up), 90)), mul(nU, side * LEG.r0 * 0.93));
-      const e2 = add(R.K, mul(nU, side * LEG.rK));
-      const e3 = add(add(R.A, mul(dirOf(R.fore), -40)), mul(nF, side * LEG.rA));
-      parts.legCut.setAttribute("d", `M${pt(e1)} L${pt(e2)} L${pt(e3)}`);
+      const R = legs.R;
+      const inner = R.outline.plus[2][0] < R.outline.minus[2][0] ? R.outline.plus : R.outline.minus;
+      const e3 = add(inner[4], mul(unit(sub(inner[4], inner[3])), -36));
+      parts.legCut.setAttribute("d", spline([inner[1], inner[2], inner[3], e3], true));
       const pk = bodyPt([772, 1815]);
       parts.pocket.setAttribute("d", `M${pt(pk)} q-14,40 8,70`);
       // shadow shrinks while airborne
@@ -1264,14 +1358,30 @@
       // so it slims down as it swings away from the body
       const lift = Math.abs(wrap(shAng - REST[side].shoulder));
       const slim = side === "R" ? lerp(1, 0.74, smooth(lift / 80)) : 1;
-      const slimY = side === "R" ? lerp(1, 0.74, smooth(lift / 80)) : 1;
 
-      // skin union: upper arm below the sleeve, elbow, forearm, palm, thumb
-      const ua = U(A.ox * slim, A.start * slimY * fsU);
-      const rE = A.rE * lerp(1, 0.92, 1 - slim) , rW = A.rW;
-      arm.upper.setAttribute("d", taper(ua, add(E, mul(perpOf(shAng), A.ox * 0.4 * slim)), A.r0 * slim, rE * slim));
-      arm.elbow.setAttribute("cx", f(E[0])); arm.elbow.setAttribute("cy", f(E[1])); arm.elbow.setAttribute("r", f(rE * slim));
-      arm.fore.setAttribute("d", taper(E, W, rE * slim, rW));
+      // skin: one organic outline from under the sleeve through elbow to wrist
+      const morph = A.sleeveTube ? smooth(lift / 70) : 0;
+      const ua = U(A.ox * slim, A.start * lerp(1, 0.78, morph) * fsU);
+      const rE = A.rE * lerp(1, 0.92, 1 - slim) * slim, rW = A.rW;
+      const Um = add(lerp2(ua, E, 0.55), mul(perpOf(shAng), A.ox * 0.2 * slim));
+      const Fm = lerp2(E, W, 0.3);
+      const rU = A.r0 * slim, rF = lerp(rE, rW, 0.3) * 1.07;
+      const isFolded = Math.abs(wrap(elAng)) > 62 || fsU < 0.85;
+      if (!isFolded) {
+        arm.upper.setAttribute("d", limb([ua, Um, E, Fm, W], [rU, rU * 1.03, rE, rF, rW]).d);
+        arm.elbow.setAttribute("r", 0); arm.elbow2.setAttribute("r", 0); arm.fore.setAttribute("d", "M0,0");
+      } else {
+        arm.upper.setAttribute("d", limb([ua, Um, E], [rU, rU * 1.03, rE]).d);
+        arm.fore.setAttribute("d", limb([E, Fm, W], [rE, rF, rW]).d);
+        for (const c of [arm.elbow, arm.elbow2]) { c.setAttribute("cx", f(E[0])); c.setAttribute("cy", f(E[1])); }
+        arm.elbow.setAttribute("r", f(rE)); arm.elbow2.setAttribute("r", f(rE * 0.97));
+      }
+      // a crease on the inside of a bent elbow
+      const bendEl = Math.abs(wrap(elAng));
+      const inSide = wrap(elAng) > 0 ? -1 : 1, nE = perpOf((shAng + foreAng) / 2);
+      const ci = add(E, mul(nE, inSide * rE * 0.45));
+      arm.crease.setAttribute("d", `M${pt(add(ci, mul(dirOf(shAng), -18)))} Q${pt(add(ci, mul(nE, -inSide * 6)))} ${pt(add(ci, mul(dirOf(foreAng), 16)))}`);
+      arm.crease.setAttribute("opacity", (smooth((bendEl - 40) / 40) * (isFolded ? 0 : 1)).toFixed(2));
 
       const side01 = s["side" + side].value + Math.sin(ph - 0.5) * 0.2 * amp, sx = (Math.abs(side01) < 0.12 ? Math.sign(side01 || 1) * 0.12 : side01) * A.hs;
       const H = frame(W, handAng);
@@ -1281,6 +1391,9 @@
       const tu = [Math.sin(ta * DEG), Math.cos(ta * DEG)];
       const tLen = HAND.thumbLen * (0.45 + 0.55 * te) * (1 + 0.35 * smooth((-ta - 70) / 20));
       arm.thumb.setAttribute("d", capsule(hmap, HAND.thumbBase, tu, tLen, HAND.thumbR));
+      // when the palm faces us, the crease at the base of the thumb shows
+      arm.palmLine.setAttribute("d", `M${pt(hmap(-30, 30))} Q${pt(hmap(-10, 62))} ${pt(hmap(-14, 104))}`);
+      arm.palmLine.setAttribute("opacity", smooth((-side01 - 0.35) / 0.4).toFixed(2));
 
       // fingers: each keeps its own outline; curled fingers fold to knuckles
       const spread = s["spread" + side].value;
@@ -1304,8 +1417,13 @@
       }
 
       // sleeve rides the upper arm; its inner seam only shows once the arm lifts
-      arm.sleeve.setAttribute("transform", `${matrixOf(S, shAng)} scale(${slim.toFixed(3)} ${(slimY * fsU).toFixed(3)})`);
-      const isFolded = Math.abs(wrap(elAng)) > 62 || fsU < 0.85;
+      if (A.sleeveTube) {
+        arm.sleeve.setAttribute("transform", `${matrixOf(S, shAng)} scale(1 ${fsU.toFixed(3)})`);
+        const q = A.sleeveRest.map((p, i) => lerp2(p, A.sleeveTube[i], morph)), Q = (i) => pt(q[i]);
+        arm.sleeveFill.setAttribute("d", `M${Q(0)} C${Q(1)} ${Q(2)} ${Q(3)} C${Q(4)} ${Q(5)} ${Q(6)} L${Q(7)} L${Q(8)} L${Q(9)} C${Q(10)} ${Q(11)} ${Q(12)} C${Q(13)} ${Q(14)} ${Q(0)} Z`);
+        arm.sleeveOuter.setAttribute("d", `M${Q(0)} C${Q(1)} ${Q(2)} ${Q(3)} C${Q(4)} ${Q(5)} ${Q(6)} L${Q(7)} L${Q(8)} L${Q(9)} L${Q(6)}`);
+        arm.sleeveInner.setAttribute("d", `M${Q(9)} C${Q(10)} ${Q(11)} ${Q(12)} C${Q(13)} ${Q(14)} ${Q(0)}`);
+      } else arm.sleeve.setAttribute("transform", `${matrixOf(S, shAng)} scale(1 ${fsU.toFixed(3)})`);
       arm.folded.style.display = isFolded ? "" : "none";
       arm.lowerBack.style.display = arm.lowerFront.style.display = isFolded ? "none" : "";
       arm.sleeveInner.setAttribute("opacity", smooth((lift - 8) / 22).toFixed(2));

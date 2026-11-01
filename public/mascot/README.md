@@ -39,6 +39,13 @@ How the motion is made to feel human rather than mechanical:
 - **Eyes lead, the head follows** a beat later and only part of the way. He often blinks when his gaze jumps.
 - **Nothing loops.** Posture, head drift and hand amplitude come from smooth noise. Breathing has a quick inhale and a slow exhale, with an occasional sigh. Smiles build unevenly from one corner and narrow the eyes. Laughs come in irregular bursts. Talking beats vary in size and direction.
 
+How the drawing holds up in motion:
+
+- **Organic limbs.** Arms and legs are one continuous outline each, with a bicep and forearm swell, thigh and calf contours, a soft point on the outside of a bent elbow or knee and a pinch on the inside, plus an elbow crease and a fold behind the knee when they bend.
+- **A torso that bends.** The spine curves rather than tilting as a board, the chest twists toward a gesture, the pelvis tilts over the standing leg while the shoulders answer the other way (contrapposto), the shirt gathers at the waist on the compressed side, and breathing widens the ribcage.
+- **A sleeve that fits.** The near sleeve morphs from the sketch's shape at rest into one that hugs the arm as it lifts.
+- **Small truths.** Blinks close fast, hold, and open slowly. The crease at the base of the thumb shows when the palm faces you. Teeth show on "ee", "s" and "f" sounds.
+
 How the body is built:
 
 - **Arms** are two-bone chains (shoulder, elbow, wrist). Gestures aim the wrist with inverse kinematics, elbows hang naturally, and a pose can foreshorten the arm when it points at the viewer. The sleeves ride the upper arm and sit exactly where the sketch has them at rest. The near arm slims as it swings away, because the sketch draws it foreshortened.
