@@ -59,6 +59,14 @@ How the drawing holds up in motion:
 - **A sleeve that fits.** The near sleeve morphs from the sketch's shape at rest into one that hugs the arm as it lifts.
 - **Small truths.** Blinks close fast, hold, and open slowly. The crease at the base of the thumb shows when the palm faces you. Teeth show on "ee", "s" and "f" sounds.
 
+How the hands are built:
+
+- **In 3D, then projected.** Each hand is modelled with x across the palm, y along the fingers and z out of the back, and turned on the forearm before it is drawn. Face-on, a curl foreshortens and the part that folds behind the hand is left out; edge-on, the curl shows as a real C-shaped bend. A hanging hand is seen mostly from the side, palm toward the thigh, as a real one is.
+- **Three joints per finger.** Fingers curl progressively from the knuckle, their tips draw together as they close, creases appear at bent joints, and each finger tapers to a rounded tip.
+- **An opposable thumb.** It abducts in the palm plane and swings across toward the palm as the hand closes.
+- **An oval wrist.** It thins as the hand turns edge-on, and the forearm flows into the heel of the hand without a step.
+- **A real wave.** The forearm rocks from the elbow, the wrist follows a quarter-beat late, the hand turns a little on each pass, and the fingers ripple one after another.
+
 How the body is built:
 
 - **Arms** are two-bone chains (shoulder, elbow, wrist). Gestures aim the wrist with inverse kinematics, elbows hang naturally, and a pose can foreshorten the arm when it points at the viewer. The sleeves ride the upper arm and sit exactly where the sketch has them at rest. The near arm slims as it swings away, because the sketch draws it foreshortened.
