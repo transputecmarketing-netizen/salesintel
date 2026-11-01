@@ -1414,6 +1414,7 @@
       const sqY = 1 - q, sqX = 1 / Math.sqrt(Math.max(0.5, sqY)) * (1 + 0.12 * q);
       const pivY = lerp(P.ground, 1650 + s.bob.value, air), pivX = 615 + s.sway.value * 0.5;
       parts.squash.setAttribute("transform", `translate(${f(pivX)} ${f(pivY)}) scale(${sqX.toFixed(4)} ${sqY.toFixed(4)}) translate(${f(-pivX)} ${f(-pivY)})`);
+      this.squashAt = (pnt) => [pivX + (pnt[0] - pivX) * sqX, pivY + (pnt[1] - pivY) * sqY];
 
       // body transform: breathing scales the torso from the hips, then lean, sway, bob
       const breath = this.breath;
@@ -1975,8 +1976,10 @@
   // glyph vocabulary (the way kaomoji are), chosen by the rig's live values
   // and stamped where each feature really is.
   function asciiFace(rig, grid, cell) {
-    const s = rig.s, hp = rig.headPt;
-    if (!hp) return;
+    const s = rig.s, hp0 = rig.headPt;
+    if (!hp0) return;
+    // place features where they are drawn, squash and stretch included
+    const hp = (q) => (rig.squashAt ? rig.squashAt(hp0(q)) : hp0(q));
     const off = [s.turn.value * 1.1 + s.lookX.value * 0.6, s.nod.value * 0.8 + s.lookY.value * 0.4];
     const at = (q) => cell(...hp([q[0] + off[0], q[1] + off[1]]));
     // write a glyph string centred on a cell, wiping the raster's guesses around it

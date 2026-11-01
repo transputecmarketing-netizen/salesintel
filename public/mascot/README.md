@@ -112,6 +112,17 @@ Expressions: smile, neutral, happy, laugh, surprised, sad, thinking, shy, sleepy
 Gestures: wave, hello, hi5, idea, count2, thumbsUp, point, think, cheer, shrug, belly, explain, shy, behind, none.
 Actions: blink, wink, nod, shakeHead, wiggleEars, hop, bounce, poke, laughBurst, stretch.
 
+## ASCII mascot
+
+The same rig can be drawn as live text. Each frame is rasterised from the rig's own shapes and every character cell is chosen from the ink inside it: dense glyphs (`@ % #`) for solid ink, `/ \ | - _` along each stroke's direction (from the cell's ink moments, with non-maximum suppression so lines stay one glyph thick), dots for specks. The face is too small for that, so it is drawn from a kaomoji-style vocabulary chosen by the live values: eyes `| - ^ O _`, brows, mouth `\_/ \__/ /‾\ -- o O (O) \O/`, blush `//`. Everything the rig does shows up in the text.
+
+```js
+const stop = Mascot.attachAscii(buddy, document.querySelector("pre"), { cols: 88 }); // live
+const text = await Mascot.asciiFrame(buddy, 72);                                    // one frame
+```
+
+Agents can look at him with the `mascot_ascii` tool, which returns the current frame as text.
+
 ## Agent hooks
 
 Ten MCP-shaped tools, each with a JSON schema, in `Mascot.tools`:
