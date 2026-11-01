@@ -571,6 +571,8 @@
       inputSchema: { type: "object", properties: { steps: { type: "array", items: { type: "object", properties: { tool: { type: "string" }, arguments: { type: "object" }, wait_seconds: { type: "number", minimum: 0 } }, required: ["tool"] } } }, required: ["steps"] } },
     { name: "mascot_view", description: "Frame the mascot ('full' body or the original 'bust' crop) and/or set the line weight ('bold' brand lines or fine 'hairline').",
       inputSchema: { type: "object", properties: { view: { type: "string", enum: Object.keys(VIEWS) }, line: { type: "string", enum: ["bold", "hairline"] } } } },
+    { name: "mascot_ascii", description: "See the mascot: returns the current frame drawn as ASCII text (cols characters wide), so an agent can look at the pose and expression it just set.",
+      inputSchema: { type: "object", properties: { cols: { type: "number", minimum: 32, maximum: 140 } } } },
     { name: "mascot_get_state", description: "Read the current expression, gesture, view, speaking status and every rig point's live value.",
       inputSchema: { type: "object", properties: {} } },
     { name: "mascot_list_params", description: "List every rig point mascot_set accepts, with its range and meaning.",
@@ -1024,6 +1026,10 @@
             if (args.line) this.update({ line: args.line });
             break;
           case "mascot_get_state": break;
+          case "mascot_ascii": {
+            const cols = Math.round(clamp(+args.cols || 72, 32, 140));
+            return { ok: true, cols, ascii: await asciiFrame(this, cols), state: this.getState() };
+          }
           case "mascot_list_params":
             return { ok: true, params: Object.fromEntries(Object.entries(PARAMS).map(([n, p]) => [n, { min: p.min, max: p.max, about: p.about }])) };
           default:
@@ -1180,7 +1186,7 @@
 
     _pointerInSvg() {
       if (!this.pointer) return null;
-      const r = this.svg.getBoundingClientRect();
+      const r = (this.hitEl || this.svg).getBoundingClientRect();
       if (!r.width) return null;
       const vb = this.viewBox;
       return [vb[0] + ((this.pointer[0] - r.left) / r.width) * vb[2], vb[1] + ((this.pointer[1] - r.top) / r.height) * vb[3]];
@@ -1831,6 +1837,221 @@
     }
   }
 
+  // ------------------------------------------------------------ ASCII
+  // The same rig, drawn in text. Each frame is rasterised, then every
+  // character cell is chosen from what the ink does inside it, the way edge-
+  // aware ASCII shaders work: solid ink becomes a dense glyph, a stroke
+  // becomes / \ | - _ along its direction (the cell's ink moments give the
+  // stroke's angle), and a speck becomes a dot. Every rig point (brows,
+  // lids, mouth, fingers, jelly arms, squash) shows up in the text.
+  const RAMP = " .:-=+*#%@";
+  // How each class paints, on a black-on-white raster: [fill, stroke, width]
+  const PAINT = {
+    ink: [null, "#000", 9], solid: ["#000", null, 0], paper: ["#fff", null, 0], cut: [null, "#fff", 9],
+    skin: ["#fff", "#000", 9], mouth: ["#000", "#000", 9], "u-back": ["#000", "#000", 18], "u-front": ["#fff", null, 0]
+  };
+  // Draw the live svg onto a canvas, synchronously: each shape is drawn
+  // with its own transform (getCTM), in paint order, honouring display,
+  // opacity, <use> and the mouth's clip path.
+  function rasterRig(rig, W, H) {
+    const cv = rig._asciiCanvas || (rig._asciiCanvas = root.document.createElement("canvas"));
+    if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H;
+    const ctx = cv.getContext("2d", { willReadFrequently: true });
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+    const svg = rig.svg, sw = svg.clientWidth || svg.getBoundingClientRect().width, k = W / (sw || W);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const shape = (el) => {
+      const t = el.tagName;
+      if (t === "path") { const d = el.getAttribute("d"); return d && d.length > 3 ? new Path2D(d) : null; }
+      const p = new Path2D(), g = (a) => +el.getAttribute(a) || 0;
+      if (t === "circle") { if (g("r") <= 0) return null; p.arc(g("cx"), g("cy"), g("r"), 0, Math.PI * 2); return p; }
+      if (t === "ellipse") { if (g("rx") <= 0 || g("ry") <= 0) return null; p.ellipse(g("cx"), g("cy"), g("rx"), g("ry"), 0, 0, Math.PI * 2); return p; }
+      if (t === "rect") { p.roundRect ? p.roundRect(g("x"), g("y"), g("width"), g("height"), g("rx")) : p.rect(g("x"), g("y"), g("width"), g("height")); return p; }
+      return null;
+    };
+    const paintOf = (el, inherit) => {
+      const cl = el.classList; let pick = inherit;
+      for (const c in PAINT) if (cl.contains(c)) pick = PAINT[c];
+      if (cl.contains("lo")) pick = [null, "#000", 6]; if (cl.contains("sep")) pick = [null, "#000", 7];
+      return pick;
+    };
+    const draw = (el, m, op, inherit, ctm) => {
+      const p = shape(el); if (!p || !inherit) return;
+      const [fill, stroke, w] = inherit;
+      ctx.setTransform(ctm.a * k, ctm.b * k, ctm.c * k, ctm.d * k, ctm.e * k, ctm.f * k);
+      ctx.globalAlpha = op;
+      if (fill) { ctx.fillStyle = fill; ctx.fill(p); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = w; ctx.stroke(p); }
+    };
+    const walk = (el, op, inherit, useCtm) => {
+      if (el.nodeType !== 1) return;
+      const t = el.tagName;
+      if (t === "defs" || t === "style" || t === "clipPath" || t === "text" || el.id === "rigOverlay") return;
+      if (el.style && el.style.display === "none") return;
+      const o = el.getAttribute("opacity"); if (o != null) op *= +o; if (op < 0.03) return;
+      if (el.classList.contains("shadow")) return;
+      const paint = paintOf(el, inherit);
+      if (t === "use") {
+        const ref = svg.querySelector(el.getAttribute("href"));
+        if (ref) { const base = el.getCTM(); for (const ch of ref.querySelectorAll("path,circle")) draw(ch, null, op, paint, base); }
+        return;
+      }
+      const clip = el.getAttribute("clip-path");
+      if (clip) {
+        const cp = svg.querySelector(clip.slice(4, -1).replace(/"/g, ""))?.firstElementChild, cm = cp && cp.getCTM ? el.getCTM() : null;
+        ctx.save();
+        if (cp && cm) { ctx.setTransform(cm.a * k, cm.b * k, cm.c * k, cm.d * k, cm.e * k, cm.f * k); ctx.clip(new Path2D(cp.getAttribute("d") || "M0,0")); }
+        for (const ch of el.children) walk(ch, op, paint);
+        ctx.restore(); return;
+      }
+      if (t === "g" || t === "svg") { for (const ch of el.children) walk(ch, op, paint); return; }
+      const ctm = el.getCTM(); if (ctm) draw(el, null, op, paint, ctm);
+    };
+    walk(svg, 1, null);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+    return ctx.getImageData(0, 0, W, H).data;
+  }
+
+  async function asciiFrame(rig, cols = 96, aspect = 0.55) {
+    if (!root.document) return "";
+    const vb = rig.viewBox, W = cols * 4, H = Math.round((W * vb[3]) / vb[2]);
+    const px = rasterRig(rig, W, H);
+    const cw = W / cols, ch = cw / aspect, rows = Math.floor(H / ch);
+    // pass 1: what the ink does in each cell
+    const cells = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const x0 = Math.floor(c * cw), x1 = Math.floor((c + 1) * cw), y0 = Math.floor(r * ch), y1 = Math.floor((r + 1) * ch);
+      let sum = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, n = 0;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+        const i = (y * W + x) * 4, ink = 1 - (px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11) / 255;
+        n++; if (ink < 0.08) continue;
+        const lx = x - x0, ly = y - y0;
+        sum += ink; sx += ink * lx; sy += ink * ly; sxx += ink * lx * lx; syy += ink * ly * ly; sxy += ink * lx * ly;
+      }
+      const cover = sum / (n || 1);
+      let kind = "empty", deg = 0, my = 0, aniso = 0;
+      if (cover >= 0.07) {
+        if (cover > 0.6) kind = "fill";
+        else {
+          const mx = sx / sum; my = sy / sum;
+          const cxx = sxx / sum - mx * mx, cyy = syy / sum - my * my, cxy = sxy / sum - mx * my;
+          aniso = Math.sqrt((cxx - cyy) ** 2 + 4 * cxy * cxy) / (cxx + cyy + 1e-6);
+          deg = (0.5 * Math.atan2(2 * cxy, cxx - cyy) * 180) / Math.PI;
+          kind = aniso < 0.35 ? "dot" : "line";
+        }
+      }
+      cells.push({ cover, kind, deg, my });
+    }
+    const at = (r, c) => (r < 0 || c < 0 || r >= rows || c >= cols ? null : cells[r * cols + c]);
+    // pass 2: one character per cell; a stroke keeps only its strongest cell
+    // across its width (non-maximum suppression), so lines stay one glyph thick
+    const grid = [];
+    for (let r = 0; r < rows; r++) {
+      const line = [];
+      grid.push(line);
+      for (let c = 0; c < cols; c++) {
+        const e = at(r, c);
+        if (e.kind === "empty") { line.push(" "); continue; }
+        if (e.kind === "fill") { line.push(RAMP[Math.min(9, 6 + Math.floor((e.cover - 0.6) * 10))]); continue; }
+        if (e.kind === "dot") { line.push(e.cover < 0.2 ? "." : e.cover < 0.35 ? "o" : "O"); continue; }
+        const a = Math.abs(e.deg);
+        const across = a < 22 ? [[-1, 0], [1, 0]] : [[0, -1], [0, 1]];
+        let weaker = false;
+        for (const [dr, dc] of across) {
+          const nb = at(r + dr, c + dc);
+          if (nb && nb.kind === "line" && Math.abs(nb.deg - e.deg) < 35 && (nb.cover > e.cover + 0.02 || (Math.abs(nb.cover - e.cover) <= 0.02 && (dr < 0 || dc < 0)))) weaker = true;
+        }
+        if (weaker) { line.push(" "); continue; }
+        if (a < 22) line.push(e.my > ch * 0.62 ? "_" : e.my < ch * 0.3 ? "\u203e" : "-");
+        else if (a > 68) line.push("|");
+        else line.push(e.deg > 0 ? "\\" : "/");
+      }
+    }
+    asciiFace(rig, grid, (x, y) => [Math.floor(((x - vb[0]) * W) / vb[2] / cw), Math.floor(((y - vb[1]) * H) / vb[3] / ch)]);
+    return grid.map((l) => l.join("").replace(/\s+$/, "")).join("\n").replace(/^\n+|\n+$/g, "");
+  }
+
+  // The face is too small for the raster to carry, so it is drawn from a
+  // glyph vocabulary (the way kaomoji are), chosen by the rig's live values
+  // and stamped where each feature really is.
+  function asciiFace(rig, grid, cell) {
+    const s = rig.s, hp = rig.headPt;
+    if (!hp) return;
+    const off = [s.turn.value * 1.1 + s.lookX.value * 0.6, s.nod.value * 0.8 + s.lookY.value * 0.4];
+    const at = (q) => cell(...hp([q[0] + off[0], q[1] + off[1]]));
+    // write a glyph string centred on a cell, wiping the raster's guesses around it
+    const put = ([c, r], str, wipe) => {
+      if (!grid[r]) return;
+      const x0 = c - Math.floor(str.length / 2);
+      if (wipe) for (let dr = -1; dr <= 1; dr++) for (let x = x0 - 1; x <= x0 + str.length; x++) {
+        const row = grid[r + dr];
+        if (row && row[x] != null && "@%#".indexOf(row[x]) < 0) row[x] = " ";
+      }
+      for (let i = 0; i < str.length; i++) if (grid[r][x0 + i] != null) grid[r][x0 + i] = str[i];
+    };
+    const lid = clamp(rig.lid, 0, 1), happy = s.happy.value, eyeH = s.eyeH.value;
+    const angry = s.browTilt.value < -0.5 && s.brow.value > 1;
+    const eye = (wink, left) => {
+      if (Math.min(lid, wink) < 0.35) return "-";
+      if (happy > 0.5) return "^";
+      if (eyeH > 1.15) return "O";
+      if (eyeH < 0.4) return "_";
+      if (angry) return left ? "\\" : "/";
+      return "|";
+    };
+    const eL = at(P.eyeL), eR = at(P.eyeR), mo = at([P.mouth[0], P.mouth[1] + 6]);
+    // clear the face between the cheek lines, from brow height to below the mouth
+    for (let y = 572; y <= 760; y += 8) {
+      const [c0, r] = cell(...hp([400, y])), [c1] = cell(...hp([770, y]));
+      const row = grid[r]; if (!row) continue;
+      for (let c = c0 + 1; c < c1; c++) if (row[c] != null && "@%#".indexOf(row[c]) < 0) row[c] = " ";
+    }
+    put(eL, eye(s.winkL.value, true)); put(eR, eye(s.winkR.value, false));
+    if (s.browShow.value > 0.4) {
+      const t = s.browTilt.value, up = s.brow.value < -7;
+      const bL = t > 0.4 ? "/" : t < -0.4 ? "\\" : "\u203e", bR = t > 0.4 ? "\\" : t < -0.4 ? "/" : "\u203e";
+      put([eL[0], eL[1] - (up ? 2 : 1)], bL); put([eR[0], eR[1] - (up ? 2 : 1)], bR);
+    }
+    const op = s.open.value, sm = s.smile.value, round = s.width.value < 0.72;
+    let mouth;
+    if (op > 0.62) mouth = sm > 0.9 ? "\\O/" : "(O)";
+    else if (op > 0.32) mouth = round ? "O" : sm > 0.9 ? "\\o/" : "o";
+    else if (op > 0.14) mouth = round ? "o" : "-o-";
+    else if (sm > 1.12) mouth = "\\__/";
+    else if (sm > 0.6) mouth = "\\_/";
+    else if (sm < -0.3) mouth = "/\u203e\\";
+    else mouth = "--";
+    put(mo, mouth);
+    if (s.blush.value > 0.5) { put([eL[0] - 1, eL[1] + 1], "//"); put([eR[0] + 1, eR[1] + 1], "//"); }
+  }
+
+  // Draw a mounted rig as live ASCII into a <pre>. The svg stays where it
+  // is (it can be hidden); the text is what people see. Returns a stop function.
+  function attachAscii(rig, pre, { cols = 96, fps = 30 } = {}) {
+    let busy = false, last = 0, raf = 0, stopped = false;
+    pre.classList.add("mascot-ascii");
+    pre.setAttribute("aria-label", rig.svg.getAttribute("aria-label") || "Blue cap mascot");
+    pre.setAttribute("role", "img");
+    rig.hitEl = pre;
+    const onClick = () => rig.poke();
+    pre.addEventListener("click", onClick);
+    const fit = () => {
+      const w = pre.clientWidth || pre.parentElement?.clientWidth || 400;
+      pre.style.fontSize = `${w / (cols * 0.6)}px`;
+      pre.style.lineHeight = `${0.6 / 0.55}`;
+    };
+    fit(); root.addEventListener("resize", fit);
+    const loop = (t) => {
+      if (stopped) return;
+      raf = requestAnimationFrame(loop);
+      if (busy || t - last < 1000 / fps) return;
+      busy = true; last = t;
+      asciiFrame(rig, cols).then((text) => { rig.asciiText = text; pre.textContent = text; busy = false; });
+    };
+    raf = requestAnimationFrame(loop);
+    return () => { stopped = true; cancelAnimationFrame(raf); root.removeEventListener("resize", fit); pre.removeEventListener("click", onClick); rig.hitEl = null; };
+  }
+
   function connect(rig, url = "http://localhost:4545") {
     if (!root.EventSource) return () => {};
     const base = url.replace(/\/$/, "");
@@ -1847,6 +2068,8 @@
   const api = {
     mount: (container, options) => new MascotRig(container, options),
     connect,
+    attachAscii,
+    asciiFrame,
     expressions: Object.keys(EXPRESSIONS),
     gestures: PUBLIC_GESTURES,
     actions: ACTIONS,
