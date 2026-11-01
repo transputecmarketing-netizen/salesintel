@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blue Cap Mascot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  /* Layout: a sticky stage on the left, an operator panel on the right, a rig reference below. */
+  :root {
+    --bg: #f4f2f8;
+    --fg: #17183a;
+    --muted: #5d5f7e;
+    --line: #dcd8e8;
+    --panel: #ffffff;
+    --stage: #efe8f0;
+    --ink: #1543e6;
+    --chip: #ebe9f6;
+    --chip-on: #1543e6;
+    --chip-on-fg: #ffffff;
+    --rig: #d6286a;
+    --font-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+    --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12132a; --fg: #ecebfb; --muted: #a3a5c8; --line: #2c2e52; --panel: #1a1c3a;
+      --stage: #1f2147; --ink: #7d97ff; --chip: #262857; --chip-on: #7d97ff; --chip-on-fg: #0e1030; --rig: #ff6fa3;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12132a; --fg: #ecebfb; --muted: #a3a5c8; --line: #2c2e52; --panel: #1a1c3a;
+    --stage: #1f2147; --ink: #7d97ff; --chip: #262857; --chip-on: #7d97ff; --chip-on-fg: #0e1030; --rig: #ff6fa3;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 56px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+  header { display: grid; gap: 6px; }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+  header p { margin: 0; color: var(--muted); max-width: 62ch; }
+  .main { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .main { grid-template-columns: 1fr; } }
+
+  .stage {
+    position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px);
+    background: var(--stage); border-radius: 20px; overflow: hidden;
+    --mascot-ink: var(--ink); --mascot-paper: var(--stage); --mascot-rig: var(--rig);
+    /* soft halftone, a nod to the screen the sketch was photographed from */
+    background-image: radial-gradient(color-mix(in srgb, var(--ink) 9%, transparent) 1.2px, transparent 1.4px);
+    background-size: 9px 9px;
+  }
+  @media (max-width: 820px) { .stage { position: relative; top: 0; } }
+  #buddy { width: 100%; max-width: 560px; margin: 0 auto; }
+  .bubble {
+    position: absolute; left: 16px; right: 16px; bottom: 16px; margin: 0 auto; max-width: 440px;
+    background: var(--panel); color: var(--fg); border: 2px solid var(--ink); border-radius: 16px;
+    padding: 10px 14px; font-weight: 500; min-height: 46px; transition: opacity .2s;
+  }
+  .bubble[data-empty="true"] { opacity: 0; }
+  .state { position: absolute; top: 14px; left: 16px; font: 500 12px/1 var(--font-mono); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+  .panel { display: grid; gap: 18px; }
+  .group { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+  .group h2 { margin: 0; font: 600 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  button.chip {
+    font: 500 14px/1 var(--font-body); color: var(--fg); background: var(--chip); border: 0; border-radius: 999px;
+    padding: 10px 14px; cursor: pointer; transition: transform .12s, background .12s;
+  }
+  button.chip:hover { transform: translateY(-1px); }
+  button.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-fg); }
+  button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--rig); outline-offset: 2px; }
+  .talk { display: grid; gap: 10px; }
+  textarea {
+    width: 100%; min-height: 70px; resize: vertical; font: 15px/1.45 var(--font-body); color: var(--fg);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+  .primary {
+    font: 600 14px/1 var(--font-body); background: var(--ink); color: var(--chip-on-fg); border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer;
+  }
+  label.toggle { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; cursor: pointer; }
+  label.toggle input { accent-color: var(--ink); width: 16px; height: 16px; }
+
+  section.ref { display: grid; gap: 14px; }
+  section.ref h2 { font-family: var(--font-display); font-weight: 600; font-size: 24px; margin: 0; }
+  .tablebox { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  code { font: 500 13px/1.5 var(--font-mono); }
+  td code { color: var(--ink); }
+  pre { margin: 0; overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  @media (prefers-reduced-motion: reduce) { button.chip { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Blue Cap Mascot</h1>
+    <p>Your sketch, traced to SVG and rigged. Every part that can move has a named pivot, and a small runtime keeps him alive: he breathes, blinks, glances around, follows your cursor and reacts when you click him.</p>
+  </header>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <span class="state" id="state">smile · idle</span>
+      <div id="buddy"></div>
+      <div class="bubble" id="bubble" data-empty="true" aria-live="polite"></div>
+    </div>
+
+    <div class="panel">
+      <div class="group">
+        <h2>Face</h2>
+        <div class="chips" id="expressions"></div>
+      </div>
+      <div class="group">
+        <h2>Hands</h2>
+        <div class="chips" id="gestures"></div>
+      </div>
+      <div class="group">
+        <h2>Actions</h2>
+        <div class="chips">
+          <button class="chip" data-act="blink">Blink</button>
+          <button class="chip" data-act="wink">Wink</button>
+          <button class="chip" data-act="nod">Nod yes</button>
+          <button class="chip" data-act="shakeHead">Shake no</button>
+          <button class="chip" data-act="wiggleEars">Wiggle ears</button>
+          <button class="chip" data-act="hop">Hop</button>
+          <button class="chip" data-act="poke">Tickle</button>
+        </div>
+      </div>
+      <div class="group talk">
+        <h2>Talk</h2>
+        <textarea id="line" aria-label="Line for the mascot to say">Hi! I'm your study buddy. Want to try five quick cardiology questions?</textarea>
+        <div class="row">
+          <button class="primary" id="say">Say it</button>
+          <label class="toggle"><input type="checkbox" id="voice"> Use browser voice</label>
+        </div>
+      </div>
+      <div class="group talk">
+        <h2>Agent console</h2>
+        <textarea id="cmd" aria-label="Tool call as JSON" spellcheck="false" style="font-family:var(--font-mono);font-size:13px;min-height:150px"></textarea>
+        <div class="row">
+          <button class="primary" id="run">Run tool call</button>
+          <span id="bridge" style="color:var(--muted);font-size:13px">MCP bridge: not connected</span>
+        </div>
+        <pre id="out" style="max-height:180px;font-size:12px" aria-live="polite"><code>Results appear here.</code></pre>
+      </div>
+      <div class="group">
+        <h2>View</h2>
+        <div class="row">
+          <label class="toggle"><input type="checkbox" id="follow" checked> Follow cursor</label>
+          <label class="toggle"><input type="checkbox" id="rig"> Show rig points</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ref">
+    <h2>Rig map</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Part</th><th>SVG id</th><th>Pivot (source px)</th><th>What moves</th></tr></thead>
+        <tbody>
+          <tr><td>Head</td><td><code>#head</code></td><td>620, 860</td><td>Tilt, turn, nod, hop. Idle sway. Carries cap, hair, ears and face.</td></tr>
+          <tr><td>Eyes</td><td><code>#eyeL</code> <code>#eyeR</code></td><td>462, 630 / 606, 630</td><td>Blink, wink, look direction, open height, and a bend into happy ∩ arcs.</td></tr>
+          <tr><td>Brows</td><td><code>#browL</code> <code>#browR</code></td><td>above each eye</td><td>Hidden at rest. Raise, lower and tilt for surprise, worry, focus, anger.</td></tr>
+          <tr><td>Mouth</td><td><code>#mouth</code></td><td>541, 696, tilted −9.7°</td><td>Smile curve, width and jaw open. One path that becomes a filled shape when open. Lip sync from text or audio.</td></tr>
+          <tr><td>Cheeks</td><td><code>#blush</code></td><td>under the eyes</td><td>Short hatch marks that fade in for happy and shy.</td></tr>
+          <tr><td>Ears</td><td><code>#earL</code> <code>#earR</code></td><td>372, 640 / 800, 705</td><td>Wiggle, random twitch, perk up on surprise.</td></tr>
+          <tr><td>Fringe</td><td><code>#fringeL</code> <code>#fringeR</code></td><td>410, 522 / 600, 522</td><td>Swings behind head movement.</td></tr>
+          <tr><td>Side lock</td><td><code>#hairLock</code></td><td>745, 560</td><td>Swings with a slower, looser spring than the fringe.</td></tr>
+          <tr><td>Cap button</td><td><code>#capButton</code></td><td>860, 268</td><td>Bobs on hops and quick head turns.</td></tr>
+          <tr><td>Neck</td><td><code>#neck</code></td><td>joins head to collar</td><td>Redrawn every frame so the head never detaches from the body.</td></tr>
+          <tr><td>Body</td><td><code>#body</code></td><td>620, 1430</td><td>Breathing: a slight vertical scale from the bottom edge.</td></tr>
+          <tr><td>Arms and hands</td><td><code>#gestureL</code> <code>#gestureR</code></td><td>elbows below the frame</td><td>Forearm angle and lift, wrist bend, four fingers each with its own curl, thumb fold and stand-up.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h2>Agent hooks</h2>
+    <p style="margin:0;color:var(--muted);max-width:70ch">Agents drive him through nine MCP tools. The same calls work three ways: in the page with <code>rig.call(name, args)</code>, from a parent window or extension as JSON-RPC over <code>postMessage</code> after <code>rig.listen()</code>, or from any MCP client through <code>mcp-server.mjs</code>.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+        <tbody id="tools"></tbody>
+      </table>
+    </div>
+    <pre><code>&lt;div id="buddy"&gt;&lt;/div&gt;
+&lt;script src="/mascot/mascot.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const buddy = Mascot.mount(document.getElementById("buddy"));
+  buddy.express("happy");            // smile, neutral, happy, laugh, surprised, sad, thinking, shy, sleepy, angry
+  buddy.gesture("wave", { hold: 3 }); // wave, hi5, idea, thumbsUp, think, cheer, count2, none
+  buddy.say("Ready for five quick questions?", { speak: true });
+  buddy.lipSync(audioElement);       // or buddy.setMouthOpen(level) from your own TTS stream
+
+  // Agent hooks
+  await buddy.call("mascot_set", { params: { "mouth.open": 0.5, "hand.right.raise": 1, "hand.right.index": 1 } });
+  buddy.on("state", (s) =&gt; console.log(s.expression, s.params["mouth.smile"]));
+  Mascot.connect(buddy, "http://localhost:4545"); // relay for: node public/mascot/mcp-server.mjs
+&lt;/script&gt;</code></pre>
+  </section>
+</div>
+
+<script src="mascot.js"></script>
+<script>
+  const buddy = Mascot.mount(document.getElementById("buddy"));
+  const stateEl = document.getElementById("state");
+  const bubble = document.getElementById("bubble");
+  let face = "smile", hands = "none";
+  const label = (s) => s.replace(/([A-Z0-9])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+  const showState = () => { stateEl.textContent = `${face} · ${hands === "none" ? "idle" : hands}`; };
+
+  function chips(hostId, names, onPick, current) {
+    const host = document.getElementById(hostId);
+    names.forEach((n) => {
+      const b = document.createElement("button");
+      b.className = "chip"; b.type = "button"; b.dataset.name = n; b.textContent = n === "none" ? "Hands down" : label(n);
+      b.setAttribute("aria-pressed", String(n === current));
+      b.addEventListener("click", () => {
+        host.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", "true");
+        onPick(n);
+      });
+      host.appendChild(b);
+    });
+    return host;
+  }
+  chips("expressions", Mascot.expressions, (n) => buddy.express(n), "smile");
+  const order = ["wave", "hi5", "idea", "thumbsUp", "think", "cheer", "count2", "none"];
+  chips("gestures", order.filter((g) => Mascot.gestures.includes(g)), (n) => {
+    buddy.gesture(n);
+  }, "none");
+
+  document.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => buddy[b.dataset.act]()));
+
+  document.getElementById("say").addEventListener("click", async () => {
+    const text = document.getElementById("line").value.trim();
+    if (!text) return;
+    await buddy.say(text, { speak: document.getElementById("voice").checked });
+  });
+  document.getElementById("follow").addEventListener("change", (e) => buddy.follow(e.target.checked));
+  document.getElementById("rig").addEventListener("change", (e) => buddy.showRig(e.target.checked));
+
+  // Agent console: the exact JSON an MCP client would send as tools/call params.
+  const sample = {
+    name: "mascot_perform",
+    arguments: { steps: [
+      { tool: "mascot_gesture", arguments: { gesture: "wave" } },
+      { tool: "mascot_say", arguments: { text: "Hello! Let's warm up with one ECG question.", expression: "happy" } },
+      { tool: "mascot_gesture", arguments: { gesture: "think" }, wait_seconds: 1.2 },
+      { tool: "mascot_set", arguments: { params: { "brows.show": 1, "brows.raise": -10, "eyes.lookX": 7 } }, wait_seconds: 1 },
+      { tool: "mascot_set", arguments: { release: true } },
+      { tool: "mascot_gesture", arguments: { gesture: "thumbsUp", hold_seconds: 2 } }
+    ] }
+  };
+  const cmdEl = document.getElementById("cmd"), outEl = document.getElementById("out");
+  cmdEl.value = JSON.stringify(sample, null, 2);
+  document.getElementById("run").addEventListener("click", async () => {
+    let call;
+    try { call = JSON.parse(cmdEl.value); }
+    catch (err) { outEl.textContent = "That isn't valid JSON: " + err.message; return; }
+    outEl.textContent = "Running " + call.name + "…";
+    const result = await buddy.call(call.name, call.arguments || {});
+    outEl.textContent = JSON.stringify(result, null, 2);
+  });
+  const mark = (hostId, name) => document.querySelectorAll(`#${hostId} button`)
+    .forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.name === name)));
+  buddy.on("state", (s) => {
+    face = s.expression; hands = s.gesture; showState();
+    mark("expressions", face); mark("gestures", hands);
+  });
+  buddy.on("speechstart", ({ text }) => { bubble.textContent = text; bubble.dataset.empty = "false"; });
+  buddy.on("speechend", () => setTimeout(() => { bubble.dataset.empty = "true"; }, 900));
+
+  const toolRows = document.getElementById("tools");
+  Mascot.tools.forEach((t) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = "<td><code></code></td><td></td>";
+    tr.firstChild.firstChild.textContent = t.name;
+    tr.lastChild.textContent = t.description;
+    toolRows.appendChild(tr);
+  });
+
+  // Served by mcp-server.mjs on localhost: join the bridge so agents can drive this page.
+  buddy.listen();
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && location.port) {
+    Mascot.connect(buddy, location.origin);
+    document.getElementById("bridge").textContent = "MCP bridge: connected to " + location.host;
+  }
+
+  // A short greeting so the first view shows him moving.
+  setTimeout(() => buddy.gesture("wave", { hold: 2.4 }), 700);
+</script>
+</body>
+</html>
