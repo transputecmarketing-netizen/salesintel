@@ -64,6 +64,12 @@ Squash, stretch and soft body:
 - **Squash and stretch, volume preserved.** A jump squashes on the crouch, stretches on take-off, rounds out at the top and squashes on landing; laughs squash with each "ha", surprise stretches him up. It squashes about the feet on the ground and about the middle in the air, and stays subtle (8 to 12%). `bounce` is a springy bounce in place; agents can drive `body.squash` directly.
 - **Soft body.** Elastic springs driven by real velocity: the chest lags behind the hips and wobbles back, the trunk compresses and rebounds, the head squashes slightly on quick nods and landings, and fingers flop back when the hand moves fast.
 
+Jelly limbs:
+
+- **The pose is a target, not the drawing.** The arm's rigid pose (shoulder, elbow, wrist) only says where it wants to be. What is drawn is a soft chain (elbow, mid-forearm, wrist) on springs that chases it: each point springs to its place and to its offset from the point before, so motion flows from the shoulder to the hand like a whip, lags, overshoots and wobbles back.
+- **No hinge.** The arm is drawn as one smooth rubber-hose curve through the chain, with no pinch or crease at the elbow.
+- **A jelly hand.** The hand rides the end of the chain, trails and settles with it, and stretches a little along a fast motion.
+
 How the hands are built:
 
 - **In 3D, then projected.** Each hand is modelled with x across the palm, y along the fingers and z out of the back, and turned on the forearm before it is drawn. Face-on, a curl foreshortens and the part that folds behind the hand is left out; edge-on, the curl shows as a real C-shaped bend. A hanging hand is seen mostly from the side, palm toward the thigh, as a real one is.

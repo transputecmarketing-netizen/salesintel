@@ -147,7 +147,7 @@
   // An organic limb: one continuous outline around a chain of points with a
   // radius profile. At each bend the outside swells to a soft point and the
   // inside pinches, so elbows and knees read as joints rather than pipes.
-  function limb(P, R) {
+  function limb(P, R, hose) {
     const n = P.length, plus = [], minus = [];
     for (let i = 0; i < n; i++) {
       const a = i > 0 ? sub(P[i], P[i - 1]) : sub(P[1], P[0]);
@@ -157,7 +157,7 @@
       t = tl < 1e-3 ? ua : mul(t, 1 / tl);
       const nrm = [t[1], -t[0]];
       let rp = R[i], rm = R[i];
-      if (i > 0 && i < n - 1) {
+      if (i > 0 && i < n - 1 && !hose) {
         const cosHalf = Math.sqrt((1 + clamp(ua[0] * ub[0] + ua[1] * ub[1], -1, 1)) / 2);
         if (cosHalf < 0.985) {
           const inner = R[i] * Math.max(0.3, cosHalf), outer = R[i] / Math.max(0.64, cosHalf);
@@ -285,7 +285,7 @@
   };
 
   const HANDS = {
-    relaxed: { fingers: [0.95, 0.9, 0.85, 0.8], thumb: 0.9, thumbAngle: -18, spread: 0.06 },
+    relaxed: { fingers: [0.92, 0.88, 0.84, 0.8], thumb: 0.9, thumbAngle: -24, spread: 0.04 },
     open:    { fingers: [1, 1, 1, 1], thumb: 1, thumbAngle: -58, spread: 0.65 },
     flat:    { fingers: [1, 1, 1, 1], thumb: 0.95, thumbAngle: -30, spread: 0.12 },
     fist:    { fingers: [0, 0, 0, 0], thumb: 0.55, thumbAngle: -14, spread: 0 },
@@ -301,8 +301,8 @@
     // a hanging hand is seen mostly from the side, palm toward the thigh
     // A relaxed arm: the hand hangs straight down in line with the forearm,
     // no bend at the wrist, palm toward the thigh, thumb to the front.
-    R: { shoulder: 0, elbow: -3, wrist: 3, hand: "relaxed", side: 0.45, z: "mid" },
-    L: { shoulder: -26, elbow: 24, wrist: 2, hand: "relaxed", side: 0.45, z: "mid" }
+    R: { shoulder: 1, elbow: -9, wrist: 6, hand: "relaxed", side: 0.88, z: "mid" },
+    L: { shoulder: -24, elbow: 26, wrist: -2, hand: "relaxed", side: 0.88, z: "mid" }
   };
   const GESTURES = {
     none: {},
@@ -1598,10 +1598,39 @@
       const elAng = s["el" + side].value + Math.sin(ph) * 13 * amp - drag * 0.6 - beat * 8 + sw * 0.7;
       const wrAng = s["wr" + side].value + Math.sin(ph - 1.25) * 24 * amp + s["lag" + side].value + beat * 7;
       const foreAng = shAng + elAng, handAng = foreAng + wrAng;
-      if (this.prevFore[side] != null && this._dt) this.foreVel[side] = wrap(foreAng - this.prevFore[side]) / this._dt;
-      this.prevFore[side] = foreAng;
       const fsU = s["fsU" + side].value, fsF = s["fsF" + side].value;
-      const E = add(S, mul(dirOf(shAng), A.Lu * fsU)), W = add(E, mul(dirOf(foreAng), A.Lf * fsF));
+      const Er = add(S, mul(dirOf(shAng), A.Lu * fsU)), Wr = add(Er, mul(dirOf(foreAng), A.Lf * fsF));
+
+      // ---- jelly limb. The pose above is only where the arm wants to be.
+      // What is drawn is a soft chain (elbow, mid-forearm, wrist) on springs
+      // that chases it: each point springs to its place and to its offset
+      // from the point before it, so motion flows from the shoulder out to
+      // the hand like a whip, lags, overshoots and wobbles back. The arm
+      // bends as one smooth curve instead of two sticks on a hinge.
+      const tgt = [Er, lerp2(Er, Wr, 0.5), Wr];
+      const dt = this._dt || 0;
+      let sim = this.soft?.[side];
+      this.soft = this.soft || {};
+      if (!sim || calm || !dt || len(sub(sim.p[2], Wr)) > 900) {
+        sim = this.soft[side] = { p: tgt.map((q) => q.slice()), v: tgt.map(() => [0, 0]) };
+      } else {
+        const K = [150, 115, 95], C = [11, 8.6, 7.6], KC = 70;
+        const steps = Math.max(1, Math.ceil(dt * 240)), h = dt / steps;
+        for (let it = 0; it < steps; it++) {
+          for (let i = 0; i < 3; i++) {
+            const p = sim.p[i], v = sim.v[i];
+            const prev = i === 0 ? S : sim.p[i - 1], prevT = i === 0 ? S : tgt[i - 1];
+            const want = add(prev, sub(tgt[i], prevT));
+            const ax = (tgt[i][0] - p[0]) * K[i] + (want[0] - p[0]) * KC - v[0] * C[i];
+            const ay = (tgt[i][1] - p[1]) * K[i] + (want[1] - p[1]) * KC - v[1] * C[i];
+            v[0] += ax * h; v[1] += ay * h; p[0] += v[0] * h; p[1] += v[1] * h;
+          }
+        }
+      }
+      const E = sim.p[0], Fs = sim.p[1], W = sim.p[2];
+      const foreJ = angleOf(W[0] - Fs[0], W[1] - Fs[1]), handJ = foreJ + wrAng;
+      if (this.prevFore[side] != null && this._dt) this.foreVel[side] = wrap(foreJ - this.prevFore[side]) / this._dt;
+      this.prevFore[side] = foreJ;
       const U = frame(S, shAng);
       // perspective: the near arm is foreshortened toward the viewer at rest,
       // so it slims down as it swings away from the body
@@ -1614,19 +1643,19 @@
       const turn01 = Math.abs(clamp(s["side" + side].value + Math.sin(ph - 0.5) * 0.24 * amp, -1, 1));
       const rE = A.rE * lerp(1, 0.92, 1 - slim) * slim, rW = A.rW * lerp(0.6, 1, Math.max(turn01, 0.3 + 0.14 * Math.sqrt(1 - turn01 * turn01)));
       const Um = add(lerp2(ua, E, 0.55), mul(perpOf(shAng), A.ox * 0.2 * slim));
-      const Fm = lerp2(E, W, 0.3);
+      const Fm = lerp2(lerp2(E, W, 0.3), Fs, 0.6);
       const rU = A.r0 * slim, rF = lerp(rE, rW, 0.3) * 1.07;
       const isFolded = Math.abs(wrap(elAng)) > 62 || fsU < 0.85;
       // the forearm flows into the heel of the hand instead of meeting it at a step
       const palmHalf = 60 * A.hs * Math.max(Math.abs(turn01 + 0.14 * Math.sqrt(1 - turn01 * turn01)), 0.3);
-      const W2 = add(W, mul(dirOf(foreAng + wrAng * 0.5), 26 * A.hs));
+      const W2 = add(W, mul(dirOf(foreJ + wrAng * 0.5), 26 * A.hs));
       const rW2 = Math.max(rW * 0.96, palmHalf * 0.94);
       if (!isFolded) {
-        arm.upper.setAttribute("d", limb([ua, Um, E, Fm, W, W2], [rU, rU * 1.03, rE, rF, rW, rW2]).d);
+        arm.upper.setAttribute("d", limb([ua, Um, E, Fm, W, W2], [rU, rU * 1.03, rE, rF, rW, rW2], true).d);
         arm.elbow.setAttribute("r", 0); arm.elbow2.setAttribute("r", 0); arm.fore.setAttribute("d", "M0,0");
       } else {
-        arm.upper.setAttribute("d", limb([ua, Um, E], [rU, rU * 1.03, rE]).d);
-        arm.fore.setAttribute("d", limb([E, Fm, W, W2], [rE, rF, rW, rW2]).d);
+        arm.upper.setAttribute("d", limb([ua, Um, E], [rU, rU * 1.03, rE], true).d);
+        arm.fore.setAttribute("d", limb([E, Fm, W, W2], [rE, rF, rW, rW2], true).d);
         for (const c of [arm.elbow, arm.elbow2]) { c.setAttribute("cx", f(E[0])); c.setAttribute("cy", f(E[1])); }
         arm.elbow.setAttribute("r", f(rE)); arm.elbow2.setAttribute("r", f(rE * 0.97));
       }
@@ -1635,7 +1664,7 @@
       const inSide = wrap(elAng) > 0 ? -1 : 1, nE = perpOf((shAng + foreAng) / 2);
       const ci = add(E, mul(nE, inSide * rE * 0.45));
       arm.crease.setAttribute("d", `M${pt(add(ci, mul(dirOf(shAng), -18)))} Q${pt(add(ci, mul(nE, -inSide * 6)))} ${pt(add(ci, mul(dirOf(foreAng), 16)))}`);
-      arm.crease.setAttribute("opacity", (smooth((bendEl - 40) / 40) * (isFolded ? 0 : 1)).toFixed(2));
+      arm.crease.setAttribute("opacity", "0");
 
       // ---- the hand, built in 3D and projected. x runs across the palm, y
       // along the fingers, z out of the back of the hand. "side" is how far
@@ -1645,7 +1674,15 @@
       const sn = Math.sqrt(Math.max(0, 1 - sd * sd));
       let fx = sd + 0.14 * sn;                       // a little perspective keeps edge-on fingers apart
       if (Math.abs(fx) < 0.3) fx = 0.3 * (fx < 0 ? -1 : 1);
-      const H = frame(W, handAng);
+      const H0 = frame(W, handJ);
+      // squash & stretch for the hand: it elongates along a fast motion
+      const vw = sim.v[2], vm = len(vw), vh = vm > 1 ? mul(vw, 1 / vm) : [1, 0];
+      const st = 1 + Math.min(0.16, vm / 6000);
+      const H = (x, y) => {
+        const q = H0(x, y), r = sub(q, W);
+        const a = r[0] * vh[0] + r[1] * vh[1], b = -r[0] * vh[1] + r[1] * vh[0];
+        return [W[0] + vh[0] * a * st - vh[1] * b / st, W[1] + vh[1] * a * st + vh[0] * b / st];
+      };
       // handedness: the near arm carries his left hand, the far arm his right,
       // its mirror image; "side" then means the same for both (1 back, -1 palm)
       const hand = side === "R" ? 1 : -1;
@@ -1743,7 +1780,7 @@
       arm.folded.style.display = isFolded ? "" : "none";
       arm.lowerBack.style.display = arm.lowerFront.style.display = isFolded ? "none" : "";
       arm.sleeveInner.setAttribute("opacity", smooth((lift - 8) / 22).toFixed(2));
-      this["joints" + side] = { S, E, W, handAng };
+      this["joints" + side] = { S, E, W, handAng: handJ };
     }
 
     _buildRig() {
