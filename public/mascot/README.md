@@ -38,7 +38,7 @@ Agents use the `mascot_feel` tool: pass `valence` and `arousal` from their own r
 
 ## The companion screen
 
-`companion.html` is the whole experience on one phone screen: Blu at the top, the conversation below.
+`companion.html` is the whole experience on one phone screen: Blu, full body from cap to shoes, at the top, and the conversation below. The chat area keeps a fixed height so he never shrinks as messages arrive.
 
 - **Listening**: when you focus the message box he leans in (`listen`), looks toward your words and nods now and then as you type.
 - **Thinking**: on send he pauses for about a second with a thinking face while a typing indicator shows.

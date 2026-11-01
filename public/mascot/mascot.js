@@ -326,7 +326,7 @@
     idea:     { R: { target: [975, 1000], handAngle: 174, hand: "point", side: -1, fsU: 0.6 }, face: "surprised", faceAfter: "happy" },
     count2:   { R: { target: [980, 1000], handAngle: 176, hand: "two", side: -1, fsU: 0.6 } },
     thumbsUp: { R: { target: [930, 1160], handAngle: -88, hand: "thumbUp", side: 1, fsU: 0.6, fsF: 0.6, elbowOut: 1.2 }, face: "happy" },
-    point:    { R: { target: [1090, 930], handAngle: 140, hand: "point", side: -1, fsU: 0.8 }, body: { lean: 1, twist: 0.45 }, look: [9, -4] },
+    point:    { R: { target: [1100, 1060], handAngle: 116, hand: "point", side: -1, fsU: 0.9 }, body: { lean: 1, twist: 0.45 }, look: [9, -4] },
     // the classic: one hand at the chin, the other arm across the chest holding that elbow
     think:    { L: { target: [572, 1045], handAngle: 172, hand: "point", side: 1, z: "top", fsU: 0.6 },
                 R: { target: [560, 1330], handAngle: -84, hand: "soft", side: 1, fsU: 0.92, fsF: 0.82, elbowOut: 0.3 }, face: "thinking", body: { twist: -0.3, lean: 1 } },
@@ -443,6 +443,8 @@
       .mascot-svg .ink{fill:none;stroke:var(--mascot-ink,#1543e6);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
       .mascot-svg .solid{fill:var(--mascot-ink,#1543e6)}
       .mascot-svg .paper{fill:var(--mascot-paper,#ffffff)}
+      /* the sleeve's fill is sealed a little past its edge, so no anti-aliased sliver of the line underneath shows through */
+      .mascot-svg .seal{stroke:var(--mascot-paper,#ffffff);stroke-width:5;stroke-linejoin:round}
       .mascot-svg .cut{fill:none;stroke:var(--mascot-paper,#ffffff);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
       .mascot-svg .skin{fill:var(--mascot-paper,#ffffff);stroke:var(--mascot-ink,#1543e6);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
       .mascot-svg .mouth{fill:var(--mascot-ink,#1543e6);stroke:var(--mascot-ink,#1543e6);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
@@ -563,7 +565,7 @@
     const skinU = el("g", { id: `${uid}-upper${side}` }, defs);
     const skinL = el("g", { id: `${uid}-lower${side}` }, defs);
     const upper = el("path", {}, skinU), elbow = el("circle", {}, skinU);
-    const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
+    const fore = el("path", {}, skinL), elbow2 = el("circle", { r: 0 }, skinL), wristC = el("circle", { r: 0 }, skinL), palm = el("path", {}, skinL), thumb = el("path", {}, skinL);
     // fingers are part of the skin union, so palm, thumb and fingers share one clean silhouette
     const digits = [0, 1, 2, 3].map(() => el("path", {}, skinL));
     // straight arm: both groups merge into one outline under the sleeve
@@ -581,10 +583,10 @@
     const palmLine = el("path", { class: "ink lo", opacity: 0 }, fingersG);
     // short lines between fingers that touch; they stop before the palm
     const seps = el("path", { class: "ink sep" }, fingersG);
-    const sleeveFill = el("path", { class: "paper", d: A.sleeve.fill }, sleeve);
+    const sleeveFill = el("path", { class: "paper seal", d: A.sleeve.fill }, sleeve);
     const sleeveInner = el("path", { class: "ink", d: A.sleeve.inner }, sleeve);
     const sleeveOuter = el("path", { class: "ink", d: A.sleeve.outer }, sleeve);
-    return { g, upper, elbow, elbow2, fore, palm, thumb, digits, seps, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
+    return { g, upper, elbow, elbow2, wristC, fore, palm, thumb, digits, seps, crease, palmLine, sleeve, sleeveFill, sleeveInner, sleeveOuter, lowerBack, lowerFront, folded };
   }
 
   // ------------------------------------------------------------ agent hooks
@@ -1953,6 +1955,8 @@
       const palmHalf = 60 * A.hs * Math.max(Math.abs(turn01 + 0.14 * Math.sqrt(1 - turn01 * turn01)), 0.3);
       const W2 = add(W, mul(dirOf(foreJ + wrAng * 0.5), 26 * A.hs));
       const rW2 = Math.max(rW * 0.96, palmHalf * 0.94);
+      // the wrist end is rounded: with a bent wrist a flat end would poke its corners past the palm
+      arm.wristC.setAttribute("cx", f(W2[0])); arm.wristC.setAttribute("cy", f(W2[1])); arm.wristC.setAttribute("r", f(rW2));
       if (!isFolded) {
         arm.upper.setAttribute("d", limb([ua, Um, E, Fm, W, W2], [rU, rU * 1.03, rE, rF, rW, rW2], true).d);
         arm.elbow.setAttribute("r", 0); arm.elbow2.setAttribute("r", 0); arm.fore.setAttribute("d", "M0,0");
@@ -2003,7 +2007,17 @@
       // that tapers to a round pad at the tip. Its base sits inside the palm,
       // and the skin union merges it into the hand's single silhouette.
       const digit = (chain, radii) => {
-        const P2 = chain.map(h3), R2 = radii.map((r) => r * hsc);
+        const P0 = chain.map(h3), R0 = radii.map((r) => r * hsc);
+        // A joint seen nearly end-on projects to a step shorter than the
+        // finger is thick, and the outline then folds over itself into a
+        // notch. Such steps are merged so the silhouette stays one soft curve.
+        const P2 = [P0[0]], R2 = [R0[0]];
+        for (let i = 1; i < P0.length; i++) {
+          const last = i === P0.length - 1, d = len(sub(P0[i], P2[P2.length - 1]));
+          if (d >= Math.max(R0[i], R2[R2.length - 1]) * 0.7 || P2.length < 2 && last) { P2.push(P0[i]); R2.push(R0[i]); }
+          else if (last) { P2[P2.length - 1] = P0[i]; R2[R2.length - 1] = Math.max(R0[i], R2[R2.length - 1]); }
+        }
+        if (P2.length < 2) { P2.push(add(P2[0], [0.01, 0.01])); R2.push(R2[0]); }
         const L = limb(P2, R2), n = P2.length - 1;
         const C = P2[n], r = R2[n], u = unit(sub(P2[n], P2[n - 1]));
         const a = L.plus[n], b = L.minus[n], na = unit(sub(a, C)), k = 0.552 * r, tip = add(C, mul(u, r));
@@ -2016,7 +2030,8 @@
       // as the hand closes (opposition)
       const ta = (s["thumbAng" + side].value + live(5, 0.5) * 8 - reach * 18) * DEG, te = clamp(s["thumb" + side].value + live(6, 0.45) * 0.06 + reach * 0.1, 0, 1), tc = 1 - te;
       const tLen = HAND.thumbLen * (0.62 + 0.38 * te) * (1 + 0.3 * smooth((-ta / DEG - 70) / 20));
-      const tb = [HAND.thumbBase[0], HAND.thumbBase[1], 0];
+      // a closing thumb tucks in over the palm instead of bulging past its edge
+      const tb = [HAND.thumbBase[0] + tc * 15, HAND.thumbBase[1] + tc * 6, 0];
       const t0d = n3([Math.sin(ta), Math.cos(ta), -(0.2 + 0.45 * tc)]);
       const t1 = v3(tb, t0d, tLen * 0.5);
       const t1d = n3([t0d[0] + tc * 0.75, t0d[1], t0d[2] - tc * 0.6]);
@@ -2091,7 +2106,9 @@
       } else arm.sleeve.setAttribute("transform", `${matrixOf(S, shAng)} scale(1 ${fsU.toFixed(3)})`);
       arm.folded.style.display = isFolded ? "" : "none";
       arm.lowerBack.style.display = arm.lowerFront.style.display = isFolded ? "none" : "";
-      arm.sleeveInner.setAttribute("opacity", smooth((lift - 8) / 22).toFixed(2));
+      // a half-faded seam reads as a ghost line, so it snaps quickly between hidden
+      // and fully drawn, and is always drawn when the sleeve sits over the chest
+      arm.sleeveInner.setAttribute("opacity", Math.max(smooth((lift - 13) / 3), smooth((0.9 - fsU) / 0.05)).toFixed(2));
       this["joints" + side] = { S, E, W, handAng: handJ };
     }
 
