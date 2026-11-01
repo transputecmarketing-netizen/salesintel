@@ -185,15 +185,56 @@
     return { shoulder: pick.up, elbow: wrap(pick.fore - pick.up), fore: pick.fore };
   }
 
+  // A CSS cubic-bezier as a function of progress.
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const X = (u) => ((ax * u + bx) * u + cx) * u, Y = (u) => ((ay * u + by) * u + cy) * u, dX = (u) => (3 * ax * u + 2 * bx) * u + cx;
+    return (t) => {
+      if (t <= 0) return 0; if (t >= 1) return 1;
+      let u = t;
+      for (let i = 0; i < 8; i++) { const e = X(u) - t, d = dX(u); if (Math.abs(e) < 1e-5 || Math.abs(d) < 1e-6) break; u -= e / d; }
+      if (!(u >= 0 && u <= 1)) { let lo = 0, hi = 1; for (let i = 0; i < 24; i++) { u = (lo + hi) / 2; if (X(u) < t) lo = u; else hi = u; } }
+      return Y(u);
+    };
+  }
+  // The lift curve: a quick start and a long, soft landing.
+  const EASE = bezier(0.32, 0.72, 0, 1);
+
+  // Two clocks, as in Hairline. Anything that follows a moving target is a
+  // spring (default k 100, c 18: just under critical, so it settles without
+  // wobble), integrated in 240 Hz sub-steps so it is smooth at any frame
+  // rate. A discrete change (a gesture, an expression) is a tween on the lift
+  // curve, always starting from wherever the value is now, so nothing jumps.
   class Spring {
-    constructor(value, k = 120, d = 18) { this.value = value; this.target = value; this.velocity = 0; this.k = k; this.d = d; }
-    set(t) { this.target = t; return this; }
-    snap(v) { this.value = this.target = v; this.velocity = 0; return this; }
+    constructor(value, k = 100, d = 18) { this.value = value; this.target = value; this.velocity = 0; this.k = k; this.d = d; this.segs = null; }
+    set(t) { this.segs = null; this.target = t; return this; }
+    snap(v) { this.segs = null; this.value = this.target = v; this.velocity = 0; return this; }
     kick(v) { this.velocity += v; return this; }
+    go(to, ms = 700, delay = 0, queue = false) {
+      const seg = { to, dur: Math.max(0.001, ms / 1000), wait: delay / 1000, from: null, t: 0 };
+      if (queue && this.segs) this.segs.push(seg); else this.segs = [seg];
+      this.target = to;
+      return this;
+    }
     step(dt) {
-      // two half steps keep stiff springs stable at low frame rates
-      for (let i = 0; i < 2; i++) {
-        const h = dt / 2, a = (this.target - this.value) * this.k - this.velocity * this.d;
+      if (this.segs) {
+        const seg = this.segs[0];
+        if (seg.wait > 0) {
+          // waiting on a stagger: coast to a stop instead of freezing mid-move
+          seg.wait -= dt; this.value += this.velocity * dt; this.velocity *= Math.exp(-dt * 10);
+          return this.value;
+        }
+        if (seg.from == null) seg.from = this.value;
+        seg.t += dt;
+        const prev = this.value;
+        this.value = lerp(seg.from, seg.to, EASE(clamp(seg.t / seg.dur, 0, 1)));
+        this.velocity = (this.value - prev) / (dt || 1e-3);
+        if (seg.t >= seg.dur) { this.segs.shift(); if (!this.segs.length) { this.segs = null; this.velocity = 0; } }
+        return this.value;
+      }
+      const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+      for (let i = 0; i < n; i++) {
+        const a = (this.target - this.value) * this.k - this.velocity * this.d;
         this.velocity += a * h; this.value += this.velocity * h;
       }
       return this.value;
@@ -304,6 +345,18 @@
       .mascot-svg .u-back{fill:var(--mascot-ink,#1543e6);stroke:var(--mascot-ink,#1543e6);stroke-width:18;stroke-linejoin:round}
       .mascot-svg .u-front{fill:var(--mascot-paper,#ffffff);stroke:none}
       .mascot-svg .shadow{fill:var(--mascot-ink,#1543e6);opacity:.1}
+      /* bright outside, dim inside: inner details are lighter and thinner than the silhouette */
+      .mascot-svg .ink.lo{stroke:color-mix(in srgb,var(--mascot-ink,#1543e6) 60%,var(--mascot-paper,#fff));stroke-width:6.5}
+      .mascot-svg .ink,.mascot-svg .solid,.mascot-svg .skin{transition:stroke 260ms cubic-bezier(.32,.72,0,1),fill 260ms cubic-bezier(.32,.72,0,1)}
+      /* hairline: the same drawing in fine, non-scaling lines, solids drawn as outlines */
+      .mascot-svg.is-hairline .ink,.mascot-svg.is-hairline .skin,.mascot-svg.is-hairline .mouth{stroke-width:1.7px;vector-effect:non-scaling-stroke}
+      .mascot-svg.is-hairline .ink.lo,.mascot-svg.is-hairline .cut{stroke:color-mix(in srgb,var(--mascot-ink,#1543e6) 50%,var(--mascot-paper,#fff));stroke-width:1.1px;vector-effect:non-scaling-stroke}
+      .mascot-svg.is-hairline .solid{fill:var(--mascot-paper,#fff);stroke:var(--mascot-ink,#1543e6);stroke-width:1.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+      .mascot-svg.is-hairline .u-back{stroke-width:4px;vector-effect:non-scaling-stroke}
+      .mascot-svg.is-hairline #eyeL,.mascot-svg.is-hairline #eyeR{stroke-width:2.4px}
+      .mascot-svg.is-hairline #capStripe{stroke:var(--mascot-ink,#1543e6);stroke-width:1.1px;vector-effect:non-scaling-stroke}
+      .mascot-svg.is-hairline #capGap,.mascot-svg.is-hairline #legCut{display:none}
+      .mascot-svg.is-hairline .shadow{opacity:.06}
       .mascot-svg .rig{font:600 24px ui-monospace,Menlo,monospace;fill:var(--mascot-rig,#e0306b)}
       .mascot-svg .rig-dot{fill:var(--mascot-rig,#e0306b)}
     `;
@@ -321,7 +374,7 @@
     parts.hemL = el("path", { class: "cut", "stroke-width": 6 }, legs);
     parts.shoeR = el("g", { id: "shoeR" }, legs);
     parts.legR = el("path", { class: "solid", id: "legR" }, legs);
-    parts.legCut = el("path", { class: "cut", "stroke-width": 8 }, legs);
+    parts.legCut = el("path", { class: "cut", id: "legCut", "stroke-width": 8 }, legs);
     parts.hemR = el("path", { class: "cut", "stroke-width": 6 }, legs);
     parts.pocket = el("path", { class: "cut", "stroke-width": 7 }, legs);
     parts.kneeL = el("path", { class: "cut", "stroke-width": 6 }, legs);
@@ -329,7 +382,7 @@
     for (const shoe of [parts.shoeL, parts.shoeR]) {
       el("path", { class: "skin", d: "M40,-24 C60,-6 66,34 60,60 L-136,60 C-176,60 -186,28 -158,10 C-120,-8 -70,-8 -34,-28 Z" }, shoe);
       el("path", { class: "solid", d: "M64,42 C66,58 62,74 52,76 L-138,76 C-174,76 -190,60 -176,42 Z" }, shoe);
-      el("path", { class: "ink", d: "M-56,-14 L-76,8 M-84,-4 L-104,14 M-150,40 C-128,30 -110,30 -96,40" }, shoe);
+      el("path", { class: "ink lo", d: "M-56,-14 L-76,8 M-84,-4 L-104,14 M-150,40 C-128,30 -110,30 -96,40" }, shoe);
     }
 
     // ---- torso
@@ -338,7 +391,7 @@
     parts.torsoSides = el("path", { class: "ink", id: "torsoSides",
       d: "M440,1110 C420,1230 398,1340 384,1420 C374,1520 372,1660 376,1786 M778,1110 C784,1350 792,1560 804,1786" }, torso);
     parts.hem = el("path", { class: "ink", id: "hem" }, torso);
-    parts.folds = el("path", { class: "ink", id: "shirtFolds", "stroke-width": 6, opacity: 0 }, torso);
+    parts.folds = el("path", { class: "ink lo", id: "shirtFolds", opacity: 0 }, torso);
     parts.shoulderLine = el("path", { class: "ink", id: "shoulders" }, torso);
     parts.collar = el("path", { class: "ink", id: "collar" }, torso);
 
@@ -354,13 +407,13 @@
     el("path", { class: "ink", d: "M370,566 C342,578 324,606 327,638 C330,668 344,690 362,702" }, parts.earL);
     parts.earR = el("g", { id: "earR" }, head);
     el("path", { class: "ink", d: "M845,628 C880,630 898,662 893,697 C888,735 852,760 800,762" }, parts.earR);
-    el("path", { class: "ink", d: "M800,704 L846,688" }, parts.earR);
+    el("path", { class: "ink lo", d: "M800,704 L846,688" }, parts.earR);
     parts.faceL = el("path", { class: "ink", id: "faceL" }, head);
     parts.faceR = el("path", { class: "ink", id: "faceR" }, head);
 
     const face = parts.face = el("g", { id: "features" }, head);
     parts.blush = el("g", { id: "blush", opacity: 0 }, face);
-    el("path", { class: "ink", d: "M420,690 l10,-14 M440,692 l10,-14 M640,676 l10,-14 M660,678 l10,-14" }, parts.blush);
+    el("path", { class: "ink lo", d: "M420,690 l10,-14 M440,692 l10,-14 M640,676 l10,-14 M660,678 l10,-14" }, parts.blush);
     parts.browL = el("path", { class: "ink", id: "browL", opacity: 0 }, face);
     parts.browR = el("path", { class: "ink", id: "browR", opacity: 0 }, face);
     parts.eyeL = el("path", { class: "ink", id: "eyeL", "stroke-width": 10 }, face);
@@ -371,23 +424,24 @@
     const inside = el("g", { "clip-path": `url(#${uid}-mouth)` }, face);
     parts.teeth = el("path", { class: "paper", id: "teeth" }, inside);
     parts.tongue = el("ellipse", { class: "paper", id: "tongue" }, inside);
-    parts.dimples = el("path", { class: "ink", id: "dimples", "stroke-width": 7, opacity: 0 }, face);
+    parts.dimples = el("path", { class: "ink lo", id: "dimples", opacity: 0 }, face);
 
     parts.lock = el("g", { id: "hairLock" }, head);
     el("path", { class: "solid",
       d: "M722,500 L728,560 C730,610 734,650 752,671 C760,679 771,670 777,655 C783,640 790,631 802,626 L840,520 Z" }, parts.lock);
+    // the fringe hangs under the brim, so it is painted before the cap
+    parts.fringe = el("g", { id: "fringe" }, head);
+    parts.fringe1 = el("path", { class: "solid", id: "fringeL", d: "M330,520 C328,548 352,572 380,568 C420,563 466,550 490,520 Z" }, parts.fringe);
+    parts.fringe2 = el("path", { class: "solid", id: "fringeR", d: "M512,520 C518,548 555,570 590,568 C630,566 672,550 694,520 Z" }, parts.fringe);
     const cap = parts.cap = el("g", { id: "cap" }, head);
     el("path", { class: "solid", id: "capDome",
       d: "M398,402 C396,300 472,204 600,198 C722,193 822,240 882,302 C926,350 948,420 945,492 C943,560 921,610 890,627 L795,631 L728,526 Z" }, cap);
     parts.button = el("g", { id: "capButton" }, cap);
     el("circle", { class: "solid", cx: 860, cy: 268, r: 36 }, parts.button);
     el("rect", { class: "paper", id: "capStripe", x: 481, y: 338, width: 128, height: 23, rx: 11.5, transform: "rotate(15 545 349.5)" }, cap);
-    el("path", { class: "cut", d: "M236,402 C262,388 288,384 312,387 C345,392 378,406 420,420 L712,517", "stroke-width": 18 }, cap);
+    el("path", { class: "cut", id: "capGap", d: "M236,402 C262,388 288,384 312,387 C345,392 378,406 420,420 L712,517", "stroke-width": 18 }, cap);
     el("path", { class: "solid", id: "capBrim",
       d: "M207,470 C204,425 245,388 300,386 C340,386 380,405 420,420 L702,512 C716,518 714,532 698,532 L300,537 C250,537 210,512 207,470 Z" }, cap);
-    parts.fringe = el("g", { id: "fringe" }, head);
-    parts.fringe1 = el("path", { class: "solid", id: "fringeL", d: "M330,520 C328,548 352,572 380,568 C420,563 466,550 490,520 Z" }, parts.fringe);
-    parts.fringe2 = el("path", { class: "solid", id: "fringeR", d: "M512,520 C518,548 555,570 590,568 C630,566 672,550 694,520 Z" }, parts.fringe);
 
     parts.layerTop = el("g", { id: "layerTop" }, g);
     parts.rig = el("g", { id: "rigOverlay", style: "display:none" }, g);
@@ -412,13 +466,13 @@
     const folded = el("g", { style: "display:none" }, g);
     el("use", { href: `#${uid}-lower${side}`, class: "u-back" }, folded);
     el("use", { href: `#${uid}-lower${side}`, class: "u-front" }, folded);
-    const crease = el("path", { class: "ink", "stroke-width": 7, opacity: 0 }, g);
+    const crease = el("path", { class: "ink lo", opacity: 0 }, g);
     const fingersG = el("g", {}, g);
-    const palmLine = el("path", { class: "ink", "stroke-width": 6, opacity: 0 }, fingersG);
+    const palmLine = el("path", { class: "ink lo", opacity: 0 }, fingersG);
     const fingers = [];
     for (let i = 3; i >= 0; i--) {
       const fg = el("g", {}, fingersG);
-      fingers[i] = { fill: el("path", { class: "paper" }, fg), line: el("path", { class: "ink" }, fg), crease: el("path", { class: "ink", "stroke-width": 7 }, fg) };
+      fingers[i] = { fill: el("path", { class: "paper" }, fg), line: el("path", { class: "ink" }, fg), crease: el("path", { class: "ink lo" }, fg) };
     }
     const sleeveFill = el("path", { class: "paper", d: A.sleeve.fill }, sleeve);
     const sleeveInner = el("path", { class: "ink", d: A.sleeve.inner }, sleeve);
@@ -481,8 +535,8 @@
       inputSchema: { type: "object", properties: { params: { type: "object", additionalProperties: { type: "number" } }, release: { oneOf: [{ type: "boolean" }, { type: "array", items: { type: "string" } }] } } } },
     { name: "mascot_perform", description: "Run a timeline of tool calls in order. Each step is {tool, arguments, wait_seconds}. mascot_say steps wait for the line to finish.",
       inputSchema: { type: "object", properties: { steps: { type: "array", items: { type: "object", properties: { tool: { type: "string" }, arguments: { type: "object" }, wait_seconds: { type: "number", minimum: 0 } }, required: ["tool"] } } }, required: ["steps"] } },
-    { name: "mascot_view", description: "Frame the mascot: 'full' shows the whole body, 'bust' matches the original head-and-shoulders crop.",
-      inputSchema: { type: "object", properties: { view: { type: "string", enum: Object.keys(VIEWS) } }, required: ["view"] } },
+    { name: "mascot_view", description: "Frame the mascot ('full' body or the original 'bust' crop) and/or set the line weight ('bold' brand lines or fine 'hairline').",
+      inputSchema: { type: "object", properties: { view: { type: "string", enum: Object.keys(VIEWS) }, line: { type: "string", enum: ["bold", "hairline"] } } } },
     { name: "mascot_get_state", description: "Read the current expression, gesture, view, speaking status and every rig point's live value.",
       inputSchema: { type: "object", properties: {} } },
     { name: "mascot_list_params", description: "List every rig point mascot_set accepts, with its range and meaning.",
@@ -492,7 +546,11 @@
   // ------------------------------------------------------------ runtime
   class MascotRig {
     constructor(container, options = {}) {
-      this.opts = Object.assign({ follow: true, idle: true, view: "full", talkGestures: true, reducedMotion: undefined }, options);
+      // Hairline's five options (intensity, theme, label, onRead, play), plus
+      // the framing, the line weight and the mascot's own behaviour switches.
+      this.opts = Object.assign({ follow: true, idle: true, view: "full", line: "bold", talkGestures: true, reducedMotion: undefined,
+        intensity: 0.5, theme: "auto", label: "Blue cap mascot", onRead: null, play: false }, options);
+      this.opts.intensity = typeof this.opts.intensity === "number" ? clamp(this.opts.intensity, 0, 1) : 0.5;
       if (this.opts.reducedMotion === undefined) {
         this.opts.reducedMotion = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
       }
@@ -503,28 +561,29 @@
       parts.layerMid.appendChild(this.arms.L.g);
       parts.layerMid.appendChild(this.arms.R.g);
       container.appendChild(svg);
+      this.update({ theme: this.opts.theme, label: this.opts.label, line: this.opts.line, play: this.opts.play });
 
       const S = (v, k, d) => new Spring(v, k, d);
       this.s = {
-        smile: S(1, 140, 18), open: S(0, 340, 26), width: S(1, 180, 19), happy: S(0, 140, 18), squeeze: S(0, 140, 18),
+        smile: S(1, 140, 21), open: S(0, 340, 33), width: S(1, 180, 24), happy: S(0, 140, 21), squeeze: S(0, 140, 21),
         eyeH: S(1, 160, 18), blink: S(1, 1100, 46), winkL: S(1, 500, 30), winkR: S(1, 500, 30),
         lookX: S(0, 420, 34), lookY: S(0, 420, 34),      // eyes are fast; the head follows
         cornerL: S(-3, 150, 15), cornerR: S(-3, 150, 15),
         brow: S(0, 150, 16), browTilt: S(0, 150, 16), browShow: S(0, 130, 18), blush: S(0, 60, 14),
-        tilt: S(0, 80, 11), turn: S(0, 90, 13), nod: S(0, 150, 14),
+        tilt: S(0, 100, 18), turn: S(0, 100, 18), nod: S(0, 150, 21),
         earL: S(0, 260, 9), earR: S(0, 260, 9), earPerk: S(0, 120, 14),
         fringe: S(0, 70, 5), lock: S(0, 60, 4), button: S(0, 160, 6),
-        lean: S(0, 40, 9), sway: S(0, 28, 8), bob: S(0, 150, 13), shrug: S(0, 110, 12),
-        hipTilt: S(0, 26, 8), twist: S(0, 38, 9), teeth: S(0, 260, 24),
+        lean: S(0, 40, 11.4), sway: S(0, 28, 9.5), bob: S(0, 150, 19), shrug: S(0, 110, 18.9),
+        hipTilt: S(0, 26, 9.2), twist: S(0, 38, 11), teeth: S(0, 260, 29),
         feetLift: S(0, 230, 19), footTilt: S(0, 200, 16), view: S(0, 50, 13)
       };
       for (const side of ["R", "L"]) {
         const r = REST[side], h = HANDS[r.hand];
         // proximal joints are heavy and calm, distal ones light and lively
-        this.s["sh" + side] = S(r.shoulder, 46, 10);
-        this.s["el" + side] = S(r.elbow, 135, 15);
-        this.s["wr" + side] = S(r.wrist, 115, 10);
-        this.s["lag" + side] = S(0, 150, 8.5);    // wrist drag from forearm speed
+        this.s["sh" + side] = S(r.shoulder);
+        this.s["el" + side] = S(r.elbow);
+        this.s["wr" + side] = S(r.wrist);
+        this.s["lag" + side] = S(0, 150, 13.5);   // wrist drag from forearm speed: real mass, a little bounce
         this.s["lift" + side] = S(0, 95, 11);     // one-sided shoulder lift
         this.s["side" + side] = S(r.side, 120, 16);
         this.s["spread" + side] = S(h.spread, 150, 15);
@@ -533,7 +592,7 @@
         this.s["wave" + side] = S(0, 60, 12);
         this.s["fsU" + side] = S(1, 110, 15);   // upper arm foreshortening (pointing at the camera)
         this.s["fsF" + side] = S(1, 140, 16);
-        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 150 - i * 10, 11.5);
+        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 150, 22);
       }
 
       this.expression = "smile";
@@ -569,7 +628,7 @@
       this.breathPhase = 0; this.breath = 0; this.breathAmp = 1; this.nextSigh = 16 + Math.random() * 14;
       this.turnLag = 0; this.greetToken = 0; this.armToken = { R: 0, L: 0 }; this.foreVel = { R: 0, L: 0 }; this.prevFore = {};
 
-      this._onMove = (e) => { this.pointer = [e.clientX, e.clientY]; };
+      this._onMove = (e) => { this.pointer = [e.clientX, e.clientY]; this._lastPointer = performance.now(); };
       this._onLeave = () => { this.pointer = null; };
       this._onClick = () => this.poke();
       if (this.opts.follow) {
@@ -579,6 +638,15 @@
       svg.addEventListener("click", this._onClick);
       svg.style.cursor = "pointer";
 
+      // the loop sleeps while the figure is offscreen or the tab is hidden
+      this.visible = true;
+      if (root.IntersectionObserver) {
+        this._io = new IntersectionObserver((es) => { for (const en of es) this.visible = en.isIntersecting; this._resume(); }, { rootMargin: "80px" });
+        this._io.observe(svg);
+      }
+      this._onVis = () => this._resume();
+      root.document.addEventListener("visibilitychange", this._onVis);
+
       this.express("smile", { instant: true });
       this._render();
       this._last = performance.now();
@@ -586,12 +654,48 @@
     }
 
     // -------------------------------------------------- public API
+    // Change options after mount. A key left out stays as it is.
+    update(o = {}) {
+      if ("intensity" in o) this.opts.intensity = typeof o.intensity === "number" ? clamp(o.intensity, 0, 1) : 0.5;
+      if ("label" in o) this.svg.setAttribute("aria-label", o.label || "Blue cap mascot");
+      if ("onRead" in o) this.opts.onRead = o.onRead;
+      if ("line" in o) { this.opts.line = o.line === "hairline" ? "hairline" : "bold"; this.svg.classList.toggle("is-hairline", this.opts.line === "hairline"); }
+      if ("theme" in o) {
+        this.opts.theme = o.theme || "auto";
+        const st = this.svg.style;
+        if (this.opts.theme === "light") { st.setProperty("--mascot-ink", "#1543e6"); st.setProperty("--mascot-paper", "#ffffff"); }
+        else if (this.opts.theme === "dark") { st.setProperty("--mascot-ink", "#7d97ff"); st.setProperty("--mascot-paper", "#12132a"); }
+        else { st.removeProperty("--mascot-ink"); st.removeProperty("--mascot-paper"); }
+      }
+      if ("view" in o) this.setView(o.view);
+      if ("play" in o) this._setPlay(!!o.play);
+      return this;
+    }
+
+    // play: walks through a short tour on its own until a pointer arrives,
+    // and picks it up again a few seconds after the pointer leaves.
+    _setPlay(on) {
+      this.opts.play = on;
+      clearInterval(this._playTimer);
+      this._playIdx = 0;
+      if (!on || this.opts.reducedMotion) return;
+      const TOUR = [["wave", "happy"], ["none", "smile"], ["idea", null], ["none", "smile"], ["think", null], ["thumbsUp", null], ["none", "smile"]];
+      this._playTimer = setInterval(() => {
+        if (this.talk || (this._lastPointer && performance.now() - this._lastPointer < 5000)) return;
+        const [g, e] = TOUR[this._playIdx++ % TOUR.length];
+        this.gesture(g); if (e) this.express(e);
+      }, 2600);
+    }
+
     express(name, { instant = false, hold = 0 } = {}) {
       const e = EXPRESSIONS[name];
       if (!e) return this;
       this.expression = name;
-      for (const k of ["smile", "open", "width", "happy", "squeeze", "eyeH", "brow", "browTilt", "browShow", "blush"]) {
-        instant ? this.s[k].snap(e[k]) : this.s[k].set(e[k]);
+      // the face changes as one gesture spreading out from the mouth:
+      // mouth first, then eyes, then brows, then the cheeks colour
+      const FACE = { smile: [0, 420], open: [0, 360], width: [0, 420], happy: [40, 380], squeeze: [40, 380], eyeH: [40, 380], brow: [80, 360], browTilt: [80, 360], browShow: [80, 360], blush: [140, 700] };
+      for (const k in FACE) {
+        if (instant) this.s[k].snap(e[k]); else this._go(this.s[k], e[k], FACE[k][1], FACE[k][0]);
         delete this.held[k];
       }
       this.exprLook = [e.lookX || 0, e.lookY || 0];
@@ -602,7 +706,7 @@
       const cornerGoal = -e.smile * 3 - Math.max(0, e.smile - 1) * 7;
       const first = Math.random() < 0.5 ? "cornerL" : "cornerR", second = first === "cornerL" ? "cornerR" : "cornerL";
       if (instant) { this.s.cornerL.snap(cornerGoal); this.s.cornerR.snap(cornerGoal); }
-      else { this.s[first].set(cornerGoal - 1.5); this._later(0.09 + Math.random() * 0.06, () => { this.s[second].set(cornerGoal); this.s[first].set(cornerGoal); }); }
+      else { this._go(this.s[first], cornerGoal, 420, 0); this._go(this.s[second], cornerGoal, 420, 80 + Math.random() * 70); }
       this.s.earPerk.set(name === "surprised" ? 1 : 0);
       if (name === "happy") this.wiggleEars();
       if (name === "laugh") this.laughBurst();
@@ -744,11 +848,11 @@
           this.s.width.set(EXPRESSIONS[this.expression].width);
           this.s.teeth.set(0);
           if (this.opts.talkGestures && this.gestureName === "none" && tk.autoGesture) this._applyArm("R", REST.R);
-          this._emit("speechend", { text: raw });
+          this._emit("speechend", { text: raw }); this._emit("state", this.getState());
           resolve();
         };
         this.talk = { units, total, t: 0, i: 0, done, autoGesture: startGesture === "none" };
-        this._emit("speechstart", { text: raw });
+        this._emit("speechstart", { text: raw }); this._emit("state", this.getState());
         if (speak && root.speechSynthesis && root.SpeechSynthesisUtterance) {
           try {
             const u = new SpeechSynthesisUtterance(raw);
@@ -805,12 +909,19 @@
     getState() {
       const params = {};
       for (const [name, spec] of Object.entries(PARAMS)) params[name] = Math.round(this.s[spec.key].value * 100) / 100;
-      return { expression: this.expression, gesture: this.gestureName, view: this.view, speaking: !!this.talk,
+      return { expression: this.expression, gesture: this.gestureName, view: this.view, line: this.opts.line, caption: this.caption(), speaking: !!this.talk,
         held: Object.keys(PARAMS).filter((n) => PARAMS[n].key in this.held), params };
     }
     on(event, fn) { (this.listeners[event] ||= []).push(fn); return () => this.off(event, fn); }
     off(event, fn) { this.listeners[event] = (this.listeners[event] || []).filter((h) => h !== fn); }
-    _emit(event, detail) { for (const h of this.listeners[event] || []) { try { h(detail); } catch (_) { /* listeners never stop the rig */ } } }
+    caption() {
+      if (this.talk) return "talking";
+      if (this.laughT > 0) return "laughing";
+      if (this.gestureName !== "none") return this.gestureName;
+      return this.expression === "smile" ? "rest" : this.expression;
+    }
+    _emit(event, detail) {
+      if (event === "state" && this.opts.onRead) { const c = this.caption(); if (c !== this._lastRead) { this._lastRead = c; try { this.opts.onRead(c); } catch (_) { /* never stop the rig */ } } } for (const h of this.listeners[event] || []) { try { h(detail); } catch (_) { /* listeners never stop the rig */ } } }
 
     async call(name, args = {}) {
       this._emit("command", { name, arguments: args });
@@ -852,8 +963,11 @@
             return { ok: results.every((r) => r.ok), steps: results, state: this.getState() };
           }
           case "mascot_view":
-            if (!VIEWS[args.view]) return fail(`Unknown view "${args.view}". Use full or bust.`);
-            this.setView(args.view); break;
+            if (args.view != null && !VIEWS[args.view]) return fail(`Unknown view "${args.view}". Use full or bust.`);
+            if (args.line != null && !["bold", "hairline"].includes(args.line)) return fail(`Unknown line "${args.line}". Use bold or hairline.`);
+            if (args.view) this.setView(args.view);
+            if (args.line) this.update({ line: args.line });
+            break;
           case "mascot_get_state": break;
           case "mascot_list_params":
             return { ok: true, params: Object.fromEntries(Object.entries(PARAMS).map(([n, p]) => [n, { min: p.min, max: p.max, about: p.about }])) };
@@ -883,7 +997,11 @@
     }
 
     destroy() {
+      this.destroyed = true;
       cancelAnimationFrame(this._raf);
+      this._io?.disconnect();
+      root.document.removeEventListener("visibilitychange", this._onVis);
+      clearInterval(this._playTimer);
       this.timers.forEach(clearTimeout);
       clearTimeout(this._exprHold); clearTimeout(this._gestureHold);
       root.removeEventListener("pointermove", this._onMove);
@@ -893,6 +1011,9 @@
 
     // -------------------------------------------------- internals
     _later(sec, fn) { this.timers.push(setTimeout(fn, sec * 1000)); }
+    _go(spring, to, ms, delay = 0, queue = false) {
+      if (this.opts.reducedMotion) spring.snap(to); else spring.go(to, ms, delay, queue);
+    }
 
     // A greeting is a whole-body event, not an arm animation: eyes find you,
     // brows flash, the head tilts toward the hand, the shoulder rises, weight
@@ -901,8 +1022,9 @@
       const s = this.s, token = ++this.greetToken;
       const live = (fn) => () => { if (this.greetToken === token && (this.gestureName === name)) fn(); };
       this.exprLook = [0, 0];
-      s.browShow.set(0.9); s.brow.set(-13);                                  // eyebrow flash
-      this._later(0.42, live(() => { s.brow.set(EXPRESSIONS[this.expression].brow); s.browShow.set(EXPRESSIONS[this.expression].browShow); }));
+      // eyebrow flash: up quickly, held a beat, then down softly
+      this._go(s.browShow, 0.9, 200); this._go(s.brow, -13, 220);
+      this._later(0.42, live(() => { this._go(s.brow, EXPRESSIONS[this.expression].brow, 600); this._go(s.browShow, EXPRESSIONS[this.expression].browShow, 600); }));
       this._later(0.08, live(() => { this.base.tilt = name === "hello" ? 7 : 5.5; this.base.lean = name === "hi5" ? 2 : -1.6; this.idleSway = -14; this.base.twist = 0.4; }));
       this._later(0.12, live(() => s.liftR.set(name === "hello" ? 16 : 11)));
       this._later(0.3, live(() => { s.open.set(0.38); s.width.set(0.95); }));     // "hi"
@@ -930,35 +1052,39 @@
       const near = (spring, target) => { let t = target; while (t - spring.value > 180) t -= 360; while (t - spring.value < -180) t += 360; return t; };
       const shGoal = near(s["sh" + side], shoulder);
       const h = HANDS[pose.hand || "relaxed"];
-      // Successive breaking of joints: shoulder leads, elbow follows, the
-      // wrist and fingers arrive last. Big swings start with a small dip the
-      // other way (anticipation).
-      const token = ++this.armToken[side];
-      const at = (sec, fn) => this._later(sec, () => { if (this.armToken[side] === token) fn(); });
+      // Successive breaking of joints, as Hairline staggers by distance: each
+      // joint starts a step later the further it is down the chain, all on
+      // the 700ms lift curve, so the arm moves as one gesture. Big swings
+      // start with a small dip the other way (anticipation).
+      const g = (key, to, ms, delay, queue) => this._go(s[key + side], to, ms, delay, queue);
+      const STEP = 45;
       const delta = shGoal - s["sh" + side].value;
       const big = Math.abs(delta) > 30 && !this.opts.reducedMotion;
-      const t0 = big ? 0.1 : 0;
-      if (big) s["sh" + side].set(s["sh" + side].value - Math.sign(delta) * Math.min(7, Math.abs(delta) * 0.07));
-      if (big) s["wave" + side].set(0);
+      const t0 = big ? 130 : 0;
+      if (big) g("sh", s["sh" + side].value - Math.sign(delta) * Math.min(7, Math.abs(delta) * 0.07), 150, 0);
       // Raising: the elbow folds first, so the hand travels up close to the
       // body. Lowering: the elbow stays bent until the arm is nearly down,
       // so the hand never swings out wide.
       const elGoal = wrap(elbow), elNow = s["el" + side].value;
       const folding = Math.abs(elGoal) > Math.abs(elNow) + 35;
       const opening = Math.abs(elGoal) + 35 < Math.abs(elNow);
-      at(t0 + (folding ? 0.05 : 0), () => { s["sh" + side].set(shGoal); s["fsU" + side].set(pose.fsU ?? 1); });
-      at(t0 + (folding ? 0 : opening ? 0.2 : 0.07), () => s["el" + side].set(elGoal));
+      g("sh", shGoal, 700, big ? (folding ? 40 : 0) : (folding ? 40 : 0), big);
+      const elDelay = t0 + (folding ? 0 : opening ? 200 : STEP);
+      g("el", elGoal, 650, elDelay);
       if ((folding || opening) && !this.opts.reducedMotion) {
         // the forearm swings toward the viewer on its way, so in 2D it
         // shortens mid-move and the hand rises in front of the body
-        at(t0, () => { s["fsF" + side].set(0.42); s["fsU" + side].set(Math.min(pose.fsU ?? 1, 0.88)); });
-        at(t0 + (folding ? 0.24 : 0.36), () => { s["fsF" + side].set(pose.fsF ?? 1); s["fsU" + side].set(pose.fsU ?? 1); });
-      } else at(t0 + 0.07, () => s["fsF" + side].set(pose.fsF ?? 1));
-      at(t0 + 0.13, () => { s["wr" + side].set(clamp(wrap(wrist), -95, 95)); s["side" + side].set(pose.side ?? 1); });
-      at(t0 + 0.16, () => { s["thumb" + side].set(h.thumb); s["thumbAng" + side].set(h.thumbAngle); s["spread" + side].set(h.spread); });
+        g("fsF", 0.42, folding ? 280 : 380, t0);
+        g("fsF", pose.fsF ?? 1, 480, 0, true);
+        g("fsU", Math.min(pose.fsU ?? 1, 0.88), 300, t0);
+        g("fsU", pose.fsU ?? 1, 520, 0, true);
+      } else { g("fsF", pose.fsF ?? 1, 650, t0 + STEP); g("fsU", pose.fsU ?? 1, 700, t0); }
+      g("wr", clamp(wrap(wrist), -95, 95), 600, t0 + 2 * STEP);
+      g("side", pose.side ?? 1, 560, t0 + 2 * STEP);
+      g("thumb", h.thumb, 520, t0 + 2.5 * STEP); g("thumbAng", h.thumbAngle, 520, t0 + 2.5 * STEP); g("spread", h.spread, 520, t0 + 2.5 * STEP);
       const unfurl = h.fingers.reduce((a, v, i) => a + v - s[`f${i}${side}`].target, 0) > 0;
-      h.fingers.forEach((v, i) => at(t0 + 0.18 + (unfurl ? i : 3 - i) * 0.045, () => s[`f${i}${side}`].set(v)));
-      at(t0 + (pose.wave ? 0.42 : 0), () => s["wave" + side].set(pose.wave || 0));
+      h.fingers.forEach((v, i) => g(`f${i}`, v, 480, t0 + 3 * STEP + (unfurl ? i : 3 - i) * 35));
+      g("wave", pose.wave || 0, 500, pose.wave ? t0 + 420 : 0);
       for (const k of ["sh", "el", "wr", "side", "spread", "thumb", "thumbAng", "f0", "f1", "f2", "f3"]) delete this.held[k + side];
       this.armPose[side] = pose;
       const layer = { back: this.parts.layerBack, mid: this.parts.layerMid, top: this.parts.layerTop }[pose.z || "mid"];
@@ -983,13 +1109,19 @@
       this._behave(dt);
       for (const k in this.s) this.s[k].step(dt);
       this._render();
-      this._raf = requestAnimationFrame((t) => this._tick(t));
+      this._raf = this.visible && !root.document.hidden ? requestAnimationFrame((t) => this._tick(t)) : 0;
+    }
+    _resume() {
+      if (this.visible && !root.document.hidden && !this._raf && !this.destroyed) {
+        this._last = performance.now();
+        this._raf = requestAnimationFrame((t) => this._tick(t));
+      }
     }
 
     // Autonomous life and the talking director.
     _behave(dt) {
       const s = this.s, calm = this.opts.reducedMotion;
-      const want = (k, v) => { if (!(k in this.held)) s[k].set(v); };
+      const want = (k, v) => { if (!(k in this.held) && !s[k].segs) s[k].set(v); };
 
       if (this.opts.idle) {
         this.nextBlink -= dt;
@@ -1055,8 +1187,8 @@
       const p = this._pointerInSvg();
       this.attention = 0;
       if (p && this.opts.follow) {
-        const dx = (p[0] - 600) / 480, dy = (p[1] - 640) / 480;
-        lx = clamp(dx, -1, 1) * 9; ly = clamp(dy, -1, 1) * 7; turn = clamp(dx, -1, 1) * 10;
+        const dx = (p[0] - 600) / 480, dy = (p[1] - 640) / 480, k = 0.4 + 1.2 * this.opts.intensity;
+        lx = clamp(dx, -1, 1) * 9 * Math.min(1.2, 0.6 + k * 0.4); ly = clamp(dy, -1, 1) * 7; turn = clamp(dx, -1, 1) * 10 * k;
         this.attention = clamp(dx, -1, 1);
       }
       if (this.exprLook && (this.exprLook[0] || this.exprLook[1]) && !p) { lx = this.exprLook[0]; ly = this.exprLook[1]; }

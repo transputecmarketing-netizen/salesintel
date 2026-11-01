@@ -114,7 +114,7 @@
 <div class="wrap">
   <header>
     <h1>Blue Cap Mascot</h1>
-    <p>Your sketch, traced to SVG and rigged head to toe. Real shoulders, elbows, wrists and fingers, legs that bend at the knee, a jaw that drops when he talks. Left alone he breathes, blinks, shifts his weight and glances around; click him and he laughs.</p>
+    <p>Your sketch, traced to SVG and rigged head to toe, moving on Hairline's two clocks: near-critical springs for anything that follows you, a 700 ms lift curve for every change, staggered joint by joint. Real shoulders, elbows, wrists and fingers, legs that bend at the knee, a jaw that drops when he talks. Left alone he breathes, blinks, shifts his weight and glances around; click him and he laughs.</p>
   </header>
 
   <div class="main">
@@ -123,6 +123,10 @@
       <div class="seg" role="group" aria-label="Framing" style="position:absolute;top:8px;right:12px;z-index:1">
         <button type="button" data-view="full" aria-pressed="true">Full body</button>
         <button type="button" data-view="bust" aria-pressed="false">Bust</button>
+      </div>
+      <div class="seg seg-line" role="group" aria-label="Line" style="position:absolute;top:48px;right:12px;z-index:1">
+        <button type="button" data-line="bold" aria-pressed="true">Bold</button>
+        <button type="button" data-line="hairline" aria-pressed="false">Hairline</button>
       </div>
       <div id="buddy"></div>
       <div class="bubble" id="bubble" data-empty="true" aria-live="polite"></div>
@@ -173,7 +177,11 @@
         <div class="row">
           <label class="toggle"><input type="checkbox" id="follow" checked> Follow cursor</label>
           <label class="toggle"><input type="checkbox" id="rig"> Show rig points</label>
+          <label class="toggle"><input type="checkbox" id="play"> Play tour</label>
         </div>
+        <label class="toggle" for="intensity" style="gap:12px">How strongly he answers the cursor
+          <input type="range" id="intensity" min="0" max="1" step="0.05" value="0.5" style="accent-color:var(--ink);width:140px">
+        </label>
       </div>
     </div>
   </div>
@@ -229,12 +237,13 @@
 
 <script src="mascot.js"></script>
 <script>
-  const buddy = Mascot.mount(document.getElementById("buddy"));
+  const stateEl0 = document.getElementById("state");
+  const buddy = Mascot.mount(document.getElementById("buddy"), { onRead: (c) => { stateEl0.textContent = c; } });
   const stateEl = document.getElementById("state");
   const bubble = document.getElementById("bubble");
   let face = "smile", hands = "none";
   const label = (s) => s.replace(/([A-Z0-9])/g, " $1").replace(/^./, (c) => c.toUpperCase());
-  const showState = () => { stateEl.textContent = `${face} · ${hands === "none" ? "idle" : hands}`; };
+  const showState = () => {};
 
   function chips(hostId, names, onPick, current) {
     const host = document.getElementById(hostId);
@@ -318,11 +327,18 @@
   // A short greeting so the first view shows him moving.
   // Framing toggle
   const stage = document.getElementById("stage");
-  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".seg button[data-view]").forEach((b) => b.addEventListener("click", () => {
     buddy.setView(b.dataset.view);
     stage.dataset.view = b.dataset.view;
-    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    document.querySelectorAll(".seg button[data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
   }));
+
+  document.querySelectorAll(".seg-line button").forEach((b) => b.addEventListener("click", () => {
+    buddy.update({ line: b.dataset.line });
+    document.querySelectorAll(".seg-line button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+  document.getElementById("play").addEventListener("change", (e) => buddy.update({ play: e.target.checked }));
+  document.getElementById("intensity").addEventListener("input", (e) => buddy.update({ intensity: +e.target.value }));
 
   setTimeout(() => buddy.gesture("wave", { hold: 2.4 }), 700);
 </script>

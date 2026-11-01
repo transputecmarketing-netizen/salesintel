@@ -30,6 +30,17 @@ Options: `view` ("full" or "bust"), `follow` (track the cursor), `idle` (autonom
 
 He is never still. He breathes, blinks (sometimes twice), darts his eyes, shifts his weight from foot to foot, fidgets his fingers, twitches an ear, follows the cursor, and laughs when clicked. Hair, the side lock and the cap button lag behind the head; forearms and hands trail the shoulders.
 
+## Motion engine: Hairline's craft rules
+
+The motion follows the rules behind [Hairline](https://hairline.lucasmarkes.com) (MIT, Lucas Marques):
+
+- **Two clocks.** Anything that follows a moving target (gaze, head, posture) is a spring at Hairline's constants, k 100 and c 18: just under critical damping, so it settles without wobble. It is integrated in 240 Hz sub-steps so it is equally smooth at any frame rate. Every discrete change (a gesture, an expression) is a tween on the 700 ms lift curve `cubic-bezier(.32,.72,0,1)`, always starting from wherever the value is now, so nothing jumps.
+- **Stagger by distance.** A gesture spreads down the arm (shoulder, elbow, wrist, then the fingers one by one, 35 to 45 ms apart). An expression spreads out from the mouth to the eyes, brows and cheeks.
+- **Bright outside, dim inside.** Silhouettes are full weight; inner details (creases, folds, the palm line, laces, blush) are lighter and thinner.
+- **Two line weights.** `line: "bold"` is the brand drawing; `line: "hairline"` redraws the same rig in fine, non-scaling lines with solids as outlines.
+- **The loop sleeps** while the figure is offscreen or the tab is hidden.
+- **Same options as Hairline**: `intensity` (how strongly he answers the cursor), `theme` ("auto", "light", "dark"), `label`, `onRead` (a short caption such as `rest`, `wave` or `talking` whenever it changes) and `play` (a self-running tour until a pointer arrives). Change them later with `rig.update({...})`.
+
 How the motion is made to feel human rather than mechanical:
 
 - **Joints break in sequence.** The shoulder leads, the elbow follows, the wrist and fingers arrive last and overshoot. Big swings start with a small anticipation the other way.
