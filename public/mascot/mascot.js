@@ -585,7 +585,7 @@
       // Hairline's five options (intensity, theme, label, onRead, play), plus
       // the framing, the line weight and the mascot's own behaviour switches.
       this.opts = Object.assign({ follow: true, idle: true, view: "full", line: "bold", talkGestures: true, reducedMotion: undefined,
-        intensity: 0.5, theme: "auto", label: "Blue cap mascot", onRead: null, play: false }, options);
+        intensity: 0.5, theme: "auto", label: "Blue cap mascot", onRead: null, play: false, hands: "cartoon" }, options);
       this.opts.intensity = typeof this.opts.intensity === "number" ? clamp(this.opts.intensity, 0, 1) : 0.5;
       if (this.opts.reducedMotion === undefined) {
         this.opts.reducedMotion = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -615,6 +615,7 @@
         // squash & stretch and soft-body: elastic, so they overshoot and jiggle back
         squash: S(0, 240, 8.5), headSq: S(0, 300, 9), softX: S(0, 70, 4.6), softY: S(0, 170, 6.5),
         flopR: S(0, 170, 8.5), flopL: S(0, 170, 8.5),
+        popR: S(0, 190, 7), popL: S(0, 190, 7),          // a soft hand bounces when it lands in a pose
         feetLift: S(0, 230, 19), footTilt: S(0, 200, 16), view: S(0, 50, 13)
       };
       for (const side of ["R", "L"]) {
@@ -710,6 +711,7 @@
         else { st.removeProperty("--mascot-ink"); st.removeProperty("--mascot-paper"); }
       }
       if ("view" in o) this.setView(o.view);
+      if ("hands" in o) this.opts.hands = o.hands === "realistic" ? "realistic" : "cartoon";
       if ("play" in o) this._setPlay(!!o.play);
       return this;
     }
@@ -776,7 +778,9 @@
       if (b.tilt != null) this.base.tilt = b.tilt;
       if (b.hop) this.hop();
       this.s.liftR.set(0); this.s.liftL.set(0);
+      this.clipToken = (this.clipToken || 0) + 1;              // a new gesture cancels any playing clip
       if (name === "wave" || name === "hello" || name === "hi5") this._greet(name);
+      if (name === "wave" && !this.opts.reducedMotion) this._waveClip();
       clearTimeout(this._gestureHold);
       if (hold) this._gestureHold = setTimeout(() => { this.gesture("none"); this.express("smile"); }, hold * 1000);
       this._emit("state", this.getState());
@@ -1124,6 +1128,41 @@
       }
     }
 
+    // Hand-crafted motion: key poses with authored timing, played as eased
+    // tweens that carry momentum; the jelly arm adds follow-through on top.
+    // Each key: [time s, duration s, {sh, el, wr, side, f:[4], spread, thumb, thumbAng}]
+    _clip(side, keys, onEnd) {
+      const s = this.s, token = (this.clipToken = (this.clipToken || 0) + 1);
+      for (const [t, dur, k] of keys) {
+        this._later(t, () => {
+          if (this.clipToken !== token) return;
+          const ms = dur * 1000, g = (key, v) => v != null && this._go(s[key + side], v, ms);
+          g("sh", k.sh); g("el", k.el); g("wr", k.wr); g("side", k.side); g("spread", k.spread); g("thumb", k.thumb); g("thumbAng", k.thumbAng);
+          if (k.f) k.f.forEach((v, i) => this._go(s[`f${i}${side}`], v, ms * 0.9, i * 35));   // fingers trail one by one
+          if (k.pop) s["pop" + side].kick(k.pop);
+        });
+      }
+      const end = keys[keys.length - 1][0] + keys[keys.length - 1][1];
+      this._later(end, () => { if (this.clipToken === token && onEnd) onEnd(); });
+    }
+    _waveClip() {
+      const B = { sh: 44.6, el: 137, wr: 0 };
+      const keys = [
+        [0.00, 0.14, { sh: -6, el: -24, wr: -14 }],                                                  // wind-up: drops a touch
+        [0.14, 0.20, { sh: 22, el: 96, wr: -38, side: -0.6, f: [0.8, 0.74, 0.7, 0.66] }],             // rises close to the body, wrist trailing
+        [0.34, 0.18, { sh: 49, el: 146, wr: 18, side: -1, f: [1, 1, 1, 1], spread: 0.85, thumb: 1, thumbAng: -58, pop: 3 }], // the hit: open, a little past
+        [0.52, 0.16, { sh: B.sh, el: B.el, wr: B.wr }]                                                // settle
+      ];
+      // the waves themselves: wrist leads, elbow answers, fingers lag; each smaller
+      for (let k = 0; k < 6; k++) {
+        const d = 1 - k * 0.13, out = k % 2 === 0;
+        keys.push([0.68 + k * 0.26, 0.26, { wr: (out ? 24 : -20) * d, el: B.el + (out ? 9 : -7) * d, f: out ? [1, 1, 1, 1] : [0.9, 0.88, 0.86, 0.84] }]);
+      }
+      keys.push([0.68 + 6 * 0.26, 0.3, { wr: 3, el: B.el - 2, f: [1, 1, 1, 1] }]);
+      this.s.waveR.snap(0);
+      this._clip("R", keys, () => { if (this.gestureName === "wave") this._go(this.s.waveR, 0.18, 600); });
+    }
+
     // A greeting is a whole-body event, not an arm animation: eyes find you,
     // brows flash, the head tilts toward the hand, the shoulder rises, weight
     // shifts away for balance, the smile builds, then the wave decays.
@@ -1141,8 +1180,10 @@
       this._later(0.95, live(() => this.blink()));
       if (name !== "hi5") {
         // the wave itself: strong at first, then a gentler, hand-held rhythm
-        this._later(1.9, live(() => s.waveR.set(0.7)));
-        this._later(3.1, live(() => s.waveR.set(0.28)));
+        if (name === "hello") {
+          this._later(1.9, live(() => s.waveR.set(0.7)));
+          this._later(3.1, live(() => s.waveR.set(0.28)));
+        }
         this._later(3.2, live(() => { this.base.tilt = 3; s.liftR.set(6); }));
       }
     }
@@ -1198,6 +1239,7 @@
       const unfurl = h.fingers.reduce((acc, v, i) => acc + v - s[`f${i}${side}`].target, 0) > 0;
       h.fingers.forEach((v, i) => a(`f${i}`, v, t0 + 4 * STEP + (unfurl ? i : 3 - i) * 40));
       g("wave", pose.wave || 0, 500, pose.wave ? t0 + 420 : 0);
+      if (!this.opts.reducedMotion && pose !== this.armPose[side]) this._later(0.38, () => { if (this.armPose[side] === pose) s["pop" + side].kick(3.4); });
       for (const k of ["sh", "el", "wr", "side", "spread", "thumb", "thumbAng", "f0", "f1", "f2", "f3"]) delete this.held[k + side];
       this.armPose[side] = pose;
       const layer = { back: this.parts.layerBack, mid: this.parts.layerMid, top: this.parts.layerTop }[pose.z || "mid"];
@@ -1736,7 +1778,11 @@
       // along the fingers, z out of the back of the hand. "side" is how far
       // the forearm has turned: 1 shows the back of the hand, -1 the palm,
       // 0 the edge, where curled fingers show as real curves.
-      const sd = clamp(s["side" + side].value + Math.sin(ph - 0.5) * 0.24 * amp + live(11, 0.25) * 0.1 - reach * 0.35, -1, 1);
+      const cartoon = this.opts.hands !== "realistic";
+      let sd = clamp(s["side" + side].value + Math.sin(ph - 0.5) * 0.24 * amp + live(11, 0.25) * 0.1 - reach * 0.35, -1, 1);
+      // Cartoon hands, as Tolan reasons about fingers: stylised, never a thin
+      // anatomical side view. The hand always reads as a full soft silhouette.
+      if (cartoon) sd = (sd < 0 ? -1 : 1) * Math.max(Math.abs(sd), 0.82);
       const sn = Math.sqrt(Math.max(0, 1 - sd * sd));
       let fx = sd + 0.14 * sn;                       // a little perspective keeps edge-on fingers apart
       if (Math.abs(fx) < 0.3) fx = 0.3 * (fx < 0 ? -1 : 1);
@@ -1752,8 +1798,9 @@
       // handedness: the near arm carries his left hand, the far arm his right,
       // its mirror image; "side" then means the same for both (1 back, -1 palm)
       const hand = side === "R" ? 1 : -1;
-      const hmap = (x, y) => H(x * fx * hand * A.hs, y * A.hs);
-      const h3 = (q) => H((q[0] * fx * hand + q[2] * sn) * A.hs, q[1] * A.hs);
+      const pop = 1 + s["pop" + side].value * 0.13, hsc = A.hs * pop, cy = cartoon ? 0.92 : 1, cxs = cartoon ? 1.06 : 1;
+      const hmap = (x, y) => H(x * fx * hand * hsc * cxs, y * hsc * cy);
+      const h3 = (q) => H((q[0] * fx * hand + q[2] * sn) * hsc * cxs, q[1] * hsc * cy);
       arm.palm.setAttribute("d", HAND.palm.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(hmap(+x, +y))));
       const v3 = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
       const n3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
@@ -1761,7 +1808,7 @@
       // that tapers to a round pad at the tip. Its base sits inside the palm,
       // and the skin union merges it into the hand's single silhouette.
       const digit = (chain, radii) => {
-        const P2 = chain.map(h3), R2 = radii.map((r) => r * A.hs);
+        const P2 = chain.map(h3), R2 = radii.map((r) => r * hsc);
         const L = limb(P2, R2), n = P2.length - 1;
         const C = P2[n], r = R2[n], u = unit(sub(P2[n], P2[n - 1]));
         const a = L.plus[n], b = L.minus[n], na = unit(sub(a, C)), k = 0.552 * r, tip = add(C, mul(u, r));
@@ -1779,7 +1826,9 @@
       const t1 = v3(tb, t0d, tLen * 0.5);
       const t1d = n3([t0d[0] + tc * 0.75, t0d[1], t0d[2] - tc * 0.6]);
       const t2 = v3(t1, t1d, tLen * 0.42);
-      arm.thumb.setAttribute("d", digit([v3(tb, t0d, -16), tb, t1, t2], [24, 21, 18, 15.5]).d);
+      arm.thumb.setAttribute("d", cartoon
+        ? digit([v3(tb, t0d, -16), tb, v3(tb, t0d, tLen * 0.42), v3(tb, n3(v3(t0d, t1d, 0.5)), tLen * 0.74)], [27, 24, 21.5, 19.5]).d
+        : digit([v3(tb, t0d, -16), tb, t1, t2], [24, 21, 18, 15.5]).d);
       // when the palm faces us, the crease at the base of the thumb shows
       arm.palmLine.setAttribute("d", `M${pt(hmap(-30, 30))} Q${pt(hmap(-10, 62))} ${pt(hmap(-14, 104))}`);
       arm.palmLine.setAttribute("opacity", smooth((-sd - 0.35) / 0.4).toFixed(2));
@@ -1797,10 +1846,11 @@
         const beta = (HAND.fan[i] + spread * HAND.spreadFan[i]) * (1 - 0.5 * curl) * DEG;
         const sb = Math.sin(beta), cb = Math.cos(beta);
         const flex = [3 + curl * 82, 6 + curl * 96, 4 + curl * 62];
-        const segs = [0.47, 0.31, 0.22].map((q) => q * HAND.lengths[i]);
+        // cartoon fingers are short and chunky; realistic ones keep anatomy
+        const segs = [0.47, 0.31, 0.22].map((q) => q * HAND.lengths[i] * (cartoon ? 0.64 : 1));
         const k = [HAND.knuckles[i][0], HAND.knuckles[i][1], 0];
         // fingers taper a little toward the pad; the little finger is slimmer
-        const r0 = i === 3 ? 14.5 : 16.2;
+        const r0 = cartoon ? (i === 3 ? 17 : 19.5) : (i === 3 ? 14.5 : 16.2);
         const chain = [v3(k, [sb, cb, 0], -22), k], radii = [r0 + 1, r0];
         let p = k, cum = 0;
         for (let j = 0; j < 3; j++) {

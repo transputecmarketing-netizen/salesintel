@@ -75,6 +75,12 @@ Jelly limbs:
 - **No hinge.** The arm is drawn as one smooth rubber-hose curve through the chain, with no pinch or crease at the elbow.
 - **A jelly hand.** The hand rides the end of the chain, trails and settles with it, and stretches a little along a fast motion.
 
+Stylised hands and hand-crafted motion (after [Tolan](https://www.tolans.com/relay/designing-tolan-part-1-characters)):
+
+- **Cartoon hands by default.** Tolan's designers note that fingers shift a character "from magical toward humanoid", and a stylised character is not judged against real human motion. So `hands: "cartoon"` (the default) draws soft, chunky glove-like hands with short rounded fingers and a fat thumb, always as a full readable silhouette, never a thin anatomical side view. `hands: "realistic"` keeps the articulated version. The previous release is saved in `versions/`.
+- **Jelly pop.** A hand bounces a little, like soft rubber, when it lands in a new pose.
+- **Key poses with authored timing.** Like Tolan's mix of procedural motion and hand-made keyframes, the wave is a sequence of designed poses: a wind-up, the hand rising close to the body with the wrist trailing, an overshoot hit with the fingers spread, a settle, then swings that shrink with the fingers lagging, played as eased tweens with momentum while the jelly arm adds follow-through.
+
 Living hands:
 
 - **Never still.** Each finger, the thumb, the spread and the wrist roll drift on their own slow rhythms, strongest when the hand is idle.

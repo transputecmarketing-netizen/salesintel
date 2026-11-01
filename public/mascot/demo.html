@@ -127,6 +127,10 @@
         <button type="button" data-view="full" aria-pressed="true">Full body</button>
         <button type="button" data-view="bust" aria-pressed="false">Bust</button>
       </div>
+      <div class="seg seg-hands" role="group" aria-label="Hands" style="position:absolute;top:128px;right:12px;z-index:1">
+        <button type="button" data-hands="cartoon" aria-pressed="true">Cartoon</button>
+        <button type="button" data-hands="realistic" aria-pressed="false">Realistic</button>
+      </div>
       <div class="seg seg-look" role="group" aria-label="Look" style="position:absolute;top:88px;right:12px;z-index:1">
         <button type="button" data-look="drawing" aria-pressed="true">Drawing</button>
         <button type="button" data-look="ascii" aria-pressed="false">ASCII</button>
@@ -339,6 +343,11 @@
     buddy.setView(b.dataset.view);
     stage.dataset.view = b.dataset.view;
     document.querySelectorAll(".seg button[data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+
+  document.querySelectorAll(".seg-hands button").forEach((b) => b.addEventListener("click", () => {
+    buddy.update({ hands: b.dataset.hands });
+    document.querySelectorAll(".seg-hands button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
   }));
 
   // ASCII look: the live rig rendered as text over the same spot
