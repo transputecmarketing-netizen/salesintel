@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blu Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+  /* Layout: one phone screen. Blu fills the top, the conversation sits under him, the composer at the bottom. */
+  :root {
+    --bg: #eef0f7;
+    --screen: #f8f7fc;
+    --stage: #ebe7f4;
+    --fg: #191a3a;
+    --muted: #63658a;
+    --line: #dddaea;
+    --ink: #1543e6;
+    --you: #1543e6;
+    --you-fg: #ffffff;
+    --blu: #ffffff;
+    --font-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+    --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0e22; --screen: #14152e; --stage: #1b1d40; --fg: #ecebfb; --muted: #a2a4c8; --line: #2a2c52;
+      --ink: #7d97ff; --you: #7d97ff; --you-fg: #0d0e22; --blu: #222448; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0e22; --screen: #14152e; --stage: #1b1d40; --fg: #ecebfb; --muted: #a2a4c8; --line: #2a2c52;
+    --ink: #7d97ff; --you: #7d97ff; --you-fg: #0d0e22; --blu: #222448; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px;
+    display: grid; place-items: center;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 16px;
+  }
+  .phone {
+    width: 100%; max-width: 420px; height: min(860px, 100%); background: var(--screen);
+    border-radius: 36px; border: 1px solid var(--line); overflow: hidden;
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+  @media (max-width: 480px) { body { padding: 0; } .phone { max-width: none; height: 100%; border-radius: 0; border: 0; } }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 0; gap: 12px; }
+  .who { display: grid; gap: 1px; }
+  .who b { font: 700 22px/1.1 var(--font-display); letter-spacing: -0.01em; }
+  .who span { color: var(--muted); font-size: 13px; transition: color .3s; }
+  .voice { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--screen); color: var(--fg);
+    border-radius: 999px; padding: 8px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+  .voice[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--you-fg); }
+
+  .stage { position: relative; margin: 10px 14px 0; border-radius: 26px; background: var(--stage); overflow: hidden; min-height: 0;
+    --mascot-ink: var(--ink); --mascot-paper: var(--stage); }
+  #blu { position: absolute; inset: 0; display: grid; place-items: end center; }
+  #blu svg { width: auto; height: 100%; max-width: 100%; }
+
+  .log { overflow-y: auto; padding: 12px 16px 6px; display: flex; flex-direction: column; gap: 8px; max-height: 34vh; min-height: 120px; }
+  .msg { max-width: 82%; padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; overflow-wrap: anywhere; }
+  .msg.you { align-self: flex-end; background: var(--you); color: var(--you-fg); border-bottom-right-radius: 6px; }
+  .msg.blu { align-self: flex-start; background: var(--blu); border: 1px solid var(--line); border-bottom-left-radius: 6px; }
+  .msg.blu .w { opacity: .18; transition: opacity .12s; }
+  .msg.blu .w.on { opacity: 1; }
+  .msg.help { border-color: var(--ink); }
+  .typing { display: inline-flex; gap: 4px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: dot 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+
+  .ideas { display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 8px; scrollbar-width: none; }
+  .ideas button { flex: none; border: 1px solid var(--line); background: var(--screen); color: var(--fg); border-radius: 999px; padding: 8px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+
+  form { display: flex; gap: 8px; padding: 6px 12px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); }
+  #say { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 12px 16px; font: 15px var(--font-body); }
+  form button { border: 0; background: var(--ink); color: var(--you-fg); border-radius: 999px; padding: 0 18px; font: 600 15px var(--font-body); cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .typing i { animation: none; } .msg.blu .w { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <header>
+    <div class="who"><b>Blu</b><span id="mood" aria-live="polite">here with you</span></div>
+    <button class="voice" id="voice" type="button" aria-pressed="false">Voice off</button>
+  </header>
+  <div class="stage"><div id="blu"></div></div>
+  <div class="log" id="log" aria-live="polite"></div>
+  <div>
+    <div class="ideas" id="ideas"></div>
+    <form id="composer">
+      <input id="say" type="text" autocomplete="off" placeholder="Tell Blu how you're doing" aria-label="Message to Blu">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+<script src="mascot.js"></script>
+<script>
+  // Blu, a companion that feels with you. The replies here are a small
+  // stand-in; in the app a local model writes them and returns the same
+  // feeling numbers (valence, arousal) that drive Blu's face, body and voice.
+  const blu = Mascot.mount(document.getElementById("blu"), { view: "bust", hands: "cartoon" });
+  const log = document.getElementById("log"), input = document.getElementById("say"), moodEl = document.getElementById("mood");
+  let voiceOn = false, name = null, care = 0, busy = false, lastNod = 0;
+
+  const MOODS = { sad: "feeling it with you", upset: "staying calm with you", calm: "taking it easy", neutral: "listening", happy: "happy for you", excited: "so excited for you" };
+  const REPLIES = {
+    sad: ["I'm sorry. That sounds really hard. I'm here with you.", "That's a lot to carry. We can take it slowly.", "I hear you. You don't have to go through this alone."],
+    upset: ["That sounds stressful. Let's take one slow breath together.", "I hear you. We can untangle this one piece at a time."],
+    calm: ["Nice and easy. I like this pace.", "A quiet one. That's okay. I'm here."],
+    neutral: ["I'm listening. Tell me more?", "Got it. What's on your mind?", "Mm-hm. How does that feel for you?"],
+    happy: ["That's lovely! I'm really happy for you.", "Aw, that made me smile."],
+    excited: ["Yes! That's amazing, well done!", "Wow, that's huge! I'm so proud of you!"]
+  };
+  const TOPICS = [
+    [/\b(exam|test|quiz|study|studying|revise|revision|grade|marks)\b/, { sad: "Exams can feel so heavy. One bad day doesn't define you. Want to plan the next step together?", happy: "Your hard work paid off! What helped most?", any: "Studying, huh? Want to break it into small pieces together?" }],
+    [/\b(tired|sleep|sleepy|exhausted|insomnia)\b/, { any: "Sounds like you need rest. Have you had water and a little break today?" }],
+    [/\b(friend|friends|lonely|alone|nobody)\b/, { sad: "Feeling alone hurts. I'm glad you told me. Is there one person you could message today?", any: "Friends matter so much. Tell me about them?" }],
+    [/\b(work|job|boss|shift)\b/, { sad: "Work can wear you down. What's weighing on you most?", any: "How's work treating you?" }]
+  ];
+  // A companion that responds to sadness needs a safety path: on signs of crisis it stops mirroring and points to real help.
+  const CRISIS = /\b(kill myself|suicide|suicidal|end my life|hurt myself|self[- ]?harm|don't want to (live|be here))\b/;
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+  function reply(text, label) {
+    const t = text.toLowerCase();
+    const named = t.match(/\b(?:my name is|i'm called|call me)\s+([a-z][a-z'-]{1,20})/);
+    if (named) { name = named[1][0].toUpperCase() + named[1].slice(1); return { text: `Nice to meet you, ${name}! I'll remember that.`, feel: [0.7, 0.6], gesture: "wave" }; }
+    if (CRISIS.test(t)) { care = 4; return { text: "I'm really glad you told me, and I'm worried about you. You deserve support right now. Please reach out to someone you trust, or a local crisis line or emergency number. I'm here and I'll keep talking with you.", feel: [-0.35, 0.2], gesture: "heart", help: true }; }
+    // after a hard moment Blu stays gentle for a few turns instead of bouncing back
+    if (care > 0) { care--; if (label !== "happy" && label !== "excited") return { text: pick(["I'm still right here with you. Do you want to tell me more?", "Thank you for staying with me. Is there someone you trust you could reach out to today?", "We can go slowly. How are you feeling right now?"]), feel: [-0.3, 0.2] }; }
+    for (const [re, r] of TOPICS) if (re.test(t)) {
+      const line = r[label] || (label === "excited" && r.happy) || (label === "upset" && r.sad) || r.any;
+      if (line) return { text: line };
+    }
+    let line = pick(REPLIES[label]);
+    if (name && Math.random() < 0.4) line = line.replace(/^(\w)/, (c) => `${name}, ${c.toLowerCase()}`);
+    return { text: line };
+  }
+
+  function add(who, text, cls = "") {
+    const el = document.createElement("div");
+    el.className = `msg ${who} ${cls}`;
+    el.textContent = text;
+    log.appendChild(el); log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  // messages sent while Blu is still answering wait their turn
+  let queue = Promise.resolve();
+  function send(text) { if (text.trim()) queue = queue.then(() => turn(text)); }
+  async function turn(text) {
+    busy = true;
+    add("you", text);
+    blu.release(); blu.gesture("none");
+    // a short pause to think, eyes up, before answering
+    blu.express("thinking");
+    const dots = add("blu", ""); dots.innerHTML = '<span class="typing" aria-label="Blu is typing"><i></i><i></i><i></i></span>';
+    await new Promise((r) => setTimeout(r, 650 + Math.random() * 400));
+    const read = blu.mirror(text);
+    const r = reply(text, read.user.label);
+    if (r.feel) blu.feel(r.feel[0], r.feel[1]);
+    if (r.gesture) blu.gesture(r.gesture, { hold: 3 });
+    moodEl.textContent = (r.help || care > 0) ? "here for you" : MOODS[read.user.label];
+    // words appear in time with his mouth
+    dots.innerHTML = ""; if (r.help) dots.classList.add("help");
+    const words = r.text.split(" ").map((w) => { const s = document.createElement("span"); s.className = "w"; s.textContent = w + " "; dots.appendChild(s); return s; });
+    log.scrollTop = log.scrollHeight;
+    const per = (r.text.length * 0.068) / Math.max(1, words.length) * 1000;
+    words.forEach((w, i) => setTimeout(() => w.classList.add("on"), i * per));
+    await blu.say(r.text, { speak: voiceOn });
+    words.forEach((w) => w.classList.add("on"));
+    busy = false;
+  }
+
+  document.getElementById("composer").addEventListener("submit", (e) => { e.preventDefault(); const t = input.value; input.value = ""; send(t); });
+  // while you type, Blu leans in to listen, looks toward your words and nods now and then
+  input.addEventListener("focus", () => { if (!busy) { blu.gesture("listen"); blu.set({ "eyes.lookY": 6 }); } });
+  input.addEventListener("blur", () => { blu.release(["eyes.lookY"]); if (!busy && blu.gestureName === "listen") blu.gesture("none"); });
+  input.addEventListener("input", () => { const now = performance.now(); if (now - lastNod > 2600 && input.value.length > 3) { lastNod = now; blu.nod(1); } });
+  document.getElementById("voice").addEventListener("click", (e) => {
+    voiceOn = !voiceOn; e.currentTarget.setAttribute("aria-pressed", String(voiceOn)); e.currentTarget.textContent = voiceOn ? "Voice on" : "Voice off";
+  });
+  ["I failed my exam and I feel so alone", "My name is Sam", "Kind of tired today", "I passed!!! so happy", "Work was stressful"].forEach((t) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.addEventListener("click", () => send(t));
+    document.getElementById("ideas").appendChild(b);
+  });
+
+  // hello
+  setTimeout(async () => {
+    blu.gesture("wave", { hold: 2.6 });
+    const el = add("blu", "Hi, I'm Blu. How are you feeling today?");
+    await blu.say("Hi, I'm Blu. How are you feeling today?");
+  }, 600);
+</script>
+</body>
+</html>

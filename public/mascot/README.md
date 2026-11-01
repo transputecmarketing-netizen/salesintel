@@ -36,6 +36,20 @@ Running it on a phone with a local model: see [MOBILE.md](MOBILE.md).
 
 Agents use the `mascot_feel` tool: pass `valence` and `arousal` from their own read of the conversation, or `user_text` to read and mirror it.
 
+## The companion screen
+
+`companion.html` is the whole experience on one phone screen: Blu at the top, the conversation below.
+
+- **Listening**: when you focus the message box he leans in (`listen`), looks toward your words and nods now and then as you type.
+- **Thinking**: on send he pauses for about a second with a thinking face while a typing indicator shows.
+- **Mirroring**: he reads how you feel (`mirror`), then answers with face, posture, a fitting gesture and, with Voice on, a voice whose pace and pitch follow his mood. The status line under his name says how he is meeting you ("feeling it with you", "so excited for you").
+- **Words in time with his mouth**: the reply fades in word by word while he speaks it.
+- **Memory**: tell him your name ("my name is Sam") and he uses it later.
+- **Safety path**: on signs of crisis he stops mirroring, answers with care, points to someone trusted or a local crisis line or emergency number, and stays gentle for the next few turns.
+- Messages sent while he is still answering wait their turn.
+
+The replies are a small stand-in. In the app a local model writes them and returns the same feeling numbers (see `MOBILE.md`).
+
 ## Use it in a page
 
 ```html
