@@ -210,10 +210,17 @@
     set(t) { this.segs = null; this.target = t; return this; }
     snap(v) { this.segs = null; this.value = this.target = v; this.velocity = 0; return this; }
     kick(v) { this.velocity += v; return this; }
-    // wait out a stagger, then let the spring carry it there (overshoot and settle)
-    aim(to, delay = 0) { this.segs = [{ to, wait: delay / 1000, spring: true }]; this.target = to; return this; }
+    // wait out a stagger, then let the spring carry it there (overshoot and settle).
+    // While waiting it keeps heading where it was going, with its momentum:
+    // a living part never stops dead between two moves.
+    aim(to, delay = 0) {
+      if (delay <= 0) { this.segs = null; this.target = to; return this; }
+      const hold = this.segs ? this.segs[this.segs.length - 1].to : this.target;
+      this.segs = [{ to, wait: delay / 1000, spring: true, hold }]; this.target = to; return this;
+    }
     go(to, ms = 700, delay = 0, queue = false) {
-      const seg = { to, dur: Math.max(0.001, ms / 1000), wait: delay / 1000, from: null, t: 0 };
+      const hold = this.segs ? this.segs[this.segs.length - 1].to : this.target;
+      const seg = { to, dur: Math.max(0.001, ms / 1000), wait: delay / 1000, from: null, t: 0, hold };
       if (queue && this.segs) this.segs.push(seg); else this.segs = [seg];
       this.target = to;
       return this;
@@ -222,25 +229,31 @@
       if (this.segs) {
         const seg = this.segs[0];
         if (seg.wait > 0) {
-          // waiting on a stagger: coast to a stop instead of freezing mid-move
-          seg.wait -= dt; this.value += this.velocity * dt; this.velocity *= Math.exp(-dt * 10);
+          seg.wait -= dt; this._phys(dt, seg.hold);
           return this.value;
         }
         if (seg.spring) { this.segs = null; this.target = seg.to; return this.step(dt); }
         if (seg.from == null) seg.from = this.value;
         seg.t += dt;
         const prev = this.value;
-        this.value = lerp(seg.from, seg.to, EASE(clamp(seg.t / seg.dur, 0, 1)));
+        // the tween carries the momentum it started with, fading out, so a
+        // part already moving does not stop and restart
+        if (seg.v0 == null) seg.v0 = this.velocity;
+        const tau = 0.12, carry = seg.v0 * tau * (1 - Math.exp(-seg.t / tau)) * (1 - EASE(clamp(seg.t / seg.dur, 0, 1)));
+        this.value = lerp(seg.from, seg.to, EASE(clamp(seg.t / seg.dur, 0, 1))) + carry;
         this.velocity = (this.value - prev) / (dt || 1e-3);
         if (seg.t >= seg.dur) { this.segs.shift(); if (!this.segs.length) { this.segs = null; this.velocity = 0; } }
         return this.value;
       }
+      this._phys(dt, this.target);
+      return this.value;
+    }
+    _phys(dt, target) {
       const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
       for (let i = 0; i < n; i++) {
-        const a = (this.target - this.value) * this.k - this.velocity * this.d;
+        const a = (target - this.value) * this.k - this.velocity * this.d;
         this.velocity += a * h; this.value += this.velocity * h;
       }
-      return this.value;
     }
   }
 
@@ -605,8 +618,8 @@
       for (const side of ["R", "L"]) {
         const r = REST[side], h = HANDS[r.hand];
         // proximal joints are heavy and calm, distal ones light and lively
-        this.s["sh" + side] = S(r.shoulder);
-        this.s["el" + side] = S(r.elbow);
+        this.s["sh" + side] = S(r.shoulder, 52, 11.5);   // heavy, calm
+        this.s["el" + side] = S(r.elbow, 78, 13.5);
         this.s["wr" + side] = S(r.wrist, 110, 12);
         this.s["lag" + side] = S(0, 150, 13.5);   // wrist drag from forearm speed: real mass, a little bounce
         this.s["lift" + side] = S(0, 95, 11);     // one-sided shoulder lift
@@ -1126,17 +1139,18 @@
       const STEP = 45;
       const delta = shGoal - s["sh" + side].value;
       const big = Math.abs(delta) > 30 && !this.opts.reducedMotion;
-      const t0 = big ? 130 : 0;
-      if (big) g("sh", s["sh" + side].value - Math.sign(delta) * Math.min(7, Math.abs(delta) * 0.07), 150, 0);
+      const t0 = 0;
+      // anticipation is a small push the other way, not a separate stop-start move
+      if (big && Math.abs(shGoal) > Math.abs(s["sh" + side].value)) s["sh" + side].kick(-Math.sign(delta) * Math.min(70, Math.abs(delta) * 0.6));
       // Raising: the elbow folds first, so the hand travels up close to the
       // body. Lowering: the elbow stays bent until the arm is nearly down,
       // so the hand never swings out wide.
       const elGoal = wrap(elbow), elNow = s["el" + side].value;
       const folding = Math.abs(elGoal) > Math.abs(elNow) + 35;
       const opening = Math.abs(elGoal) + 35 < Math.abs(elNow);
-      g("sh", shGoal, 700, big ? (folding ? 40 : 0) : (folding ? 40 : 0), big);
-      const elDelay = t0 + (folding ? 0 : opening ? 200 : STEP);
-      g("el", elGoal, 650, elDelay);
+      const a0 = (key, to, delay) => this._aim(s[key + side], to, delay);
+      a0("sh", shGoal, folding ? 50 : 0);
+      a0("el", elGoal, folding ? 0 : opening ? 90 : STEP);
       if ((folding || opening) && !this.opts.reducedMotion) {
         // the forearm swings toward the viewer on its way, so in 2D it
         // shortens mid-move and the hand rises in front of the body
@@ -1273,6 +1287,11 @@
       }
       if (this.exprLook && (this.exprLook[0] || this.exprLook[1]) && !p) { lx = this.exprLook[0]; ly = this.exprLook[1]; }
       if (this.idleLook && !p) { lx = this.idleLook[0]; ly = this.idleLook[1]; }
+      // living eyes are never perfectly still: tiny jumps (microsaccades) a
+      // few times a second while holding a gaze, on top of a slow drift
+      this.nextMicro = (this.nextMicro ?? 0) - dt;
+      if (this.nextMicro <= 0) { this.micro = [(Math.random() - 0.5) * 1.6, (Math.random() - 0.5) * 1.1]; this.nextMicro = 0.25 + Math.random() * 0.6; }
+      if (!calm && this.micro) { lx += this.micro[0]; ly += this.micro[1]; }
       want("lookX", lx); want("lookY", ly);
       // the head follows the eyes a beat later, and only part of the way
       this.turnLag += (turn - this.turnLag) * (1 - Math.exp(-dt / 0.24));
@@ -1470,7 +1489,8 @@
 
     _renderFace() {
       const s = this.s, parts = this.parts;
-      const lx = s.lookX.value, ly = s.lookY.value;
+      const drift = this.opts.reducedMotion ? 0 : 1;
+      const lx = s.lookX.value + this.nz.talk(this.t * 0.6) * 0.6 * drift, ly = s.lookY.value + this.nz.hand(this.t * 0.5 + 7) * 0.45 * drift;
       const open = clamp(this.lid, 0, 1);
       const sq = clamp(s.squeeze.value, 0, 1);
       const eye = (cx, cy, wink) => {
