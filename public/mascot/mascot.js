@@ -159,6 +159,14 @@
     }
   }
 
+  // Smooth 1-D value noise. Living things drift; they do not loop on sines.
+  function makeNoise(seed) {
+    const v = []; let x = seed * 9301 + 49297;
+    for (let i = 0; i < 256; i++) { x = (x * 16807) % 2147483647; v.push((x / 2147483647) * 2 - 1); }
+    const n = (t) => { const i = Math.floor(t), fr = t - i, u = fr * fr * (3 - 2 * fr); return lerp(v[i & 255], v[(i + 1) & 255], u); };
+    return (t) => n(t) * 0.62 + n(t * 2.3 + 17) * 0.28 + n(t * 5.7 + 31) * 0.1;
+  }
+
   const el = (tag, attrs, parent) => {
     const node = document.createElementNS(NS, tag);
     for (const k in attrs) node.setAttribute(k, attrs[k]);
@@ -450,7 +458,8 @@
       this.s = {
         smile: S(1, 140, 18), open: S(0, 340, 26), width: S(1, 180, 19), happy: S(0, 140, 18), squeeze: S(0, 140, 18),
         eyeH: S(1, 160, 18), blink: S(1, 1100, 46), winkL: S(1, 500, 30), winkR: S(1, 500, 30),
-        lookX: S(0, 220, 22), lookY: S(0, 220, 22),
+        lookX: S(0, 420, 34), lookY: S(0, 420, 34),      // eyes are fast; the head follows
+        cornerL: S(-3, 150, 15), cornerR: S(-3, 150, 15),
         brow: S(0, 150, 16), browTilt: S(0, 150, 16), browShow: S(0, 130, 18), blush: S(0, 60, 14),
         tilt: S(0, 80, 11), turn: S(0, 90, 13), nod: S(0, 150, 14),
         earL: S(0, 260, 9), earR: S(0, 260, 9), earPerk: S(0, 120, 14),
@@ -460,17 +469,20 @@
       };
       for (const side of ["R", "L"]) {
         const r = REST[side], h = HANDS[r.hand];
-        this.s["sh" + side] = S(r.shoulder, 55, 11);
-        this.s["el" + side] = S(r.elbow, 85, 11.5);
-        this.s["wr" + side] = S(r.wrist, 130, 12);
+        // proximal joints are heavy and calm, distal ones light and lively
+        this.s["sh" + side] = S(r.shoulder, 46, 10);
+        this.s["el" + side] = S(r.elbow, 135, 15);
+        this.s["wr" + side] = S(r.wrist, 115, 10);
+        this.s["lag" + side] = S(0, 150, 8.5);    // wrist drag from forearm speed
+        this.s["lift" + side] = S(0, 95, 11);     // one-sided shoulder lift
         this.s["side" + side] = S(r.side, 120, 16);
         this.s["spread" + side] = S(h.spread, 150, 15);
         this.s["thumb" + side] = S(h.thumb, 160, 15);
         this.s["thumbAng" + side] = S(h.thumbAngle, 160, 15);
         this.s["wave" + side] = S(0, 60, 12);
-        this.s["fsU" + side] = S(1, 90, 13);   // upper arm foreshortening (pointing at the camera)
-        this.s["fsF" + side] = S(1, 90, 13);
-        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 170 - i * 12, 14);
+        this.s["fsU" + side] = S(1, 110, 15);   // upper arm foreshortening (pointing at the camera)
+        this.s["fsF" + side] = S(1, 140, 16);
+        for (let i = 0; i < 4; i++) this.s[`f${i}${side}`] = S(h.fingers[i], 150 - i * 10, 11.5);
       }
 
       this.expression = "smile";
@@ -498,6 +510,12 @@
       this.nodPulse = 0;
       this.idleSway = 0;
       this.attention = 0;
+      // noise channels for posture, head drift, breathing and hands
+      this.nz = {}; ["sway", "lean", "tilt", "nod", "turn", "breath", "hand", "laugh", "wave", "talk"].forEach((k, i) => { this.nz[k] = makeNoise(11 + i * 13); });
+      this.base = { lean: 0, tilt: 0, nod: 0, shrug: 0 };   // set by expressions and gestures
+      this.add = { shrug: 0, nod: 0, tilt: 0 };             // short-lived offsets from actions
+      this.breathPhase = 0; this.breath = 0; this.breathAmp = 1; this.nextSigh = 16 + Math.random() * 14;
+      this.turnLag = 0; this.greetToken = 0; this.armToken = { R: 0, L: 0 }; this.foreVel = { R: 0, L: 0 }; this.prevFore = {};
 
       this._onMove = (e) => { this.pointer = [e.clientX, e.clientY]; };
       this._onLeave = () => { this.pointer = null; };
@@ -527,11 +545,16 @@
       this.exprLook = [e.lookX || 0, e.lookY || 0];
       const post = Object.assign({ shrug: 0, lean: 0, nod: 0, tilt: 0 }, POSTURE[name] || {});
       this.posture = post;
-      for (const k of ["shrug", "lean", "nod", "tilt"]) { this.s[k].set(post[k]); delete this.held[k]; }
+      for (const k of ["shrug", "lean", "nod", "tilt"]) { this.base[k] = post[k]; delete this.held[k]; }
+      // smiles build unevenly: one corner of the mouth leads the other
+      const cornerGoal = -e.smile * 3 - Math.max(0, e.smile - 1) * 7;
+      const first = Math.random() < 0.5 ? "cornerL" : "cornerR", second = first === "cornerL" ? "cornerR" : "cornerL";
+      if (instant) { this.s.cornerL.snap(cornerGoal); this.s.cornerR.snap(cornerGoal); }
+      else { this.s[first].set(cornerGoal - 1.5); this._later(0.09 + Math.random() * 0.06, () => { this.s[second].set(cornerGoal); this.s[first].set(cornerGoal); }); }
       this.s.earPerk.set(name === "surprised" ? 1 : 0);
       if (name === "happy") this.wiggleEars();
       if (name === "laugh") this.laughBurst();
-      if (name === "surprised" && !instant) { this.s.bob.kick(-420); this.s.shrug.kick(260); }
+      if (name === "surprised" && !instant) { this.s.bob.kick(-420); this.s.shrug.kick(260); this.blink(); }
       clearTimeout(this._exprHold);
       if (hold) this._exprHold = setTimeout(() => this.express("smile"), hold * 1000);
       this._emit("state", this.getState());
@@ -546,11 +569,15 @@
       if (g.face) this.express(g.face);
       if (g.faceAfter) this._later(0.9, () => { if (this.gestureName === name) this.express(g.faceAfter); });
       if (g.look) this.exprLook = g.look;
-      const b = g.body || {};
-      if (b.lean != null) this.s.lean.set(b.lean);
-      if (b.shrug != null) this.s.shrug.set(b.shrug);
-      if (b.tilt != null) this.s.tilt.set(b.tilt);
+      const b = g.body || {}, post = this.posture || {};
+      // each gesture starts from the expression's own posture
+      this.base.lean = post.lean || 0; this.base.tilt = post.tilt || 0; this.base.shrug = post.shrug || 0;
+      if (b.lean != null) this.base.lean = b.lean;
+      if (b.shrug != null) this.base.shrug = b.shrug;
+      if (b.tilt != null) this.base.tilt = b.tilt;
       if (b.hop) this.hop();
+      this.s.liftR.set(0); this.s.liftL.set(0);
+      if (name === "wave" || name === "hello" || name === "hi5") this._greet(name);
       clearTimeout(this._gestureHold);
       if (hold) this._gestureHold = setTimeout(() => { this.gesture("none"); this.express("smile"); }, hold * 1000);
       this._emit("state", this.getState());
@@ -574,9 +601,10 @@
     }
     nod(times = 2) {
       for (let i = 0; i < times; i++) {
-        this._later(i * 0.4, () => this.s.nod.set(13 + (this.posture?.nod || 0)));
-        this._later(i * 0.4 + 0.18, () => this.s.nod.set(this.posture?.nod || 0));
+        this._later(i * 0.42, () => { this.add.nod = 12 - i * 2; });
+        this._later(i * 0.42 + 0.19, () => { this.add.nod = -1.5; });
       }
+      this._later(times * 0.42 + 0.1, () => { this.add.nod = 0; });
       return this;
     }
     shakeHead(times = 3) { this.shakeT = times * 0.33; return this; }
@@ -588,10 +616,11 @@
     hop() {
       if (this.opts.reducedMotion) { this.s.bob.kick(-200); return this; }
       const s = this.s;
-      s.bob.set(42); s.shrug.set(-6);
-      this._later(0.13, () => { s.bob.set(-175); s.feetLift.set(125); s.footTilt.set(16); s.shrug.set(10); });
-      this._later(0.42, () => { s.bob.set(38); s.feetLift.set(0); s.footTilt.set(0); s.shrug.set(-4); });
-      this._later(0.62, () => { s.bob.set(0); s.shrug.set(this.posture?.shrug || 0); });
+      const a = this.add;
+      s.bob.set(42); a.shrug = -6; a.nod = 4;
+      this._later(0.13, () => { s.bob.set(-175); s.feetLift.set(125); s.footTilt.set(16); a.shrug = 10; a.nod = -5; });
+      this._later(0.42, () => { s.bob.set(38); s.feetLift.set(0); s.footTilt.set(0); a.shrug = -4; a.nod = 5; });
+      this._later(0.62, () => { s.bob.set(0); a.shrug = 0; a.nod = 0; });
       return this;
     }
     laughBurst(seconds = 1.6) { this.laughT = Math.max(this.laughT, seconds); return this; }
@@ -811,6 +840,28 @@
     // -------------------------------------------------- internals
     _later(sec, fn) { this.timers.push(setTimeout(fn, sec * 1000)); }
 
+    // A greeting is a whole-body event, not an arm animation: eyes find you,
+    // brows flash, the head tilts toward the hand, the shoulder rises, weight
+    // shifts away for balance, the smile builds, then the wave decays.
+    _greet(name) {
+      const s = this.s, token = ++this.greetToken;
+      const live = (fn) => () => { if (this.greetToken === token && (this.gestureName === name)) fn(); };
+      this.exprLook = [0, 0];
+      s.browShow.set(0.9); s.brow.set(-13);                                  // eyebrow flash
+      this._later(0.42, live(() => { s.brow.set(EXPRESSIONS[this.expression].brow); s.browShow.set(EXPRESSIONS[this.expression].browShow); }));
+      this._later(0.08, live(() => { this.base.tilt = name === "hello" ? 7 : 5.5; this.base.lean = name === "hi5" ? 2 : -1.6; this.idleSway = -10; }));
+      this._later(0.12, live(() => s.liftR.set(name === "hello" ? 16 : 11)));
+      this._later(0.3, live(() => { s.open.set(0.38); s.width.set(0.95); }));     // "hi"
+      this._later(0.55, live(() => s.open.set(EXPRESSIONS[this.expression].open)));
+      this._later(0.95, live(() => this.blink()));
+      if (name !== "hi5") {
+        // the wave itself: strong at first, then a gentler, hand-held rhythm
+        this._later(1.9, live(() => s.waveR.set(0.7)));
+        this._later(3.1, live(() => s.waveR.set(0.28)));
+        this._later(3.2, live(() => { this.base.tilt = 3; s.liftR.set(6); }));
+      }
+    }
+
     // Turn a pose into joint targets. IK poses aim the wrist at a point.
     _applyArm(side, pose) {
       const A = ARMS[side], s = this.s;
@@ -822,16 +873,38 @@
         const ik = solveIK(A.S, pose.target, A.Lu * (pose.fsU ?? 1), A.Lf * (pose.fsF ?? 1), natural);
         shoulder = ik.shoulder; elbow = ik.elbow; wrist = wrap(pose.handAngle - ik.fore);
       }
-      const near = (spring, target) => { let t = target; while (t - spring.value > 180) t -= 360; while (t - spring.value < -180) t += 360; spring.set(t); };
-      near(s["sh" + side], shoulder);
-      s["el" + side].set(wrap(elbow));
-      s["wr" + side].set(clamp(wrap(wrist), -95, 95));
-      s["side" + side].set(pose.side ?? 1);
+      const near = (spring, target) => { let t = target; while (t - spring.value > 180) t -= 360; while (t - spring.value < -180) t += 360; return t; };
+      const shGoal = near(s["sh" + side], shoulder);
       const h = HANDS[pose.hand || "relaxed"];
-      h.fingers.forEach((v, i) => s[`f${i}${side}`].set(v));
-      s["thumb" + side].set(h.thumb); s["thumbAng" + side].set(h.thumbAngle); s["spread" + side].set(h.spread);
-      s["wave" + side].set(pose.wave || 0);
-      s["fsU" + side].set(pose.fsU ?? 1); s["fsF" + side].set(pose.fsF ?? 1);
+      // Successive breaking of joints: shoulder leads, elbow follows, the
+      // wrist and fingers arrive last. Big swings start with a small dip the
+      // other way (anticipation).
+      const token = ++this.armToken[side];
+      const at = (sec, fn) => this._later(sec, () => { if (this.armToken[side] === token) fn(); });
+      const delta = shGoal - s["sh" + side].value;
+      const big = Math.abs(delta) > 30 && !this.opts.reducedMotion;
+      const t0 = big ? 0.1 : 0;
+      if (big) s["sh" + side].set(s["sh" + side].value - Math.sign(delta) * Math.min(7, Math.abs(delta) * 0.07));
+      if (big) s["wave" + side].set(0);
+      // Raising: the elbow folds first, so the hand travels up close to the
+      // body. Lowering: the elbow stays bent until the arm is nearly down,
+      // so the hand never swings out wide.
+      const elGoal = wrap(elbow), elNow = s["el" + side].value;
+      const folding = Math.abs(elGoal) > Math.abs(elNow) + 35;
+      const opening = Math.abs(elGoal) + 35 < Math.abs(elNow);
+      at(t0 + (folding ? 0.05 : 0), () => { s["sh" + side].set(shGoal); s["fsU" + side].set(pose.fsU ?? 1); });
+      at(t0 + (folding ? 0 : opening ? 0.2 : 0.07), () => s["el" + side].set(elGoal));
+      if ((folding || opening) && !this.opts.reducedMotion) {
+        // the forearm swings toward the viewer on its way, so in 2D it
+        // shortens mid-move and the hand rises in front of the body
+        at(t0, () => { s["fsF" + side].set(0.42); s["fsU" + side].set(Math.min(pose.fsU ?? 1, 0.88)); });
+        at(t0 + (folding ? 0.24 : 0.36), () => { s["fsF" + side].set(pose.fsF ?? 1); s["fsU" + side].set(pose.fsU ?? 1); });
+      } else at(t0 + 0.07, () => s["fsF" + side].set(pose.fsF ?? 1));
+      at(t0 + 0.13, () => { s["wr" + side].set(clamp(wrap(wrist), -95, 95)); s["side" + side].set(pose.side ?? 1); });
+      at(t0 + 0.16, () => { s["thumb" + side].set(h.thumb); s["thumbAng" + side].set(h.thumbAngle); s["spread" + side].set(h.spread); });
+      const unfurl = h.fingers.reduce((a, v, i) => a + v - s[`f${i}${side}`].target, 0) > 0;
+      h.fingers.forEach((v, i) => at(t0 + 0.18 + (unfurl ? i : 3 - i) * 0.045, () => s[`f${i}${side}`].set(v)));
+      at(t0 + (pose.wave ? 0.42 : 0), () => s["wave" + side].set(pose.wave || 0));
       for (const k of ["sh", "el", "wr", "side", "spread", "thumb", "thumbAng", "f0", "f1", "f2", "f3"]) delete this.held[k + side];
       this.armPose[side] = pose;
       const layer = { back: this.parts.layerBack, mid: this.parts.layerMid, top: this.parts.layerTop }[pose.z || "mid"];
@@ -852,7 +925,7 @@
 
     _tick(now) {
       const dt = Math.min(0.05, (now - this._last) / 1000);
-      this._last = now; this.t += dt;
+      this._last = now; this.t += dt; this._dt = dt;
       this._behave(dt);
       for (const k in this.s) this.s[k].step(dt);
       this._render();
@@ -872,7 +945,12 @@
           this.nextBlink = 2 + Math.random() * 4;
         }
         this.nextSaccade -= dt;
-        if (this.nextSaccade <= 0) { this.saccade = [(Math.random() - 0.5) * 7, (Math.random() - 0.5) * 4]; this.nextSaccade = 0.6 + Math.random() * 2.2; }
+        if (this.nextSaccade <= 0) {
+          const next = [(Math.random() - 0.5) * 8, (Math.random() - 0.5) * 4.5];
+          // people often blink when their gaze jumps
+          if (Math.hypot(next[0] - this.saccade[0], next[1] - this.saccade[1]) > 4.5 && Math.random() < 0.4) this.blink();
+          this.saccade = next; this.nextSaccade = 0.5 + Math.random() * 2.4;
+        }
         this.nextTwitch -= dt;
         if (this.nextTwitch <= 0 && !calm) { (Math.random() < 0.5 ? s.earL : s.earR).kick(Math.random() < 0.5 ? 70 : -70); this.nextTwitch = 5 + Math.random() * 7; }
         // shift weight from foot to foot now and then
@@ -886,7 +964,27 @@
           this.nextFidget = 7 + Math.random() * 6;
         }
       }
-      want("sway", this.idleSway);
+      // breathing: quick inhale, slow exhale, rate drifting; an occasional sigh
+      const nz = this.nz, T = this.t;
+      if (!calm) {
+        const rate = 0.25 + 0.05 * nz.breath(T * 0.05);
+        this.breathPhase += dt * rate;
+        if (this.breathPhase >= 1) {
+          this.breathPhase -= 1;
+          this.nextSigh -= 1 / rate;
+          this.breathAmp = 1;
+          if (this.nextSigh <= 0 && !this.talk) { this.breathAmp = 2.6; this.nextSigh = 18 + Math.random() * 16; this._later(2.2, () => { this.add.nod = 3; }); this._later(3.6, () => { this.add.nod = 0; }); }
+        }
+        const u = this.breathPhase;
+        this.breath = (u < 0.38 ? smooth(u / 0.38) : 1 - smooth((u - 0.38) / 0.62)) * this.breathAmp;
+      } else this.breath = 0;
+
+      // posture drifts like a person standing, never like a metronome
+      const talking = !!this.talk, energy = talking ? 1.8 : 1;
+      want("sway", this.idleSway + (calm ? 0 : nz.sway(T * 0.11) * 7));
+      want("lean", this.base.lean + (calm ? 0 : nz.lean(T * 0.09) * 0.8));
+      want("shrug", this.base.shrug + this.add.shrug + this.breath * 2.2);
+      const post = this.posture || {};
 
       // gaze and attention
       let lx = this.saccade[0], ly = this.saccade[1], turn = 0;
@@ -899,23 +997,32 @@
       }
       if (this.exprLook && (this.exprLook[0] || this.exprLook[1]) && !p) { lx = this.exprLook[0]; ly = this.exprLook[1]; }
       want("lookX", lx); want("lookY", ly);
-      if (this.shakeT > 0) { this.shakeT -= dt; turn += Math.sin(this.t * 21) * 13 * clamp(this.shakeT * 3, 0, 1); }
-      want("turn", turn);
+      // the head follows the eyes a beat later, and only part of the way
+      this.turnLag += (turn - this.turnLag) * (1 - Math.exp(-dt / 0.24));
+      let headTurn = this.turnLag + (calm ? 0 : nz.turn(T * 0.13) * 2 * energy);
+      if (this.shakeT > 0) { this.shakeT -= dt; headTurn += Math.sin(this.t * 19) * 12 * clamp(this.shakeT * 3, 0, 1); }
+      want("turn", headTurn);
+      want("tilt", this.base.tilt + this.add.tilt + this.attention * 1.5 + (calm ? 0 : nz.tilt(T * 0.12) * 1.6 * energy));
 
-      // laughing: the whole body bounces and the shoulders shake
-      const post = this.posture || {};
+      // laughing comes in uneven "ha-ha" bursts that shake the shoulders and
+      // bounce the body, with the head thrown back a little
+      let nodExtra = 0;
       if (this.laughT > 0 && !calm) {
         this.laughT -= dt;
-        const env = clamp(this.laughT / 0.6, 0, 1);
-        want("bob", 10 + Math.sin(this.t * 15) * 12 * env);
-        want("shrug", (post.shrug || 0) + 6 + Math.sin(this.t * 15 + 0.6) * 9 * env);
-        want("nod", (post.nod || 0) + Math.sin(this.t * 15 + 1.2) * 3 * env);
-        s.open.set(0.55 + 0.35 * Math.abs(Math.sin(this.t * 15)));
+        const env = clamp(this.laughT / 0.7, 0, 1);
+        this.laughPh = (this.laughPh || 0) + dt * (13 + 4 * nz.laugh(T * 0.7));
+        const burst = 0.55 + 0.45 * smooth(0.5 + nz.laugh(T * 1.3 + 5));
+        const ha = Math.abs(Math.sin(this.laughPh)) * burst;
+        want("bob", 8 + ha * 14 * env);
+        s.shrug.set(this.base.shrug + 5 + ha * 10 * env);
+        nodExtra = -3 + ha * 4 * env;
+        s.open.set(0.45 + 0.45 * ha);
       } else if (this._laughWas) {
-        want("bob", 0); want("shrug", post.shrug || 0); want("nod", post.nod || 0);
+        want("bob", 0);
         if (!this.talk) s.open.set(EXPRESSIONS[this.expression].open);
       }
       this._laughWas = this.laughT > 0;
+      want("nod", this.base.nod + this.add.nod + nodExtra + (calm ? 0 : nz.nod(T * 0.1) * 1.2 * energy));
 
       // talking director: visemes, head beats, hand beats, prosody
       const e = EXPRESSIONS[this.expression];
@@ -926,11 +1033,13 @@
           tk.i++;
           const u = tk.units[tk.i];
           if (u.wordStart && !calm) {
-            s.nod.kick(-28 - u.stress * 40);
-            this.beat = 0.6 + u.stress;
+            // beats vary in size and direction, the way real emphasis does
+            s.nod.kick(-(18 + Math.random() * 18) - u.stress * 40);
+            if (Math.random() < 0.35) s.tilt.kick((Math.random() - 0.5) * 40);
+            this.beat = (0.4 + Math.random() * 0.5 + u.stress) * (Math.random() < 0.8 ? 1 : -0.6);
             if (u.stress > 0.5) { s.browShow.set(Math.max(e.browShow, 0.7)); s.brow.set(e.brow - 6); this._later(0.25, () => { if (this.talk) { s.brow.set(e.brow); s.browShow.set(e.browShow); } }); }
           }
-          if (u.ch === "?") { s.tilt.set((post.tilt || 0) + 5); s.browShow.set(1); s.brow.set(-9); }
+          if (u.ch === "?") { this.add.tilt = 5; s.browShow.set(1); s.brow.set(-9); this._later(0.9, () => { this.add.tilt = 0; }); }
           if (u.ch === "!") { s.brow.set(-9); s.browShow.set(1); this.beat = 1.4; }
         }
         const u = tk.units[tk.i], next = tk.units[tk.i + 1];
@@ -950,14 +1059,20 @@
       } else if (this.laughT <= 0) {
         want("width", e.width);
       }
-      this.beat = Math.max(0, this.beat - dt * 3.2);
+      this.beat = this.beat > 0 ? Math.max(0, this.beat - dt * 3.2) : Math.min(0, this.beat + dt * 3.2);
+
+      // follow-through: the wrist trails the forearm's real angular speed
+      for (const side of ["R", "L"]) {
+        s["lag" + side].set(clamp(-this.foreVel[side] * 0.075, -32, 32));
+      }
 
       // secondary motion: hair, cap button lag behind the head
       const headVel = s.tilt.velocity + s.turn.velocity * 0.6 + s.nod.velocity * 0.3 + s.lean.velocity;
       s.fringe.set(-headVel * 0.12); s.lock.set(-headVel * 0.16);
       s.button.set(-headVel * 0.25 + s.bob.velocity * 0.012);
 
-      this.wavePhase += dt * (calm ? 3 : 9.5);
+      // a real wave is about two swings a second, never perfectly regular
+      this.wavePhase += dt * (calm ? 3 : 12.5 * (1 + 0.16 * nz.wave(T * 0.8)));
     }
 
     _render() {
@@ -969,8 +1084,8 @@
       this.svg.setAttribute("viewBox", this.viewBox.map(f).join(" "));
 
       // body transform: breathing scales the torso from the hips, then lean, sway, bob
-      const breath = calm ? 0 : Math.sin(t * 1.6) * 0.5 + 0.5;
-      const sy = 1 + breath * 0.009;
+      const breath = this.breath;
+      const sy = 1 + breath * 0.008;
       const hip = P.hip, lean = s.lean.value, sway = s.sway.value, bob = s.bob.value;
       const bodyPt = ([x, y]) => {
         const q = rotAround([x, hip[1] + (y - hip[1]) * sy], hip, lean);
@@ -979,20 +1094,19 @@
       parts.torso.setAttribute("transform", `translate(${f(sway)} ${f(bob)}) rotate(${f(lean)} ${hip[0]} ${hip[1]}) translate(0 ${f(hip[1] * (1 - sy))}) scale(1 ${sy.toFixed(4)})`);
 
       // shoulders: shrug lifts both, breathing nudges them
-      const shrug = s.shrug.value;
-      const shR = [866, 1008 - shrug], shL = [446, 1058 - shrug * 0.8];
+      const shrug = s.shrug.value, upR = shrug + s.liftR.value, upL = shrug * 0.8 + s.liftL.value;
+      const shR = [866, 1008 - upR], shL = [446, 1058 - upL];
       parts.shoulderLine.setAttribute("d",
-        `M716,932 C766.4,944 ${f(821.8)},${f(969 - shrug * 0.5)} ${pt(shR)} M548,1003 C512,1012 ${f(478)},${f(1030 - shrug * 0.5)} ${pt(shL)}`);
+        `M716,932 C766.4,944 ${f(821.8)},${f(969 - upR * 0.5)} ${pt(shR)} M548,1003 C512,1012 ${f(478)},${f(1030 - upL * 0.5)} ${pt(shL)}`);
       parts.shirt.setAttribute("d",
-        `M556,975 L716,932 C766.4,944 821.8,${f(969 - shrug * 0.5)} ${pt(shR)} L800,1060 L778,1110 C784,1350 792,1560 804,1786 C700,1806 500,1806 376,1786 C372,1660 374,1520 384,1420 C398,1340 420,1230 440,1110 L${pt(shL)} C478,${f(1030 - shrug * 0.5)} 512,1012 548,1003 Z`);
+        `M556,975 L716,932 C766.4,944 821.8,${f(969 - upR * 0.5)} ${pt(shR)} L800,1060 L778,1110 C784,1350 792,1560 804,1786 C700,1806 500,1806 376,1786 C372,1660 374,1520 384,1420 C398,1340 420,1230 440,1110 L${pt(shL)} C478,${f(1030 - upL * 0.5)} 512,1012 548,1003 Z`);
 
       // legs from planted feet
       this._renderLegs(bodyPt);
 
       // neck and head
       const hp = bodyPt(P.headPivot);
-      const sway2 = calm ? 0 : Math.sin(t * 0.7) * 1.1 + Math.sin(t * 1.3 + 1) * 0.5;
-      const tilt = s.tilt.value + sway2 + this.attention * 2.5 + s.turn.value * 0.08 + lean * 0.45;
+      const tilt = s.tilt.value + s.turn.value * 0.08 + lean * 0.45;
       const hx = hp[0] - P.headPivot[0] + s.turn.value * 0.6;
       const hy = hp[1] - P.headPivot[1] + s.nod.value * 0.9;
       parts.head.setAttribute("transform", `translate(${f(hx)} ${f(hy)}) rotate(${f(tilt)} ${P.headPivot[0]} ${P.headPivot[1]})`);
@@ -1030,7 +1144,9 @@
       const sq = clamp(s.squeeze.value, 0, 1);
       const eye = (cx, cy, wink) => {
         const k = clamp(s.happy.value, 0, 1);
-        const h = 21 * s.eyeH.value * Math.max(0.04, open * wink);
+        // a genuine smile pushes the cheeks up and narrows the eyes
+        const squint = 1 - 0.16 * smooth((s.smile.value - 0.95) / 0.4) * (1 - k);
+        const h = 21 * s.eyeH.value * squint * Math.max(0.04, open * wink);
         const x = cx + lx, y = cy + ly + sq * 3;
         const w = 17 + sq * 3;
         const ax = lerp(x, x - w, k), ay = lerp(y - h, y + 5, k);
@@ -1061,23 +1177,24 @@
       const round = clamp(1 - s.width.value, 0, 0.6);
       const upper = 34 * sm * (1 - op * 0.5) - op * (10 + 40 * round);
       const lower = 34 * sm + op * 64;
-      const corner = -sm * 3;
+      const cL = s.cornerL.value, cR = s.cornerR.value;
+      const corner = (cL + cR) / 2;
       const mx = P.mouth[0] + lx * 0.5, my = P.mouth[1] + ly * 0.3;
       const M = (x, y) => rotAround([mx + x, my + y], [mx, my], P.mouthTilt);
-      const d = `M${pt(M(-hw, corner))} Q${pt(M(0, upper))} ${pt(M(hw, corner))} Q${pt(M(0, lower))} ${pt(M(-hw, corner))} Z`;
+      const d = `M${pt(M(-hw, cL))} Q${pt(M(0, upper))} ${pt(M(hw, cR))} Q${pt(M(0, lower))} ${pt(M(-hw, cL))} Z`;
       parts.mouth.setAttribute("d", d);
       parts.mouthClip.setAttribute("d", d);
       const teethH = 12 * smooth((op - 0.22) / 0.3) * (1 - round * 1.2);
       const upperMid = (upper + corner) / 2;
       parts.teeth.setAttribute("d", teethH > 0.5
-        ? `M${pt(M(-hw, corner - 6))} Q${pt(M(0, upper - 6))} ${pt(M(hw, corner - 6))} L${pt(M(hw, corner + teethH))} Q${pt(M(0, upperMid + teethH + 4))} ${pt(M(-hw, corner + teethH))} Z`
+        ? `M${pt(M(-hw, cL - 6))} Q${pt(M(0, upper - 6))} ${pt(M(hw, cR - 6))} L${pt(M(hw, cR + teethH))} Q${pt(M(0, upperMid + teethH + 4))} ${pt(M(-hw, cL + teethH))} Z`
         : "M0,0");
       const tongueOn = smooth((op - 0.45) / 0.3);
       const tc = M(4, lower * 0.5 + 4);
       parts.tongue.setAttribute("cx", f(tc[0])); parts.tongue.setAttribute("cy", f(tc[1]));
       parts.tongue.setAttribute("rx", f(hw * 0.55 * tongueOn)); parts.tongue.setAttribute("ry", f(14 * tongueOn));
       const dimple = smooth((sm - 1.05) / 0.25);
-      const c1 = M(-hw - 4, corner), c2 = M(hw + 4, corner);
+      const c1 = M(-hw - 4, cL), c2 = M(hw + 4, cR);
       parts.dimples.setAttribute("d", `M${pt(add(c1, [-4, -9]))} Q${pt(add(c1, [-9, 0]))} ${pt(add(c1, [-3, 8]))} M${pt(add(c2, [4, -9]))} Q${pt(add(c2, [9, 0]))} ${pt(add(c2, [3, 8]))}`);
       parts.dimples.setAttribute("opacity", dimple.toFixed(2));
     }
@@ -1128,13 +1245,18 @@
       const lean = s.lean.value;
       const shrug = s.shrug.value;
 
-      const S = add(bodyPt(A.S), [0, -shrug * (side === "R" ? 1 : 0.8)]);
-      // follow-through: the forearm and hand trail the shoulder's motion
-      const drag = clamp(s["sh" + side].velocity * 0.06, -14, 14);
-      const shAng = s["sh" + side].value + lean * 0.7 + (calm ? 0 : Math.sin(this.t * 1.6) * 0.6);
-      const elAng = s["el" + side].value + Math.sin(ph) * 16 * waveAmp - drag - beat * 9;
-      const wrAng = s["wr" + side].value + Math.sin(ph - 1) * 22 * waveAmp - drag * 1.4 + beat * 6;
+      const S = add(bodyPt(A.S), [0, -(shrug * (side === "R" ? 1 : 0.8) + s["lift" + side].value)]);
+      // A wave is a chain: the forearm swings from the elbow, the wrist
+      // follows a quarter-beat late and flicks further, the palm turns a
+      // little on each pass, and the shoulder joins in slightly.
+      const amp = waveAmp * (0.85 + 0.25 * this.nz.hand(this.t * 0.9 + (side === "L" ? 9 : 0)));
+      const drag = clamp(s["sh" + side].velocity * 0.05, -12, 12);
+      const shAng = s["sh" + side].value + lean * 0.7 + Math.sin(ph + 0.7) * 3 * amp + (calm ? 0 : this.breath * 0.8);
+      const elAng = s["el" + side].value + Math.sin(ph) * 13 * amp - drag * 0.6 - beat * 8;
+      const wrAng = s["wr" + side].value + Math.sin(ph - 1.25) * 24 * amp + s["lag" + side].value + beat * 7;
       const foreAng = shAng + elAng, handAng = foreAng + wrAng;
+      if (this.prevFore[side] != null && this._dt) this.foreVel[side] = wrap(foreAng - this.prevFore[side]) / this._dt;
+      this.prevFore[side] = foreAng;
       const fsU = s["fsU" + side].value, fsF = s["fsF" + side].value;
       const E = add(S, mul(dirOf(shAng), A.Lu * fsU)), W = add(E, mul(dirOf(foreAng), A.Lf * fsF));
       const U = frame(S, shAng);
@@ -1151,7 +1273,7 @@
       arm.elbow.setAttribute("cx", f(E[0])); arm.elbow.setAttribute("cy", f(E[1])); arm.elbow.setAttribute("r", f(rE * slim));
       arm.fore.setAttribute("d", taper(E, W, rE * slim, rW));
 
-      const side01 = s["side" + side].value, sx = (Math.abs(side01) < 0.12 ? Math.sign(side01 || 1) * 0.12 : side01) * A.hs;
+      const side01 = s["side" + side].value + Math.sin(ph - 0.5) * 0.2 * amp, sx = (Math.abs(side01) < 0.12 ? Math.sign(side01 || 1) * 0.12 : side01) * A.hs;
       const H = frame(W, handAng);
       const hmap = (x, y) => H(x * sx, y * A.hs);
       arm.palm.setAttribute("d", HAND.palm.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (_, x, y) => pt(hmap(+x, +y))));
@@ -1164,7 +1286,8 @@
       const spread = s["spread" + side].value;
       for (let i = 0; i < 4; i++) {
         const fg = arm.fingers[i];
-        const ext = clamp(s[`f${i}${side}`].value + (waveAmp ? Math.sin(ph * 1.2 - i * 0.5) * 0.05 * waveAmp : 0), 0, 1);
+        // fingers trail the wrist one after another, like a soft fan
+        const ext = clamp(s[`f${i}${side}`].value + (amp ? Math.sin(ph - 1.7 - i * 0.35) * 0.07 * amp : 0), 0, 1);
         const beta = (HAND.fan[i] + spread * HAND.spreadFan[i] + (1 - ext) * 4) * DEG;
         const u = [Math.sin(beta), Math.cos(beta)];
         const k = HAND.knuckles[i];

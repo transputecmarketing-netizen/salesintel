@@ -30,6 +30,15 @@ Options: `view` ("full" or "bust"), `follow` (track the cursor), `idle` (autonom
 
 He is never still. He breathes, blinks (sometimes twice), darts his eyes, shifts his weight from foot to foot, fidgets his fingers, twitches an ear, follows the cursor, and laughs when clicked. Hair, the side lock and the cap button lag behind the head; forearms and hands trail the shoulders.
 
+How the motion is made to feel human rather than mechanical:
+
+- **Joints break in sequence.** The shoulder leads, the elbow follows, the wrist and fingers arrive last and overshoot. Big swings start with a small anticipation the other way.
+- **Elbows behave like elbows.** When a hand rises, the elbow folds first and the forearm swings toward the viewer, so the hand travels up in front of the body. When it lowers, the elbow stays bent until the arm is nearly down.
+- **Follow-through from real speed.** The wrist trails the forearm's actual angular velocity, so every fast move has drag and settle.
+- **A greeting uses the whole body.** Eyes find you, the brows flash, the head tilts toward the hand, that shoulder lifts, weight shifts away, the smile builds, and the wave rolls from elbow to wrist to fingers with the palm turning, at a rhythm that drifts. It starts strong and settles into a gentler wave.
+- **Eyes lead, the head follows** a beat later and only part of the way. He often blinks when his gaze jumps.
+- **Nothing loops.** Posture, head drift and hand amplitude come from smooth noise. Breathing has a quick inhale and a slow exhale, with an occasional sigh. Smiles build unevenly from one corner and narrow the eyes. Laughs come in irregular bursts. Talking beats vary in size and direction.
+
 How the body is built:
 
 - **Arms** are two-bone chains (shoulder, elbow, wrist). Gestures aim the wrist with inverse kinematics, elbows hang naturally, and a pose can foreshorten the arm when it points at the viewer. The sleeves ride the upper arm and sit exactly where the sketch has them at rest. The near arm slims as it swings away, because the sketch draws it foreshortened.
