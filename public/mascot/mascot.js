@@ -1089,7 +1089,10 @@
         [1, () => { this._go(s.browShow, 0.7, 240); this._go(s.brow, -8, 240); this._later(0.9, () => { this._go(s.brow, e.brow, 600); this._go(s.browShow, e.browShow, 600); }); }], // a lifted brow
         [2.5, () => { this.idleSway = (Math.random() - 0.5) * 34; }],                                                     // shifts weight
         [1, () => { look(7, 7, 1.8); this._applyArm("R", { shoulder: 6, elbow: -46, wrist: -18, hand: "soft", side: 1, z: "mid" }); this._later(1.7, () => { if (this.gestureName === "none") this._applyArm("R", REST.R); }); }], // looks at his hand
-        [0.35, () => this.stretch()]
+        [0.35, () => this.stretch()],
+        [1.6, () => this._handHabit("tap", Math.random() < 0.7 ? "R" : "L")],    // drums the fingers
+        [1.2, () => this._handHabit("flex", Math.random() < 0.6 ? "R" : "L")],   // opens the hand and lets it relax
+        [1.0, () => this._handHabit("rub", "R")]                                  // thumb across the fingertips
       ] : [
         [3, () => { this.blink(); }],
         [2, () => { this.idleTilt = (Math.random() < 0.5 ? -1 : 1) * 4; this._later(1.2, () => { this.idleTilt = 0; }); }],
@@ -1098,6 +1101,27 @@
       ];
       let r = Math.random() * acts.reduce((t, x) => t + x[0], 0);
       for (const [w, fn] of acts) { if ((r -= w) <= 0) { fn(); break; } }
+    }
+
+    // Small things hands do on their own. They only run while that arm is at rest.
+    _handHabit(kind, side) {
+      const s = this.s, h = HANDS.relaxed, atRest = () => this.armPose[side] === REST[side];
+      if (!atRest()) return;
+      const f = (i, v) => this._aim(s[`f${i}${side}`], v);
+      if (kind === "tap") {
+        for (let rep = 0; rep < 2; rep++) for (let i = 0; i < 4; i++) {
+          this._later(rep * 0.55 + i * 0.07, () => { if (atRest()) f(i, h.fingers[i] - 0.45); });
+          this._later(rep * 0.55 + i * 0.07 + 0.11, () => { if (atRest()) f(i, h.fingers[i]); });
+        }
+      } else if (kind === "flex") {
+        [0, 1, 2, 3].forEach((i) => this._later(i * 0.04, () => { if (atRest()) f(i, 1); }));
+        this._aim(s["spread" + side], 0.75); this._aim(s["thumb" + side], 1);
+        this._later(0.55, () => { if (!atRest()) return; [0, 1, 2, 3].forEach((i) => this._later(i * 0.06, () => f(i, h.fingers[i]))); this._aim(s["spread" + side], h.spread); this._aim(s["thumb" + side], h.thumb); });
+      } else if (kind === "rub") {
+        [0, 1, 2, 3].forEach((i) => f(i, h.fingers[i] - 0.25));
+        for (let k = 0; k < 4; k++) this._later(k * 0.22, () => { if (atRest()) this._aim(s["thumbAng" + side], k % 2 ? -10 : -38); });
+        this._later(0.95, () => { if (!atRest()) return; [0, 1, 2, 3].forEach((i) => f(i, h.fingers[i])); this._aim(s["thumbAng" + side], h.thumbAngle); });
+      }
     }
 
     // A greeting is a whole-body event, not an arm animation: eyes find you,
@@ -1364,6 +1388,15 @@
       }
       this.beat = this.beat > 0 ? Math.max(0, this.beat - dt * 3.2) : Math.min(0, this.beat + dt * 3.2);
 
+      // curiosity: a hand opens and turns a little toward a cursor that comes near it
+      this.reach = this.reach || { R: 0, L: 0 };
+      for (const side of ["R", "L"]) {
+        const J = this["joints" + side];
+        let want01 = 0;
+        if (p && J && this.opts.follow && !calm) { const d = Math.hypot(p[0] - J.W[0], p[1] - J.W[1]); want01 = smooth((330 - d) / 220) * (0.4 + this.opts.intensity); }
+        this.reach[side] += (clamp(want01, 0, 1) - this.reach[side]) * (1 - Math.exp(-dt / 0.18));
+      }
+
       // follow-through: the wrist trails the forearm's real angular speed
       for (const side of ["R", "L"]) {
         s["lag" + side].set(clamp(-this.foreVel[side] * 0.075, -32, 32));
@@ -1623,7 +1656,13 @@
       const sw = s["swing" + side].value * hang;
       const shAng = s["sh" + side].value + lean * 0.7 + sw + Math.sin(ph + 0.7) * 3 * amp + (calm ? 0 : this.breath * 1.6);
       const elAng = s["el" + side].value + Math.sin(ph) * 13 * amp - drag * 0.6 - beat * 8 + sw * 0.7;
-      const wrAng = s["wr" + side].value + Math.sin(ph - 1.25) * 24 * amp + s["lag" + side].value + beat * 7;
+      // A hand is never still. Each finger, the thumb, the spread and the
+      // wrist drift on their own slow rhythms, more when the hand is idle.
+      const nzh = this.nz.hand, tt = this.t, sk = side === "R" ? 0 : 31;
+      const idleHand = calm ? 0 : (this.armPose[side] === REST[side] ? 1 : 0.45);
+      const live = (i, sp) => nzh(tt * sp + sk + i * 7.3) * idleHand;
+      const reach = this.reach?.[side] || 0;                  // curiosity: 0..1 as the cursor nears
+      const wrAng = s["wr" + side].value + Math.sin(ph - 1.25) * 24 * amp + s["lag" + side].value + beat * 7 + live(9, 0.35) * 5 + reach * 10 * (side === "R" ? -1 : 1);
       const foreAng = shAng + elAng, handAng = foreAng + wrAng;
       const fsU = s["fsU" + side].value, fsF = s["fsF" + side].value;
       const Er = add(S, mul(dirOf(shAng), A.Lu * fsU)), Wr = add(Er, mul(dirOf(foreAng), A.Lf * fsF));
@@ -1697,7 +1736,7 @@
       // along the fingers, z out of the back of the hand. "side" is how far
       // the forearm has turned: 1 shows the back of the hand, -1 the palm,
       // 0 the edge, where curled fingers show as real curves.
-      const sd = clamp(s["side" + side].value + Math.sin(ph - 0.5) * 0.24 * amp, -1, 1);
+      const sd = clamp(s["side" + side].value + Math.sin(ph - 0.5) * 0.24 * amp + live(11, 0.25) * 0.1 - reach * 0.35, -1, 1);
       const sn = Math.sqrt(Math.max(0, 1 - sd * sd));
       let fx = sd + 0.14 * sn;                       // a little perspective keeps edge-on fingers apart
       if (Math.abs(fx) < 0.3) fx = 0.3 * (fx < 0 ? -1 : 1);
@@ -1733,7 +1772,7 @@
 
       // thumb: abducts in the palm plane, and swings across toward the palm
       // as the hand closes (opposition)
-      const ta = s["thumbAng" + side].value * DEG, te = clamp(s["thumb" + side].value, 0, 1), tc = 1 - te;
+      const ta = (s["thumbAng" + side].value + live(5, 0.5) * 8 - reach * 18) * DEG, te = clamp(s["thumb" + side].value + live(6, 0.45) * 0.06 + reach * 0.1, 0, 1), tc = 1 - te;
       const tLen = HAND.thumbLen * (0.62 + 0.38 * te) * (1 + 0.3 * smooth((-ta / DEG - 70) / 20));
       const tb = [HAND.thumbBase[0], HAND.thumbBase[1], 0];
       const t0d = n3([Math.sin(ta), Math.cos(ta), -(0.2 + 0.45 * tc)]);
@@ -1748,11 +1787,12 @@
       // fingers: three joints each, curling progressively from the knuckle,
       // tips drawing together as they close. Seen face-on, the part that
       // folds behind the hand is left out; seen edge-on, the whole curl shows.
-      const spread = s["spread" + side].value, frontal = Math.abs(sd) > 0.55;
+      const spread = clamp(s["spread" + side].value + live(8, 0.3) * 0.08 + reach * 0.45, 0, 1), frontal = Math.abs(sd) > 0.55;
       const drawn = [];
       for (let i = 0; i < 4; i++) {
         // in a wave the fingers ripple one after another behind the wrist
-        const ext = clamp(s[`f${i}${side}`].value + s["flop" + side].value * (0.6 + i * 0.15) + (amp ? Math.sin(ph - 1.6 - i * 0.45) * 0.13 * amp : 0), 0, 1);
+        const ext = clamp(s[`f${i}${side}`].value + s["flop" + side].value * (0.6 + i * 0.15) + (amp ? Math.sin(ph - 1.6 - i * 0.45) * 0.13 * amp : 0)
+          + live(i, 0.55 + i * 0.07) * 0.07 + reach * (0.12 - i * 0.02), 0, 1);
         const curl = 1 - ext;
         const beta = (HAND.fan[i] + spread * HAND.spreadFan[i]) * (1 - 0.5 * curl) * DEG;
         const sb = Math.sin(beta), cb = Math.cos(beta);

@@ -75,6 +75,12 @@ Jelly limbs:
 - **No hinge.** The arm is drawn as one smooth rubber-hose curve through the chain, with no pinch or crease at the elbow.
 - **A jelly hand.** The hand rides the end of the chain, trails and settles with it, and stretches a little along a fast motion.
 
+Living hands:
+
+- **Never still.** Each finger, the thumb, the spread and the wrist roll drift on their own slow rhythms, strongest when the hand is idle.
+- **Habits.** Left alone, a hand drums its fingers (index to little finger, twice), opens and relaxes, or rubs the thumb across the fingertips.
+- **Curiosity.** When the cursor comes near a hand, its fingers open and spread and the wrist turns toward it, easing back as the cursor leaves.
+
 How the hands are built:
 
 - **In 3D, then projected.** Each hand is modelled with x across the palm, y along the fingers and z out of the back, and turned on the forearm before it is drawn. Face-on, a curl foreshortens and the part that folds behind the hand is left out; edge-on, the curl shows as a real C-shaped bend. A hanging hand is seen mostly from the side, palm toward the thigh, as a real one is.
