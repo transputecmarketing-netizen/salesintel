@@ -430,7 +430,9 @@ li.is-done .badge { opacity: 1; transform: none; }
 .panel-min { margin-left: auto; width: 24px; height: 24px; padding: 3px; border: 0; background: none; flex: none; }
 .panel-min svg { fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; }
 .panel.is-min .panel-body { display: none; }
-.panel-camera .panel-body { position: relative; aspect-ratio: 16 / 10; background: #2a2f45; }
+.panel-camera { background: transparent; }
+.panel-camera header { background: var(--paper-solid); }
+.panel-camera .panel-body { position: relative; aspect-ratio: 16 / 10; background: transparent; }
 .feed, .feed-ink { position: absolute; inset: 0; width: 100%; height: 100%; }
 .rec { position: absolute; left: 8px; bottom: 6px; font: 600 10px var(--mono); color: #ff6b5e; letter-spacing: 0.08em; }
 .panel-browser { width: 280px; }
