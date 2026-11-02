@@ -4,6 +4,7 @@ import {
   THREE, V, mat, mesh, box, cyl, at, glowSprite, metal, slab, roundedRectShape, canvasTexture,
   makeBreakout, freeApi, decal, textDecal, silkPlane, soic, qfn, smd, smdField, smdLed, thtLed, trimRound, trimpot3296,
   electrolytic, emissiveMat, noRay, pulseRings, cable, femaleBlock, PITCH, PCB, PCB_T, PIN_TIP, MONO, SANS,
+  live,
 } from './common.js';
 
 /** Common small "comparator" sensor board bits: LM393, power + signal LEDs. */
@@ -44,7 +45,7 @@ export function makePIR(pos, opts = {}) {
   g.add(rings.group);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(DX, 2.2, 0) });
   let on = false;
-  Object.assign(api, {
+  live(api, {
     get triggered() { return on; },
     /** Show (true) / hide (false) the detection pulse. */
     trigger(v = true) {
@@ -146,7 +147,7 @@ export function makeIRReceiver(pos, opts = {}) {
   smdField(b, [[0.45, -0.3]]);
   let t = 0;
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.8, 0.4) });
-  Object.assign(api, {
+  live(api, {
     /** Facing point (front of the receiver dome), world. */
     front: g.localToWorld(V(0, b.top + 0.6, 0.85)),
     flash() { t = 0.25; return api; },
@@ -271,7 +272,7 @@ export function makeMPU6050(pos, opts = {}) {
   for (const [k, p] of b.pinsLocal) pinsLocal.set(k, p.clone().add(b.group.position));
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, STAND + 1.4, 0), frame: tilt });
   let pitch = 0, roll = 0;
-  Object.assign(api, {
+  live(api, {
     get pitch() { return pitch; },
     get roll() { return roll; },
     /** Pitch tips the front edge down (+) / up (−) about X; roll banks about Z (+ = right side down). */
@@ -407,7 +408,7 @@ export function makeSoilSensor(pos, opts = {}) {
   const leafDry = new THREE.Color(0x9bb54a), leafWet = new THREE.Color(0x46b456);
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, PH + 3.4, 0) });
   let moisture = 0.5;
-  Object.assign(api, {
+  live(api, {
     get moisture() { return moisture; },
     setMoisture(m) {
       moisture = Math.max(0, Math.min(1, m));
@@ -455,7 +456,7 @@ export function makeSoundSensor(pos, opts = {}) {
   rings.group.position.set(2.1, b.top + 0.5, 0);
   g.add(rings.group);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.5, 1.8, 0) });
-  Object.assign(api, {
+  live(api, {
     /** Show sound reaching the mic (true/false) and light the DO LED. */
     hear(on = true) {
       rings.set(on);
@@ -603,7 +604,7 @@ export function makeFSR(pos, opts = {}) {
   g.rotation.y = 0;
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.4, 0) });
   let level = 0;
-  Object.assign(api, {
+  live(api, {
     get level() { return level; },
     /** Press level 0..1: dimple, darker pad, warm glow, a fingertip pressing. */
     press(v = 1) {

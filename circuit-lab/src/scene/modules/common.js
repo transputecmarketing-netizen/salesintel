@@ -627,3 +627,8 @@ export function yawOf(a, b) {
   const d = new THREE.Vector3().subVectors(b, a);
   return Math.atan2(-d.z, d.x);
 }
+
+/** Like Object.assign, but keeps getters live (Object.assign would copy their current value once). */
+export function live(target, src) {
+  return Object.defineProperties(target, Object.getOwnPropertyDescriptors(src));
+}

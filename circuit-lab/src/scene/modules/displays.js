@@ -4,6 +4,7 @@ import {
   THREE, V, mat, mesh, box, cyl, at, canvasTexture, glowSprite, metal, slab, roundedRectShape,
   makeBreakout, freeApi, silkPlane, textDecal, soic, smdField, smd, trimRound, emissiveMat, noRay,
   standLegs, midOf, yawOf, PITCH, PCB, MONO, SANS,
+  live,
 } from './common.js';
 import { glyph } from './font5x7.js';
 
@@ -107,7 +108,7 @@ export function makeOLED(pos, opts = {}) {
   clearBuf();
 
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.4, 0) });
-  Object.assign(api, {
+  live(api, {
     width: 128,
     height: 64,
     /** The logical 128×64 canvas (white = lit). */
@@ -284,7 +285,7 @@ export function makeLCD1602(pos, opts = {}) {
   render();
 
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, LIFT + 1.6, 0) });
-  Object.assign(api, {
+  live(api, {
     cols: 16,
     rows: 2,
     /** print(row, col, text) — or print(text) at the cursor. */
@@ -366,7 +367,7 @@ function pixelApi(api, leds, light) {
   const n = leds.length;
   const buf = new Uint8Array(n * 3);
   const avg = new THREE.Color();
-  return Object.assign(api, {
+  return live(api, {
     count: n,
     setPixel(i, r, g, b) {
       if (i < 0 || i >= n) return api;

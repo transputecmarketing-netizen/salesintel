@@ -2,6 +2,7 @@
 import {
   THREE, V, mat, mesh, box, cyl, at, metal, slab, roundedRectShape, canvasTexture,
   makeBreakout, freeApi, decal, textDecal, smd, smdField, tactile, femaleBlock, PITCH, SANS,
+  live,
 } from './common.js';
 
 // ================================================================= joystick
@@ -58,7 +59,7 @@ export function makeJoystick(pos, opts = {}) {
   smdField(b, [[-0.9, 0.0, Math.PI / 2]]);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(CX, 3.2, 0) });
   let x = 0, y = 0, pressed = false;
-  Object.assign(api, {
+  live(api, {
     get x() { return x; },
     get y() { return y; },
     get pressed() { return pressed; },
@@ -137,7 +138,7 @@ export function makeKeypad(pos, opts = {}) {
   ['R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4'].forEach((n, i) => pinsLocal.set(n, conn.userData.holes[i].clone().add(conn.position)));
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.6, -1) });
   let down = null;
-  Object.assign(api, {
+  live(api, {
     keys: KEYS.flat(),
     get pressed() { return down; },
     press(k) {
@@ -216,7 +217,7 @@ export function makeRotaryEncoder(pos, opts = {}) {
   const baseY = shaft.position.y;
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(CX, 3.0, 0) });
   let angle = 0, pressed = false;
-  Object.assign(api, {
+  live(api, {
     get angle() { return angle; },
     get pressed() { return pressed; },
     /** Shaft angle in degrees (clockwise from above). 20 detents per turn = 18° each. */

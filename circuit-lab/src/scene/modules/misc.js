@@ -2,6 +2,7 @@
 import {
   THREE, V, mat, mesh, box, cyl, at, metal, slab, roundedRectShape,
   makeBreakout, freeApi, decal, textDecal, soic, qfn, smd, smdField, smdLed, tactile, electrolytic, PITCH, SANS, MONO,
+  live,
 } from './common.js';
 
 // ================================================================= DS3231 RTC
@@ -127,7 +128,7 @@ export function makeHC05(pos, opts = {}) {
   smdField(b, [[-1.25, 0.05, Math.PI / 2], [-0.9, 0.05, Math.PI / 2, 'cap']]);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.3, 1.4, 0) });
   let linked = false, t = 0;
-  Object.assign(api, {
+  live(api, {
     get linked() { return linked; },
     setLinked(on = true) {
       linked = !!on;

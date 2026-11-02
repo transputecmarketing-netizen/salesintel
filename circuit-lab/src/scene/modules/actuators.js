@@ -4,6 +4,7 @@ import {
   THREE, V, mat, mesh, box, cyl, at, glowSprite, metal, slab, roundedRectShape,
   makeBreakout, freeApi, decal, textDecal, soic, smd, smdField, smdLed, thtLed, dipOnPcb, jst, cable,
   screwTerminal, electrolytic, emissiveMat, noRay, PITCH, PCB, PCB_T, MONO, SANS,
+  live,
 } from './common.js';
 import { glowPool } from '../kit.js';
 
@@ -143,7 +144,7 @@ export function makeStepper(pos, opts = {}) {
     HALF_STEPS[ph].forEach((on, i) => leds[i].set(on));
     rotor.rotation.y = -(pos_ / STEPS_PER_REV) * Math.PI * 2;
   };
-  Object.assign(api, {
+  live(api, {
     stepsPerRev: STEPS_PER_REV,
     /** Advance one half-step (dir = +1 clockwise seen from above, −1 back). */
     step(dir = 1) {
@@ -270,7 +271,7 @@ export function makeRelay(pos, opts = {}) {
 
   let on = false, click = 0, armA = angNC;
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0.15, 2.4, 0) });
-  Object.assign(api, {
+  live(api, {
     get on() { return on; },
     /** Energise (true) or release (false) the coil. */
     set(v) {

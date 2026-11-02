@@ -329,12 +329,12 @@ void loop() {
   {
     id: 'relay-lamp', title: 'Switch a lamp', icon: 'bolt',
     thumb: () => { const r = makeRelay(v(0, 0, 0)); r.set(true); return r.group; },
-    view: { center: [5.8, 1.4, -3.0], size: 18 },
+    view: { center: [6.2, 1.4, -3.2], size: 18 },
     build(ctx) {
       const bb = ctx.breadboard(...BB);
       const relay = ctx.add(makeRelay(v(2.6, 0, -6.6)));
-      const lamp = ctx.add(makeLamp(v(12.2, 0, -6.6), { rotY: -0.4 }));
-      const psu = ctx.add(makeSupply(v(8.2, 0, -7.0), { lines: ['8 × AA', '12 V DC'], rotY: Math.PI / 2 }));
+      const lamp = ctx.add(makeLamp(v(13.6, 0, -7.4), { rotY: -0.5 }));
+      const psu = ctx.add(makeSupply(v(8.0, 0, -7.6), { lines: ['8 × AA', '12 V DC'], rotY: Math.PI / 2 }));
       const btn = ctx.add(makeButton([bb.hole(5, 'e'), bb.hole(7, 'e'), bb.hole(5, 'f'), bb.hole(7, 'f')]));
       const inW = ctx.wire(ctx.board.pin('D7'), relay.pin('IN'), 'orange', { signal: 'D7', lift: 1.2 });
       ctx.wire(ctx.board.pin('5V'), relay.pin('VCC'), 'red', { signal: '5V', lift: 2.6 });
