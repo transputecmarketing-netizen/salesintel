@@ -96,3 +96,41 @@ Run `npx vite --port <port>` in `circuit-lab/`, then
 `node scripts/qa.cjs --url http://localhost:<port> --ids a,b,c --run --out <dir>`
 and look at the screenshots. Fix overlapping callouts, parts floating or
 intersecting, wires through parts, and any console errors.
+
+## Boards (`ctx.board`, chosen by `lesson.board` / track)
+All boards sit at the origin and expose `pin(name)` (world position of the
+socket top / male pin tip), `pins`, `anchors`, `setBuiltinLed(level)`.
+- **uno** (`src/scene/board.js`): `D0`–`D13`, `A0`–`A5`, `5V`, `3V3`, `GND` (back header), `GND_2`, `GND_3` (front), `VIN`, `AREF`, `IOREF`, `RESET`, `SCL`, `SDA`. Digital header is on the back (−z) edge, power/analog on the front (+z). Board is 6.86 × 5.34 cm. Anchors: usb, jack, chip, digital, power, analog, reset, lLed, d13, gnd.
+- **mega** (`boards/mega.js`, 10.16 × 5.33): as Uno plus `D14`–`D53`, `A6`–`A15`; double header D22–D53 at the right (+x) end.
+- **nano** (`boards/nano.js`, 4.3 × 1.8, male pins up): `D0`–`D13`, `A0`–`A7`, `5V`, `3V3`, `GND`, `GND_2`, `VIN`, `RESET`, `RESET_2`, `AREF`.
+- **esp32** (`boards/esp32.js`, DevKit 30-pin, male pins up, 3.3 V logic): `GPIO2` (blue built-in LED), `GPIO4`, `GPIO5`, `GPIO12`–`GPIO19`, `GPIO21`–`GPIO23`, `GPIO25`–`GPIO27`, `GPIO32`–`GPIO35`, `VP`(36), `VN`(39), `TX0`, `RX0`, `EN`, `3V3`, `VIN` (5 V from USB), `GND`, `GND_2`. Aliases like `GPIO36`, `D2` resolve.
+- **pico** (`boards/pico.js`, male pins up, 3.3 V): `GP0`–`GP22`, `GP26`–`GP28` (ADC0–2), `GP25` = on-board LED, `3V3`, `3V3_EN`, `VSYS`, `VBUS`, `RUN`, `ADC_VREF`, `GND`, `GND_2`…`GND_8`.
+- **jetson** (`boards/jetson.js`, ~10 × 8 cm, 40-pin header, 3.3 V): `PIN1`–`PIN40` (physical BOARD numbering, Raspberry-Pi layout) + aliases `3V3`, `5V`, `5V_2`, `SDA`(3), `SCL`(5), `GND`(6) … `GND_8`, `TXD`(8), `RXD`(10), `PWM0`(32), `PWM2`(33), `3V3_2`(17). `setFan(0–1)`, `csi` (Vector3 of the camera connector). Same file exports `makeCSICamera(pos, opts)` → `{ group, pick, anchor, lensWorld, lookDir }` and `makeRibbon(a, b, width)` → `{ group }`.
+Check `BOARD_INFO` / anchors in `src/scene/boards/index.js` and each board file for exact names.
+
+## Components (`src/scene/components.js`, breadboard-mounted unless noted)
+`makeLED(color, anodeHole, cathodeHole)` → `set(0–1)`, `setColor(name)`; `makeRGBLED([R,GND,G,B])` → `set(r,g,b 0–255)`; `makeResistor(a, b, ohms, {height})` → `setValue`; `makeButton([4 holes])` → `press(bool)`, `pressed`; `makePot([3 holes])` → `set(0–1)`; `makeLDR(a,b)`; `makeBuzzer(a,b)` → `set(on, freq)`; `makeTO92([3 holes], label)`; `makeDiode(a,b)`; `makeMotor(pos)` (free-standing) → `set(speed)`, `terminals`; `makeServo(pos)` (free-standing) → `set(deg)`, `leads[gnd,pwr,sig]`; `makeUltrasonic([VCC,TRIG,ECHO,GND])` → `front`; `makeTrafficLight([R,Y,G,GND])` → `set(name, on)`; `makeCar(pos)`; `makeBlock(pos)`; `makePing(origin)` → `fire(dist)`. Helpers in `src/lessons/helpers.js`: `v`, `clamp`, `BB`, `ledOnPin(ctx, bb, {pin, col, color, gnd, ohms})` (resistor + LED + 2 wires, returns `{ led, res, sig, gw, on(level) }`).
+
+## Modules (`src/scene/modules.js`)
+Free-standing modules `(pos, opts)` (`opts.rotY` radians) return `{ group, pick, anchor, pins, pin(name) }` with pins pointing UP (wire straight to `m.pin('VCC')`). Breadboard modules `(holes)` return `{ group, pick, anchor }`. Animated ones have `tick(dt)` (auto-registered by `ctx.add`).
+- `makeOLED` — GND VCC SCL SDA; `draw(fn(ctx,128,64), {clear})`, `clear()`, `text(lines, {x,y,size,align,lineHeight,clear})` (5×7 pixel font), `bar(x,y,w,h,frac)`, `pixel(x,y,on)`; `opts.yellowTop`.
+- `makeLCD1602` — GND VCC SDA SCL (I²C backpack on the left); `print(row, col, text)` or `print(text)`, `setCursor(col,row)`, `clear()`, `backlight(on)`; `opts.variant:'blue'`.
+- `makeNeoPixelRing` / `makeNeoPixelStrip(pos, n=8)` — DIN 5V GND; `setPixel(i,r,g,b)`, `fill`, `clear`, `show()`, `count`.
+- `makeStepper` — 28BYJ-48 + ULN2003 (driver 4.5 cm to +x): IN1–IN4 VCC GND; `step(dir)` = one half-step (4096/rev), `setAngle`, `angle`, `release()`.
+- `makeRelay` — IN VCC GND + terminals NO COM NC (`terminal(name)`); `set(on)`. `makeLamp(pos)` → `set(on)`, `terminal(0|1)`.
+- `makePIR` — VCC OUT GND; `trigger(on)`. `makePerson(pos)` (≈5.4 cm figure) → `{group, pick, anchor, head}`.
+- `makeDHT11` — VCC DATA GND.
+- `makeJoystick` — GND +5V VRX VRY SW; `set(x,y)` −1..1, `press(on)`.
+- `makeIRReceiver` — OUT GND VCC; `flash()`, `front`. `makeRemote(pos)` → `keys`, `tip`, `flash(dur)`.
+- `makeKeypad` — R1–R4 C1–C4; `press(key)`, `release()`, `keyPos(key)`.
+- `makeMPU6050` — VCC GND SCL SDA XDA XCL AD0 INT; `setTilt(pitchDeg, rollDeg)` (on a small stand).
+- `makeSoilSensor` — GND VCC AOUT (pins ~10 cm up, probe in a pot with a plant); `setMoisture(0–1)`.
+- `makeSoundSensor` — AO GND + DO; `hear(on)`, `setDetect(on)`. `makeGasSensor` — VCC GND DO AO; `setDetect(on)`. `makeFlameSensor` — VCC GND DO AO; `setDetect(on)`, `front`.
+- `makeRotaryEncoder` — CLK DT SW + GND; `setAngle(deg)`, `press(on)`.
+- `makeRTC` — GND VCC SDA SCL. `makeSDCard` — GND VCC MISO MOSI SCK CS. `makeHC05` — STATE RXD TXD GND VCC EN; `setLinked(on)`.
+- `makeL298N` — ENA IN1 IN2 IN3 IN4 ENB + screw terminals 12V GND 5V OUT1–OUT4; `setPower(on)`, `opts.jumpers`.
+- `makeFSR` — P1 P2; `press(0–1)`.
+- `makeRobotCar(pos)` — life-size 2WD chassis (~16 cm long, give it its own scene); `pos` = ground under the drive axle, forward = local +z; `setWheels(l, r)` −1..1, `tick`, `reset()`, `stop()`, `deck` (Group that moves with the car), `heading`, `position`.
+- Breadboard: `makeSevenSegment([10 holes])` — top row g f COM a b, bottom row e d COM c DP; `setSegments(mask)` (bit0=a … bit7=dp), `showDigit(n, dp)`. `makeDIP(holes, label, pinCount)` (standard DIP numbering straddling the channel). `makeLEDBar([20 holes])` → `setLevel(n)`, `set(i,on)`.
+- Also `makeBreakout({...})` for custom breakout boards.
+Run `dev/modules.html?m=<key>` and `dev/boards.html?b=<id>` to preview parts.

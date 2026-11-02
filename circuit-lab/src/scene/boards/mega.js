@@ -105,7 +105,7 @@ function silkscreen(ctx, t) {
   text(ctx, 'RX', px(-1.72), pz(-0.69), sm);
   text(ctx, 'ON', px(2.12), pz(-1.05), sm);
   text(ctx, 'RESET', px(-4.55), pz(-1.78), { size: f(0.11) });
-  text(ctx, 'ICSP', px(3.75), pz(0.68), { size: f(0.1) });
+  text(ctx, 'ICSP', px(1.75), pz(0.66), { size: f(0.1) });
   text(ctx, 'ICSP', px(-3.08 + 0.45), pz(-1.88), { size: f(0.1), align: 'left' });
   text(ctx, '16 MHz', px(-1.15), pz(1.3), { size: f(0.09) });
   text(ctx, '7–12V', px(-4.55), pz(0.95), { size: f(0.1) });
@@ -156,13 +156,13 @@ export function makeMega() {
   });
   on(mcu, 0.55, 0.2, 0, Math.PI / 4);
   on(crystal({ hc49: true, w: 0.85, d: 0.36 }), -1.15, 0.95);
-  on(smallMaleHeader(3, 2), 3.75, 1.05);
+  on(smallMaleHeader(3, 2), 1.75, 1.0);
   on(canCap(0.22, 0.4), -2.1, 0.55);
   g.add(passives([
     [-1.9, 0.05, 0, 'c'], [-1.9, 0.35, 0, 'r'], [-0.9, -0.4, Math.PI / 2, 'c'], [-0.65, 1.3, 0, 'c'], [-1.65, 1.3, 0, 'c'],
-    [1.65, -0.35, Math.PI / 4, 'r'], [1.85, 0.75, -Math.PI / 4, 'c'], [-0.35, -1.0, Math.PI / 4, 'r'], [1.1, 1.35, -Math.PI / 4, 'c'],
+    [1.65, -0.35, Math.PI / 4, 'r'], [2.35, 1.05, Math.PI / 2, 'c'], [-0.35, -1.0, Math.PI / 4, 'r'], [1.1, 1.35, -Math.PI / 4, 'c'],
     [-2.6, -1.4, 0, 'r'], [-2.6, -1.2, 0, 'r'], [-3.75, -0.35, Math.PI / 2, 'c'], [-3.65, -1.6, 0, 'c'], [-2.95, 2.2, 0, 'C'],
-    [-2.4, 1.9, Math.PI / 2, 'd'], [2.55, -1.05, 0, 'r'], [-1.3, -1.6, 0, 'r'], [-0.95, -1.6, 0, 'r'], [3.6, 0.05, Math.PI / 2, 'r'],
+    [-2.4, 1.9, Math.PI / 2, 'd'], [2.55, -1.05, 0, 'r'], [-1.3, -1.6, 0, 'r'], [-0.95, -1.6, 0, 'r'], [3.75, 1.05, 0, 'r'], [3.75, 0.85, 0, 'c'],
     [0.6, -1.1, Math.PI / 4, 'c'], [0.1, 1.5, 0, 'r'],
   ], TOP));
 
@@ -211,7 +211,7 @@ export function makeMega() {
       analogExtra: center(HEADERS[5]),
       reset: new THREE.Vector3(-4.55, TOP + 0.45, -2.25),
       lLed: new THREE.Vector3(-1.97, TOP + 0.1, -1.15),
-      icsp: new THREE.Vector3(3.75, TOP + 0.85, 1.05),
+      icsp: new THREE.Vector3(1.75, TOP + 0.85, 1.0),
       usbChip: new THREE.Vector3(-3.2, TOP + 0.1, -0.95),
       d13: pinMap.D13.clone(),
       gnd: pinMap.GND.clone(),

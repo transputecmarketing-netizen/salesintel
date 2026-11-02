@@ -182,26 +182,26 @@ export function makeLCD1602(pos, opts = {}) {
   const LIFT = 1.2; // LCD PCB raised on standoffs above the backpack
   // --- backpack (blue) on the ground, header protruding on the left
   const bp = makeBreakout({
-    w: 5.4, d: 2.1, color: 0x2a5cb8, pins: ['GND', 'VCC', 'SDA', 'SCL'], pinsEdge: 'left', pinOffset: -0.3, inset: 0.2,
+    w: 5.9, d: 2.1, color: 0x2a5cb8, pins: ['GND', 'VCC', 'SDA', 'SCL'], pinsEdge: 'left', pinOffset: -0.3, inset: 0.62, labelSide: 'out',
     silk: (P) => {
-      P.text('I2C', -2.2, 0.62, 0.13, { align: 'left', weight: 700 });
+      P.text('I2C', -2.6, 0.62, 0.13, { weight: 700 });
       P.text('LED', -1.95, 0.88, 0.09);
     },
   });
-  bp.group.position.set(-2.45, 0, -0.85);
+  bp.group.position.set(-2.75, 0, -0.85);
   g.add(bp.group);
-  bp.on(soic(8, { label: 'PCF8574T', len: 1.05, wid: 0.5 }), 0.6, 0.35);
+  bp.on(soic(8, { label: 'PCF8574T', len: 1.05, wid: 0.5 }), 0.9, 0.35);
   const pot = new THREE.Group();
   pot.add(at(box(0.66, 0.42, 0.66, mat(0x2f62c9, { rough: 0.5 })), 0, 0.21, 0));
   pot.add(at(cyl(0.2, 0.2, 0.06, mat(0xe8e4da), { seg: 16 }), 0, 0.45, 0));
   pot.add(at(box(0.28, 0.02, 0.05, mat(0x55575c), { outline: false }), 0, 0.485, 0));
-  bp.on(pot, -1.6, 0.45);
+  bp.on(pot, -1.55, 0.5);
   // LED jumper
   const jp = new THREE.Group();
   jp.add(at(box(0.25, 0.25, 0.5, mat(0x23262e)), 0, 0.125, 0));
   jp.add(at(box(0.26, 0.5, 0.52, mat(0x2b2d33, { rough: 0.6 })), 0, 0.5, 0));
-  bp.on(jp, -2.2, 0.85 - 0.1).rotation.y = Math.PI / 2;
-  smdField(bp, [[0.2, -0.4], [0.6, -0.4], [1.0, -0.4], [1.5, 0.3, Math.PI / 2], [1.8, 0.3, Math.PI / 2, 'cap']]);
+  bp.on(jp, -2.1, -0.15).rotation.y = Math.PI / 2;
+  smdField(bp, [[0.5, -0.4], [0.9, -0.4], [1.3, -0.4], [1.8, 0.3, Math.PI / 2], [2.1, 0.3, Math.PI / 2, 'cap']]);
   const pinsLocal = new Map();
   for (const [k, p] of bp.pinsLocal) pinsLocal.set(k, p.clone().add(bp.group.position));
 
@@ -338,8 +338,8 @@ function pixelLED() {
   const lens = mat(0xf6f2df, { emissive: 0xffffff, emissiveIntensity: 0, unique: true, rough: 0.3 });
   g.add(at(cyl(0.19, 0.19, 0.03, lens, { outline: false, seg: 20 }), 0, 0.16, 0));
   g.add(at(box(0.06, 0.02, 0.06, mat(0x8a7a50), { outline: false }), 0.03, 0.18, 0.02));
-  const glow = glowSprite(0xffffff, 1.5);
-  glow.position.y = 0.4;
+  const glow = glowSprite(0xffffff, 1.05);
+  glow.position.y = 0.35;
   g.add(glow);
   const c = new THREE.Color();
   return {
@@ -354,10 +354,10 @@ function pixelLED() {
       }
       c.setRGB(r / m, gg / m, b / m, THREE.SRGBColorSpace);
       lens.emissive.copy(c);
-      lens.color.copy(c);
-      lens.emissiveIntensity = 0.6 + (m / 255) * 1.8;
+      lens.color.copy(c).multiplyScalar(0.3);
+      lens.emissiveIntensity = 0.25 + (m / 255) * 0.5;
       glow.material.color.copy(c);
-      glow.material.opacity = 0.25 + (m / 255) * 0.7;
+      glow.material.opacity = 0.2 + (m / 255) * 0.55;
     },
   };
 }
@@ -394,7 +394,7 @@ function pixelApi(api, leds, light) {
       if (light) {
         if (m > 0) avg.setRGB(sr / m, sg / m, sb / m);
         light.color.copy(avg);
-        light.intensity = (m / (255 * n)) * 6;
+        light.intensity = (m / (255 * n)) * 2.5;
       }
       return api;
     },
@@ -411,8 +411,9 @@ export function makeNeoPixelRing(pos, opts = {}) {
   const hole = new THREE.Path();
   hole.absarc(0, 0, r, 0, Math.PI * 2, true);
   shape.holes.push(hole);
-  const ringPcb = slab(shape, 0.16, mat(PCB.black, { rough: 0.55 }));
-  g.add(ringPcb);
+  const ringGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.16, bevelEnabled: false, curveSegments: 40 });
+  ringGeo.rotateX(-Math.PI / 2);
+  g.add(mesh(ringGeo, mat(PCB.black, { rough: 0.55 }), { edgeAngle: 40 }));
   // pin tab
   const tab = makeBreakout({ w: 1.25, d: 0.95, color: PCB.black, pins: ['DIN', '5V', 'GND'], pinsEdge: 'back', inset: 0.18, radius: 0.1 });
   tab.group.position.set(0, -0.001, -R - 0.3);
@@ -422,13 +423,11 @@ export function makeNeoPixelRing(pos, opts = {}) {
   // silkscreen: pixel indices + data arrows
   const silk = silkPlane(2 * R, 2 * R, (P) => {
     for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2;
-      const x = Math.sin(a), z = -Math.cos(a);
-      P.text(String(i), x * 1.26, z * 1.26, 0.15, { weight: 700 });
-      const a2 = a + Math.PI / n;
-      P.text('›', Math.sin(a2) * 1.5, -Math.cos(a2) * 1.5, 0.2, { rot: a2 });
+      const a2 = ((i + 0.5) / n) * Math.PI * 2;
+      P.text('›', Math.sin(a2) * 1.5, -Math.cos(a2) * 1.5, 0.22, { rot: a2, weight: 700 });
     }
-    P.circle(0, 0, R - 0.06, { stroke: 'rgba(255,255,255,.25)', lw: 0.02 });
+    P.text('0', 0, -1.79, 0.11, { weight: 700 });
+    P.circle(0, 0, R - 0.05, { stroke: 'rgba(255,255,255,.25)', lw: 0.02 });
   });
   silk.position.y = 0.162;
   g.add(silk);
@@ -533,7 +532,7 @@ export function makeSevenSegment(holes) {
   shapes.push(dp);
   const red = 0xff2a1a;
   const segs = shapes.map((s) => {
-    const sm = mat(0x3b3533, { emissive: red, emissiveIntensity: 0, unique: true, rough: 0.4 });
+    const sm = mat(0x3b3533, { emissive: 0xff1a0a, emissiveIntensity: 0, unique: true, rough: 0.4 });
     const geo = new THREE.ShapeGeometry(s);
     geo.rotateX(-Math.PI / 2);
     const segMesh = new THREE.Mesh(geo, sm);
@@ -559,9 +558,9 @@ export function makeSevenSegment(holes) {
       mask = bits & 0xff;
       segs.forEach(({ sm, glow }, i) => {
         const on = (mask >> i) & 1;
-        sm.color.setHex(on ? 0xff6a50 : 0x3b3533);
-        sm.emissiveIntensity = on ? 1.8 : 0;
-        glow.material.opacity = on ? 0.55 : 0;
+        sm.color.setHex(on ? 0xe0220f : 0x3b3533);
+        sm.emissiveIntensity = on ? 0.5 : 0;
+        glow.material.opacity = on ? 0.5 : 0;
       });
       return api;
     },
@@ -673,8 +672,8 @@ export function makeLEDBar(holes, opts = {}) {
       segs.forEach(({ sm, glow, c }, i) => {
         const on = (mask >> i) & 1;
         sm.color.setHex(on ? c : 0x3a3533);
-        sm.emissiveIntensity = on ? 1.6 : 0;
-        glow.material.opacity = on ? 0.6 : 0;
+        sm.emissiveIntensity = on ? 0.7 : 0;
+        glow.material.opacity = on ? 0.55 : 0;
       });
       return api;
     },

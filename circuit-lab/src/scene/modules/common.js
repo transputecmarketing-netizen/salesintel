@@ -163,7 +163,7 @@ const pinGeom = new THREE.BoxGeometry(0.064, 1, 0.064);
 export function makeBreakout({
   w, d, color = PCB.blue, pins = [], label = '', sublabel = '', pinsEdge = 'back', pinOffset = 0, inset = 0.2,
   holes = [], holeR = 0.14, radius = 0.12, silk: extra, pinText = {}, headers = [], labelPos, labelSize, thickness = PCB_T,
-  ink = '#f1efe6', pinLabels = true,
+  ink = '#f1efe6', pinLabels = true, labelSide = 'in',
 }) {
   const g = new THREE.Group();
   const top = thickness;
@@ -236,16 +236,25 @@ export function makeBreakout({
     for (const [x, z] of tips) P.circle(x, z, 0.075, { fill: '#d8b866' });
     if (pinLabels)
       for (const { h, xz } of layouts) {
+        const names = h.pins.filter(Boolean).map((n) => pinText[n] ?? n);
+        // short names on a back/front header read horizontally, like real silkscreen
+        const flat = names.every((t) => t.length <= 3);
+        const side = (h.labelSide ?? labelSide) === 'out' ? -1 : 1;
         h.pins.forEach((name, i) => {
           if (!name) return;
           const [x, z] = xz(i);
           const t = pinText[name] ?? name;
           const fs = t.length > 4 ? 0.105 : 0.12;
           switch (h.edge) {
-            case 'front': P.text(t, x, z - 0.2, fs, { rot: -Math.PI / 2, align: 'left' }); break;
-            case 'left': P.text(t, x + 0.2, z, fs, { align: 'left' }); break;
-            case 'right': P.text(t, x - 0.2, z, fs, { align: 'right' }); break;
-            default: P.text(t, x, z + 0.2, fs, { rot: -Math.PI / 2, align: 'right' });
+            case 'front':
+              if (flat) P.text(t, x, z - side * 0.24, 0.095);
+              else P.text(t, x, z - side * 0.2, fs, { rot: -Math.PI / 2, align: side > 0 ? 'left' : 'right' });
+              break;
+            case 'left': P.text(t, x + side * 0.2, z, fs, { align: side > 0 ? 'left' : 'right' }); break;
+            case 'right': P.text(t, x - side * 0.2, z, fs, { align: side > 0 ? 'right' : 'left' }); break;
+            default:
+              if (flat) P.text(t, x, z + side * 0.24, 0.095);
+              else P.text(t, x, z + side * 0.2, fs, { rot: -Math.PI / 2, align: side > 0 ? 'right' : 'left' });
           }
         });
       }
@@ -402,7 +411,8 @@ export function dipOnPcb(n = 16, label = '') {
 export function smdLed(color = 0xff3b2f, o = {}) {
   const g = new THREE.Group();
   const lens = emissiveMat(color, { opacity: 0.95 });
-  lens.color.lerp(new THREE.Color(0xffffff), 0.35);
+  const offCol = new THREE.Color(color).lerp(new THREE.Color(0xffffff), 0.55);
+  lens.color.copy(offCol);
   g.add(at(box(0.2, 0.06, 0.13, mat(0xe9e5d8), { outline: false }), 0, 0.03, 0));
   g.add(at(box(0.14, 0.05, 0.11, lens, { outline: false }), 0, 0.08, 0));
   const glow = glowSprite(color, o.glow ?? 0.9);
@@ -414,8 +424,9 @@ export function smdLed(color = 0xff3b2f, o = {}) {
     get level() { return level; },
     set(v) {
       level = Math.max(0, Math.min(1, +v));
-      lens.emissiveIntensity = level * 2.2;
-      glow.material.opacity = level * 0.9;
+      lens.color.copy(offCol).lerp(new THREE.Color(color), level);
+      lens.emissiveIntensity = level * 0.9;
+      glow.material.opacity = level * 0.8;
     },
   };
 }
@@ -433,8 +444,8 @@ export function thtLed(color = 0xff3b2f, r = 0.15) {
   return {
     group: g,
     set(v) {
-      lens.emissiveIntensity = v * 2;
-      glow.material.opacity = v * 0.9;
+      lens.emissiveIntensity = v * 1.1;
+      glow.material.opacity = v * 0.85;
     },
   };
 }

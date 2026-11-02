@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circuit Lab · module gallery</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f4ecdc; font: 14px/1.4 "Barlow Semi Condensed", sans-serif; color: #1d2440; }
+      #host { position: fixed; inset: 0; }
+      #host canvas { width: 100%; height: 100%; display: block; }
+      #nav { position: fixed; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 2; }
+      #nav a { background: #fffaf0cc; border: 1px solid #d9cfba; border-radius: 6px; padding: 2px 7px; color: inherit; text-decoration: none; }
+      #nav a.on { background: #1d2440; color: #fff; }
+      #title { position: fixed; left: 12px; bottom: 10px; font-size: 22px; font-weight: 700; z-index: 2; }
+    </style>
+  </head>
+  <body>
+    <div id="host"><canvas id="c"></canvas></div>
+    <nav id="nav"></nav>
+    <div id="title"></div>
+    <script type="module" src="./modules.js"></script>
+  </body>
+</html>
