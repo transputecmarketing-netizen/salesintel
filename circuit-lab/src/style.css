@@ -473,7 +473,9 @@ li.is-done .badge { opacity: 1; transform: none; }
   }
   .side-toggle, .side-foot { display: none; }
   .side-nav { display: flex; width: 100%; justify-content: space-around; gap: 0; }
-  .side-nav a { flex-direction: column; justify-content: center; gap: 2px; height: 52px; padding: 0 10px; font-size: 11px; }
+  .side-nav li { flex: 1; min-width: 0; }
+  .side-nav a { flex-direction: column; justify-content: center; gap: 2px; height: 52px; padding: 0 2px; font-size: 10.5px; letter-spacing: 0.04em; }
+  .side-nav a .side-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
   .side-nav a .icon { width: 22px; height: 22px; }
   .side-label { opacity: 1; }
   .side-nav li.is-active a::before { left: 10px; right: 10px; top: auto; bottom: 0; width: auto; height: 3px; border-radius: 3px 3px 0 0; }

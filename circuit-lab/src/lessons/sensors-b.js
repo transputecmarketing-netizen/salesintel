@@ -472,8 +472,23 @@ void loop() {
         followWire(ctx, ctx.board.pin('A4'), () => mpu.pin('SDA'), 'blue', { signal: 'A4', lift: 1.6 }),
       ];
       const state = { pitch: 0, roll: 0, auto: false, t: 0 };
-      // visual: pitch rotates about the sensor's Y axis (world Z), roll about its X axis (world X)
-      const apply = () => { mpu.setTilt(state.roll, state.pitch); live.forEach((l) => l.update()); };
+      // Orient the tilting PCB as Rz(pitch)·Rx(roll) — the rotation order the pitch/roll formulas assume —
+      // so the printed angles match the sliders. Pitch turns about the sensor's Y axis, roll about its X axis.
+      const tiltGroup = mpu.group.children.find((c) => c.isGroup) ?? null;
+      const rad = THREE.MathUtils.degToRad;
+      const apply = () => {
+        mpu.setTilt(state.roll, state.pitch);
+        tiltGroup?.rotation.set(rad(state.roll), 0, -rad(state.pitch), 'ZXY');
+        live.forEach((l) => l.update());
+      };
+      /** Gravity as the accelerometer feels it (in g), from the PCB's actual orientation. */
+      const gravity = () => {
+        if (!tiltGroup) { const P = rad(state.pitch), R = rad(state.roll); return { ax: -Math.sin(P), ay: Math.cos(P) * Math.sin(R), az: Math.cos(P) * Math.cos(R) }; }
+        const q = new THREE.Quaternion();
+        tiltGroup.getWorldQuaternion(q);
+        const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q.invert()); // world up in PCB coordinates
+        return { ax: up.x, ay: -up.z, az: up.y }; // silkscreen: X → +x, Y → −z, Z → up
+      };
       ctx.onTick((dt) => {
         if (!state.auto) return;
         state.t += dt;
@@ -485,18 +500,18 @@ void loop() {
         name: 'MPU-6050 (GY-521)', hint: 'Tilt the board on its stand',
         controls: [
           { type: 'range', label: 'Pitch (X arrow up ↔ down)', min: -80, max: 80, step: 1, get: () => state.pitch, set: (x) => { state.auto = false; state.pitch = x; apply(); }, format: (x) => `${x}°` },
-          { type: 'range', label: 'Roll (Y arrow up ↔ down)', min: -80, max: 80, step: 1, get: () => state.roll, set: (x) => { state.auto = false; state.roll = x; apply(); }, format: (x) => `${x}°` },
+          { type: 'range', label: 'Roll (Y arrow down ↔ up)', min: -80, max: 80, step: 1, get: () => state.roll, set: (x) => { state.auto = false; state.roll = x; apply(); }, format: (x) => `${x}°` },
           { type: 'toggle', label: 'Rock gently', get: () => state.auto, set: (on) => (state.auto = on) },
           { type: 'button', label: 'Level it', press: () => { state.auto = false; state.pitch = state.roll = 0; apply(); } },
         ],
-        note: () => `Gravity on Z ≈ ${(Math.cos((state.pitch * Math.PI) / 180) * Math.cos((state.roll * Math.PI) / 180)).toFixed(2)} g`,
+        note: () => { const g = gravity(); return `Accelerometer: X ${g.ax.toFixed(2)} g, Y ${g.ay.toFixed(2)} g, Z ${g.az.toFixed(2)} g`; },
       });
       const plot = ctx.plotter({ title: 'Serial plotter', series: [{ name: 'Pitch', color: '#e5412e', min: -90, max: 90 }, { name: 'Roll', color: '#3b78e7', min: -90, max: 90 }] });
       ctx.anchor('mpu', mpu.anchor);
       ctx.anchor('scl', live[2].w.mid);
       ctx.anchor('sda', live[3].w.mid);
       ctx.anchor('vcc', live[0].w.mid);
-      return { mpu, plot, state };
+      return { mpu, plot, state, gravity };
     },
     callouts: [
       { anchor: 'vcc', x: 0.04, y: 0.17, icon: 'plug', title: '5V and GND', text: 'The GY-521 has its own 3.3 V regulator.' },
@@ -511,7 +526,7 @@ void loop() {
     pinout: [['5V', 'VCC', 'On-board 3.3 V regulator'], ['GND', 'GND', ''], ['A5 (SCL)', 'SCL', 'I²C clock'], ['A4 (SDA)', 'SDA', 'I²C data'], ['AD0', 'Not connected', 'Low → address 0x68']],
     example: {
       text: 'Phones rotating the screen, self-balancing robots, drone flight controllers and camera gimbals all start from accelerometer tilt like this — then blend in the gyro for fast, smooth motion.',
-      points: ['Shake it while tilted: the accelerometer also feels movement, so readings jump', 'Average a few readings or add the gyro for steadier angles'],
+      points: ['Shake it while tilted: the accelerometer also feels movement, so readings jump', 'Past ±90° pitch the formulas wrap round — tilt-only sensing has limits', 'Average a few readings or add the gyro for steadier angles'],
     },
     specs: [['Chip', 'InvenSense MPU-6050 (GY-521 board)'], ['I²C address', '0x68 (0x69 with AD0 high)'], ['Accel range', '± 2 g → 16384 LSB/g'], ['Gyro range', '± 250 °/s'], ['Supply', '3.3–5 V on VCC'], ['Library', '<code>Wire</code> (built in)']],
     quiz: [
@@ -569,13 +584,10 @@ void loop() {
       io.line('Wire.write(0x3B)'); io.pin('A4', '0x3B', true); io.pin('A5', 'CLK', true);
       await io.delay(30);
       io.line('Wire.requestFrom'); io.pin('A4', '6 bytes', true);
-      const r = (d) => (d * Math.PI) / 180;
-      const P = r(b.state.pitch), R = r(b.state.roll);
-      // gravity in the sensor frame for the actual orientation (roll about X, then pitch about Y)
-      const raw = (g) => clamp(Math.round(g * 16384 + noise(70)), -32768, 32767);
-      const ax = raw(-Math.cos(R) * Math.sin(P));
-      const ay = raw(Math.sin(R));
-      const az = raw(Math.cos(R) * Math.cos(P));
+      // ±2 g range: 16384 counts per g, plus a little sensor noise
+      const g = b.gravity();
+      const raw = (x) => clamp(Math.round(x * 16384 + noise(70)), -32768, 32767);
+      const ax = raw(g.ax), ay = raw(g.ay), az = raw(g.az);
       io.line('int16_t az');
       io.pin('A4', 'idle', false); io.pin('A5', 'idle', false);
       io.line('float pitch');
@@ -594,7 +606,7 @@ void loop() {
   {
     id: 'ir-remote', level: 'Intermediate', title: 'Remote control', icon: 'radar',
     thumb: () => makeRemote(v(0, 0, 0)).group,
-    view: { center: [5.9, 0.6, 2.6], size: 17 },
+    view: { center: [6.4, 0.6, 2.5], size: 17 },
     build(ctx) {
       const bb = ctx.breadboard(...BB);
       ctx.wire(ctx.board.pin('GND'), bb.hole(1, 'top-'), 'black', { signal: 'GND', dir: -1 });
@@ -636,8 +648,8 @@ void loop() {
         }
       });
       const keysCtl = {
-        type: 'keys', label: 'Press (hold for repeats)', keys: Object.keys(IR_CODES),
-        down: (k) => { state.held = k; state.rep = -0.25; fire(k, false); },
+        type: 'keys', label: 'Press (hold for repeats)', keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#', '▲', '◄', 'OK', '►', '▼'],
+        down: (k) => { state.held = k; state.rep = -0.3; fire(k, false); },
         up: () => { state.held = null; },
       };
       ctx.interact(remote, { name: 'IR remote', hint: 'Press keys 1, 2, 3 to toggle the LEDs, 0 for all off', controls: [keysCtl] });
