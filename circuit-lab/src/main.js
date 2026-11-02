@@ -239,7 +239,7 @@ function loadLesson(i, { instant = false } = {}) {
   lesson = lessons[i];
   dimEl.style.opacity = '0';
   board = getBoard(lesson.board);
-  board.setBuiltinLed(0);
+  board.setBuiltinLed(lesson.board === 'jetson' ? 1 : 0);
   board.setFan?.(lesson.board === 'jetson' ? 0.6 : 0);
   const root = new THREE.Group();
   root.add(board.group);
