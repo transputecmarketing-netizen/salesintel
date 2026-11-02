@@ -800,7 +800,7 @@ void loop() {
           if (!st.loaded) return '<p class="muted">Loading…</p>';
           return `<h5>Dimmer</h5><input type="range" min="0" max="255" value="${st.slider}" data-action="set" aria-label="Brightness">
             <p>Brightness: <b class="pv">${st.slider}</b> <span class="muted pp">(${Math.round((st.slider * 100) / 255)} %)</span></p>
-            <p class="muted pl">${st.sent} requests sent</p>`;
+            <p class="muted pl">${st.sent} request${st.sent === 1 ? '' : 's'} sent</p>`;
         },
         onAction(action, value, el) {
           if (action !== 'set' || !st.loaded) return;
@@ -954,7 +954,7 @@ void loop() {
       io.line('server.send(200, "text/plain"');
       b.st.sent++;
       const pl = b.phone.el.querySelector('.pl');
-      if (pl) pl.textContent = `${b.st.sent} requests sent · last: 200 OK "${v}"`;
+      if (pl) pl.textContent = `${b.st.sent} request${b.st.sent === 1 ? '' : 's'} sent · last: 200 OK "${v}"`;
       await io.delay(40);
     },
     reset(b) {
@@ -1010,9 +1010,9 @@ void loop() {
       { q: 'Why compare touched with wasTouched before toggling?', options: ['To debounce Wi-Fi', 'So holding your finger down toggles the LED only once', 'To read faster', 'It is required by touchRead'], answer: 1, explain: 'This is edge detection: act on the change from not-touched to touched.' },
     ],
     challenges: ['Turn the LED on only while the pad is touched.', 'Use two pads (T0 and T3/GPIO15) as up/down buttons for a PWM brightness.', 'Print how long each touch lasted, in milliseconds.'],
-    code: `const int TOUCH_PIN = T0;              // GPIO4
-const int LED_PIN = 2;                 // green LED + blue on-board LED
-const int SENSITIVITY = {{sens}};          // % drop that counts as a touch
+    code: `const int TOUCH_PIN = T0;   // GPIO4
+const int LED_PIN = 2;      // green LED + on-board LED
+const int SENSITIVITY = {{sens}};  // % drop = touch
 
 int threshold;
 bool ledOn = false;
@@ -1238,6 +1238,7 @@ void loop() {
       if (b.st.online && !b.st.broker) { b.st.online = false; b.app.update(); }
       io.line('if (!mqtt.connected()) reconnect()');
       while (!b.st.online) {
+        b.inbox.length = 0; // messages sent while the ESP32 is offline are lost
         io.line('Serial.print("MQTT connecting...")');
         io.line('String id'); await io.delay(300);
         io.line('if (mqtt.connect');
@@ -1246,7 +1247,6 @@ void loop() {
           io.line('Serial.println("connected")'); io.print('MQTT connecting...connected');
           io.line('mqtt.subscribe'); await io.delay(100);
           b.st.online = true;
-          b.inbox.length = 0;
           b.app.update();
         } else {
           io.line('Serial.printf("failed'); io.print('MQTT connecting...failed, rc=-2. Retry in 3 s');
@@ -1457,7 +1457,7 @@ void loop() {
       const btn = ctx.add(makeButton([bb.hole(15, 'e'), bb.hole(17, 'e'), bb.hole(15, 'f'), bb.hole(17, 'f')], 0x2f6fd8));
       const res = ctx.add(makeResistor(bb.hole(15, 'c'), bb.hole(19, 'c'), 10000));
       const w4 = ctx.wire(ctx.board.pin('GPIO4'), bb.hole(15, 'a'), 'yellow', { signal: 'GPIO4' });
-      ctx.wire(ctx.board.pin('3V3'), bb.hole(10, 'top+'), 'red', { signal: '3V3' });
+      ctx.wire(ctx.board.pin('3V3'), bb.hole(10, 'top+'), 'red', { signal: '3V3', chipT: 0.3 });
       ctx.wire(bb.hole(17, 'top+'), bb.hole(17, 'b'), 'red', { lift: 0.45 });
       ctx.wire(ctx.board.pin('GND_2'), bb.hole(11, 'top-'), 'black', { signal: 'GND', dir: -1 });
       ctx.wire(bb.hole(19, 'b'), bb.hole(19, 'top-'), 'black', { lift: 0.45 });

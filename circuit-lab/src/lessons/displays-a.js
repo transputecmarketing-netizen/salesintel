@@ -295,7 +295,7 @@ void loop() {
   {
     id: 'lcd-hello', title: 'Character LCD', icon: 'serial',
     thumb: () => { const l = makeLCD1602(v(0, 0, 0)); l.print(0, 0, 'Hello, world! ♥'); l.print(1, 0, 'Uptime: 42 s'); return l.group; },
-    view: { center: [5.0, 1.2, 0.0], size: 15 },
+    view: { center: [5.2, 1.2, 0.0], size: 15, az: -30 },
     build(ctx) {
       const lcd = ctx.add(makeLCD1602(v(9.9, 0, 0.2)));
       const g = ctx.wire(lcd.pin('GND'), ctx.board.pin('GND'), 'black', { signal: 'GND', lift: 1.6 });
@@ -310,6 +310,7 @@ void loop() {
         note: () => (state.addr === 0x27 ? 'Matches LiquidCrystal_I2C lcd(0x27, …) in the sketch.' : 'The sketch talks to 0x27, so this LCD will stay blank. Run an I²C scanner to find the address.'),
       });
       ctx.anchor('lcd', lcd.anchor);
+      ctx.anchor('heart', v(12.5, 2.0, 0.01)); // top row, column 15
       ctx.anchor('sda', sda.mid);
       ctx.anchor('scl', scl.mid);
       ctx.anchor('vcc', vcc.mid);
@@ -320,7 +321,7 @@ void loop() {
       { anchor: 'sda', x: 0.04, y: 0.17, icon: 'pins', title: 'SDA and SCL', text: 'I²C needs just two signal wires for the whole display.' },
       { anchor: 'lcd', x: 0.7, y: 0.17, icon: 'serial', title: '16 × 2 characters', text: 'Two rows of sixteen 5 × 8-dot cells.' },
       { anchor: 'vcc', x: 0.04, y: 0.68, icon: 'plug', title: '5V and GND', text: 'Powers the LCD, the backlight and the backpack.' },
-      { anchor: 'lcd', x: 0.7, y: 0.68, icon: 'heart', title: 'Custom character', text: 'createChar() draws your own 5 × 8 symbol — the heart.' },
+      { anchor: 'heart', x: 0.7, y: 0.68, icon: 'heart', title: 'Custom character', text: 'createChar() draws your own 5 × 8 symbol — the heart.' },
     ],
     overview: {
       heading: 'Character LCD',
@@ -434,20 +435,20 @@ void loop() {
       o.bar(0, 20, 128, 10, 0.6);
       return o.group;
     },
-    view: { center: [6.4, 0.8, 1.6], size: 15.5 },
+    view: { center: [8.0, 1.0, 1.9], size: 11.5, az: -20 },
     build(ctx) {
       const bb = ctx.breadboard(...BB);
       ctx.wire(ctx.board.pin('5V'), bb.hole(2, 'bot+'), 'red', { signal: '5V' });
       ctx.wire(ctx.board.pin('GND_2'), bb.hole(3, 'bot-'), 'black', { signal: 'GND', dir: -1 });
       const pot = ctx.add(makePot([bb.hole(6, 'h'), bb.hole(8, 'h'), bb.hole(10, 'h')]));
-      ctx.wire(bb.hole(6, 'j'), bb.hole(6, 'bot+'), 'red', { signal: '5V', lift: 0.35 });
-      ctx.wire(bb.hole(10, 'j'), bb.hole(10, 'bot-'), 'black', { signal: 'GND', dir: -1, lift: 0.35 });
+      ctx.wire(bb.hole(6, 'j'), bb.hole(6, 'bot+'), 'red', { lift: 0.35 });
+      ctx.wire(bb.hole(10, 'j'), bb.hole(10, 'bot-'), 'black', { lift: 0.35 });
       const a0 = ctx.wire(ctx.board.pin('A0'), bb.hole(8, 'j'), 'green', { signal: 'A0', dir: -1, lift: 1.6 });
       const oled = ctx.add(makeOLED(v(11.6, 0, 4.4)));
-      ctx.wire(oled.pin('GND'), bb.hole(23, 'bot-'), 'black', { signal: 'GND', lift: 0.8 });
-      ctx.wire(oled.pin('VCC'), bb.hole(24, 'bot+'), 'red', { signal: '5V', dir: -1, lift: 0.8 });
-      const scl = ctx.wire(ctx.board.pin('A5'), oled.pin('SCL'), 'yellow', { signal: 'A5', lift: 2.2 });
-      const sda = ctx.wire(ctx.board.pin('A4'), oled.pin('SDA'), 'blue', { signal: 'A4', lift: 2.5 });
+      ctx.wire(oled.pin('GND'), bb.hole(23, 'bot-'), 'black', { lift: 0.8 });
+      ctx.wire(oled.pin('VCC'), bb.hole(24, 'bot+'), 'red', { lift: 0.8 });
+      const scl = ctx.wire(ctx.board.pin('A5'), oled.pin('SCL'), 'yellow', { signal: 'A5', lift: 2.2, chipT: 0.55 });
+      const sda = ctx.wire(ctx.board.pin('A4'), oled.pin('SDA'), 'blue', { signal: 'A4', lift: 2.5, chipT: 0.45 });
       const state = { knob: 0.62, auto: false, t: 0 };
       pot.set(state.knob);
       ctx.onTick((dt) => {

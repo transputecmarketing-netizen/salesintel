@@ -1,5 +1,4 @@
 // Track — MicroPython on Pico: the RP2040 programmed in Python.
-import * as THREE from 'three';
 import { makeLED, makeResistor, makeButton, makePot } from '../scene/components.js';
 import { makeNeoPixelRing, makeOLED } from '../scene/modules.js';
 import { makePico } from '../scene/boards/pico.js';

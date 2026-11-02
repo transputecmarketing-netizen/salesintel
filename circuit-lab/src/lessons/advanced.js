@@ -359,7 +359,7 @@ void loop() {
   {
     id: 'i2c-bus', title: 'The I²C bus', icon: 'serial',
     thumb: () => { const o = makeOLED(v(0, 0, 0)); o.text(['I2C', '0x3C 0x68'], { y: 18, size: 2, align: 'center' }); return o.group; },
-    view: { center: [5.6, 0.8, -0.4], size: 18 },
+    view: { center: [5.8, 0.8, -0.2], size: 16.5 },
     build(ctx) {
       const bb = ctx.breadboard(...BBM);
       const { wSda, wScl } = i2cBus(ctx, bb, { sdaPin: 'D20', sclPin: 'D21', vccPin: '5V_2', gndPin: 'GND_4', sda: 14, scl: 16, vccCol: 2, gndCol: 3 });
@@ -473,13 +473,13 @@ void loop() {
       io.line('Wire.begin'); await io.delay(100);
       io.line('scanBus();'); io.line('"Scanning I2C'); io.print('Scanning I2C bus...');
       const found = [...(b.state.oledOn ? [0x3c] : []), 0x57, 0x68];
-      for (let addr = 1; addr < 127; addr += 7) {
+      for (let addr = 1; addr < 127; addr += 8) {
         io.line('Wire.beginTransmission(addr)');
         io.pin('SDA', `0x${hex2(addr)}?`, true);
         io.pin('SCL', 'clock', true);
-        await io.delay(45);
+        await io.delay(30);
         for (const f of found) {
-          if (f >= addr && f < addr + 7) {
+          if (f >= addr && f < addr + 8) {
             io.line('Serial.println(addr, HEX)'); io.print(`  device at 0x${hex2(f)}`);
             await io.delay(90);
           }
@@ -877,27 +877,28 @@ void loop() {
       ctx.wire(ctx.board.pin('GND'), bb.hole(2, 'top-'), 'black', { signal: 'GND', dir: -1 });
       ctx.wire(bb.hole(12, 'b'), bb.hole(11, 'top-'), 'black', { lift: 0.5 });
       ctx.wire(hc.pin('GND'), bb.hole(16, 'top-'), 'black', { lift: 1.0 });
+      // makeHC05's `linked` getter is a snapshot, so keep the pairing state here
+      const state = { rx: [], phone: [], linked: true };
       hc.setLinked(true);
-      const state = { rx: [], phone: [] };
       const say = (who, text) => { state.phone.push([who, text]); if (state.phone.length > 7) state.phone.shift(); };
       const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
       const phone = ctx.browser({
         url: 'Bluetooth terminal · HC-05',
         title: 'Phone',
-        render: () => `<h5>${hc.linked ? 'Connected to HC-05' : 'Not connected'}</h5>
+        render: () => `<h5>${state.linked ? 'Connected to HC-05' : 'Not connected'}</h5>
           <div class="muted" style="min-height:7.5em;font-family:var(--mono,monospace);font-size:12px;line-height:1.5">${state.phone.map(([w, t]) => `<div>${w === 'me' ? '&gt; ' : w === 'pc' ? 'PC: ' : '&lt; '}${esc(t)}</div>`).join('') || 'No messages yet'}</div>
           <div class="row"><button class="on" data-action="send" data-value="on">on</button><button class="off" data-action="send" data-value="off">off</button><button data-action="send" data-value="uptime">uptime</button></div>`,
         onAction: (a, val) => {
           if (a !== 'send') return;
-          if (!hc.linked) { say('sys', 'Pair with the HC-05 first'); return; }
+          if (!state.linked) { say('sys', 'Pair with the HC-05 first'); return; }
           say('me', val);
           state.rx.push(val);
         },
       });
       ctx.interact(hc, {
         name: 'HC-05 Bluetooth', hint: 'A serial port without wires: whatever the phone sends comes out of TXD',
-        controls: [{ type: 'toggle', label: 'Phone paired', get: () => hc.linked, set: (x) => { hc.setLinked(x); phone.update(); } }],
-        note: () => (hc.linked ? 'Linked: LED steady, STATE pin HIGH' : 'Waiting: LED blinks fast, STATE pin LOW'),
+        controls: [{ type: 'toggle', label: 'Phone paired', get: () => state.linked, set: (x) => { state.linked = x; hc.setLinked(x); phone.update(); } }],
+        note: () => (state.linked ? 'Linked: LED steady, STATE pin HIGH' : 'Waiting: LED blinks fast, STATE pin LOW'),
       });
       ctx.interact(r2, { name: '2 kΩ resistor', hint: 'With the 1 kΩ it divides 5 V down to ≈ 3.3 V for the HC-05’s RXD' });
       ctx.anchor('hc', hc.anchor);
@@ -988,7 +989,7 @@ void loop() {
     },
     async loop(io, b) {
       io.line('bool now = digitalRead');
-      const linked = b.hc.linked;
+      const linked = b.state.linked;
       io.pin('D22', linked ? 'HIGH' : 'LOW', linked);
       if (linked !== b.linked) {
         b.linked = linked;
@@ -1013,7 +1014,7 @@ void loop() {
       const typed = io.readLine();
       if (typed !== null) {
         io.line('Serial1.write(Serial.read())'); io.pin('D18', `"${typed}"`, true);
-        if (b.hc.linked) b.say('pc', typed); else io.print('(nobody is paired, so the bytes go nowhere)');
+        if (b.state.linked) b.say('pc', typed); else io.print('(nobody is paired, so the bytes go nowhere)');
         b.phone.update();
         await io.delay(40);
         io.pin('D18', 'idle', false);
@@ -1160,7 +1161,7 @@ void loop() {
   {
     id: 'low-power', title: 'Sleep to save power', icon: 'sun', board: 'nano',
     thumb: () => makeNano().group,
-    view: { center: [4.0, 0.6, 0.6], size: 13 },
+    view: { center: [5.2, 0.6, 1.4], size: 13 },
     build(ctx) {
       const bb = ctx.breadboard(...BBN);
       const { btn, sig } = buttonAt(ctx, bb, 8, 'D2', 'GND', 'yellow', 0x3aa65a);

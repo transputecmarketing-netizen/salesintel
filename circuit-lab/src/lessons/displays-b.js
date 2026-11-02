@@ -43,6 +43,9 @@ function colorHSV(hue16) {
 }
 const gamma8 = (x) => Math.round(255 * (x / 255) ** 2.6);
 
+// 28BYJ-48 half-step coil pattern [A, B, C, D] (same table as the stepper module)
+const HALF_STEPS = [[1, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 1], [1, 0, 0, 1]];
+
 const NOTE_NAMES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
 const NOTE_HZ = [262, 294, 330, 349, 392, 440, 494, 523];
 const KEY_WIRES = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'white', 'brown'];
@@ -201,7 +204,8 @@ void loop() {
       const wires = ins.map((n, i) => ctx.wire(ctx.board.pin(`D${8 + i}`), st.pin(n), cols[i], { signal: `D${8 + i}`, lift: 3.0 - i * 0.25 }));
       ctx.wire(ctx.board.pin('5V'), st.pin('VCC'), 'red', { signal: '5V', lift: 1.6 });
       ctx.wire(ctx.board.pin('GND_2'), st.pin('GND'), 'black', { signal: 'GND', dir: -1, lift: 1.3 });
-      const state = { queue: [], position: 0 };
+      // the module's angle/coils getters are snapshots, so track the half-step count here
+      const state = { queue: [], position: 0, half: 1 };
       st.setAngle(0).step(1); // park on a two-coil (full-step) position
       st.release();
       const send = (deg) => () => state.queue.push(String(deg));
@@ -213,7 +217,7 @@ void loop() {
           { type: 'button', label: 'Send −180', press: send(-180) },
           { type: 'button', label: 'Send 360', press: send(360) },
         ],
-        note: () => `Shaft at ${(((st.angle % 360) + 360) % 360).toFixed(1)}° · sketch thinks ${((state.position * 360) / 2048).toFixed(1)}°${state.queue.length ? ` · ${state.queue.length} queued` : ''}`,
+        note: () => `Shaft at ${((((((state.half - 1) * 360) / 4096) % 360) + 360) % 360).toFixed(1)}° · sketch thinks ${((state.position * 360) / 2048).toFixed(1)}°${state.queue.length ? ` · ${state.queue.length} queued` : ''}`,
       });
       ctx.anchor('motor', st.group.localToWorld(v(0, 3.2, -0.8)));
       ctx.anchor('drv', st.group.localToWorld(v(4.5, 0.9, -0.2)));
@@ -294,8 +298,9 @@ void loop() {
         while (done < n) {
           const k = Math.min(n - done, Math.max(1, Math.round(32 / msPerStep)));
           for (let i = 0; i < k; i++) { b.st.step(dir); b.st.step(dir); }
+          b.state.half += 2 * k * dir;
           done += k;
-          b.st.coils.forEach((c, i) => io.pin(`D${8 + i}`, c ? 'HIGH' : 'LOW', !!c));
+          HALF_STEPS[((b.state.half % 8) + 8) % 8].forEach((c, i) => io.pin(`D${8 + i}`, c ? 'HIGH' : 'LOW', !!c));
           await io.delay(k * msPerStep);
         }
         b.state.position += steps;
@@ -341,12 +346,12 @@ void loop() {
         ctx.wire(relay.terminal('NO'), lamp.terminal(0), 'red', { lift: 1.8 }),
         ctx.wire(lamp.terminal(1), psu.minus(), 'black', { lift: 1.2 }),
       ];
-      const state = { requests: [] };
+      const state = { requests: [], on: false };
       ctx.interact(btn, { name: 'Push button', hint: 'Press to toggle the lamp', hold: { down: () => btn.press(true), up: () => btn.press(false) } });
       ctx.interact(relay, {
         name: 'Relay module', hint: 'An electromagnet flips a switch that is isolated from the board',
         controls: [{ type: 'button', label: 'Send “toggle” over serial', press: () => state.requests.push('toggle') }],
-        note: () => `Coil ${relay.on ? 'energised — COM connected to NO' : 'off — COM connected to NC'}`,
+        note: () => `Coil ${state.on ? 'energised — COM connected to NO' : 'off — COM connected to NC'}`,
       });
       ctx.interact(lamp, { name: '12 V lamp', hint: 'Runs from its own supply — the board only drives the relay coil', note: () => (lamp.on ? 'On' : 'Off') });
       ctx.interact(psu, { name: '12 V supply', hint: 'A separate supply for the load; it never touches the board’s pins' });
@@ -431,6 +436,7 @@ void loop() {
     async loop(io, b) {
       const setRelay = (on) => {
         b.lampOn = on;
+        b.state.on = on;
         io.line('digitalWrite(RELAY, on');
         b.relay.set(on);
         b.lamp.set(on);
@@ -459,7 +465,7 @@ void loop() {
       }
       await io.delay(20);
     },
-    reset(b) { b.relay.set(false); b.lamp.set(false); b.load.forEach((w) => { w.live = false; }); b.lampOn = false; b.state.requests.length = 0; },
+    reset(b) { b.relay.set(false); b.lamp.set(false); b.load.forEach((w) => { w.live = false; }); b.lampOn = false; b.state.on = false; b.state.requests.length = 0; },
     serialInput: { placeholder: 'on / off / toggle' },
   },
 

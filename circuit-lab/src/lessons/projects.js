@@ -512,7 +512,7 @@ void loop() {
       io.line('if (isnan(tMin)'); if (Number.isNaN(b.web.min) || t < b.web.min) b.web.min = t;
       io.line('if (isnan(tMax)'); if (Number.isNaN(b.web.max) || t > b.web.max) b.web.max = t;
       io.line('Serial.printf'); io.print(`${t.toFixed(1)} C  ${h} %`);
-      io.line('showOled()');
+      io.line('showOled();');
       const o = b.oled;
       o.text([ESP_IP], { y: 0 });
       o.text([`${t.toFixed(1)} C`], { size: 2, y: 16, clear: false });
@@ -545,7 +545,7 @@ void loop() {
     pinout: [['D5 ~ / D6 ~', 'L298N ENA / ENB', 'PWM speed (remove the jumpers)'], ['D7, D8', 'IN1, IN2', 'Left motor direction'], ['D9, D11', 'IN3, IN4', 'Right motor direction'], ['D3 / D2', 'HC-SR04 TRIG / ECHO', ''], ['5V, GND', 'HC-SR04 VCC, GND', ''], ['Battery + → L298N 12V → Uno VIN', 'Battery – → L298N GND → Uno GND', 'Common ground']],
     example: {
       text: 'Robot vacuums, warehouse robots and toy cars use the same sense → decide → act loop, usually with more sensors (bump switches, IR cliff sensors, lidar) and wheel encoders for precise turns.',
-      points: ['Raise <code>STOP_CM</code> if it clips corners; lower <code>SPEED</code> for tighter control', '<code>TURN_MS</code> is calibrated for ≈ 45° — measure your car and adjust', 'The sensor sees a 15° cone, so thin or angled objects can be missed'],
+      points: ['Raise <code>STOP_CM</code> if it clips corners; lower <code>SPEED</code> for tighter control', '<code>TURN_MS</code> is calibrated for ≈ 45° — measure your car and adjust', 'The sensor sees a 15° cone, so a block off to one side can still catch a wheel — real robots add bump switches'],
     },
     specs: [['Chassis', '2WD acrylic, 2 × TT gear motors, ball caster'], ['Driver', 'L298N dual H-bridge, ≈ 2 V drop'], ['Battery', '4×AA (6 V); 2 × 18650 (7.4 V) is punchier'], ['Sensor', 'HC-SR04, 2–400 cm, 15° cone'], ['Top speed', '≈ 14 cm/s at full PWM'], ['Libraries', 'None — plain Arduino']],
     quiz: [
@@ -678,7 +678,7 @@ void loop() {
       } else if (b.st === 'BACK') {
         io.line('case BACK:');
         motors(-p.speed, -p.speed);
-        if (performance.now() - b.since > 400) { io.line('motors(0, 0);', 1); b.car.stop(); b.wheelsLive(false); b.st = 'SCAN'; }
+        if (performance.now() - b.since > 400) { io.line('motors(0, 0);', 2); b.car.stop(); b.wheelsLive(false); b.st = 'SCAN'; }
       } else {
         io.line('case SCAN:');
         await pivot(1, 1, 'pivot(LEFT, 1)');
@@ -702,7 +702,7 @@ void loop() {
   {
     id: 'proj-smart-home', title: 'Smart home hub', icon: 'home', board: 'esp32',
     thumb: () => { const l = makeLamp(v(0, 0, 0)); l.set(true); return l.group; },
-    view: { center: [-2.2, 1.6, -3.4], size: 25 },
+    view: { center: [-2.0, 1.8, -4.6], size: 25 },
     build(ctx) {
       const b = ctx.board;
       const bb = ctx.breadboard(-8.6, 0.4);
@@ -727,7 +727,7 @@ void loop() {
       const inW = ctx.wire(b.pin('GPIO26'), relay.pin('IN'), 'orange', { signal: 'GPIO26', lift: 1.4 });
       ctx.wire(bb.hole(25, 'top+'), relay.pin('VCC'), 'red', { lift: 1.6 });
       ctx.wire(bb.hole(26, 'top-'), relay.pin('GND'), 'black', { lift: 1.3, dir: -1 });
-      const lamp = ctx.add(makeLamp(v(9.2, 0, -6.4)));
+      const lamp = ctx.add(makeLamp(v(8.0, 0, -9.8)));
       const lw = [ctx.wire(relay.pin('COM'), lamp.terminal(0), 'red', { lift: 1.2 }), ctx.wire(relay.pin('NO'), lamp.terminal(1), 'black', { lift: 1.6 })];
       // someone walking past
       const person = ctx.add(makePerson(v(-15, 0, -10.2), { rotY: Math.PI / 2 }));
@@ -1098,7 +1098,6 @@ void loop() {
       await secGo(io, b, 0);
     },
     async loop(io, b, p) {
-      const NAMES = SEC_NAMES;
       io.line('char k = keypad.getKey()');
       const k = b.state.keys.shift();
       if (k === '#') {
@@ -1117,7 +1116,6 @@ void loop() {
         else if (Math.floor(t / 500) % 2 === 0) { io.line('tone(BUZZER, 2000)'); secTone(io, b, 2000); }
         else { io.line('else noTone(BUZZER)'); secTone(io, b, 0); }
       } else if (b.st === 4) { io.line('if (state == ALARM)'); secTone(io, b, Math.floor(t / 300) % 2 ? 1800 : 1200); }
-      void NAMES;
       await io.delay(40);
     },
     reset(b, io) { b.bz.set(false); io?.noTone(); b.led.led.set(0); io?.board.setBuiltinLed(0); b.lcd.clear(); b.lcd.backlight(false); },
@@ -1156,7 +1154,7 @@ const COURSES = {
   b: [[-10, -2, 6, 14], [6, 8, 14, 6], [18, -8, 8, 8], [24, 14, 6, 6]],
   c: [[2, 0, 10, 10]],
 };
-const START = { pos: v(-22, 0, -12), rotY: 0.9 };
+const START = { pos: v(-22, 0, -12), rotY: 1.2 };
 
 /** 2D ray (o, d) against an axis-aligned box → hit distance or Infinity. */
 function rayBox(ox, oz, dx, dz, b) {

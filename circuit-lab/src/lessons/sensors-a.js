@@ -305,6 +305,7 @@ void loop() {
         series: [{ name: 'temp °C', color: '#e5412e', min: 0, max: 50 }, { name: 'humidity %', color: '#3b78e7', min: 0, max: 100 }, { name: 'heat index °C', color: '#f08a2c', min: 0, max: 50 }],
       });
       const state = { t: 23, h: 45, breath: 0, loose: false };
+      const read = () => ({ t: state.t + 3 * state.breath, h: state.h + 40 * state.breath });
       ctx.onTick((dt) => { state.breath = Math.max(0, state.breath - dt / 9); puffs.set(state.breath > 0.6 ? (state.breath - 0.6) * 2.5 : 0); });
       ctx.interact(dht, {
         name: 'DHT11 sensor', hint: 'Click to change the weather around it',
@@ -314,11 +315,11 @@ void loop() {
           { type: 'button', label: 'Breathe on it', press: () => (state.breath = 1) },
           { type: 'toggle', label: 'Unplug the DATA wire', get: () => state.loose, set: (x) => { state.loose = x; data.group.visible = !x; } },
         ],
-        note: () => `Heat index ≈ ${heatIndexC(state.t, state.h).toFixed(1)} °C`,
+        note: () => { const r = read(); return `Heat index ≈ ${heatIndexC(r.t, r.h).toFixed(1)} °C`; },
       });
       ctx.anchor('dht', dht.anchor);
       ctx.anchor('data', data.mid);
-      return { dht, data, plot, state, read: () => ({ t: state.t + 3 * state.breath, h: state.h + 40 * state.breath }) };
+      return { dht, data, plot, state, read };
     },
     callouts: [
       { anchor: 'dht', x: 0.7, y: 0.17, icon: 'thermo', title: 'DHT11', text: 'Click it to change the temperature and humidity — or breathe on it.' },
@@ -404,11 +405,11 @@ void loop() {
   {
     id: 'soil-moisture', title: 'Thirsty plant', icon: 'plant',
     thumb: () => makeSoilSensor(v(0, 0, 0), { moisture: 0.7 }).group,
-    view: { center: [9.4, 2.0, 1.0], size: 22 },
+    view: { center: [9.2, 2.4, 1.8], size: 22 },
     build(ctx) {
       const bb = ctx.breadboard(...BB);
       const c = ledOnPin(ctx, bb, { pin: 'D7', col: 20, color: 'red' });
-      const soil = ctx.add(makeSoilSensor(v(17.6, 0, -0.4), { moisture: 0.55 }));
+      const soil = ctx.add(makeSoilSensor(v(15.6, 0, 4.4), { moisture: 0.55 }));
       ctx.wire(ctx.board.pin('GND_2'), soil.pin('GND'), 'black', { signal: 'GND', lift: 2.6 });
       ctx.wire(ctx.board.pin('5V'), soil.pin('VCC'), 'red', { signal: '5V', dir: -1, lift: 3.0 });
       const ao = ctx.wire(soil.pin('AOUT'), ctx.board.pin('A0'), 'yellow', { signal: 'A0', lift: 2.2 });
@@ -530,10 +531,10 @@ void loop() {
         thumb.position.set(0.5, 0.05, 0);
         thumb.rotation.z = -0.7;
         p.add(thumb);
-        const arm = mesh(new THREE.CapsuleGeometry(0.36, 1.6, 4, 12), sleeve);
-        arm.position.set(0, -1.45, s * 0.35);
-        arm.rotation.x = s * 0.35;
-        p.add(arm);
+        const cuff = mesh(new THREE.CapsuleGeometry(0.34, 0.3, 4, 12), sleeve);
+        cuff.scale.set(1, 1, 0.75);
+        cuff.position.set(0, -0.82, 0);
+        p.add(cuff);
         p.position.z = s * 0.9;
         p.rotation.x = s * 0.18;
         hands.add(p);
@@ -830,7 +831,7 @@ void loop() {
       const state = { lit: true, cm: 30, thr: 500, running: false, ao: 1015, flame: false };
       const xFor = (cm) => fs.front.x + 0.9 + cm * 0.1;
       const candle = ctx.add(makeCandle(v(xFor(state.cm), 0, fs.front.z)));
-      const place = () => (candle.group.position.x = xFor(state.cm));
+      const place = () => { candle.group.position.x = xFor(state.cm); ctx.anchor('candle', candle.group.position.clone().add(v(0, 2.2, 0))); };
       const plot = ctx.plotter({ title: 'Serial plotter', series: [{ name: 'IR level (AO)', color: '#f08a2c', min: 0, max: 1023 }] });
       // AO falls as more infrared reaches the receiver (inverse square with distance)
       const level = () => {
@@ -854,7 +855,7 @@ void loop() {
         note: () => (state.running ? `AO ≈ ${state.ao} · DO ${state.flame ? 'LOW (flame)' : 'HIGH'}` : 'Run the sketch to power the sensor'),
       });
       ctx.anchor('fs', fs.anchor);
-      ctx.anchor('candle', candle.group.position.clone().add(v(0, 2, 0)));
+      place();
       ctx.anchor('do', dw.mid);
       ctx.anchor('ao', aw.mid);
       ctx.anchor('bz', bz.anchor);
@@ -865,6 +866,7 @@ void loop() {
       { anchor: 'bz', x: 0.7, y: 0.17, icon: 'sound', title: 'Buzzer · pin 8', text: 'Sounds while a flame is seen.' },
       { anchor: 'ao', x: 0.04, y: 0.17, icon: 'wave', title: 'AO → A0', text: 'The raw IR level: lower means a stronger flame.' },
       { anchor: 'fs', x: 0.04, y: 0.68, icon: 'sun', title: 'Flame sensor', text: 'Its dark lens only lets through infrared (≈ 760–1100 nm).' },
+      { anchor: 'candle', x: 0.36, y: 0.72, icon: 'hand', title: 'Candle', text: 'Click to light it, blow it out or move it.' },
     ],
     overview: {
       heading: 'Flame detector',
