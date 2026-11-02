@@ -131,7 +131,7 @@ export const sensorsA = [
       const pc = pir.group.localToWorld(v(0.22, 0, 0));
       const R = 6.5;
       const zone = ctx.addObject(makeZone(pc, R, THREE.MathUtils.degToRad(110), -Math.PI / 2));
-      const PATH_Z = 10.6, X0 = -4, X1 = 16;
+      const PATH_Z = 10.6, X0 = -4, X1 = 14.5;
       const person = ctx.add(makePerson(v(12, 0, PATH_Z), { rotY: -Math.PI / 2 }));
       const state = { x: 12, dir: -1, auto: true, holdS: 4, running: false, out: false, lastSeen: -1e9, lockUntil: 0, powerOn: 0, lastMotion: 0 };
       const place = () => {
