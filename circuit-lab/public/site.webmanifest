@@ -1,0 +1,10 @@
+{
+  "name": "Circuit Lab",
+  "short_name": "Circuit Lab",
+  "description": "Learn electronics in interactive 3D — Arduino, ESP32, Raspberry Pi Pico and Jetson Nano.",
+  "start_url": "/learn/",
+  "display": "standalone",
+  "background_color": "#f4ecdc",
+  "theme_color": "#f4ecdc",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
