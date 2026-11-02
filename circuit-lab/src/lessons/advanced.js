@@ -515,7 +515,7 @@ void loop() {
   {
     id: 'sd-logger', title: 'Data logger', icon: 'book',
     thumb: () => makeSDCard(v(0, 0, 0)).group,
-    view: { center: [3.6, 0.7, -0.4], size: 15 },
+    view: { center: [5.2, 0.7, 1.2], size: 15 },
     build(ctx) {
       const sd = ctx.add(makeSDCard(v(8.7, 0, 1.3)));
       const dht = ctx.add(makeDHT11(v(8.3, 0, -2.0)));

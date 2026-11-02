@@ -196,12 +196,12 @@ void loop() {
   {
     id: 'stepper', title: 'Precise steps', icon: 'gear',
     thumb: () => { const s = makeStepper(v(-2.2, 0, 0)); s.setAngle(60); return s.group; },
-    view: { center: [5.6, 0.9, -0.4], size: 15 },
+    view: { center: [6.4, 0.9, 0.2], size: 15.5 },
     build(ctx) {
-      const st = ctx.add(makeStepper(v(6.9, 0, -0.5)));
+      const st = ctx.add(makeStepper(v(11.7, 0, 0.5), { rotY: Math.PI })); // driver faces the board
       const ins = ['IN1', 'IN2', 'IN3', 'IN4'];
       const cols = ['blue', 'purple', 'yellow', 'orange'];
-      const wires = ins.map((n, i) => ctx.wire(ctx.board.pin(`D${8 + i}`), st.pin(n), cols[i], { signal: `D${8 + i}`, lift: 3.0 - i * 0.25 }));
+      const wires = ins.map((n, i) => ctx.wire(ctx.board.pin(`D${8 + i}`), st.pin(n), cols[i], { signal: `D${8 + i}`, lift: 1.4 + i * 0.12, chipT: 0.55 + i * 0.1 }));
       ctx.wire(ctx.board.pin('5V'), st.pin('VCC'), 'red', { signal: '5V', lift: 1.6 });
       ctx.wire(ctx.board.pin('GND_2'), st.pin('GND'), 'black', { signal: 'GND', dir: -1, lift: 1.3 });
       // the module's angle/coils getters are snapshots, so track the half-step count here
