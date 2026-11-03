@@ -113,11 +113,11 @@ def build():
         f"On 20 October Oracle's quarterly update fixed CVE-2026-101767, a 9.8-rated unauthenticated SQL injection in E-Business Suite 12.2.3 to 12.2.15. Horizon3.ai, which reported it in July, says the vulnerable endpoint is allowed by the default configuration and the flaw can be chained to run commands on the server.{R('h3')} On 27 October Defused's decoys recorded exploratory attacks. Data at stake includes financial, payroll, HR and procurement records.{R('thn')}",
         f"At the time of writing CVE-2026-101767 is not on CISA's exploited list, and the reported activity is probing rather than confirmed compromise.{R('kev','swor')} But Oracle E-Business Suite has been here before: CVE-2025-61882 was exploited as a zero-day in a 2025 extortion campaign.{R('gtig')}"],
         "The October wave", pull="PHP2Shell was attacked before it was announced. The Oracle flaw was probed within a week of its fix.")
-    b.figpage("How it works", "How an unauthenticated web flaw becomes a breach", "PHP2Shell and the Oracle EBS flaw differ in detail, but both follow the same short path from one web request to control of a server.", "query",
-        [("A request nobody has to log in for", f"Both flaws are reachable without credentials. In PHP the bug is in the runtime itself; in Oracle EBS it is a servlet allowed by default.{R('hns','h3')}"),
+    b.figpage("How it works", "How an unauthenticated web flaw becomes a breach", "PHP2Shell and the Oracle EBS flaw differ in detail, but follow the same short path.", "query",
+        [("A request nobody has to log in for", f"Both are reachable without credentials: in PHP the runtime itself, in Oracle EBS a servlet allowed by default.{R('hns','h3')}"),
          ("Code or SQL runs on the server", f"PHP2Shell can lead to remote code execution. The EBS flaw runs SQL as the APPS database user, then commands as the application account.{R('php','h3')}"),
-         ("Data and access follow", f"An attacker can read or change business data, plant web shells and move on. Wiz also showed leaks of process memory, which can expose passwords and keys.{R('wiz')}"),
-         ("Patching does not undo a compromise", f"The NCSC and Amazon both advise checking for compromise, looking back at least to the earliest known attack date, not just patching.{R('ncscphp','aws')}")], "The October wave")
+         ("Data and access follow", f"Attackers can read or change business data and plant web shells. Wiz also showed memory leaks exposing keys.{R('wiz')}"),
+         ("Patching does not undo a compromise", f"The NCSC and Amazon advise checking for compromise back to the earliest known attack date.{R('ncscphp','aws')}")], "The October wave")
     b.table("Side by side", "Three flaws, three timelines", "What each October flaw is, how exposed it was and what fixed it.", ["Flaw", "What it is", "Exploitation", "Fix and fallback"],
         [("Windows Shell<br>CVE-2026-96951", f"Mark of the Web bypass, rated 8.8, triggered by a click.{R('mwb')}", "Exploited before release. Listed by CISA on day one.", "October update. User awareness and email filtering help, but only partly."),
          ("PHP2Shell<br>CVE-2026-109618/9", f"Unauthenticated remote code execution in PHP, rated 9.2.{R('php')}", "Attempt seen four days before disclosure. Listed 26 October.", f"Upgrade to a fixed release. Firewall rules are a stopgap only.{R('cf')}"),
@@ -135,13 +135,6 @@ def build():
         f"Regulators have followed the data. In June CISA replaced its old directive with BOD 26-04, which ranks flaws on exposure, known exploitation, whether attacks can be automated and impact. The most urgent tier must be fixed in three days, with a forensic check for compromise.{R('bod')} The effect shows in the catalogue: most 2024 additions carried a 21-day deadline, while 29 of 36 October 2026 additions carried three days.{R('kev')}",
         f"The UK view is consistent. In 2025 the NCSC judged that the time between disclosure and exploitation \"has shrunk to days and AI will almost certainly reduce this further\".{R('ncscai')}"],
         "The shrinking window", pull="The question is no longer whether attackers will use a new flaw. It is whether you fix it first.")
-    b.compare("Old assumptions", "What patching was built for, and what it faces now", "Most patch processes were designed for a slower threat. These are the assumptions that no longer hold.", ["Area", "The old assumption", "What the evidence shows now"],
-        [("Timing", "Attackers need weeks to reverse-engineer a patch.", f"Average time to exploit is negative; attempts can precede disclosure.{R('mtr','aws')}"),
-         ("Cadence", "A monthly cycle with a 14 to 30 day window is enough.", f"Exploited flaws now get three-day federal deadlines.{R('bod')}"),
-         ("Volume", "A few dozen fixes a month can each be assessed.", f"Over 1,400 Microsoft CVEs in one month.{R('tenms')}"),
-         ("Severity", "A CVSS score tells you what to fix first.", f"Exposure and active exploitation matter more.{R('r7','msrc')}"),
-         ("Old systems", "Legacy software is low risk because it is old.", f"Old flaws keep being exploited. CISA listed 2015 and 2016 CVEs as exploited on 8 October 2026.{R('kev')}"),
-         ("The embargo", "Coordinated disclosure gives defenders a head start.", f"Amazon: \"An embargo protects defenders only until someone else finds the same bug.\"{R('aws')}")], "The shrinking window")
     b.essay("The shrinking window", "AI on both sides of the patch", [
         f"AI is changing the supply of vulnerabilities. Microsoft says it is scanning Windows with AI and expects more fixes per release as a result, calling the volume \"evidence that defenders are getting better at identifying and addressing issues\".{R('win')} The exploited Windows Shell flaw itself was reported by researchers including an AI company.{R('swms')}",
         f"PHP2Shell is the clearest case yet. Wiz says it used frontier models in discovery, exploit development and patch validation, and that one researcher did in a week what would once have taken a top team months. Its conclusion: what used to be a barrier to exploitation \"is no longer a barrier\".{R('wiz')} CyberScoop reports that a second firm, Calif, found one flaw using an OpenAI model.{R('cs')}",
@@ -152,7 +145,7 @@ def build():
         "The shrinking window", pull="AI is finding flaws faster than ever. The patch process has to move at the same speed.")
     b.grid("Why organisations fall behind", "Four reasons the gap stays open", "In our experience, organisations rarely fall behind because they do not care. They fall behind for structural reasons.",
         [("magnifier", "They do not know what they run", f"PHP hides inside appliances and other products. CISA and the NCSC both start with finding every copy.{R('cisaphp','ncscphp')}"),
-         ("recycle", "Old software has no fix", f"PHP 8.1 and older get no official update. Researchers count far more servers on unsupported branches than supported ones.{R('php','cs')}"),
+         ("recycle", "Old software has no fix", f"PHP 8.1 and older get no official fix. CISA listed 2015 and 2016 CVEs as exploited on 8 October 2026.{R('php','kev')}"),
          ("loop", "The process is built for a month", "Change boards, test cycles and maintenance windows assume weeks. An exploited flaw does not wait for the next window."),
          ("owner", "Nobody owns the number", "Few boards see patch latency. Without a measure and an owner, urgent fixes compete with everything else.")], "The shrinking window",
         "The fix for all four is the same: a known estate, a fast lane for urgent flaws and a number someone is accountable for.")
@@ -199,7 +192,9 @@ def build():
         ("End of life", "Software that no longer receives security fixes from its maker.")])
 
     b.mark("", "Sources")
-    b.sources([(str(n), SRC[k]) for k, n in sorted(order.items(), key=lambda kv: kv[1])],
-              "Sources were accessed between 1 and 3 November 2026. CVE counts for Microsoft's October release vary by tracker. Exploitation status for the Oracle flaw was still developing at the time of writing.")
+    items = [(str(n), SRC[k]) for k, n in sorted(order.items(), key=lambda kv: kv[1])]
+    half = (len(items) + 1) // 2
+    b.sources(items[:half])
+    b.sources(items[half:], "Continued. Sources were accessed between 1 and 3 November 2026. CVE counts for Microsoft's October release vary by tracker. Exploitation status for the Oracle flaw was still developing at the time of writing.")
     b.rep_back("Close the gap<br>before attackers do.", "We help UK organisations build a live view of their estate, prioritise the flaws that matter and patch at the speed the threat now demands.", "Book a patch gap review", "Companion playbook: Close the Gap")
     return b

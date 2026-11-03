@@ -127,7 +127,7 @@ def build():
     # ---------------- Part 02
     b.mark("02", "Why AI tooling is a target")
     b.opener("02", "Why AI tooling<br>is a target.", "AI work gathers keys, permissions and trust in exactly the places attackers can reach.",
-             [("01", "What attackers want from AI teams"), ("02", "Four properties that raise the stakes"), ("03", "A pattern years in the making")])
+             [("01", "What attackers want from AI teams"), ("02", "A pattern years in the making"), ("03", "What helped, and what did not")])
     b.essay("The attraction", "Why the AI toolchain is worth attacking", [
         f"The October payloads read like shopping lists, and the lists are revealing. Alongside the usual cloud and source control credentials, researchers found the LiteLLM stealer looking for model provider API keys, sessions for Claude, Codex and Cursor, and the credentials LiteLLM's own proxy database holds for upstream providers{c('dd')}. Tensorlake's worm collected configuration and MCP files for several AI coding tools{c('thn_tl')}.",
         "The reason is concentration. An AI gateway exists to hold many provider keys in one place. A coding assistant runs with a developer's own access to code, shell and tokens. An MCP server is, by design, a bridge from an AI assistant into other systems. Compromise any one of them and you inherit its reach.",

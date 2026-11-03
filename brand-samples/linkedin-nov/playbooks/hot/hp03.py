@@ -51,18 +51,18 @@ def build():
     b.mark("02", "Get report-ready")
     b.opener("02", "Get report-<br>ready.", "Twenty four hours is not long. Build the muscle now, for human and AI incidents alike.", [("01", "The reporting chain"), ("02", "Reporting readiness"), ("03", "AI agent oversight"), ("04", "Three scenarios")])
     b.figpage("The reporting chain", "Who tells whom, and when", "The bill's two stage model, as the government describes it. Thresholds will be set in regulations.", "relay",
-        [("Within 24 hours: initial notice", "A short notice to your regulator, with the NCSC informed at the same time: who you are, the service affected, brief details."),
-         ("Within 72 hours: full report", "Timing, whether it is ongoing, nature and impact, and whether another regulated entity's incident caused it, so far as known."),
+        [("Within 24 hours: initial notice", "A short notice to your regulator, NCSC sighted: who you are, the service affected, brief details."),
+         ("Within 72 hours: full report", "Timing, whether ongoing, nature and impact, and any link to another firm's incident, so far as known."),
          ("Then: tell affected customers", "Data centres, MSPs and digital service providers must identify affected customers, notify them and keep them updated while it lasts."),
          ("Proposed for AI: tell others affected", "The government plans to consult on requiring firms to tell other organisations an AI agent has affected.")], "Get report-ready")
     b.steps("Reporting readiness", "Six steps to a confident first notice", "Each takes days, not months. Together they make 24 hours achievable.",
-        [("Name the decision maker", "One accountable person, with a deputy, decides whether an incident is reportable and signs the notice. Owner: CIO or CISO."),
-         ("Write the templates", "Prepare 24 and 72 hour notices with the fields regulators will expect, so the team fills gaps rather than drafts."),
-         ("Define significant, locally", "Until thresholds arrive, agree internal triggers: users affected, duration, data exposure, impact on customers."),
-         ("Map who you must tell", "Regulator, NCSC, customers, insurers, suppliers. Keep current contacts in a place you can reach when systems are down."),
-         ("Rehearse it", "Run a tabletop each quarter that ends with a sent draft notice within 24 hours. Time it."),
-         ("Learn from near misses", "Log events that nearly became incidents. A voluntary reporting route is promised and the habit will pay off.")], "Get report-ready",
-        "The clock runs from when you become aware, not from when you are sure. Decide early and correct later.")
+        [("Name the decision maker", "One person, with a deputy, decides if an incident is reportable and signs the notice."),
+         ("Write the templates", "Prepare 24 and 72 hour notices with the fields regulators expect."),
+         ("Define significant, locally", "Until thresholds arrive, agree triggers: users affected, duration, data exposed, customer impact."),
+         ("Map who you must tell", "Regulator, NCSC, customers, insurers, suppliers, reachable when systems are down."),
+         ("Rehearse it", "Run a quarterly tabletop that ends with a draft notice inside 24 hours."),
+         ("Learn from near misses", "Log events that nearly became incidents. A voluntary reporting route is promised.")], "Get report-ready",
+        "The clock runs from awareness, not certainty. Decide early, correct later.")
     b.dive("01", "eye", "Oversight and logging for AI agents", "The government intends to consult on monitoring, evidence preservation and notification duties for AI agents. Build the basics now.",
         [("Inventory", "List every agent that can act on systems or data: what it can touch, who owns it, and which supplier provides it."),
          ("Permissions", "Give agents the least access they need, separate from human accounts, with approval steps for high impact actions."),
