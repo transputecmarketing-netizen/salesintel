@@ -140,6 +140,8 @@ export function makeRobotCar(pos, opts = {}) {
     group: g,
     pick: g,
     anchor,
+    kind: 'module',
+    label: '2WD robot car chassis',
     deck,
     deckY,
     track: TRACK,

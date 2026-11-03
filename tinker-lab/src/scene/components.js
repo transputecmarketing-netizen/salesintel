@@ -18,6 +18,13 @@ function legs(group, holes, feet, h, r = 0.022, material = metal()) {
   });
 }
 
+/** "220 Ω", "4.7 kΩ", "1 MΩ" (for part labels). */
+export function formatOhms(ohms) {
+  const f = (v) => String(Math.round(v * 100) / 100);
+  return ohms >= 1e6 ? `${f(ohms / 1e6)} MΩ` : ohms >= 1000 ? `${f(ohms / 1000)} kΩ` : `${f(ohms)} Ω`;
+}
+const colourWord = (name) => (name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Red');
+
 function emissiveMat(color, opts = {}) {
   return mat(color, { emissive: color, emissiveIntensity: 0, unique: true, rough: 0.3, ...opts });
 }
@@ -54,6 +61,8 @@ export function makeLED(colorName, anode, cathode, opts = {}) {
     anchor: new THREE.Vector3(m.x, m.y + h + 0.8, m.z),
     get level() { return level; },
     color: colorName,
+    kind: 'led',
+    label: `${colourWord(COLORS[colorName] ? colorName : 'red')} LED`,
     set(v) {
       level = Math.max(0, Math.min(1, v));
       lens.emissiveIntensity = level * 1.6;
@@ -65,6 +74,7 @@ export function makeLED(colorName, anode, cathode, opts = {}) {
     setColor(name) {
       const col = COLORS[name] ?? COLORS.red;
       api.color = name;
+      api.label = `${colourWord(COLORS[name] ? name : 'red')} LED`;
       lens.color.setHex(col);
       lens.emissive.setHex(col);
       glow.material.color.setHex(col);
@@ -103,6 +113,8 @@ export function makeRGBLED(holes /* [R, GND, G, B] */) {
     group: g,
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 0.85, m.z),
+    kind: 'rgb-led',
+    label: 'RGB LED (common cathode)',
     set(r, gr, b) {
       // r, g, b are 0..255 PWM values
       const max = Math.max(r, gr, b) / 255;
@@ -160,8 +172,11 @@ export function makeResistor(a, b, ohms = 220, opts = {}) {
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 0.15, m.z),
     ohms,
+    kind: 'resistor',
+    label: `${formatOhms(ohms)} resistor`,
     setValue(v) {
       api.ohms = v;
+      api.label = `${formatOhms(v)} resistor`;
       bandsFor(v).forEach((c, i) => bandMats[i].color.set(c));
     },
   };
@@ -189,6 +204,8 @@ export function makeButton(holes, capColor = 0xd8443a) {
     group: g,
     pick: base,
     anchor: new THREE.Vector3(m.x, m.y + h + 0.6, m.z),
+    kind: 'button',
+    label: 'Push button',
     get pressed() { return pressed; },
     press(v) {
       pressed = v;
@@ -218,6 +235,8 @@ export function makePot(holes /* 3 in a row */) {
     group: g,
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 1.2, m.z),
+    kind: 'pot',
+    label: 'Potentiometer',
     set(v) { knob.rotation.y = -(v - 0.5) * (Math.PI * 1.5); },
   };
 }
@@ -250,7 +269,7 @@ export function makeLDR(a, b) {
   head.add(at(face, 0, 0.125, 0));
   head.position.set(m.x, m.y + h, m.z);
   g.add(head);
-  return { group: g, pick: head, anchor: new THREE.Vector3(m.x, m.y + h + 0.2, m.z) };
+  return { group: g, pick: head, anchor: new THREE.Vector3(m.x, m.y + h + 0.2, m.z), kind: 'ldr', label: 'Photoresistor (LDR)' };
 }
 
 // ---------------------------------------------------------------- piezo buzzer
@@ -278,6 +297,8 @@ export function makeBuzzer(a, b) {
     group: g,
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 0.6, m.z),
+    kind: 'buzzer',
+    label: 'Piezo buzzer',
     set(v, freq = 440) { on = v; pitch = freq / 440; },
     tick(dt) {
       t += dt * (on ? 1.2 * Math.sqrt(pitch) : 0);
@@ -317,7 +338,8 @@ export function makeTO92(holes, label = '', color = 0x24262c) {
   }
   body.position.set(m.x, m.y + h, m.z);
   g.add(body);
-  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + h + 0.7, m.z) };
+  const to92 = /TMP36|LM35/.test(label) ? `${label} temperature sensor` : label === 'NPN' || label === 'PNP' ? `${label} transistor` : label ? `${label} (TO-92)` : 'Transistor';
+  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + h + 0.7, m.z), kind: /TMP36|LM35/.test(label) ? 'sensor' : 'transistor', label: to92 };
 }
 
 // ---------------------------------------------------------------- diode (axial, like the resistor)
@@ -339,7 +361,7 @@ export function makeDiode(a, b) {
   body.position.set(m.x, m.y + h, m.z);
   body.rotation.y = -Math.atan2(dir.z, dir.x);
   g.add(body);
-  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + h + 0.1, m.z) };
+  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + h + 0.1, m.z), kind: 'diode', label: 'Diode (1N4001)' };
 }
 
 // ---------------------------------------------------------------- DC motor with fan
@@ -389,6 +411,8 @@ export function makeMotor(pos) {
     pick: can,
     anchor: new THREE.Vector3(pos.x, pos.y + 2.0, pos.z + 1.2),
     terminals: terms,
+    kind: 'motor',
+    label: 'DC motor with fan',
     set(v) { speed = v; },
     tick(dt) {
       angle += dt * speed * 28;
@@ -420,6 +444,8 @@ export function makeServo(pos) {
     pick: g,
     anchor: new THREE.Vector3(pos.x - 0.55, pos.y + 1.9, pos.z),
     leads: [0, 1, 2].map(lead),
+    kind: 'servo',
+    label: 'Micro servo (SG90)',
     set(deg) { horn.rotation.y = THREE.MathUtils.degToRad(90 - deg); },
   };
 }
@@ -452,6 +478,8 @@ export function makeUltrasonic(holes /* VCC, TRIG, ECHO, GND left→right */) {
     pick: board,
     anchor: new THREE.Vector3(m.x, m.y + h + 2.0, m.z),
     front: new THREE.Vector3(m.x, m.y + h + 1.1, m.z + 0.7),
+    kind: 'sensor',
+    label: 'Ultrasonic sensor (HC-SR04)',
   };
 }
 
@@ -487,6 +515,8 @@ export function makeTrafficLight(holes /* R, Y, G, GND */) {
     group: g,
     pick: head,
     anchor: new THREE.Vector3(m.x, m.y + h + 4.2, m.z),
+    kind: 'module',
+    label: 'Traffic light module',
     set(name, v) {
       const l = lamps[name];
       l.lens.emissiveIntensity = v ? 1.8 : 0;
@@ -514,7 +544,7 @@ export function makeCar(pos, color = 0xe5412e) {
     hub.rotation.z = Math.PI / 2;
     g.add(at(hub, x * 0.96, 0.42, z * 1.0));
   }
-  return { group: g, pick: g, anchor: new THREE.Vector3(pos.x, pos.y + 1.7, pos.z) };
+  return { group: g, pick: g, anchor: new THREE.Vector3(pos.x, pos.y + 1.7, pos.z), kind: 'prop', label: 'Toy car' };
 }
 
 /** Simple box obstacle (used for the distance lesson). */
@@ -523,7 +553,7 @@ export function makeBlock(pos) {
   g.position.copy(pos);
   g.add(at(box(3.2, 2.6, 0.5, mat(0xd9c9a3)), 0, 1.3, 0));
   g.add(at(box(3.2, 0.12, 1.2, mat(0xc4b48c)), 0, 0.06, 0.2));
-  return { group: g, pick: g, anchor: new THREE.Vector3(pos.x, pos.y + 2.7, pos.z) };
+  return { group: g, pick: g, anchor: new THREE.Vector3(pos.x, pos.y + 2.7, pos.z), kind: 'prop', label: 'Obstacle (a book or box)' };
 }
 
 // ---------------------------------------------------------------- ultrasonic "ping" (visual only)
@@ -542,6 +572,8 @@ export function makePing(origin) {
   const pings = [];
   return {
     group: g,
+    kind: 'effect',
+    label: null,
     /** Send a ping that travels `dist` world units forward (+z) and back. */
     fire(dist) { pings.push({ t: 0, dist }); },
     tick(dt) {

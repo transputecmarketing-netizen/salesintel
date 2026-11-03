@@ -20,44 +20,8 @@ import { lucide } from '../brand/lucide.js';
 import './explainers.css';
 
 export const NS = 'http://www.w3.org/2000/svg';
-const FALLBACK = {
-  ink: '#0c0c0e', ink2: '#44454c', muted: '#85868d', line: '#e8e6e1', line2: '#d4d1c9', subtle: '#f7f7f5', subtle2: '#f0efeb',
-  accent: '#e5132d', accentInk: '#b80d22', accentSoft: '#fdecee', iris: '#5b3df5', irisInk: '#4527d9', irisSoft: '#efecff',
-  blue: '#2456f5', green: '#12915a', red: '#e5132d', yellow: '#f2b10a', bg: '#ffffff',
-};
-const VARS = {
-  ink: '--tl-ink', ink2: '--tl-ink-2', muted: '--tl-muted', line: '--tl-line', line2: '--tl-line-2', subtle: '--tl-subtle', subtle2: '--tl-subtle-2',
-  accent: '--tl-accent', accentInk: '--tl-accent-ink', accentSoft: '--tl-accent-soft', iris: '--tl-iris', irisInk: '--tl-iris-ink', irisSoft: '--tl-iris-soft',
-  blue: '--tl-blue', green: '--tl-green', red: '--tl-red', yellow: '--tl-yellow', bg: '--tl-bg',
-};
-
-/** Brand colours resolved from src/brand/tokens.css (rough.js and data-URI thumbnails need real values). */
-export function tokens() {
-  const out = { ...FALLBACK };
-  try {
-    const cs = getComputedStyle(document.documentElement);
-    for (const [k, v] of Object.entries(VARS)) {
-      const val = cs.getPropertyValue(v).trim();
-      if (val) out[k] = val;
-    }
-  } catch { /* no DOM: keep fallbacks */ }
-  // soft tints used for fills (mixed with white so they stay light on white)
-  out.blueSoft = mix(out.blue, '#ffffff', 0.86);
-  out.greenSoft = mix(out.green, '#ffffff', 0.85);
-  out.yellowSoft = mix(out.yellow, '#ffffff', 0.78);
-  out.redSoft = out.accentSoft;
-  out.copper = '#c87533'; // the colour of copper itself (wires, coils): a material, not a brand colour
-  out.copperSoft = mix(out.copper, '#ffffff', 0.78);
-  return out;
-}
-
-export function mix(a, b, t) {
-  const p = (h) => { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map((c) => c + c).join(''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
-  try {
-    const A = p(a), B = p(b);
-    return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
-  } catch { return a; }
-}
+export { tokens, mix } from './colors.js';
+import { tokens } from './colors.js';
 
 // ---------------------------------------------------------------- maths & easing
 export const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -248,6 +212,10 @@ export function scene(el, api = {}, spec) {
   // ---- cancellable sequences (one per step)
   let token = 0;
   const waits = new Set();
+  function cancelPlay() {
+    token++;
+    for (const w of waits) if (w.tok !== token) { waits.delete(w); w.rej(new Cancel()); }
+  }
   function wait(sec, tok = token) {
     return new Promise((res, rej) => {
       if (tok !== token) return rej(new Cancel());
@@ -313,7 +281,7 @@ export function scene(el, api = {}, spec) {
     return m ? pt.matrixTransform(m.inverse()) : { x: 0, y: 0 };
   };
   let interacted = false;
-  const userActed = () => { interacted = true; stopAuto(); S.hand.hide(); };
+  const userActed = () => { interacted = true; stopAuto(); cancelPlay(); S.hand.hide(); };
   function drag(node, { start, move, end, cursor = 'grab' } = {}) {
     node.style.cursor = cursor;
     node.style.touchAction = 'none';
@@ -358,7 +326,7 @@ export function scene(el, api = {}, spec) {
       const fmt = o.format ?? ((v) => String(v));
       const fill = () => w.style.setProperty('--p', `${((inp.value - o.min) / (o.max - o.min)) * 100}%`);
       const api = {
-        el: w, input: inp,
+        el: w, input: inp, min: o.min, max: o.max,
         get value() { return Number(inp.value); },
         set(v, fire = true) { inp.value = v; out.textContent = fmt(Number(inp.value)); fill(); if (fire) o.onInput?.(Number(inp.value)); },
         show(on = true) { w.hidden = !on; return api; },
@@ -457,11 +425,30 @@ export function scene(el, api = {}, spec) {
     },
     /** Drag from (x1,y1) to (x2,y2), calling onMove(t) along the way. */
     async drag(x1, y1, x2, y2, dur = 1.4, onMove) {
+      const tok = token;
       await S.hand.move(x1, y1);
+      if (tok !== token) throw new Cancel();
       await to(hs, { s: 0.88 }, 0.12);
-      const tw = tween({ dur, ease: 'inOut', onUpdate: (t) => { hs.x = lerp(x1, x2, t); hs.y = lerp(y1, y2, t); onMove?.(t); } });
+      let tw = null;
+      tw = tween({ dur, ease: 'inOut', onUpdate: (t) => { if (tok !== token) return tw?.cancel(); hs.x = lerp(x1, x2, t); hs.y = lerp(y1, y2, t); onMove?.(t); } });
       await tw.promise;
+      if (tok !== token) throw new Cancel();
       await to(hs, { s: 1 }, 0.14);
+    },
+    /** Demonstrate an S.ui.slider: drag its thumb to value v. */
+    async slide(sl, v, dur = 1.3) {
+      const r0 = sl.input.getBoundingClientRect();
+      const fx = (val) => 0.04 + 0.92 * clamp((val - sl.min) / (sl.max - sl.min));
+      const a = S.pt(sl.input, fx(sl.value), 0.75), b = S.pt(sl.input, fx(v), 0.75);
+      const v0 = sl.value;
+      if (!r0.width) { sl.set(v); return; }
+      await S.hand.drag(a.x, a.y, b.x, b.y, dur, (t) => sl.set(lerp(v0, v, t)));
+      sl.set(v);
+    },
+    /** Demonstrate pressing an HTML control (button, toggle). */
+    async press(elm) {
+      const p = S.pt(elm, 0.5, 0.6);
+      await S.hand.tap(p.x, p.y);
     },
   };
 
@@ -476,8 +463,7 @@ export function scene(el, api = {}, spec) {
     if (user) stopAuto();
     const prev = curStep;
     curStep = i;
-    token++;
-    for (const w of waits) if (w.tok !== token) { waits.delete(w); w.rej(new Cancel()); }
+    cancelPlay();
     autoT = 0;
     const st = steps[i];
     numEl.textContent = String(i + 1);
@@ -553,6 +539,13 @@ export function scene(el, api = {}, spec) {
     get time() { return time; },
     get interacted() { return interacted; },
     step: 0, steps,
+    /** Drawing-unit coordinates of a point on an HTML element (fx, fy are fractions of its box). */
+    pt(elm, fx = 0.5, fy = 0.5) {
+      const r = elm.getBoundingClientRect(), m = svg.getScreenCTM();
+      const p = svg.createSVGPoint();
+      p.x = r.left + r.width * fx; p.y = r.top + r.height * fy;
+      return m ? p.matrixTransform(m.inverse()) : { x: 0, y: 0 };
+    },
     /** Move a node: S.at(node, x, y, rot?, scale?) */
     at(node, x, y, r = 0, s = 1) { node.setAttribute('transform', `translate(${(+x).toFixed(2)} ${(+y).toFixed(2)})${r ? ` rotate(${(+r).toFixed(2)})` : ''}${s !== 1 ? ` scale(${(+s).toFixed(3)})` : ''}`); return node; },
     show(node, v) { node.setAttribute('opacity', (+v).toFixed(3)); node.style.pointerEvents = v < 0.05 ? 'none' : ''; return node; },
@@ -577,7 +570,7 @@ export function scene(el, api = {}, spec) {
       io.disconnect();
       document.removeEventListener('visibilitychange', onVis);
       root.removeEventListener('keydown', onKey);
-      token++;
+      cancelPlay();
       waits.clear(); tweens.clear(); springs.clear(); flows.clear(); tickers.length = 0;
       for (const c of cleanups) c();
       try { handle.destroy?.(); } catch (e) { console.error(e); }

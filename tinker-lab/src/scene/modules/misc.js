@@ -35,7 +35,7 @@ export function makeRTC(pos, opts = {}) {
   // spring clip
   holder.add(at(box(0.5, 0.06, 1.0, mat(0xd2d0c8, { metal: 0.6, rough: 0.3 })), 0.85, 0.56, 0));
   b.on(holder, 0.95, 0.0);
-  return freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.6, 0) });
+  return Object.assign(freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.6, 0) }), { kind: 'module', label: 'RTC module (DS3231)' });
 }
 
 // ================================================================= micro-SD module
@@ -79,7 +79,7 @@ export function makeSDCard(pos, opts = {}) {
   b.on(reg, -0.95, 0.55);
   b.on(soic(7, { label: '74LVC125A', len: 0.95, wid: 0.4, sizes: [0.36] }), -0.3, -0.25);
   smdField(b, [[-1.3, -0.1, Math.PI / 2, 'cap'], [-0.35, 0.55], [0.0, 0.55], [0.35, 0.55, 0, 'cap'], [0.3, -0.7]]);
-  return freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.4, 1.5, 0) });
+  return Object.assign(freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.4, 1.5, 0) }), { kind: 'module', label: 'microSD card module' });
 }
 
 // ================================================================= HC-05
@@ -127,6 +127,8 @@ export function makeHC05(pos, opts = {}) {
   b.on(btn, -0.95, -0.4);
   smdField(b, [[-1.25, 0.05, Math.PI / 2], [-0.9, 0.05, Math.PI / 2, 'cap']]);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.3, 1.4, 0) });
+  api.kind = 'module';
+  api.label = 'Bluetooth module (HC-05)';
   let linked = false, t = 0;
   live(api, {
     get linked() { return linked; },

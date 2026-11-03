@@ -108,6 +108,8 @@ export function makeOLED(pos, opts = {}) {
   clearBuf();
 
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.4, 0) });
+  api.kind = 'display';
+  api.label = 'OLED display (SSD1306, 128×64)';
   live(api, {
     width: 128,
     height: 64,
@@ -285,6 +287,8 @@ export function makeLCD1602(pos, opts = {}) {
   render();
 
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, LIFT + 1.6, 0) });
+  api.kind = 'display';
+  api.label = 'LCD 1602 with I²C backpack';
   live(api, {
     cols: 16,
     rows: 2,
@@ -445,6 +449,8 @@ export function makeNeoPixelRing(pos, opts = {}) {
   light.position.y = 0.8;
   g.add(light);
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.2, 0) });
+  api.kind = 'neopixel';
+  api.label = `NeoPixel ring (${n} LEDs)`;
   return pixelApi(api, leds, light);
 }
 
@@ -478,6 +484,8 @@ export function makeNeoPixelStrip(pos, n = 8, opts = {}) {
   light.position.y = 1;
   g.add(light);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.2, 0) });
+  api.kind = 'neopixel';
+  api.label = `NeoPixel strip (${n} LEDs)`;
   return pixelApi(api, leds, light);
 }
 
@@ -552,6 +560,8 @@ export function makeSevenSegment(holes) {
     group: g,
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 1.4, m.z),
+    kind: 'display',
+    label: '7-segment display (common cathode)',
     pinNames: ['g', 'f', 'COM', 'a', 'b', 'e', 'd', 'COM', 'c', 'DP'],
     get mask() { return mask; },
     /** bit0 = a … bit6 = g, bit7 = dp. */
@@ -623,7 +633,7 @@ export function makeDIP(holes, label = '', pinCount = holes.length) {
     body.add(lab);
   }
   g.add(body);
-  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + 1.0, m.z) };
+  return { group: g, pick: body, anchor: new THREE.Vector3(m.x, m.y + 1.0, m.z), kind: 'chip', label: label ? `${label} chip (DIP-${pinCount})` : `DIP-${pinCount} chip` };
 }
 
 // ================================================================= LED bar graph (breadboard)
@@ -662,6 +672,8 @@ export function makeLEDBar(holes, opts = {}) {
     group: g,
     pick: body,
     anchor: new THREE.Vector3(m.x, m.y + h + 1.3, m.z),
+    kind: 'display',
+    label: '10-segment LED bar graph',
     get level() { return level; },
     /** Light segment i (0..9). */
     set(i, on) {

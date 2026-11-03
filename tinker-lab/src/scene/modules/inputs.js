@@ -58,6 +58,8 @@ export function makeJoystick(pos, opts = {}) {
   g.add(stick);
   smdField(b, [[-0.9, 0.0, Math.PI / 2]]);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(CX, 3.2, 0) });
+  api.kind = 'input';
+  api.label = 'Joystick module (KY-023)';
   let x = 0, y = 0, pressed = false;
   live(api, {
     get x() { return x; },
@@ -137,6 +139,8 @@ export function makeKeypad(pos, opts = {}) {
   const pinsLocal = new Map();
   ['R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4'].forEach((n, i) => pinsLocal.set(n, conn.userData.holes[i].clone().add(conn.position)));
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.6, -1) });
+  api.kind = 'input';
+  api.label = '4×4 membrane keypad';
   let down = null;
   live(api, {
     keys: KEYS.flat(),
@@ -216,6 +220,8 @@ export function makeRotaryEncoder(pos, opts = {}) {
   smdField(b, [[-0.55, -0.6], [-0.55, 0.6], [1.0, 0, Math.PI / 2]]);
   const baseY = shaft.position.y;
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(CX, 3.0, 0) });
+  api.kind = 'input';
+  api.label = 'Rotary encoder (KY-040)';
   let angle = 0, pressed = false;
   live(api, {
     get angle() { return angle; },

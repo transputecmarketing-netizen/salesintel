@@ -44,6 +44,8 @@ export function makePIR(pos, opts = {}) {
   rings.group.position.set(DX, b.top + 0.4, 0);
   g.add(rings.group);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(DX, 2.2, 0) });
+  api.kind = 'sensor';
+  api.label = 'PIR motion sensor (HC-SR501)';
   let on = false;
   live(api, {
     get triggered() { return on; },
@@ -91,7 +93,7 @@ export function makePerson(pos, opts = {}) {
   g.position.copy(pos ?? V());
   g.rotation.y = opts.rotY ?? 0;
   g.updateMatrixWorld(true);
-  return { group: g, pick: g, anchor: g.localToWorld(V(0, 5.4, 0)), head };
+  return { group: g, pick: g, anchor: g.localToWorld(V(0, 5.4, 0)), head, kind: 'prop', label: 'Person figure' };
 }
 
 // ================================================================= DHT11
@@ -124,6 +126,8 @@ export function makeDHT11(pos, opts = {}) {
   housing.add(at(textDecal('DHT11', 0.6, 0.18, { vertical: true, color: '#e9f2ff', size: 0.7, font: SANS }), 0, BH * 0.5, BD / 2 + 0.003));
   b.on(housing, 0.32, 0);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.5, 0) });
+  api.kind = 'sensor';
+  api.label = 'DHT11 temperature and humidity sensor';
   return api;
 }
 
@@ -147,6 +151,8 @@ export function makeIRReceiver(pos, opts = {}) {
   smdField(b, [[0.45, -0.3]]);
   let t = 0;
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.8, 0.4) });
+  api.kind = 'sensor';
+  api.label = 'IR receiver module';
   live(api, {
     /** Facing point (front of the receiver dome), world. */
     front: g.localToWorld(V(0, b.top + 0.6, 0.85)),
@@ -218,6 +224,8 @@ export function makeRemote(pos, opts = {}) {
     group: g,
     pick: g,
     anchor: g.localToWorld(V(0, 1.6, -1)),
+    kind: 'input',
+    label: 'IR remote control',
     /** World position of the IR LED tip. */
     tip: g.localToWorld(V(0, T / 2, -L / 2 - 0.2)),
     keys: keys.map((k) => k.k),
@@ -271,6 +279,8 @@ export function makeMPU6050(pos, opts = {}) {
   const pinsLocal = new Map();
   for (const [k, p] of b.pinsLocal) pinsLocal.set(k, p.clone().add(b.group.position));
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, STAND + 1.4, 0), frame: tilt });
+  api.kind = 'sensor';
+  api.label = 'MPU-6050 accelerometer and gyro';
   let pitch = 0, roll = 0;
   live(api, {
     get pitch() { return pitch; },
@@ -407,6 +417,8 @@ export function makeSoilSensor(pos, opts = {}) {
   const dry = new THREE.Color(0xb08a5e), wet = new THREE.Color(0x3a2618);
   const leafDry = new THREE.Color(0x9bb54a), leafWet = new THREE.Color(0x46b456);
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, PH + 3.4, 0) });
+  api.kind = 'sensor';
+  api.label = 'Soil moisture sensor';
   let moisture = 0.5;
   live(api, {
     get moisture() { return moisture; },
@@ -456,6 +468,8 @@ export function makeSoundSensor(pos, opts = {}) {
   rings.group.position.set(2.1, b.top + 0.5, 0);
   g.add(rings.group);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.5, 1.8, 0) });
+  api.kind = 'sensor';
+  api.label = 'Sound sensor module (KY-038)';
   live(api, {
     /** Show sound reaching the mic (true/false) and light the DO LED. */
     hear(on = true) {
@@ -507,6 +521,8 @@ export function makeGasSensor(pos, opts = {}) {
   b.on(sig.group, -0.55, 0.82);
   smdField(b, [[-0.95, -0.82], [-0.55, -0.82]]);
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.15, 2.0, 0) });
+  api.kind = 'sensor';
+  api.label = 'Gas sensor (MQ-2)';
   api.setDetect = (on) => { sig.set(on ? 1 : 0); return api; };
   return api;
 }
@@ -537,6 +553,8 @@ export function makeFlameSensor(pos, opts = {}) {
   b.on(pot, 0.5, 0.15);
   const { sig } = comparatorBits(b, { chip: [-0.35, 0.15], pwr: [-0.8, -0.5], sig: [-0.45, -0.5] });
   const api = freeApi(g, b.pinsLocal, pos, opts, { pick: g, anchor: V(0.5, 1.6, 0) });
+  api.kind = 'sensor';
+  api.label = 'Flame sensor module';
   api.front = g.localToWorld(V(2.1, b.top + 0.32, 0));
   api.setDetect = (on) => { sig.set(on ? 1 : 0); return api; };
   return api;
@@ -603,6 +621,8 @@ export function makeFSR(pos, opts = {}) {
   // tail runs from the pad toward +z
   g.rotation.y = 0;
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 1.4, 0) });
+  api.kind = 'sensor';
+  api.label = 'Force-sensitive resistor (FSR)';
   let level = 0;
   live(api, {
     get level() { return level; },

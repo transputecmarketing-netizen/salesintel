@@ -85,6 +85,8 @@ export function makeBreadboard() {
 
   return {
     group: g,
+    kind: 'breadboard',
+    label: 'Half-size breadboard',
     top: H,
     /** World position of a hole, e.g. hole(12, 'e') or hole(3, 'top-') */
     hole(col, row) {

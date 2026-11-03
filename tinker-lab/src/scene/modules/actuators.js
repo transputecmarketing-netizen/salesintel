@@ -139,6 +139,8 @@ export function makeStepper(pos, opts = {}) {
 
   let pos_ = 0;
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(1.8, 3.4, 0) });
+  api.kind = 'motor';
+  api.label = '28BYJ-48 stepper with ULN2003 driver';
   const show = () => {
     const ph = ((pos_ % 8) + 8) % 8;
     HALF_STEPS[ph].forEach((on, i) => leds[i].set(on));
@@ -271,6 +273,8 @@ export function makeRelay(pos, opts = {}) {
 
   let on = false, click = 0, armA = angNC;
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0.15, 2.4, 0) });
+  api.kind = 'module';
+  api.label = 'Relay module (5 V)';
   live(api, {
     get on() { return on; },
     /** Energise (true) or release (false) the coil. */
@@ -355,6 +359,8 @@ export function makeLamp(pos, opts = {}) {
     group: g,
     pick: g,
     anchor: g.localToWorld(V(-0.3, 6.0, 0.6)),
+    kind: 'prop',
+    label: 'Desk lamp (mains load)',
     get on() { return on; },
     set(v) {
       on = !!v;
@@ -459,6 +465,8 @@ export function makeL298N(pos, opts = {}) {
   }
   smdField(b, [[0.6, 0.25, Math.PI / 2], [-0.35, 0.55], [0.55, 0.85]]);
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, 3.6, 0) });
+  api.kind = 'module';
+  api.label = 'L298N motor driver';
   api.setPower = (v) => { led.set(v ? 1 : 0); return api; };
   return api;
 }

@@ -13,10 +13,12 @@ import HL from './vendor/hairline-kernel.js';
 /** The registry: name, title (for a caption) and description (the default accessible name). */
 export const FIGURES = [
   { name: 'chip', title: 'Inside a chip', description: 'An IC taken apart into its layers: lead frame, die, bond wires and lid. Move across to open the gap, up and down to pick a layer.' },
+  { name: 'breadboard', title: 'Breadboard', description: 'A breadboard whose hidden clips lift out: the hole under the pointer raises its five-hole strip, and a power rail rises as one.' },
 ];
 
 const LOAD = {
   chip: () => import('./chip.js'),
+  breadboard: () => import('./breadboard.js'),
 };
 
 /**

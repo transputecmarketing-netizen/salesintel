@@ -477,7 +477,7 @@ void loop() {
     callouts: [
       { anchor: 'arm', x: 0.04, y: 0.17, icon: 'servo', title: 'Gripper straight down', text: 'solve() works backwards from x, y, z to four servo angles.' },
       { anchor: 'grid', x: 0.36, y: 0.12, icon: 'gear', title: 'Arm coordinates', text: 'x right, y forward, z up, in cm, from the centre of the base.' },
-      { anchor: 'stack', x: 0.7, y: 0.17, icon: 'check', title: 'Stack at (8, 10)', text: 'Each block lands 2.5 cm higher than the last.' },
+      { anchor: 'stack', x: 0.7, y: 0.17, icon: 'check', title: 'Stack at (6, 8)', text: 'Each block lands 2.5 cm higher than the last; four fit.' },
       { anchor: 'hub', x: 0.04, y: 0.68, icon: 'pins', title: 'Same wiring as Teach', text: 'D3–D10 to S1–S5, 5 V 3 A on V+, grounds joined.' },
     ],
     overview: {
@@ -516,8 +516,9 @@ const int GRIP_OPEN = 90, GRIP_CLOSED = {{grip}};
 const int STEP_MS = {{stepms}};                   // ms per degree
 const float BLOCK = 2.5;                        // cube size, cm
 const float HOVER = {{hover}};                     // safe height above the table, cm
-const float STACK_X = 8.0, STACK_Y = 10.0;
-const float BLOCKS[][2] = {{-6, 12}, {-1, 13}, {4, 9}};
+const float STACK_X = 6.0, STACK_Y = 8.0;
+const int MAX_STACK = 4;
+const float BLOCKS[][2] = {{-7, 11}, {-2, 13}, {2, 13}};
 
 Servo joint[5];
 int pos[5] = {90, 110, 70, 40, GRIP_OPEN};
@@ -563,7 +564,11 @@ bool goTo(float x, float y, float z, int grip) {
 }
 
 void pickAndStack(float x, float y) {
-  float top = HOVER + stacked * BLOCK;          // clear the stack as it grows
+  if (stacked >= MAX_STACK) {
+    Serial.println("Stack full");
+    return;
+  }
+  float top = max(HOVER, (stacked + 1) * BLOCK + 1.0);  // carry over the stack
   if (!goTo(x, y, HOVER, GRIP_OPEN)) return;
   goTo(x, y, BLOCK / 2, GRIP_OPEN);             // down around the block
   goTo(x, y, BLOCK / 2, GRIP_CLOSED);           // grip
@@ -571,7 +576,7 @@ void pickAndStack(float x, float y) {
   goTo(STACK_X, STACK_Y, top, GRIP_CLOSED);
   goTo(STACK_X, STACK_Y, BLOCK / 2 + stacked * BLOCK, GRIP_CLOSED);
   goTo(STACK_X, STACK_Y, BLOCK / 2 + stacked * BLOCK, GRIP_OPEN);
-  goTo(STACK_X, STACK_Y, top + BLOCK, GRIP_OPEN);
+  goTo(STACK_X, STACK_Y, top, GRIP_OPEN);
   stacked++;
 }
 
@@ -631,8 +636,8 @@ void loop() {
 
 // ---------------------------------------------------------------- arm lesson data + sim helpers
 const LO = [0, 15, 30, 0, 0], HI = [180, 165, 180, 180, 90];
-const STACK = { x: 8, y: 10 };
-const IK_BLOCKS = [[-6, 12], [-1, 13], [4, 9]];
+const STACK = { x: 6, y: 8 };
+const IK_BLOCKS = [[-7, 11], [-2, 13], [2, 13]];
 const IK_LAYOUTS = { a: IK_BLOCKS };
 
 /** Demo routine for the teach lesson: A (−6, 11) → B (6, 11), as recorded poses. */
@@ -673,7 +678,9 @@ async function goTo(io, b, p, x, y, z, grip, label) {
 }
 
 async function pickAndStack(io, b, p, x, y) {
-  const top = p.hover + b.stacked * 2.5;
+  io.line('if (stacked >= MAX_STACK)');
+  if (b.stacked >= 4) { io.line('Serial.println("Stack full");'); io.print('Stack full'); return; }
+  const top = Math.max(p.hover, (b.stacked + 1) * 2.5 + 1);
   const zs = 1.25 + b.stacked * 2.5;
   if (!(await goTo(io, b, p, x, y, p.hover, 90, 'if (!goTo(x, y, HOVER, GRIP_OPEN)) return;'))) return;
   await goTo(io, b, p, x, y, 1.25, 90, 'goTo(x, y, BLOCK / 2, GRIP_OPEN);');
@@ -682,7 +689,7 @@ async function pickAndStack(io, b, p, x, y) {
   await goTo(io, b, p, STACK.x, STACK.y, top, p.grip, 'goTo(STACK_X, STACK_Y, top, GRIP_CLOSED);');
   await goTo(io, b, p, STACK.x, STACK.y, zs, p.grip, 'goTo(STACK_X, STACK_Y, BLOCK / 2 + stacked * BLOCK, GRIP_CLOSED);');
   await goTo(io, b, p, STACK.x, STACK.y, zs, 90, 'goTo(STACK_X, STACK_Y, BLOCK / 2 + stacked * BLOCK, GRIP_OPEN);');
-  await goTo(io, b, p, STACK.x, STACK.y, top + 2.5, 90, 'goTo(STACK_X, STACK_Y, top + BLOCK, GRIP_OPEN);');
+  await goTo(io, b, p, STACK.x, STACK.y, top, 90, 'goTo(STACK_X, STACK_Y, top, GRIP_OPEN);');
   io.line('stacked++;');
   b.stacked++;
 }
@@ -711,3 +718,10 @@ function drawGridMat(c, s, cw, ch) {
   c.textAlign = 'left';
   for (let ay = 8; ay <= 20; ay += 4) c.fillText(`y ${ay}`, 0.3 * s, Y(ay) - 0.2 * s);
 }
+
+/** Extra glossary entries: [icon, name, description, lessonId]. */
+export const parts = [
+  ['servo', '4-DOF robot arm', 'Base, shoulder, elbow and wrist servos plus a gripper; taught by knobs or driven by inverse kinematics.', 'ind-robot-arm'],
+  ['pins', 'Servo hub', 'Small board that fans five servo plugs out to signal pins and a separate 5 V supply.', 'ind-robot-arm'],
+  ['bolt', '5 V 3 A supply', 'Wall adapter with a screw-terminal jack: servo power that never runs through the Uno.', 'ind-robot-arm'],
+];

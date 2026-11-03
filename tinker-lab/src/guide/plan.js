@@ -282,6 +282,7 @@ function lower(label) {
 }
 
 function partPhrase(u) {
+  if (!u.label) return { verb: 'Add', text: 'the piece shown' };
   const name = `${article(u.label ?? '')} ${lower(u.label ?? 'part')}`;
   if (u.holes?.length) {
     let s = `${name} into ${holesText(u.holes)}`;
@@ -321,35 +322,6 @@ function ledAnode(u) {
     if (d < bd) { bd = d; best = h; }
   }
   return bd < 0.12 ? best : null;
-}
-
-function article() {
-  return 'the';
-}
-
-function lower(label) {
-  // keep acronyms and model names, lower-case ordinary first words ("Red LED" → "red LED")
-  return /^[A-Z][a-z]/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
-}
-
-function partPhrase(u) {
-  const name = `${article(u.label ?? '')} ${lower(u.label ?? 'part')}`;
-  if (u.holes?.length) {
-    let s = `${name} into ${holesText(u.holes)}`;
-    if (u.part?.kind === 'led' && u.holes.length === 2) {
-      const an = ledAnode(u);
-      if (an) s += `, long leg (+) in ${an.row}${an.col}`;
-    }
-    return { verb: 'Push', text: s };
-  }
-  return { verb: 'Place', text: name };
-}
-
-function ledAnode(u) {
-  // makeLED puts the anode's foot on the +x side of the body: the anode hole is the one further along +x
-  const xs = u.holes.map((h) => ({ h, x: h.bb.hole(h.col, h.row).x }));
-  xs.sort((p, q) => q.x - p.x);
-  return xs[0].x - xs[1].x > 0.1 ? xs[0].h : null;
 }
 
 function wirePhrase(u, namer, first = true) {
