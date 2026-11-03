@@ -86,8 +86,7 @@ export default (el, api) => scene(el, api, {
       backA.g.setAttribute('transform', `translate(${wx} 0)`);
       backA.set(rb > 0 && rb < Dpx + 30 ? rb : -1, st.back * (rb < Dpx ? 1 : clamp(1 - (rb - Dpx) / 30)));
       // ruler
-      d.seed = 70;
-      d.redraw(ruler, () => {
+      if (ruler.dataset.x !== String(Math.round(wx))) ruler.dataset.x = String(Math.round(wx)), d.seed = 70, d.redraw(ruler, () => {
         d.line(SX, 380, wx, 380, { stroke: C.ink2, strokeWidth: 1.6, roughness: 0.3 });
         d.line(SX, 372, SX, 388, { stroke: C.ink2, strokeWidth: 1.6, roughness: 0.2 });
         d.line(wx, 372, wx, 388, { stroke: C.ink2, strokeWidth: 1.6, roughness: 0.2 });

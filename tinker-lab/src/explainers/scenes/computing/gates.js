@@ -21,7 +21,7 @@ export default (el, api) => scene(el, api, {
     const left = d.g(), mid = d.g(), tbl = d.g();
     let lamp, switches = {};
     panel(S, 20, 54, 410, 400);
-    const leftT = d.text(225, 78, '', { size: 15, fill: C.muted, mono: true });
+    const leftT = d.text(225, 440, '', { size: 15, fill: C.muted, mono: true });
 
     function drawLeft() {
       d.seed = 100 + Object.keys(FN).indexOf(st.gate) * 300;
@@ -54,7 +54,7 @@ export default (el, api) => scene(el, api, {
           switches.a = { lever: d.el('line', { x1: 130, y1: 200, stroke: C.ink, 'stroke-width': 5, 'stroke-linecap': 'round' }, left), hit: d.el('rect', { x: 110, y: 140, width: 60, height: 120, fill: 'transparent' }, left), xor: 'a' };
           switches.b = { lever: d.el('line', { x1: 310, y1: 200, stroke: C.ink, 'stroke-width': 5, 'stroke-linecap': 'round' }, left), hit: d.el('rect', { x: 270, y: 140, width: 60, height: 120, fill: 'transparent' }, left), xor: 'b' };
           wire(S, [[310, 200], [lt[0], 200], lamp.left], { r: 0 });
-          d.text(220, 280, 'like stairs lights: two switches, one lamp', { size: 13, fill: C.muted, mono: true });
+          d.text(225, 380, 'like stair lights: two switches, one lamp', { size: 13, fill: C.muted, mono: true });
         }
         for (const k of ['a', 'b']) if (switches[k]) {
           S.tap(switches[k].hit, () => { st[k] ^= 1; }, `Switch ${k.toUpperCase()}`);

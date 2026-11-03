@@ -129,9 +129,10 @@ export default (el, api) => scene(el, api, {
       safeG.setAttribute('opacity', st.safety.toFixed(3));
       boardG.setAttribute('opacity', (1 - 0.75 * st.safety - 0.7 * st.joints).toFixed(3));
       ironAt(st.wipe > 0 ? -st.wipe : st.iron);
-      iron.setAttribute('opacity', (1 - st.safety * 0.8 - st.joints).toFixed(3));
+      iron.setAttribute('opacity', Math.max(0, 1 - st.safety * 0.8 - st.joints - (st.snip > 0 ? 1 : 0)).toFixed(3));
       tipGlow.setAttribute('opacity', clamp((st.temp - 150) / 250).toFixed(3));
       tempT.textContent = `${Math.round(st.temp)} °C`;
+      tempT.setAttribute('opacity', (1 - st.joints).toFixed(2));
       tempT.setAttribute('fill', st.temp > 60 ? C.accentInk : C.ink);
       heatGlow.setAttribute('opacity', (st.heat * 0.8 * (1 - st.joints)).toFixed(3));
       S.at(solder, HX - 18 - (1 - st.feed) * 150, BY - 16 - (1 - st.feed) * 80);

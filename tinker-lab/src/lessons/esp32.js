@@ -489,6 +489,42 @@ void loop() {
       ctx.anchor('res', c.res.anchor);
       return { ...c, st, queue, phone };
     },
+    hw: (b) => {
+      b.queue.length = 0;
+      Object.assign(b.st, { serverUp: false, pending: null, page: null, ledOn: false, last: '' });
+      b.phone.update();
+      return {
+        digitalWrite: (pin, v) => { if (pin === 4) b.set(v ? 1 : 0); },
+        devices: {
+          webserver: () => {
+            // server.begin(): the phone can reach the page now; it loads "/" first
+            b.st.serverUp = true;
+            b.queue.push('/');
+            b.phone.update();
+            return {
+              poll: () => {
+                const path = b.queue.shift();
+                if (!path) return null;
+                return {
+                  uri: path,
+                  method: 'GET',
+                  remoteIP: '192.168.1.23',
+                  respond: (r) => {
+                    // show what the sketch really served: the LED state written in its HTML
+                    const m = /LED is <b>(ON|OFF)/i.exec(r.body ?? '');
+                    b.st.page = { ledOn: m ? m[1].toUpperCase() === 'ON' : !!b.st.ledOn };
+                    b.st.ledOn = b.st.page.ledOn;
+                    b.st.pending = null;
+                    b.st.last = r.timeout ? `GET ${path} · no response` : `GET ${path} · ${r.code}${r.code === 200 ? ' OK' : ''}`;
+                    b.phone.update();
+                  },
+                };
+              },
+            };
+          },
+        },
+      };
+    },
     callouts: [
       { anchor: 'module', x: 0.04, y: 0.17, icon: 'globe', title: 'Web server', text: '<code>WebServer</code> listens on port 80 and runs a handler for each URL.' },
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pins', title: 'GPIO4', text: '<code>/on</code> and <code>/off</code> switch this pin HIGH and LOW.' },

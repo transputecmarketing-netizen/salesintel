@@ -29,6 +29,7 @@ export default (el, api) => scene(el, api, {
       d.rect(90, 100, 230, 230, { fill: '#2a2b31', stroke: C.ink, strokeWidth: 2.4, roughness: 0.5 });
       d.text(205, 362, 'microcontroller', { size: 20, fill: C.ink, weight: 500 });
     });
+    mG.appendChild(blocks);
     d.into(blocks, () => {
       const b = (x, y, w, h, t, c) => { d.rect(x, y, w, h, { fill: c, stroke: 'none', roughness: 0.5 }); d.text(x + w / 2, y + h / 2, t, { size: 13, fill: '#fff', mono: true, weight: 500 }); };
       b(104, 114, 96, 70, 'CPU', C.accent); b(210, 114, 96, 70, 'flash', C.iris);
@@ -89,7 +90,7 @@ export default (el, api) => scene(el, api, {
     // ---------- boards
     const bG = d.g(S.layers.top, { opacity: 0 });
     d.into(bG, () => {
-      d.rect(30, 60, 740, 400, { fill: '#fff', stroke: 'none' });
+      d.rect(20, 40, 760, 456, { fill: '#fff', stroke: 'none' });
       d.rect(80, 150, 250, 180, { fill: '#1f6f8b', stroke: C.ink, strokeWidth: 2.4 });
       d.rect(170, 220, 90, 40, { fill: '#2a2b31', stroke: C.ink, strokeWidth: 1.6 });
       for (let k = 0; k < 14; k++) d.rect(100 + k * 15, 160, 9, 14, { fill: '#1b1b1d', stroke: 'none' });

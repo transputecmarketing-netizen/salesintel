@@ -95,7 +95,7 @@ export default (el, api) => scene(el, api, {
         e.dot.setAttribute('cx', (e.x1 + (e.x2 - e.x1) * ph).toFixed(1)); e.dot.setAttribute('cy', (e.y1 + (e.y2 - e.y1) * ph).toFixed(1));
         e.dot.setAttribute('opacity', (active && st.edges > 0.5 ? 0.8 : 0).toString());
       });
-      hidden.forEach((n, k) => { n.c.setAttribute('fill', h[k] > 0 ? C.yellow : '#fff'); n.t.textContent = st.sums > 0.5 ? (h[k] > 0 ? `+${h[k].toFixed(1)}` : '0') : ''; });
+      hidden.forEach((n, k) => { n.c.setAttribute('fill', st.sums > 0.5 && h[k] > 0 ? C.yellow : '#fff'); n.t.textContent = st.sums > 0.5 ? (h[k] > 0 ? `+${h[k].toFixed(1)}` : '0') : ''; });
       outEdges.forEach((e) => e.el.setAttribute('opacity', (st.edges * (h[e.k] > 0 ? 0.9 : 0.15)).toFixed(2)));
       outs.forEach((o, k) => {
         const p = k === 0 ? pv : 1 - pv, win = p > 0.6;

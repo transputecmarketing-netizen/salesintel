@@ -57,8 +57,8 @@
 /* path */
 .path-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 40px; margin-bottom: clamp(36px, 5vw, 56px); }
 .path-head .lede { max-width: 34ch; }
-.path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-bottom: 36px; }
-.path-col { border-radius: 24px; padding: 26px 24px 18px; background: #fff; border: 1px solid var(--tl-line); }
+.path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); gap: 18px; margin-bottom: 36px; }
+.path-col { border-radius: 24px; padding: 24px 20px 16px; background: #fff; border: 1px solid var(--tl-line); }
 .path-col header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .path-col .pc-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--c-soft); color: var(--c); }
 .path-col h3 { margin: 0; font-weight: 400; font-size: 21px; }

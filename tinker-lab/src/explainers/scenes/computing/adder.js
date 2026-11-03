@@ -50,7 +50,7 @@ export default (el, api) => scene(el, api, {
         const box = d.el('rect', { x: x - 50, y: 222, width: 100, height: 80, fill: C.yellow, opacity: 0 }, cG);
         const s = d.text(x, 372, '', { size: 30, fill: C.ink, mono: true, weight: 500, parent: cG });
         const carry = d.el('path', { d: `M${x - 50} 280 C ${x - 64} 280, ${x - 66} 280, ${x - 80} 280`, fill: 'none', 'stroke-width': 3.5 }, cG);
-        const cT = d.text(x - 66, 266, '', { size: 14, fill: C.accentInk, mono: true, parent: cG });
+        const cT = d.text(x - 65, 262, '', { size: 16, fill: C.accentInk, mono: true, weight: 500, parent: cG });
         cells.push({ at, bt, s, carry, cT, box });
       }
       d.line(660, 280, 640, 280, { stroke: C.ink2, strokeWidth: 2 });
@@ -103,7 +103,7 @@ export default (el, api) => scene(el, api, {
         cl.at.textContent = String(a); cl.bt.textContent = String(b);
         cl.s.textContent = done ? String(sum) : '·';
         cl.carry.setAttribute('stroke', done && co ? C.accent : C.line2);
-        cl.cT.textContent = done && co ? 'carry 1' : '';
+        cl.cT.textContent = done && co ? '1' : '';
         cl.box.setAttribute('opacity', st.t > k * 0.7 && !done ? 0.35 : 0);
         S4 |= sum << k;
         c = co;

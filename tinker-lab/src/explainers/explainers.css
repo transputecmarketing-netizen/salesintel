@@ -84,7 +84,7 @@
 
 /* compact layout (matches the app's breakpoint): the stage is its own box, no brand above it */
 @media (max-width: 1080px), (max-height: 640px) and (max-width: 1300px) {
-  .app.is-explainer .stage { height: min(80vh, 700px); min-height: 520px; }
+  .app.is-explainer .stage { height: clamp(520px, calc(62.5vw + 330px), 700px); min-height: 0; }
   .xp { padding: 14px 14px 10px; border-radius: inherit; }
   .xp-head { min-height: 52px; gap: 11px; }
   .xp-num { font-size: 46px; }
