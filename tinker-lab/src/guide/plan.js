@@ -272,8 +272,8 @@ function holesText(holes) {
 }
 
 // ---------------------------------------------------------------- captions
-function article(label) {
-  return /^\d/.test(label) || /^[A-Z0-9]{2,}/.test(label) ? 'the' : 'the';
+function article() {
+  return 'the';
 }
 
 function lower(label) {
@@ -295,19 +295,10 @@ function partPhrase(u) {
 }
 
 function ledAnode(u) {
-  const part = u.part;
-  const body = part.pick;
-  if (!body) return null;
-  const bx = body.getWorldPosition(new THREE.Vector3()).x;
-  // the anode's foot is on the +x side of the body (see makeLED)
-  return u.holes.reduce((best, h) => {
-    const x = h.bb.hole(h.col, h.row).x;
-    return !best || x > best.x ? { ...h, x } : best;
-  }, null) && (() => {
-    const xs = u.holes.map((h) => ({ h, x: h.bb.hole(h.col, h.row).x }));
-    xs.sort((a, b) => b.x - a.x);
-    return xs[0].x >= bx - 0.3 ? xs[0].h : null;
-  })();
+  // makeLED puts the anode's foot on the +x side of the body: the anode hole is the one further along +x
+  const xs = u.holes.map((h) => ({ h, x: h.bb.hole(h.col, h.row).x }));
+  xs.sort((p, q) => q.x - p.x);
+  return xs[0].x - xs[1].x > 0.1 ? xs[0].h : null;
 }
 
 function wirePhrase(u, namer, first = true) {

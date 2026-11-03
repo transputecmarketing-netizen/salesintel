@@ -138,7 +138,7 @@ export function makeBatteryPack(pos, opts = {}) {
  * centre on the table (cm). Forward = local +Z of the group.
  *
  * Servo angle conventions (what Servo.write() receives):
- *  base     90 = forward; 90 + atan2(x, y)
+ *  base     90 = forward; 90 − atan2(x, y) (servo turns counter-clockwise from above)
  *  shoulder upper-arm elevation above horizontal (0 forward … 180 back)
  *  elbow    interior angle between upper arm and forearm (180 = straight)
  *  wrist    90 = gripper in line with the forearm
@@ -163,7 +163,7 @@ export function armIK(x, y, z, pitchDeg = -90) {
   const a2 = Math.acos((L1 * L1 + L2 * L2 - d * d) / (2 * L1 * L2));
   const fore = a1 - (Math.PI - a2);
   const j = {
-    base: Math.round(90 + Math.atan2(x, y) / D2R),
+    base: Math.round(90 - Math.atan2(x, y) / D2R),
     shoulder: Math.round(a1 / D2R),
     elbow: Math.round(a2 / D2R),
     wrist: Math.round(90 + (p - fore) / D2R),
@@ -311,8 +311,8 @@ export function makeRobotArm(pos, opts = {}) {
     ik: armIK,
     /** Gripper tool point (between the finger pads), world. */
     tcp() { return wrist.localToWorld(tcpLocal.clone()); },
-    toArm(w) { const l = g.worldToLocal(w.clone()); return { x: l.x, y: l.z, z: l.y }; },
-    fromArm(x, y, z) { return g.localToWorld(V(x, z, y)); },
+    toArm(w) { const l = g.worldToLocal(w.clone()); return { x: -l.x, y: l.z, z: l.y }; },
+    fromArm(x, y, z) { return g.localToWorld(V(-x, z, y)); },
     /** Carry obj in the gripper (keeps its world pose); width = its size between the jaws. */
     hold(obj, width = 2.5) {
       held = obj;
