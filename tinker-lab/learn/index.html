@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" class="is-loading">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Tinker Lab — learn Arduino with interactive 3D lessons</title>
+    <meta name="description" content="Learn Arduino on an interactive 3D board: wire LEDs, buttons, sensors, motors and servos, then run the code and watch it work. Beginner to advanced: Arduino, ESP32, Raspberry Pi Pico and Jetson Nano." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tinker Lab — learn Arduino in 3D" />
+    <meta property="og:description" content="Wire up LEDs, buttons, sensors, motors and servos on a 3D board, then run the code and watch it work." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="loader-inner">
+        <span class="loader-logo" data-logo="64"></span>
+        <p class="loader-title">Tinker Lab</p>
+        <div class="loader-track" aria-hidden="true"><span class="loader-fill" id="loader-fill"></span></div>
+        <p class="loader-step" id="loader-step">Loading</p>
+        <noscript><p class="noscript">This interactive 3D course needs JavaScript and WebGL. Please turn on JavaScript to start.</p></noscript>
+      </div>
+    </div>
+
+    <div id="app" class="app" inert>
+      <svg class="traces" id="traces" aria-hidden="true"></svg>
+
+      <nav class="sidebar" aria-label="Main">
+        <button class="side-toggle" id="side-toggle" aria-label="Expand sidebar" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5" /></svg>
+        </button>
+        <ul class="side-nav">
+          <li><a href="/" data-nav="site" title="Back to the home page"><span data-icon="home"></span><span class="side-label">Home</span></a></li>
+          <li><a href="#" data-nav="lessons" title="Lessons"><span data-icon="book"></span><span class="side-label">Lessons</span></a></li>
+          <li><a href="#" data-nav="parts" title="Components"><span data-icon="chip"></span><span class="side-label">Components</span></a></li>
+          <li><a href="#" data-nav="run" title="Run simulation"><span data-icon="play"></span><span class="side-label">Simulator</span></a></li>
+          <li><a href="#" data-nav="boards" title="Boards"><span data-icon="pins"></span><span class="side-label">Boards</span></a></li>
+          <li class="is-muted"><a href="#" data-nav="settings" title="Settings"><span data-icon="gear"></span><span class="side-label">Settings</span></a></li>
+        </ul>
+        <div class="side-foot"><span>Tinker Lab</span><b>v1.0</b></div>
+      </nav>
+      <aside class="flyout" id="flyout" aria-live="polite"></aside>
+
+      <a class="brand" href="/" aria-label="Tinker Lab home">
+        <span class="brand-logo" data-logo="52"></span>
+        <span class="brand-rule" aria-hidden="true"></span>
+        <div class="brand-text">
+          <h1>Tinker Lab</h1>
+          <p>The virtual maker space</p>
+        </div>
+      </a>
+
+      <main class="stage" id="stage">
+        <canvas id="board-canvas" aria-label="Interactive 3D view. Drag or use WASD to pan, Q and E to rotate, scroll to zoom."></canvas>
+        <div class="dim" id="dim" aria-hidden="true"></div>
+        <div class="explainer" id="explainer"></div>
+        <svg class="leaders" id="leaders" aria-hidden="true"></svg>
+        <div class="callouts" id="callouts"></div>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+        <div class="inspector" id="inspector" role="dialog" aria-label="Part inspector"></div>
+        <div class="dock" id="dock"></div>
+        <div class="tip" id="tip" role="tooltip"><b></b><span></span></div>
+        <div class="viewbar" id="viewbar" role="toolbar" aria-label="3D view">
+          <p class="view-hint">Drag or WASD to pan · Q / E to rotate · Scroll to zoom</p>
+          <button data-view="left" title="Turn left (Q)" aria-label="Turn left"><svg viewBox="0 0 24 24"><path d="M4.5 10.5A8 8 0 1 1 6 17" /><path d="M4 5v5.8h5.8" /></svg></button>
+          <button data-view="right" title="Turn right (E)" aria-label="Turn right"><svg viewBox="0 0 24 24"><path d="M19.5 10.5A8 8 0 1 0 18 17" /><path d="M20 5v5.8h-5.8" /></svg></button>
+          <span class="viewbar-sep"></span>
+          <button data-view="out" title="Zoom out (−)" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14" /></svg></button>
+          <button data-view="in" title="Zoom in (+)" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg></button>
+          <span class="viewbar-sep"></span>
+          <button data-view="reset" class="compass" title="Reset view (R)" aria-label="Reset view"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><g class="compass-needle"><path d="M12 5.2 14.2 12h-4.4z" class="fill" /><path d="M12 18.8 9.8 12h4.4z" /></g></svg></button>
+          <span class="viewbar-sep"></span>
+          <button data-view="labels" class="toggle" title="Labels (L)" aria-label="Show labels" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="8" rx="1.2" /><path d="M15 11l5 6M6 8.5h6M6 10.5h4" /></svg></button>
+          <button data-view="flow" class="toggle" title="Current flow (F)" aria-label="Show current flow" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M2.5 15.5c4.2 0 5.3-7 9.5-7s5.3 7 9.5 7" /><circle cx="6.6" cy="13" r="1.7" class="fill" /><circle cx="12" cy="8.5" r="1.7" class="fill" /><circle cx="17.4" cy="13" r="1.7" class="fill" /></svg></button>
+        </div>
+      </main>
+
+      <section class="status" aria-label="Progress">
+        <div class="progress-card">
+          <span data-icon="book" class="progress-icon"></span>
+          <div class="progress-body">
+            <span class="progress-label">Foundations</span>
+            <div class="progress-row">
+              <span class="progress-track" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><span class="progress-fill" id="progress-fill"></span></span>
+              <span class="progress-count" id="progress-count">0/12</span>
+            </div>
+            <small class="progress-total" id="progress-total"></small>
+          </div>
+        </div>
+        <time class="clock" id="clock"><span id="clock-date"></span><span id="clock-time"></span></time>
+      </section>
+
+      <section class="info-card card" id="info-card" aria-label="Lesson information">
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" data-tab="overview" aria-selected="true" class="is-active">Overview</button>
+          <button role="tab" data-tab="pinout" aria-selected="false">Wiring</button>
+          <button role="tab" data-tab="example" aria-selected="false">Practice</button>
+          <button role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
+          <button role="tab" data-tab="specs" aria-selected="false">Specs</button>
+        </div>
+        <div class="info-body" role="tabpanel">
+          <button class="expand" id="info-expand" aria-label="Expand panel" title="Expand">
+            <svg viewBox="0 0 24 24"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" /><circle cx="12" cy="12" r="1.3" class="fill" /></svg>
+          </button>
+          <div class="info-content" id="info-content"></div>
+        </div>
+      </section>
+
+      <section class="code-card card" id="code-card" aria-label="Try it yourself" data-state="idle">
+        <header>
+          <div class="code-title"><h2>Try it yourself</h2><small id="code-lang">C++</small></div>
+          <div class="code-actions">
+            <button class="btn-ghost" id="code-expand" aria-label="Expand code" title="Expand code" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" /><circle cx="12" cy="12" r="1.3" class="fill" /></svg>
+            </button>
+            <button class="btn-ghost" id="code-download" aria-label="Download code" title="Download file">
+              <svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14" /></svg>
+            </button>
+            <button class="btn-ghost" id="code-copy" aria-label="Copy code" title="Copy code">
+              <svg viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="12.5" rx="1.6" /><path d="M15.5 5.2V4.8c0-.9-.7-1.6-1.6-1.6H6.1c-.9 0-1.6.7-1.6 1.6v9.6c0 .9.7 1.6 1.6 1.6h.4" /></svg>
+            </button>
+            <button class="btn-run" id="code-run" aria-label="Run sketch" title="Run sketch (Space)">
+              <svg viewBox="0 0 24 24" class="i-play"><path d="M7.5 4.8v14.4L19 12z" class="fill" /></svg>
+              <svg viewBox="0 0 24 24" class="i-stop"><rect x="6.5" y="6.5" width="11" height="11" rx="1.2" class="fill" /></svg>
+            </button>
+          </div>
+        </header>
+        <div class="code-wrap">
+          <div class="code-scroll"><pre class="code" id="code"></pre></div>
+          <div class="console" id="console">
+            <div class="console-head">
+              <span class="console-dot"></span>
+              <span class="console-title">Serial monitor</span>
+              <span class="console-status" id="console-status">Stopped</span>
+              <button class="console-clear" id="console-clear" title="Clear">Clear</button>
+            </div>
+            <div class="console-lines" id="console-lines" aria-live="polite"></div>
+            <form class="console-form" id="console-form"><span>&gt;</span><input id="console-input" autocomplete="off" spellcheck="false" aria-label="Send to the board" /><button>Send</button></form>
+          </div>
+        </div>
+      </section>
+
+      <section class="lessons" aria-label="Lessons">
+        <div class="lessons-head">
+          <h2>Lessons</h2>
+          <div class="track-tabs" id="track-tabs" role="tablist" aria-label="Tracks"></div>
+          <div class="lessons-nav">
+            <button id="lessons-prev" aria-label="Scroll lessons left"><svg viewBox="0 0 24 24"><path d="M15 5.5 8.5 12l6.5 6.5" /></svg></button>
+            <button id="lessons-next" aria-label="Scroll lessons right"><svg viewBox="0 0 24 24"><path d="m9 5.5 6.5 6.5L9 18.5" /></svg></button>
+          </div>
+        </div>
+        <ol class="lesson-list" id="lesson-list"></ol>
+      </section>
+
+      <div class="modal" id="modal" hidden>
+        <div class="modal-card card" role="dialog" aria-modal="true">
+          <button class="modal-close" id="modal-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+          <div class="modal-body" id="modal-body"></div>
+        </div>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

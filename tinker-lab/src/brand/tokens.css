@@ -1,0 +1,36 @@
+/* Tinker Lab design tokens. One place to change the brand. */
+@import '@fontsource/newsreader/300.css';
+@import '@fontsource/newsreader/400.css';
+@import '@fontsource/newsreader/500.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+:root {
+  --tl-bg: #ffffff;
+  --tl-surface: #ffffff;
+  --tl-subtle: #f7f7f5;
+  --tl-subtle-2: #f0efeb;
+  --tl-line: #e8e6e1;
+  --tl-line-2: #d4d1c9;
+  --tl-ink: #0c0c0e;
+  --tl-ink-2: #44454c;
+  --tl-muted: #85868d;
+  --tl-accent: #ff5a1f;      /* Tinker orange: the spark */
+  --tl-accent-ink: #c2410c;  /* accent on white text (AA) */
+  --tl-accent-soft: #fff2eb;
+  --tl-blue: #2456f5;
+  --tl-green: #12915a;
+  --tl-red: #e0362b;
+  --tl-yellow: #f2b10a;
+  --tl-trace: #ebe8e1;       /* the circuit-trace background */
+  --tl-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --tl-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --tl-radius: 10px;
+  --tl-radius-lg: 16px;
+  --tl-shadow: 0 1px 2px rgba(12, 12, 14, 0.04), 0 12px 32px -18px rgba(12, 12, 14, 0.22);
+  --tl-weight: 300;          /* light by default */
+}
+
+/* The brand uses no italics, anywhere. */
+*, *::before, *::after { font-style: normal !important; font-synthesis: none; }
+em, i, cite, dfn, var, address { font-style: normal; }

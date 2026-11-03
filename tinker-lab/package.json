@@ -1,0 +1,40 @@
+{
+  "name": "tinker-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "qa": "node scripts/qa.cjs",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-cpp": "^6.0.3",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/search": "^6.7.2",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-semi-condensed": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/newsreader": "^5.3.0",
+    "@lucasmarkes/hairline": "^0.5.1",
+    "codemirror": "^6.0.2",
+    "lz-string": "^1.5.0",
+    "roughjs": "^4.6.6",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5"
+  },
+  "description": "Tinker Lab \u2014 a virtual maker space: electronics, Arduino, IoT, robotics and edge AI, from first principles, in interactive 3D.",
+  "engines": {
+    "node": ">=20"
+  }
+}
