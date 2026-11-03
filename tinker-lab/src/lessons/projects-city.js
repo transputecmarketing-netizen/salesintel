@@ -73,6 +73,7 @@ export const projectsCity = [
         note: () => `Waiting: N ${X.waiting('N')} · S ${X.waiting('S')} · E ${X.waiting('E')} · W ${X.waiting('W')} · through: ${['N', 'S', 'E', 'W'].reduce((a, k) => a + X.passed(k), 0)}`,
       });
       ctx.onTick(() => { if (st.plotOn) plot.push(X.waiting('N') + X.waiting('S'), X.waiting('E') + X.waiting('W')); });
+      for (let i = 0; i < 160; i++) X.tick(0.05); // traffic already on the roads
       ctx.anchor('poleN', X.poleTop('N'));
       ctx.anchor('sensE', X.sensors.E.anchor);
       ctx.anchor('hdr', hdr.anchor);
@@ -239,10 +240,10 @@ void loop() {
       const beamA = ctx.add(makeBreakBeam(W(A_X, 1.0, -RW / 2 - 0.7), W(A_X, 1.0, RW / 2 + 0.7), { outA: v(0, 0, -1.4), outB: v(0, 0, 1.4), label: 'IR break-beam A' }));
       const beamB = ctx.add(makeBreakBeam(W(B_X, 1.0, -RW / 2 - 0.7), W(B_X, 1.0, RW / 2 + 0.7), { outA: v(0, 0, -1.4), outB: v(0, 0, 1.4), label: 'IR break-beam B' }));
       ctx.step('Speed sign: TM1637 and an 8×8 matrix on posts facing the traffic');
-      const sign = ctx.add(makeTM1637(W(17, 0, 4.6), { post: 5.5, rotY: -Math.PI / 2 }));
-      const face = ctx.add(makeLedMatrix(W(17, 0, 8.0), { post: 5.5, rotY: -Math.PI / 2 }));
+      const sign = ctx.add(makeTM1637(W(17, 0, 4.6), { post: 5.5, rotY: -Math.PI / 4 }));
+      const face = ctx.add(makeLedMatrix(W(19.5, 0, 7.6), { post: 5.5, rotY: -Math.PI / 4 }));
       ctx.step('Speed camera with a white LED flash');
-      const cam = ctx.add(makeSpeedCamera(W(27, 0, 4.4), { rotY: -Math.PI / 2 }));
+      const cam = ctx.add(makeSpeedCamera(W(27, 0, 4.4), { rotY: -Math.PI / 3 }));
       ctx.step('The loom brings every device to one header');
       const rxFoot = (bm) => bm.pin('OUT').clone();
       const hdr = ctx.add(makeHarness(v(-3.5, 0, -3.6), ['BEAM_A', 'BEAM_B', 'FLASH', 'CLK', 'DIO', 'DIN', 'CS', 'MCLK', '5V', 'GND'],
@@ -451,9 +452,9 @@ void loop() {
     build(ctx) {
       const PC = v(-6, 0, -19);
       ctx.step('Lay the car park: four bays, a barrier at the entrance');
-      const park = ctx.add(makeCarPark(PC, { rate: 3, stay: 18 }));
+      const park = ctx.add(makeCarPark(PC, { rate: 4, stay: 18 }));
       ctx.step('Free-spaces sign: an 8×8 matrix on a post at the entrance');
-      const sign = ctx.add(makeLedMatrix(v(PC.x - 21, 0, PC.z + 8.2), { post: 5, rotY: -Math.PI / 2 }));
+      const sign = ctx.add(makeLedMatrix(v(PC.x - 21, 0, PC.z + 8.2), { post: 5, rotY: -Math.PI / 4 }));
       ctx.step('The loom header and a 5 V supply for the servo and sensors');
       const f = park.feet;
       const hdr = ctx.add(makeHarness(v(-6.5, 0, -0.4), ['OUT', 'IN', 'B1', 'B2', 'B3', 'B4', 'SERVO', 'DIN', 'CS', 'CLK', 'V+', 'GND'],
@@ -466,7 +467,8 @@ void loop() {
       toHeader(ctx, hdr, [['D2', 'OUT', 'white'], ['D3', 'IN', 'white'], ['D4', 'B1', 'blue'], ['D5', 'B2', 'blue'], ['D6', 'B3', 'blue'], ['D7', 'B4', 'blue']]);
       ctx.step('Barrier servo on D9; matrix on D11 / D10 / D13; common GND');
       toHeader(ctx, hdr, [['D9', 'SERVO', 'orange'], ['D11', 'DIN', 'purple'], ['D10', 'CS', 'yellow'], ['D13', 'CLK', 'green'], ['GND', 'GND', 'black']], 1.8);
-      const st = { rate: 3, stay: 18 };
+      const st = { rate: 4, stay: 18 };
+      park.preload([1, 3]);
       ctx.interact(park, {
         name: 'Car park', hint: 'Change how busy it is',
         controls: [
@@ -702,7 +704,7 @@ void loop() {
         const L = T.lane({ from, to, stop: 22 - 4.6 - 1.4, light: () => (st.hold ? 'red' : 'green') });
         st[z > 0 ? 'nb' : 'sb'] = L;
       }
-      const acc = { nb: 0.5, sb: 0.2 };
+      const acc = { nb: 0.95, sb: 0.7 };
       ctx.onTick((dt) => {
         for (const k of ['nb', 'sb']) { acc[k] += (4 / 60) * dt; if (acc[k] >= 1 && T.spawn(st[k], 11)) acc[k] -= 1; acc[k] = Math.min(acc[k], 1.2); }
         if (st.running && st.auto && !rail.train.running) { st.nextTrain -= dt; if (st.nextTrain <= 0) { rail.send(Math.random() < 0.5 ? 1 : -1, 9); st.nextTrain = 14 + Math.random() * 8; } }
@@ -842,7 +844,7 @@ void loop() {
       b.rail.reset();
       Object.assign(b, { state: 'IDLE', angle: 90, exitW: false, exitSeen: false });
       b.north.jump(90); b.south.jump(90);
-      b.st.running = true; b.st.nextTrain = 3;
+      b.st.running = true; b.st.nextTrain = 1;
       io.line('gates.write(UP);');
       await io.delay(100);
     },
@@ -938,6 +940,8 @@ void loop() {
         street.group.add(p.group);
         people.push({ p, x: dir > 0 ? -36 : 34, dir, v: 3.2 + Math.random() * 1.4, t: Math.random() * 6 });
       };
+      spawn(1); people[0].x = -24;
+      spawn(-1); people[1].x = 14;
       ctx.onTick((dt) => {
         ctx.setDarkness(1 - st.day);
         st.acc += (st.rate / 60) * dt;

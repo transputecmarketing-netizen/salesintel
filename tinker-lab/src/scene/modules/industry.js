@@ -2075,7 +2075,7 @@ export function makeCarPark(pos, opts = {}) {
   const pool = [];
   const cars = [];
   const CL = 5.2;
-  let rate = opts.rate ?? 3, stay = opts.stay ?? 16, acc = 0.6, cycle = 0, wasDown = true;
+  let rate = opts.rate ?? 3, stay = opts.stay ?? 16, acc = 0.95, cycle = 0, wasDown = true;
   const getCar = () => { const c = pool.pop() ?? makeToyCar(V()); c.group.visible = true; g.add(c.group); return c; };
   const arc = (cx, cz, r, a0, a1, n = 10) => [...Array(n + 1)].map((_, k) => { const a = a0 + ((a1 - a0) * k) / n; return [cx + Math.cos(a) * r, cz + Math.sin(a) * r]; });
   const pathTo = (i) => {
@@ -2131,6 +2131,17 @@ export function makeCarPark(pos, opts = {}) {
       return car;
     },
     clear() { for (const c of cars.splice(0)) { c.obj.group.visible = false; pool.push(c.obj); } bays.forEach((b) => (b.car = null)); },
+    /** Start with cars already parked in these bays (they leave after a while). */
+    preload(list) {
+      for (const i of list) {
+        const b = bays[i];
+        if (!b || b.car) continue;
+        const car = { state: 'parked', x: b.x, z: BAY_Z, yaw: Math.PI, v: 0, obj: getCar(), bay: b, timer: stay * (0.5 + Math.random()), cycle: 0 };
+        b.car = car;
+        cars.push(car);
+        show(car);
+      }
+    },
     tick(dt) {
       dt = Math.min(dt, 0.05);
       if (barrier.isDown && !wasDown) cycle++;
@@ -2183,7 +2194,7 @@ export function makeCarPark(pos, opts = {}) {
     },
     state: { outside: false, inside: false },
     _lastCycle: -1,
-    reset() { api.clear(); acc = 0.6; cycle = 0; api._lastCycle = -1; barrier.jump(0); },
+    reset() { api.clear(); acc = 0.95; cycle = 0; api._lastCycle = -1; barrier.jump(0); api.preload([1, 3]); },
   };
   return api;
 }
