@@ -697,9 +697,16 @@ function renderStrip(force = false) {
     renderTrackTabs();
   }
   $$('li', listEl).forEach((li) => li.classList.toggle('is-active', li.dataset.id === lesson.id));
-  $(`li[data-id="${lesson.id}"]`, listEl)?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  revealInRow(listEl, $(`li[data-id="${lesson.id}"]`, listEl));
   $$('button', trackTabs).forEach((b) => b.classList.toggle('is-active', b.dataset.track === t.id));
-  $(`[data-track="${t.id}"]`, trackTabs)?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  revealInRow(trackTabs, $(`[data-track="${t.id}"]`, trackTabs));
+}
+/** Scroll a horizontal row so `item` is visible, without scrolling the page itself. */
+function revealInRow(row, item) {
+  if (!row || !item) return;
+  const r = row.getBoundingClientRect(), b = item.getBoundingClientRect();
+  if (b.left < r.left) row.scrollBy({ left: b.left - r.left - 12, behavior: 'smooth' });
+  else if (b.right > r.right) row.scrollBy({ left: b.right - r.right + 12, behavior: 'smooth' });
 }
 listEl.addEventListener('click', (e) => {
   const b = e.target.closest('.lesson-card');

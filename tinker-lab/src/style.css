@@ -239,7 +239,7 @@ html:not(.is-loading) .loader { opacity: 0; visibility: hidden; }
 /* ---------------------------------------------------------------- info card */
 .info-card { grid-column: 3; grid-row: 2; z-index: 5; margin: 14px 22px 0 0; display: flex; flex-direction: column; min-height: 0; background: var(--tl-subtle); padding: 0 6px 6px; }
 .tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-.tabs button { position: relative; padding: 14px 9px 12px; border: 0; background: none; font: 400 15px var(--head); letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.tabs button { position: relative; padding: 14px 7px 12px; border: 0; background: none; font: 400 15px var(--head); letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
 .tabs button.is-active { color: var(--ink); }
 .tabs button.is-active::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--ink); }
 .info-body { position: relative; flex: 1; min-height: 0; margin-top: 6px; background: var(--paper-solid); border: 1px solid var(--line); border-radius: 6px; }
@@ -520,3 +520,16 @@ li.is-done .badge { opacity: 1; transform: none; }
 .app.is-explainer .leaders, .app.is-explainer .signals, .app.is-explainer .dock { visibility: hidden; }
 .app.is-explainer .code-card { display: none; }
 .app.is-explainer .info-card { grid-row: 2 / 4; }
+
+/* tighter header and tabs so every control fits */
+.tabs button { font-size: 14px; letter-spacing: 0.02em; }
+.code-card header { gap: 8px; }
+.code-actions { gap: 6px; flex-wrap: nowrap; }
+.code-actions .btn-ghost { width: 34px; height: 34px; padding: 7px; }
+.code-card h2 { white-space: nowrap; }
+
+/* small phones: icon-only bottom navigation (labels stay as titles / aria) */
+@media (max-width: 480px) {
+  .side-nav a .side-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .side-nav a .icon { width: 24px; height: 24px; }
+}
