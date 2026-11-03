@@ -134,3 +134,39 @@ Free-standing modules `(pos, opts)` (`opts.rotY` radians) return `{ group, pick,
 - Breadboard: `makeSevenSegment([10 holes])` — top row g f COM a b, bottom row e d COM c DP; `setSegments(mask)` (bit0=a … bit7=dp), `showDigit(n, dp)`. `makeDIP(holes, label, pinCount)` (standard DIP numbering straddling the channel). `makeLEDBar([20 holes])` → `setLevel(n)`, `set(i,on)`.
 - Also `makeBreakout({...})` for custom breakout boards.
 Run `dev/modules.html?m=<key>` and `dev/boards.html?b=<id>` to preview parts.
+
+## Tinker Lab additions (read these too)
+
+### Brand and design
+The product is **Tinker Lab**. Import `src/brand/tokens.css` (white background, Newsreader
+300/400/500/600, IBM Plex Mono for code, Tinker orange `--tl-accent`). **No italics anywhere.**
+Brand strings and legal placeholders live in `src/brand/brand.js`; the logo in `src/brand/logo.js`
+(`markSVG`, `wordmarkSVG`, `lockupSVG`). Visual first: show it, animate it, then say it in one line.
+
+### Explainer lessons (no board, no code)
+Set `explainer(el, api)` instead of `build`/`code`/`setup`/`loop`. It mounts an interactive,
+animated visual into `el` (the whole stage area, white) and returns `{ destroy() }`.
+`api.complete()` marks the lesson explored (call it when the learner reaches the end or has
+interacted meaningfully); `api.reducedMotion`, `api.toast(text)`. Keep `overview`, `pinout`
+(shown as "Key terms": `[term, meaning, note]`), `example`, `specs`, `quiz`, `challenges`.
+`thumb()` may return an SVG string instead of a 3D object. Track files: `basics.js`,
+`sensing.js`, `computing.js`.
+
+### Assembly steps (build guides)
+`ctx.add`, `ctx.wire`, `ctx.breadboard` and `ctx.addObject` are recorded, in order, as the
+lesson's assembly steps (`buildLessonScene(...).st.steps`). Call `ctx.step('Push the LED into row c')`
+before adding a part to give the next step a caption. Parts may carry `kind` and `label`
+(e.g. `{ kind: 'resistor', label: '220 Ω resistor' }`) for the parts list.
+
+### Run my code
+C++ lessons can set `hw(built, io)` returning a HAL (see `docs/RUNTIME_API.md`) so the learner's
+own, edited code runs on the circuit through the Tinker Lab Arduino runtime.
+
+### New boards
+`nodemcu` (ESP8266 NodeMCU v3), `rpi5` (Raspberry Pi 5), `unor4` (Uno R4 WiFi-style with LED
+matrix) and `orin` (Jetson Orin Nano-style) are added in `src/scene/boards/` with the same API.
+
+### QA without reloads
+Use `npx vite --config scripts/vite.qa.config.js --port <port>` (no hot reload, no file
+watching); restart it after your own edits. Never run `npm install`: every dependency is
+already installed. If you need one, say so in your report.

@@ -270,6 +270,8 @@ function finishLoad(i) {
   renderChips();
   renderStrip();
   if (location.hash !== `#${lesson.id}`) history.replaceState(null, '', `#${lesson.id}`);
+  const guide = document.getElementById('guide-link');
+  if (guide) { guide.href = `/guide/#${lesson.id}`; guide.hidden = !!lesson.explainer; }
   document.title = `${lesson.title} · Tinker Lab`;
   store.set('last', lesson.id);
   setNav(i === 0 ? 'home' : null);
