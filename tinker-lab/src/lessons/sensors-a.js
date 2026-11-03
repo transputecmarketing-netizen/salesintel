@@ -5,6 +5,7 @@ import { makeBuzzer } from '../scene/components.js';
 import { makePIR, makePerson, makeDHT11, makeSoilSensor, makeSoundSensor, makeGasSensor, makeFlameSensor } from '../scene/modules.js';
 import { mat, mesh, cyl, at, glowSprite } from '../scene/kit.js';
 import { v, BB, clamp, ledOnPin } from './helpers.js';
+import { serialPlotter } from '../runtime/devices.js';
 
 const hl = (on) => (on ? 'HIGH' : 'LOW');
 const noise = (amp) => Math.round((Math.random() - 0.5) * 2 * amp);
@@ -184,6 +185,16 @@ export const sensorsA = [
       ctx.anchor('bz', bz.anchor);
       return { ...c, bz, pir, person, zone, state, place };
     },
+    hw: (b) => {
+      // powering the board powers the PIR: it settles for a few seconds, then OUT follows motion
+      Object.assign(b.state, { running: true, powerOn: performance.now(), lastSeen: -1e9, lockUntil: 0, out: false });
+      return {
+        digitalRead: (pin) => (pin === 2 ? (b.state.out ? 1 : 0) : null),
+        digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); if (pin === 8 && !v) b.bz.set(false); },
+        tone: (pin, f) => { if (pin === 8) b.bz.set(true, f); },
+        noTone: (pin) => { if (pin === 8) b.bz.set(false); },
+      };
+    },
     callouts: [
       { anchor: 'out', x: 0.36, y: 0.12, icon: 'pins', title: 'OUT → pin 2', text: 'Goes HIGH (3.3 V) when something warm moves.' },
       { anchor: 'led', x: 0.7, y: 0.17, icon: 'led', title: 'Alarm LED', text: 'Flashes with the buzzer while motion is detected.' },
@@ -321,6 +332,26 @@ void loop() {
       ctx.anchor('data', data.mid);
       return { dht, data, plot, state, read };
     },
+    hw: (b) => ({
+      devices: {
+        dht: (pin) => (pin === 2 ? {
+          temperature: () => (b.state.loose ? NaN : b.read().t),
+          humidity: () => (b.state.loose ? NaN : b.read().h),
+        } : null),
+      },
+      serialWrite: (() => {
+        let buf = '';
+        return (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) {
+            const m = /Humidity: ([\d.]+).*Temp: (-?[\d.]+).*Heat index: (-?[\d.]+)/.exec(l);
+            if (m) b.plot.push(Number(m[2]), Number(m[1]), Number(m[3]));
+          }
+        };
+      })(),
+    }),
     callouts: [
       { anchor: 'dht', x: 0.7, y: 0.17, icon: 'thermo', title: 'DHT11', text: 'Click it to change the temperature and humidity — or breathe on it.' },
       { anchor: 'data', x: 0.36, y: 0.12, icon: 'pins', title: 'DATA → pin 2', text: 'One wire carries 40 bits: humidity, temperature and a checksum.' },
@@ -431,6 +462,22 @@ void loop() {
       ctx.anchor('ao', ao.mid);
       ctx.anchor('led', c.led.anchor);
       return { ...c, soil, plot, state, setM };
+    },
+    hw: (b) => {
+      b.state.running = true;
+      return {
+        analogRead: (ch) => (ch === 0 ? clamp(Math.round(520 - 260 * b.state.m) + noise(3), 0, 1023) : 0),
+        digitalWrite: (pin, v) => { if (pin === 7) b.on(v ? 1 : 0); },
+        serialWrite: (() => {
+          let buf = '';
+          return (t) => {
+            buf += t;
+            const lines = buf.split('\n');
+            buf = lines.pop();
+            for (const l of lines) { const m = /Moisture: (-?\d+) %\s+raw: (\d+)/.exec(l); if (m) b.plot.push(Number(m[1]), Number(m[2])); }
+          };
+        })(),
+      };
     },
     callouts: [
       { anchor: 'ao', x: 0.36, y: 0.12, icon: 'wave', title: 'AOUT → A0', text: 'Wetter soil gives a LOWER voltage.' },
@@ -569,6 +616,20 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       ctx.anchor('hands', hands.position.clone().add(v(0, 1.2, 0)));
       return { ...c, mic, state, clap };
+    },
+    hw: (b) => {
+      b.state.events = [];
+      return {
+        // DO is HIGH for ~15 ms at each clap and again at its echo
+        digitalRead: (pin) => {
+          if (pin !== 2) return null;
+          const now = performance.now();
+          const ev = b.state.events;
+          while (ev.length && now - ev[0] > 15) ev.shift();
+          return ev.length && now >= ev[0] ? 1 : 0;
+        },
+        digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+      };
     },
     callouts: [
       { anchor: 'do', x: 0.36, y: 0.12, icon: 'pins', title: 'DO → pin 2', text: 'Pulses HIGH whenever the sound is louder than the trimmer setting.' },
@@ -713,6 +774,17 @@ void loop() {
         return clamp(Math.round(settled + cold) + noise(4), 0, 1023);
       };
       return { ...c, bz, mq, plot, state, read };
+    },
+    hw: (b) => {
+      Object.assign(b.state, { running: true, powerOn: performance.now() });
+      b.plot.reset();
+      return {
+        analogRead: (ch) => (ch === 0 ? b.read() : 0),
+        digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); if (pin === 8 && !v) b.bz.set(false); },
+        tone: (pin, f) => { if (pin === 8) b.bz.set(true, f); },
+        noTone: (pin) => { if (pin === 8) b.bz.set(false); },
+        serialWrite: serialPlotter((gas, thr) => { if (thr !== undefined) b.plot.push(gas, thr); }),
+      };
     },
     callouts: [
       { anchor: 'mq', x: 0.04, y: 0.68, icon: 'wave', title: 'MQ-2 sensor', text: 'A tiny heater warms a tin-oxide bead; gas makes it conduct better.' },
@@ -860,6 +932,24 @@ void loop() {
       ctx.anchor('ao', aw.mid);
       ctx.anchor('bz', bz.anchor);
       return { bz, fs, candle, plot, state, level };
+    },
+    hw: (b) => {
+      b.state.running = true;
+      b.plot.reset();
+      let buf = '';
+      return {
+        analogRead: (ch) => (ch === 0 ? clamp(b.level() + noise(3), 0, 1023) : 0),
+        // LM393 comparator output: LOW while AO is below the trimmer threshold
+        digitalRead: (pin) => (pin === 2 ? (b.state.flame ? 0 : 1) : null),
+        tone: (pin, f) => { if (pin === 8) b.bz.set(true, f); },
+        noTone: (pin) => { if (pin === 8) b.bz.set(false); },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) { const m = /IR level: (\d+)/.exec(l); if (m) b.plot.push(Number(m[1])); }
+        },
+      };
     },
     callouts: [
       { anchor: 'do', x: 0.36, y: 0.12, icon: 'pins', title: 'DO → pin 2', text: 'Goes LOW when the IR level passes the trimmer’s threshold.' },
