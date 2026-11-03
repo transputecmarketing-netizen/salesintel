@@ -191,6 +191,7 @@ function makeSupply(volts) {
 function obstacle(group, front, dirZ, cm) {
   const b = makeBlock(V3());
   b.group.scale.setScalar(0.7);
+  b.group.userData.noPrint = true;
   group.add(b.group);
   const place = (c) => {
     const dist = 1.2 + c * 0.09;

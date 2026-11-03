@@ -97,14 +97,15 @@ export function createGuide(lesson) {
     const focus = boxes[k].clone();
     const fc = focus.getCenter(new THREE.Vector3());
     // keep some context around small parts
-    const min = 5.5;
+    const wiresOnly = steps[k].units.every((j) => units[j].kind === 'wire' || units[j].silent);
+    const min = wiresOnly ? 3.4 : 5.5;
     const fs = focus.getSize(new THREE.Vector3());
     focus.expandByVector(new THREE.Vector3(Math.max(0, min - fs.x) / 2, 0, Math.max(0, min - fs.z) / 2));
     focus.max.y = Math.max(focus.max.y, fc.y + 1.5); // room for the arrow
     const vFull = fitBox(sofar, aspect, az, 1.14);
     const vFocus = fitBox(focus, aspect, az, 1.25);
     if (vFull.half <= vFocus.half * 1.9) return vFull;
-    const half = Math.max(vFocus.half * 1.35, Math.min(vFull.half, 3.2));
+    const half = Math.max(vFocus.half * 1.5, Math.min(vFull.half, 3.2));
     const t = THREE.MathUtils.clamp((half - vFocus.half) / Math.max(0.01, vFull.half - vFocus.half), 0, 0.6);
     return { target: vFocus.target.clone().lerp(vFull.target, t), half };
   }
@@ -125,7 +126,7 @@ export function createGuide(lesson) {
         ends.forEach(([pt, end], ei) => {
           if (!end) return;
           if (ei === 1 && p < 0.95) return;
-          out += pinTag(pt, end.short ?? end.text, placed, w, h, ei === 0 ? 1 : f, u.color);
+          out += pinTag(pt, end.type === 'other' ? (u.signal ? u.signal.replace(/_\d+$/, '') : '') : end.short ?? end.text, placed, w, h, ei === 0 ? 1 : f, u.color);
         });
       } else {
         // a drop arrow above the part
@@ -160,6 +161,7 @@ export function arrow(x0, y0, x1, y1) {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function pinTag(pt, text, placed, w, h, opacity, color) {
+  if (!text) return opacity > 0 ? `<g class="g-tag" style="opacity:${opacity.toFixed(2)}"><circle class="dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.2"/></g>` : '';
   if (opacity <= 0 || pt.x < -20 || pt.x > w + 20 || pt.y < -20 || pt.y > h + 20) return '';
   const tw = Math.max(30, text.length * 7.6 + 18), th = 24;
   let up = pt.y > 70;

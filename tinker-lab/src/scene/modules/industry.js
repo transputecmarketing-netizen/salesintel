@@ -141,7 +141,8 @@ export function makeBatteryPack(pos, opts = {}) {
  *  base     90 = forward; 90 − atan2(x, y) (servo turns counter-clockwise from above)
  *  shoulder upper-arm elevation above horizontal (0 forward … 180 back)
  *  elbow    interior angle between upper arm and forearm (180 = straight)
- *  wrist    90 = gripper in line with the forearm
+ *  wrist    120 = gripper in line with the forearm (horn fitted 30° round, so
+ *           a straight-down gripper stays inside 0…180°)
  *  grip     GRIP_OPEN 90 (jaws 4.4 cm apart) … 0 (closed)
  *
  * API: setJoints({base, shoulder, elbow, wrist, grip}) (servos slew at their
@@ -166,7 +167,7 @@ export function armIK(x, y, z, pitchDeg = -90) {
     base: Math.round(90 - Math.atan2(x, y) / D2R),
     shoulder: Math.round(a1 / D2R),
     elbow: Math.round(a2 / D2R),
-    wrist: Math.round(90 + (p - fore) / D2R),
+    wrist: Math.round(120 + (p - fore) / D2R),
   };
   for (const k in j) if (j[k] < 0 || j[k] > 180) return null;
   return j;
@@ -267,7 +268,7 @@ export function makeRobotArm(pos, opts = {}) {
 
   // ---- state
   const J = ['base', 'shoulder', 'elbow', 'wrist', 'grip'];
-  const cur = { base: 90, shoulder: 110, elbow: 70, wrist: 40, grip: 90 };
+  const cur = { base: 90, shoulder: 110, elbow: 70, wrist: 70, grip: 90 };
   const tgt = { ...cur };
   let glideJob = null;
   let held = null, heldWidth = 0;
@@ -276,7 +277,7 @@ export function makeRobotArm(pos, opts = {}) {
     yaw.rotation.y = (cur.base - 90) * D2R;
     shoulder.rotation.x = -cur.shoulder * D2R;
     elbow.rotation.x = -(cur.elbow - 180) * D2R;
-    wrist.rotation.x = -(cur.wrist - 90) * D2R;
+    wrist.rotation.x = -(cur.wrist - 120) * D2R;
     let gap = 4.4 * clamp(cur.grip, 0, 90) / 90;
     if (held) gap = Math.max(gap, heldWidth);
     fingers[0].position.x = -(gap / 2 + 0.15);
@@ -349,7 +350,7 @@ export function makeRobotArm(pos, opts = {}) {
     reset(parent) {
       glideJob = null;
       if (held && parent) api.release(parent);
-      Object.assign(cur, { base: 90, shoulder: 110, elbow: 70, wrist: 40, grip: 90 });
+      Object.assign(cur, { base: 90, shoulder: 110, elbow: 70, wrist: 70, grip: 90 });
       Object.assign(tgt, cur);
       pose();
       return api;
@@ -724,7 +725,7 @@ export function makeBreakBeam(a, b, opts = {}) {
     hous.rotation.y = Math.atan2(-d.z, d.x);
     g.add(hous);
     const hb = makeBreakout({ w: 0.4 + names.length * PITCH, d: 0.9, color: 0x25262b, pins: names, pinsEdge: 'back', inset: 0.25, pinLabels: true });
-    const hp = V(p.x - d.x * 0.5, gy, p.z - d.z * 0.5).add(out);
+    const hp = V(p.x - d.x * 0.5, gy, p.z - d.z * 0.5).add((tag === 'RX' ? opts.outB : opts.outA) ?? out);
     hb.group.position.copy(hp);
     g.add(hb.group);
     hb.group.updateMatrix();
@@ -2006,20 +2007,15 @@ export function makeRoom(pos, opts = {}) {
 export function drawRadar(oled, sweep, points, maxCm = 100) {
   oled.draw((c) => {
     const cx = 64, cy = 63, R = 60;
-    c.lineWidth = 1;
-    c.strokeStyle = '#fff';
-    for (const k of [1 / 3, 2 / 3, 1]) {
-      for (let a = 0; a <= 180; a += 3) c.fillRect(Math.round(cx + R * k * Math.cos(a * D2R)), Math.round(cy - R * k * Math.sin(a * D2R)), 1, 1);
-    }
-    for (let a = 0; a <= 180; a += 45) for (let r = 0; r < R; r += 3) c.fillRect(Math.round(cx + r * Math.cos(a * D2R)), Math.round(cy - r * Math.sin(a * D2R)), 1, 1);
-    c.beginPath();
-    c.moveTo(cx + 0.5, cy + 0.5);
-    c.lineTo(cx + 0.5 + R * Math.cos(sweep * D2R), cy + 0.5 - R * Math.sin(sweep * D2R));
-    c.stroke();
+    const px = (x, y) => c.fillRect(Math.round(x), Math.round(y), 1, 1);
+    const ray = (a, len) => { for (let r = 0; r <= len; r += 0.7) px(cx + r * Math.cos(a * D2R), cy - r * Math.sin(a * D2R)); };
+    for (const k of [1, 2, 3]) { const rr = Math.trunc((R * k) / 3); for (let a = 0; a <= 180; a += 0.5) px(cx + rr * Math.cos(a * D2R), cy - rr * Math.sin(a * D2R)); }
+    for (let a = 0; a <= 180; a += 45) ray(a, R);
+    ray(sweep, R);
     for (const [a, cm] of points) {
       if (!(cm > 0) || cm > maxCm) continue;
-      const r = (cm / maxCm) * R;
-      c.fillRect(Math.round(cx + r * Math.cos(a * D2R)) - 1, Math.round(cy - r * Math.sin(a * D2R)) - 1, 2, 2);
+      const r = (cm * R) / maxCm;
+      c.fillRect(Math.trunc(cx + r * Math.cos(a * D2R)) - 1, Math.trunc(cy - r * Math.sin(a * D2R)) - 1, 2, 2);
     }
   });
 }

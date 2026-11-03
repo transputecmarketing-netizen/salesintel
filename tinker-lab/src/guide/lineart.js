@@ -380,7 +380,8 @@ export function toLineArt(root, { units: specs = [] } = {}) {
         if (!o.visible) hidden = true;
         if (o.isSprite || o.isPoints || o.isLight) { o.visible = false; return; }
         if ((o.isLine || o.isLineSegments) && !o.isLineSegments2) { o.visible = false; return; }
-        if (o.isMesh && !hidden) convertMesh(o, u, segs);
+        // objects only a lesson's virtual camera sees (layer 1) are left alone
+        if (o.isMesh && !hidden && o.layers.isEnabled(0)) convertMesh(o, u, segs);
         for (const c of [...o.children]) visit(c, hidden);
       };
       visit(top, false);
@@ -510,6 +511,7 @@ export function visibleBox(objects, box = new THREE.Box3()) {
     obj.updateWorldMatrix(true, true);
     obj.traverseVisible((o) => {
       if (!o.isMesh || o.isSprite || o.userData.la && o.material?.side === THREE.BackSide) return;
+      if (!o.layers.isEnabled(0)) return;
       if (o.isLineSegments2 || o.userData.noBounds) return;
       const mats = Array.isArray(o.material) ? o.material : [o.material];
       if (mats.every((m) => isHiddenMaterial(m))) return;

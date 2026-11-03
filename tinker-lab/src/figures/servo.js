@@ -109,6 +109,6 @@ export default {
   means: 'A hobby servo: the horn follows the pointer round its shaft on a spring, clamped to its travel of 0 to 180 degrees.',
   rules: [1, 3, 8, 9],
   range: [40, 100, 220],
-  tour: [[300, 112], [300, 162], [200, 168], null],
+  tour: [[312, 104], [300, 152], [205, 162], null],
   mount,
 };

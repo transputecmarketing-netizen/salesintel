@@ -11,9 +11,11 @@ const RAILS = ['top-', 'top+', 'bot-', 'bot+'];
 const SMALL = 2.3; // cm: parts smaller than this can share a step
 
 /** Panels do nothing in a guide, but some lessons aim a real camera object at the scene. */
+const div = () => document.createElement('div');
 const GUIDE_DOCK = {
-  ...NULL_DOCK,
-  camera: (opts = {}) => ({ ...NULL_DOCK.camera(opts), camera: new THREE.PerspectiveCamera(opts.fov ?? 50, 4 / 3, 0.1, 200) }),
+  camera: (opts = {}) => ({ ...NULL_DOCK.camera(opts), el: div(), camera: new THREE.PerspectiveCamera(opts.fov ?? 50, 4 / 3, 0.1, 200) }),
+  browser: (opts) => ({ ...NULL_DOCK.browser(opts), el: div() }),
+  plotter: (opts) => ({ ...NULL_DOCK.plotter(opts), el: div() }),
 };
 
 /** Short names for modules inside wire captions ("Connect D9 to keypad R1"). */
@@ -120,6 +122,8 @@ export function planGuide(lesson) {
     const vis = s.units.filter((j) => !units[j].silent).map((j) => units[j]);
     s.kind = vis[0]?.kind ?? 'part';
     s.caption ??= captionFor(vis, namer, board, units);
+    s.caption = String(s.caption).trim();
+    if (s.caption && !/[.!?:)]$/.test(s.caption)) s.caption += '.';
     s.parts = countParts(vis);
     s.wires = vis.filter((u) => u.kind === 'wire').map((u) => ({ u, a: namer.end(u.from), b: namer.end(u.to) }));
   });
@@ -242,7 +246,7 @@ function makeNamer(board, bbs, units) {
         if (d < bd) { bd = d; pu = u; }
       }
       if (pu) return { type: 'part', text: `the ${pu.kind === 'board' ? 'board' : short(pu.label)}`, short: pu.kind === 'board' ? 'board' : short(pu.label) };
-      return { type: 'other', text: 'its terminal' };
+      return { type: 'other', text: 'the marked point', short: null };
     },
   };
 }
@@ -354,7 +358,9 @@ function wirePhrase(u, namer, first = true) {
   const color = COLOR_WORD[u.color] ?? 'coloured';
   const sig = u.signal ? prettyPin(u.signal) : null;
   let at = a.text;
-  if (sig && ![a, b].some((e) => e.text === sig || e.pin === u.signal || e.text.endsWith(` ${sig}`) || (e.short ?? '') === sig)) at += ` (${sig})`;
+  const named = [a, b].some((e) => e.text === sig || e.pin === u.signal || e.text.endsWith(` ${sig}`) || (e.short ?? '') === sig);
+  if (sig && !named) at = a.type === 'part' ? `the ${a.short} ${sig} lead` : a.type === 'other' ? `the ${sig} point` : `${at} (${sig})`;
+  if (a.type === 'other' && b.type === 'other') return first ? `Join the two marked points with ${an(color)} ${color} jumper` : `the next two with ${an(color)} ${color} one`;
   return first ? `Connect ${at} to ${b.text} with ${an(color)} ${color} jumper` : `${at} to ${b.text} with ${an(color)} ${color} one`;
 }
 

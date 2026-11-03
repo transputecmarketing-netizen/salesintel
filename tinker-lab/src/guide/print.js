@@ -81,11 +81,11 @@ export function mountPrint(el, lesson) {
       for (const k of [i, i + 1]) {
         const s = guide.steps[k];
         if (!s) continue;
-        const f = snap(k, 1240, 760);
-        body += `<article class="g-pstep"><div class="n">${s.n}</div><div class="body">
+        const f = snap(k, 1500, 820);
+        body += `<article class="g-pstep"><div class="n">${s.n}</div><div class="head">
           <p class="cap">${esc(s.caption)}</p>
-          <ul class="need">${s.parts.map((e) => `<li><img src="${thumbs.get(e.key) ?? ''}" alt="" /><b>×${e.count}</b> ${esc(e.label)}</li>`).join('')}</ul>
-          ${fig(f)}</div></article>`;
+          <ul class="need">${s.parts.map((e) => `<li><img src="${thumbs.get(e.key) ?? ''}" alt="" /><b>×${e.count}</b> ${esc(e.label)}</li>`).join('')}</ul></div>
+          ${fig(f)}</article>`;
       }
       sheets.insertAdjacentHTML('beforeend', sheet('is-steps', body));
     }

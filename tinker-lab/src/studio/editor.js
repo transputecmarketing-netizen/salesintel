@@ -8,7 +8,7 @@ import { syntaxHighlighting, HighlightStyle, indentOnInput, bracketMatching, fol
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap, snippetCompletion } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
-import { linter, lintGutter, setDiagnostics } from '@codemirror/lint';
+import { lintGutter, setDiagnostics } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 
 // ---------------------------------------------------------------- Arduino completions
@@ -190,7 +190,6 @@ export class CodeEditor {
           cpp(),
           syntaxHighlighting(style),
           execField,
-          linter(null),
           keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, indentWithTab]),
           theme,
           this.ro.of(EditorState.readOnly.of(false)),

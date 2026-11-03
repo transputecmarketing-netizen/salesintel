@@ -102,22 +102,27 @@ export function led(S, x, y, o = {}) {
   const col = o.color ?? C.accent, s = o.size ?? 1;
   const g = d.g(o.parent);
   const glow = d.glow(x, y, 70 * s, col, o.glowParent);
-  let lit;
+  let lit, dome, rim;
   d.into(g, () => {
     const w = 34 * s, h = 46 * s;
     d.line(x - 9 * s, y + h * 0.5, x - 9 * s, y + h * 0.5 + (o.leg ?? 46) * s + 12 * s, { strokeWidth: 2.4, stroke: '#8e9097' }); // anode: long
     d.line(x + 9 * s, y + h * 0.5, x + 9 * s, y + h * 0.5 + (o.leg ?? 46) * s, { strokeWidth: 2.4, stroke: '#8e9097' }); // cathode: short
-    d.path(`M${x - w / 2} ${y + h * 0.42} L${x - w / 2} ${y - h * 0.1} A${w / 2} ${w / 2} 0 0 1 ${x + w / 2} ${y - h * 0.1} L${x + w / 2} ${y + h * 0.42} Z`,
+    dome = d.path(`M${x - w / 2} ${y + h * 0.42} L${x - w / 2} ${y - h * 0.1} A${w / 2} ${w / 2} 0 0 1 ${x + w / 2} ${y - h * 0.1} L${x + w / 2} ${y + h * 0.42} Z`,
       { fill: mixC(col.length === 7 ? col : '#e5132d', '#ffffff', 0.55), fillStyle: 'solid', stroke: C.ink, roughness: 0.6 });
     lit = d.el('path', { d: `M${x - w / 2 + 3} ${y + h * 0.4} L${x - w / 2 + 3} ${y - h * 0.1} A${w / 2 - 3} ${w / 2 - 3} 0 0 1 ${x + w / 2 - 3} ${y - h * 0.1} L${x + w / 2 - 3} ${y + h * 0.4} Z`, fill: col, opacity: 0 });
     // rim with the flat on the cathode (right) side
-    d.rect(x - w / 2 - 4 * s, y + h * 0.42, w + 4 * s, 8 * s, { fill: mixC(col.length === 7 ? col : '#e5132d', '#ffffff', 0.4), fillStyle: 'solid', stroke: C.ink, strokeWidth: 1.8, roughness: 0.5 });
+    rim = d.rect(x - w / 2 - 4 * s, y + h * 0.42, w + 4 * s, 8 * s, { fill: mixC(col.length === 7 ? col : '#e5132d', '#ffffff', 0.4), fillStyle: 'solid', stroke: C.ink, strokeWidth: 1.8, roughness: 0.5 });
   });
   const legY = y + 46 * s * 0.5 + (o.leg ?? 46) * s;
   return {
     g, glow,
     anode: [x - 9 * s, legY + 12 * s], cathode: [x + 9 * s, legY],
     set(v) { v = clamp(v); lit.setAttribute('opacity', (0.15 + v * 0.85) * (v > 0.01 ? 1 : 0)); glow.setAttribute('opacity', (v * 0.9).toFixed(3)); },
+    setColor(c) {
+      lit.setAttribute('fill', c);
+      glow.setAttribute('fill', d.glowFill(c));
+      for (const [n, t] of [[dome, 0.55], [rim, 0.4]]) n.querySelectorAll('path').forEach((p) => { const f = p.getAttribute('fill'); if (f && f !== 'none') p.setAttribute('fill', mixC(c, '#ffffff', t)); });
+    },
   };
 }
 
@@ -142,13 +147,14 @@ export function resistor(S, x, y, o = {}) {
       bands.forEach((b, i) => {
         if (!b) return;
         const bx = x - L / 2 + L * (xs[i] ?? 0.5);
-        d.rect(bx - 4.5, y - h / 2 + 1.5, 9, h - 3, { fill: BAND[b] ?? b, fillStyle: 'solid', stroke: 'none', roughness: 0.3 });
+        const bw = o.bandW ?? 9;
+        d.rect(bx - bw / 2, y - h / 2 + 1.5, bw, h - 3, { fill: BAND[b] ?? b, fillStyle: 'solid', stroke: b === 'white' ? C.line2 : 'none', strokeWidth: 1, roughness: 0.3 });
       });
     });
   };
   setBands(o.bands);
   const ends = vert ? [[x, y - L / 2 - lead], [x, y + L / 2 + lead]] : [[x - L / 2 - lead, y], [x + L / 2 + lead, y]];
-  return { g, a: ends[0], b: ends[1], setBands };
+  return { g, a: ends[0], b: ends[1], setBands, bandX: (i) => x - L / 2 + L * [0.24, 0.37, 0.5, 0.76][i] };
 }
 
 /** A knife switch from (x, y) to (x + len, y). set(closed 0..1). Tap target in .hit. */

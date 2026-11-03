@@ -160,6 +160,8 @@ export function scene(el, api = {}, spec) {
       parent ??= layers.fx;
       return mk('circle', { cx, cy, r, fill: `url(#${glowDef(color)})`, opacity: 0, 'pointer-events': 'none' }, parent);
     },
+    /** A fill value for a glow of this colour (to recolour an existing glow). */
+    glowFill: (color) => `url(#${glowDef(color)})`,
     /** Rebuild a group's contents (for drawings that depend on a value). */
     redraw(g, fn) { while (g.firstChild) g.firstChild.remove(); return d.into(g, fn); },
     /** Hand-drawn ground shadow under an object. */

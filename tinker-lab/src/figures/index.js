@@ -15,12 +15,18 @@ export const FIGURES = [
   { name: 'chip', title: 'Inside a chip', description: 'An IC taken apart into its layers: lead frame, die, bond wires and lid. Move across to open the gap, up and down to pick a layer.' },
   { name: 'breadboard', title: 'Breadboard', description: 'A breadboard whose hidden clips lift out: the hole under the pointer raises its five-hole strip, and a power rail rises as one.' },
   { name: 'servo', title: 'Servo', description: 'A hobby servo whose horn follows the pointer round its shaft on a spring, from 0 to 180 degrees.' },
+  { name: 'stepper', title: 'Stepper motor', description: 'A stepper motor with a dial needle that steps toward the pointer one detent at a time.' },
+  { name: 'led-matrix', title: 'LED matrix', description: 'An 8 by 8 LED matrix module that plays a loop, and glows where the pointer paints it, fading like phosphor.' },
+  { name: 'robot-arm', title: 'Robot arm', description: 'A three-joint robot arm that reaches the pointer on its table with simple inverse kinematics, and closes its gripper there.' },
 ];
 
 const LOAD = {
   chip: () => import('./chip.js'),
   breadboard: () => import('./breadboard.js'),
   servo: () => import('./servo.js'),
+  stepper: () => import('./stepper.js'),
+  'led-matrix': () => import('./led-matrix.js'),
+  'robot-arm': () => import('./robot-arm.js'),
 };
 
 /**

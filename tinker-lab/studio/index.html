@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Tinker Studio — build any circuit, write real code</title>
+    <meta name="description" content="Tinker Studio is Tinker Lab's free-build maker space: put an Arduino-style board, breadboards and 25 parts on a 3D bench, wire them up, write Arduino C++ and run it on a live circuit simulation." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <div class="st-app" id="app" data-view="build">
+      <header class="st-top">
+        <a class="st-brand" href="/" aria-label="Tinker Lab home"><span class="st-mark" data-logo></span><span class="st-brand-name">Studio</span></a>
+        <label class="st-name-wrap"><span class="sr">Project name</span><input class="st-name" id="project-name" value="Untitled project" maxlength="80" spellcheck="false" /></label>
+        <label class="st-board-wrap"><span class="sr">Board</span><select id="board-select" class="pill pill-select"></select></label>
+        <div class="st-run" role="group" aria-label="Run controls">
+          <button class="pill pill-primary" id="btn-run" title="Run (Ctrl+Enter)"><span data-lucide="play" data-size="16"></span><span class="lbl">Run</span></button>
+          <button class="pill pill-icon" id="btn-pause" title="Pause" aria-label="Pause" disabled><span data-lucide="pause" data-size="16"></span></button>
+          <button class="pill pill-icon" id="btn-step" title="Step one line (F10)" aria-label="Step" disabled><span data-lucide="step-forward" data-size="16"></span></button>
+          <button class="pill pill-icon" id="btn-stop" title="Stop" aria-label="Stop" disabled><span data-lucide="square" data-size="15"></span></button>
+          <span class="st-status" id="rt-status" role="status" aria-live="polite">Ready</span>
+        </div>
+        <div class="st-actions">
+          <button class="pill" id="btn-examples"><span data-lucide="book-open" data-size="16"></span><span class="lbl">Examples</span></button>
+          <button class="pill" id="btn-share"><span data-lucide="share-2" data-size="16"></span><span class="lbl">Share</span></button>
+          <div class="menu-wrap">
+            <button class="pill pill-icon" id="btn-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Project menu" title="Projects"><span data-lucide="folder-open" data-size="16"></span></button>
+            <div class="menu" id="menu" role="menu" hidden>
+              <button role="menuitem" data-act="new"><span data-lucide="plus" data-size="16"></span>New project</button>
+              <button role="menuitem" data-act="open"><span data-lucide="folder-open" data-size="16"></span>My projects…</button>
+              <button role="menuitem" data-act="duplicate"><span data-lucide="copy" data-size="16"></span>Save a copy</button>
+              <hr />
+              <button role="menuitem" data-act="import"><span data-lucide="upload" data-size="16"></span>Import JSON…</button>
+              <button role="menuitem" data-act="export"><span data-lucide="file-json" data-size="16"></span>Export JSON</button>
+              <button role="menuitem" data-act="ino"><span data-lucide="download" data-size="16"></span>Download .ino</button>
+              <hr />
+              <button role="menuitem" data-act="lesson"><span data-lucide="graduation-cap" data-size="16"></span>Open a lesson’s circuit…</button>
+              <button role="menuitem" data-act="sound"><span data-lucide="volume-2" data-size="16"></span><span class="sound-lbl">Sound on</span></button>
+              <button role="menuitem" data-act="keys"><span data-lucide="keyboard" data-size="16"></span>Keyboard shortcuts</button>
+              <button role="menuitem" data-act="tour"><span data-lucide="sparkles" data-size="16"></span>Take the tour</button>
+              <a role="menuitem" href="/learn/"><span data-lucide="graduation-cap" data-size="16"></span>Lessons</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="st-main">
+        <aside class="st-bin" id="bin" aria-label="Parts bin">
+          <div class="bin-head">
+            <h2>Parts</h2>
+            <button class="pill pill-icon bin-close" id="bin-close" aria-label="Close parts bin"><span data-lucide="x" data-size="16"></span></button>
+          </div>
+          <label class="bin-search"><span data-lucide="search" data-size="16"></span><span class="sr">Search parts</span><input type="search" id="bin-search" placeholder="Search parts" autocomplete="off" /></label>
+          <div class="bin-cats" id="bin-cats" role="tablist" aria-label="Categories"></div>
+          <div class="bin-list" id="bin-list"></div>
+          <p class="bin-tip">Drag a part onto the bench, or click it and then click where it goes.</p>
+        </aside>
+
+        <section class="st-stage" id="stage" aria-label="Workbench">
+          <canvas id="stage-canvas" aria-label="3D workbench. Drag to pan, scroll to zoom, Q and E rotate. Click a pin or hole, then another, to add a wire."></canvas>
+          <div class="st-toolbar" role="toolbar" aria-label="Bench tools">
+            <button class="pill pill-icon" data-tool="undo" title="Undo (Ctrl+Z)" aria-label="Undo"><span data-lucide="undo-2" data-size="16"></span></button>
+            <button class="pill pill-icon" data-tool="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><span data-lucide="redo-2" data-size="16"></span></button>
+            <span class="tb-sep"></span>
+            <button class="pill pill-icon" data-tool="rotate" title="Rotate (R)" aria-label="Rotate selection"><span data-lucide="rotate-cw" data-size="16"></span></button>
+            <button class="pill pill-icon" data-tool="duplicate" title="Duplicate (Ctrl+D)" aria-label="Duplicate selection"><span data-lucide="copy" data-size="16"></span></button>
+            <button class="pill pill-icon" data-tool="delete" title="Delete (Del)" aria-label="Delete selection"><span data-lucide="trash-2" data-size="16"></span></button>
+            <span class="tb-sep"></span>
+            <button class="pill" data-tool="breadboard" title="Add a breadboard"><span data-lucide="layout-grid" data-size="16"></span><span class="lbl">Breadboard</span></button>
+            <div class="wire-pick" id="wire-pick" role="radiogroup" aria-label="Wire colour"></div>
+            <button class="pill pill-icon" data-tool="fit" title="Fit view (F)" aria-label="Fit view"><span data-lucide="maximize" data-size="16"></span></button>
+          </div>
+          <button class="pill pill-primary st-add" id="btn-add"><span data-lucide="plus" data-size="16"></span>Add part</button>
+          <div class="st-mode" id="mode" hidden></div>
+          <div class="st-warnings" id="warnings" aria-live="polite"></div>
+          <div class="st-badges" id="badges"></div>
+          <div class="st-tip" id="tip" hidden></div>
+          <div class="st-inspector" id="inspector" hidden></div>
+          <div class="st-empty" id="empty" hidden>
+            <h3>Your bench is ready</h3>
+            <p>Drag a part from the bin onto the breadboard, then click a pin and a hole to wire it up. Or start from a working example.</p>
+            <div class="row"><button class="pill pill-primary" data-empty="examples">Start from an example</button><button class="pill" data-empty="tour">Show me around</button></div>
+          </div>
+        </section>
+
+        <section class="st-code" id="code" aria-label="Code">
+          <div class="code-head">
+            <span class="file"><span data-lucide="file-code" data-size="16"></span><b id="file-name">sketch.ino</b></span>
+            <span class="code-diag" id="code-diag"></span>
+            <button class="pill pill-sm" id="btn-ino" title="Download the sketch"><span data-lucide="download" data-size="14"></span>.ino</button>
+          </div>
+          <div class="st-editor" id="editor"></div>
+          <div class="st-dock" id="dock">
+            <div class="dock-tabs" role="tablist" aria-label="Output">
+              <button role="tab" data-tab="serial" aria-selected="true">Serial</button>
+              <button role="tab" data-tab="plot" aria-selected="false">Plotter</button>
+              <button role="tab" data-tab="debug" aria-selected="false">Debug</button>
+              <button role="tab" data-tab="problems" aria-selected="false">Problems <span class="count" id="problem-count"></span></button>
+              <button class="pill pill-sm dock-clear" id="btn-clear" title="Clear the monitor">Clear</button>
+            </div>
+            <div class="dock-panel" data-panel="serial" id="panel-serial"></div>
+            <div class="dock-panel" data-panel="plot" id="panel-plot" hidden></div>
+            <div class="dock-panel" data-panel="debug" id="panel-debug" hidden></div>
+            <div class="dock-panel" data-panel="problems" id="panel-problems" hidden></div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="st-tabs" aria-label="Views">
+        <button data-view="build" aria-pressed="true"><span data-lucide="cpu" data-size="18"></span>Build</button>
+        <button data-view="code" aria-pressed="false"><span data-lucide="file-code" data-size="18"></span>Code</button>
+        <button data-view="monitor" aria-pressed="false"><span data-lucide="monitor" data-size="18"></span>Monitor</button>
+      </nav>
+    </div>
+
+    <dialog class="st-dialog" id="dlg-examples" aria-labelledby="dlg-ex-title">
+      <header><h2 id="dlg-ex-title">Start from an example</h2><button class="pill pill-icon" data-close aria-label="Close"><span data-lucide="x" data-size="16"></span></button></header>
+      <p class="muted">Each one is a complete circuit with its sketch. Your current project is saved first.</p>
+      <div class="ex-grid" id="ex-grid"></div>
+    </dialog>
+    <dialog class="st-dialog" id="dlg-projects" aria-labelledby="dlg-pr-title">
+      <header><h2 id="dlg-pr-title">My projects</h2><button class="pill pill-icon" data-close aria-label="Close"><span data-lucide="x" data-size="16"></span></button></header>
+      <ul class="pr-list" id="pr-list"></ul>
+    </dialog>
+    <dialog class="st-dialog" id="dlg-share" aria-labelledby="dlg-sh-title">
+      <header><h2 id="dlg-sh-title">Share this project</h2><button class="pill pill-icon" data-close aria-label="Close"><span data-lucide="x" data-size="16"></span></button></header>
+      <p class="muted">The whole project (circuit and code) is packed into the link. Anyone who opens it gets their own copy.</p>
+      <div class="share-row"><input id="share-url" readonly aria-label="Share link" /><button class="pill pill-primary" id="share-copy">Copy link</button></div>
+    </dialog>
+    <dialog class="st-dialog" id="dlg-lesson" aria-labelledby="dlg-le-title">
+      <header><h2 id="dlg-le-title">Open a lesson’s circuit</h2><button class="pill pill-icon" data-close aria-label="Close"><span data-lucide="x" data-size="16"></span></button></header>
+      <p class="muted">Copies the lesson’s board, parts, wiring and code into a new Studio project you can change.</p>
+      <input type="search" id="lesson-search" placeholder="Search lessons" aria-label="Search lessons" />
+      <ul class="pr-list" id="lesson-list"></ul>
+    </dialog>
+    <dialog class="st-dialog" id="dlg-keys" aria-labelledby="dlg-k-title">
+      <header><h2 id="dlg-k-title">Keyboard shortcuts</h2><button class="pill pill-icon" data-close aria-label="Close"><span data-lucide="x" data-size="16"></span></button></header>
+      <dl class="keys" id="keys-list"></dl>
+    </dialog>
+    <input type="file" id="file-import" accept=".json,application/json" hidden />
+    <div class="st-toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <div class="st-tour" id="tour" hidden><div class="tour-ring" id="tour-ring"></div><div class="tour-card" id="tour-card" role="dialog" aria-live="polite"></div></div>
+    <script type="module" src="/src/studio/main.js"></script>
+  </body>
+</html>

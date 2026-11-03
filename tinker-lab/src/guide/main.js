@@ -16,7 +16,10 @@ function route() {
   const [id, sub] = path.split('/');
   const print = /(^|&)print\b/.test(query);
   const key = `${id}|${print}`;
-  if (view?.key === key) return;
+  if (view?.key === key) {
+    view.goTo?.(sub ?? 'cover');
+    return;
+  }
   view?.destroy();
   view = null;
   window.scrollTo(0, 0);

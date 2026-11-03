@@ -438,7 +438,7 @@ void loop() {
         state.layout = k;
         if (arm.holding) arm.release(bench.root);
         bench.falling.clear();
-        IK_LAYOUTS[k].forEach(([x, y], i) => place(pool[i], x, y));
+        [...IK_LAYOUTS[k], IK_SPARE].forEach(([x, y], i) => place(pool[i], x, y));
         pool[3].visible = false;
         pool[3].position.set(0, -50, 0);
         state.extra = null;
@@ -477,7 +477,7 @@ void loop() {
     callouts: [
       { anchor: 'arm', x: 0.04, y: 0.17, icon: 'servo', title: 'Gripper straight down', text: 'solve() works backwards from x, y, z to four servo angles.' },
       { anchor: 'grid', x: 0.36, y: 0.12, icon: 'gear', title: 'Arm coordinates', text: 'x right, y forward, z up, in cm, from the centre of the base.' },
-      { anchor: 'stack', x: 0.7, y: 0.17, icon: 'check', title: 'Stack at (6, 8)', text: 'Each block lands 2.5 cm higher than the last; four fit.' },
+      { anchor: 'stack', x: 0.7, y: 0.17, icon: 'check', title: 'Stack at (6, 8)', text: 'Each block lands 2.5 cm higher than the last; three fit.' },
       { anchor: 'hub', x: 0.04, y: 0.68, icon: 'pins', title: 'Same wiring as Teach', text: 'D3–D10 to S1–S5, 5 V 3 A on V+, grounds joined.' },
     ],
     overview: {
@@ -517,11 +517,11 @@ const int STEP_MS = {{stepms}};                   // ms per degree
 const float BLOCK = 2.5;                        // cube size, cm
 const float HOVER = {{hover}};                     // safe height above the table, cm
 const float STACK_X = 6.0, STACK_Y = 8.0;
-const int MAX_STACK = 4;
-const float BLOCKS[][2] = {{-7, 11}, {-2, 13}, {2, 13}};
+const int MAX_STACK = 3;
+const float BLOCKS[][2] = {{-7, 11}, {-2, 12}};   // the third block waits for you
 
 Servo joint[5];
-int pos[5] = {90, 110, 70, 40, GRIP_OPEN};
+int pos[5] = {90, 110, 70, 70, GRIP_OPEN};
 int stacked = 0;
 
 // x right, y forward, z up (cm) -> angles with the gripper pointing straight down
@@ -536,7 +536,7 @@ bool solve(float x, float y, float z, int out[4]) {
   out[0] = round(90 - degrees(atan2(x, y)));     // servo turns anticlockwise
   out[1] = round(degrees(a1));
   out[2] = round(degrees(a2));
-  out[3] = round(90 + degrees(-HALF_PI - fore));
+  out[3] = round(120 + degrees(-HALF_PI - fore));  // horn: 120 = in line
   for (int j = 0; j < 4; j++)
     if (out[j] < 0 || out[j] > 180) return false;
   return true;
@@ -619,6 +619,7 @@ void loop() {
       }
       io.line('Serial.println("Send x y');
       io.print('Send x y (cm) to pick another block');
+      io.print(`(the yellow block is at ${IK_SPARE[0]} ${IK_SPARE[1]})`);
     },
     async loop(io, b, p) {
       const line = io.readLine();
@@ -632,12 +633,1044 @@ void loop() {
     },
     reset(b) { b.plotOn = false; },
   },
+  // ------------------------------------------------------------------ 3 · colour sorting line
+  {
+    id: 'ind-conveyor-sort', title: 'Colour sorting line', icon: 'palette', board: 'uno',
+    thumb: () => { const c = makeConveyor(v(0, 0, 0), { length: 16 }); for (const [k, x] of [['red', -4], ['blue', 2]]) { const o = makeColorBlock(k); o.position.set(x, 6, 0); c.group.add(o); } return c.group; },
+    view: { center: [2, 4, -9], size: 52 },
+    build(ctx) {
+      const b = ctx.board;
+      ctx.step('Set up the conveyor behind the Uno, belt running left to right');
+      const belt = ctx.add(makeConveyor(v(-2, 0, -16), { length: 34, maxSpeed: 9 }));
+      const SX = -6, BX = -4.4; // sensor and beam positions along the belt (s)
+      ctx.step('Bridge the TCS34725 over the belt, sensor facing down');
+      const tcs = ctx.add(makeColorSensor(v(-2 + SX, 0, -16), { bridge: 7.8, height: 9.7, spotY: 6 }));
+      ctx.step('IR break-beam across the belt, just past the colour sensor');
+      const beam = ctx.add(makeBreakBeam(v(-2 + BX, 7.3, -20.4), v(-2 + BX, 7.3, -11.6), { out: v(0, 0, 1.6), outA: v(0, 0, -1.6) }));
+      ctx.step('Servo chute and five bins at the end of the belt');
+      const chute = ctx.add(makeChute(v(18.6, 0, -16), { height: 5, length: 9.5 }));
+      const BINS = [['red', 0xe0402e, 'RED'], ['green', 0x3aa65a, 'GREEN'], ['none', 0x8a8d94, '?'], ['blue', 0x3a6fd0, 'BLUE'], ['yellow', 0xe0b020, 'YELLOW']];
+      const bins = BINS.map(([k, c, t], i) => {
+        const deg = SORT_DEG[i];
+        const m = chute.mouth(deg).setY(0);
+        const bin = ctx.add(makeBin(m, { color: c, tag: t, width: 4.4, depth: 4.4, height: 2.0, rotY: (deg - 90) * Math.PI / 180 + Math.PI / 2, label: 'Sorting bin' }));
+        bin.key = k;
+        return bin;
+      });
+      ctx.step('Breadboard power rails');
+      const bb = ctx.breadboard(...BB);
+      ctx.wire(b.pin('5V'), bb.hole(2, 'top+'), 'red', { signal: '5V' });
+      ctx.wire(b.pin('GND'), bb.hole(3, 'top-'), 'black', { signal: 'GND', dir: -1 });
+      ctx.step('TCS34725: VIN → 5 V, GND, SDA → SDA (A4), SCL → SCL (A5)');
+      ctx.wire(bb.hole(6, 'top+'), tcs.pin('VIN'), 'red', { lift: 3 });
+      ctx.wire(bb.hole(7, 'top-'), tcs.pin('GND'), 'black', { lift: 3.2 });
+      ctx.wire(b.pin('SDA'), tcs.pin('SDA'), 'blue', { signal: 'SDA', lift: 3.4 });
+      ctx.wire(b.pin('SCL'), tcs.pin('SCL'), 'yellow', { signal: 'SCL', lift: 3.6 });
+      ctx.step('Break-beam: both halves on 5 V / GND, receiver OUT → D2');
+      ctx.wire(bb.hole(9, 'top+'), beam.pin('RX+'), 'red', { lift: 1.5 });
+      ctx.wire(bb.hole(10, 'top-'), beam.pin('RX-'), 'black', { lift: 1.6 });
+      const beamW = ctx.wire(b.pin('D2'), beam.pin('OUT'), 'white', { signal: 'D2', lift: 1.8 });
+      ctx.wire(bb.hole(12, 'top+'), beam.pin('TX+'), 'red', { lift: 2, bend: v(0, 7, 0) });
+      ctx.wire(bb.hole(13, 'top-'), beam.pin('TX-'), 'black', { lift: 2, bend: v(0, 7.4, 0) });
+      ctx.step('TM1637 counter display behind the Uno: CLK → D3, DIO → D4');
+      const disp = ctx.add(makeTM1637(v(2, 0, -7.6)));
+      ctx.wire(b.pin('D3'), disp.pin('CLK'), 'green', { signal: 'D3', lift: 1.2 });
+      ctx.wire(b.pin('D4'), disp.pin('DIO'), 'blue', { signal: 'D4', lift: 1.3 });
+      ctx.wire(bb.hole(15, 'top+'), disp.pin('VCC'), 'red', { lift: 1.6 });
+      ctx.wire(bb.hole(16, 'top-'), disp.pin('GND'), 'black', { lift: 1.7 });
+      ctx.step('L298N for the belt motor, with a 6 V battery pack');
+      const drv = ctx.add(makeL298N(v(-11, 0, -5), { rotY: Math.PI, jumpers: false }));
+      const bat = ctx.add(makeBatteryPack(v(-20, 0, -3)));
+      [['D5', 'ENA', 'orange'], ['D7', 'IN1', 'yellow'], ['D8', 'IN2', 'green']].forEach(([p, q, c], i) => ctx.wire(b.pin(p), drv.pin(q), c, { signal: p, lift: 1.2 + i * 0.2 }));
+      const motorW = [
+        ctx.wire(bat.pin('+'), drv.pin('12V'), 'red', { signal: '6V', lift: 1.4 }),
+        ctx.wire(bat.pin('-'), drv.pin('GND'), 'black', { signal: 'GND', dir: -1, lift: 1.2 }),
+        ctx.wire(drv.pin('OUT1'), belt.pin('M+'), 'red', { lift: 1.4 }),
+        ctx.wire(drv.pin('OUT2'), belt.pin('M-'), 'black', { lift: 1.6 }),
+      ];
+      ctx.wire(drv.pin('GND'), b.pin('GND_2'), 'black', { signal: 'GND', dir: -1, lift: 2.2 });
+      ctx.step('Chute servo: SIG → D9, power from its own 5 V supply, grounds joined');
+      const psu = ctx.add(makeSupply(v(24, 0, 2), { rotY: Math.PI, label: '5 V 2 A' }));
+      ctx.wire(b.pin('D9'), chute.pin('SIG'), 'orange', { signal: 'D9', lift: 2.6 });
+      ctx.wire(psu.pin('+'), chute.pin('V+'), 'red', { lift: 2.0 });
+      ctx.wire(psu.pin('-'), chute.pin('GND'), 'black', { lift: 2.2 });
+      ctx.wire(psu.pin('-'), bb.hole(29, 'top-'), 'black', { dir: -1, lift: 1.5 });
+
+      // ---- simulation state
+      const root = belt.group.parent;
+      const fly = [];
+      const st = { auto: true, next: 'red', feedT: 1.5 };
+      const pool = [];
+      const spawn = (key) => {
+        if (belt.items.some((t) => t.s < -15 + 4.5)) return false;
+        const blk = pool.pop() ?? (() => { const o = key === 'purple' ? makeColorBlock(0x8a5cc6) : makeColorBlock(key); root.add(o); return o; })();
+        blk.userData.key = key;
+        blk.visible = true;
+        belt.place(blk, -15, 0);
+        return true;
+      };
+      const rnd = () => ['red', 'green', 'blue', 'yellow'][(Math.random() * 4) | 0];
+      belt.onEnd((it) => { fly.push(chuteFlight(it.obj, belt, chute, bins)); });
+      const box3 = new THREE.Box3();
+      ctx.onTick((dt) => {
+        if (st.running && st.auto) {
+          st.feedT -= dt;
+          if (st.feedT <= 0 && spawn(Math.random() < 0.08 ? 'purple' : rnd())) st.feedT = 3.5 + Math.random() * 2;
+        }
+        for (let i = fly.length - 1; i >= 0; i--) if (fly[i](dt)) fly.splice(i, 1);
+        let blocked = false;
+        for (const t of belt.items) { box3.setFromCenterAndSize(t.obj.position.clone().add(v(0, 1.25, 0)), v(2.5, 2.5, 2.5)); if (beam.cuts(box3)) blocked = true; }
+        beam.setBlocked(blocked);
+        st.blocked = blocked;
+        const under = belt.items.find((t) => Math.abs(t.s - SX) < 1.4);
+        tcs.sample(under ? (BLOCK_RGB[under.obj.userData.key]?.hex ?? 0x8a5cc6) : null);
+        motorW.forEach((w) => (w.live = Math.abs(belt.power) > 0));
+      });
+      ctx.interact(belt, {
+        name: 'Conveyor', hint: 'Feed blocks onto the belt',
+        controls: [
+          { type: 'toggle', label: 'Auto feed', get: () => st.auto, set: (x) => (st.auto = x) },
+          { type: 'choice', label: 'Next block', options: [['red', 'Red'], ['green', 'Green'], ['blue', 'Blue'], ['yellow', 'Yellow'], ['purple', 'Purple (unknown)']], get: () => st.next, set: (k) => (st.next = k) },
+          { type: 'button', label: 'Drop it on the belt', press: () => spawn(st.next) },
+          { type: 'button', label: 'Empty the bins', press: () => bins.forEach((bn) => bn.clear().forEach((o) => { o.visible = false; pool.push(o); })) },
+        ],
+        note: () => `Belt ${fmt(belt.speed)} cm/s · ${belt.items.length} on the belt · beam ${st.blocked ? 'BLOCKED' : 'clear'}`,
+      });
+      ctx.anchor('tcs', tcs.anchor);
+      ctx.anchor('beam', beam.pin('OUT').clone().add(v(0, 1.5, 0)));
+      ctx.anchor('chute', chute.anchor);
+      ctx.anchor('disp', disp.anchor);
+      ctx.anchor('drv', drv.anchor);
+      return { belt, tcs, beam, chute, bins, disp, drv, st, spawn, fly, pool, beamW };
+    },
+    callouts: [
+      { anchor: 'tcs', x: 0.04, y: 0.17, icon: 'palette', title: 'TCS34725 on I²C', text: 'Red, green, blue and clear counts; its white LED lights the block evenly.' },
+      { anchor: 'beam', x: 0.36, y: 0.12, icon: 'radar', title: 'Break-beam → D2', text: 'LOW the moment a block cuts the beam: stop the belt and read.' },
+      { anchor: 'chute', x: 0.7, y: 0.17, icon: 'servo', title: 'Chute servo D9', text: 'Turns to 30°, 60°, 120° or 150° for each colour; 90° is the reject bin.' },
+      { anchor: 'drv', x: 0.04, y: 0.68, icon: 'motor', title: 'L298N + 6 V pack', text: 'ENA PWM sets belt speed; the motor never runs from the Uno.' },
+      { anchor: 'disp', x: 0.36, y: 0.74, icon: 'timer', title: 'TM1637 count', text: 'Shows the last colour’s letter and how many of it so far.' },
+    ],
+    overview: {
+      heading: 'Colour sorting conveyor',
+      text: 'A belt (<b>Drive motors both ways</b>) brings each block to a light barrier; the Uno stops it, reads its colour over I²C (<b>The I²C bus</b>), turns a servo chute (<b>Sweep a servo</b>) to the right bin and counts it on a 4-digit display.',
+      features: [['palette', 'Nearest-colour match on chromaticity r/(r+g+b)'], ['radar', 'Break-beam stop: no guessing where the block is'], ['timer', '<code>TM1637Display</code>: letter + count per colour']],
+    },
+    pinout: [
+      ['SDA (A4), SCL (A5)', 'TCS34725 SDA, SCL', 'I²C address 0x29; VIN on 5 V'],
+      ['D2', 'Break-beam OUT', 'Open collector: INPUT_PULLUP, LOW = blocked'],
+      ['D5 ~, D7, D8', 'L298N ENA, IN1, IN2', 'Belt speed and direction (ENA jumper off)'],
+      ['D9', 'Chute servo SIG', 'Servo V+ from the 5 V 2 A supply'],
+      ['D3, D4', 'TM1637 CLK, DIO', 'VCC 5 V'],
+      ['6 V pack → L298N 12V / GND', 'L298N GND → Uno GND', 'Motor supply, common ground'],
+      ['5 V supply − → breadboard −', 'Servo GND', 'Common ground'],
+    ],
+    example: {
+      text: 'Recycling plants, sweet factories and seed sorters use the same idea with faster cameras and air jets instead of a servo chute: detect, classify, divert.',
+      points: ['Calibrate <code>REF[]</code>: print the r/g/b fractions for each of your blocks under your lighting', 'Drop a purple block: it is too far from every reference and goes to the reject bin', 'Raise <code>BELT_PWM</code> until blocks start overshooting the sensor, then back off'],
+    },
+    specs: [['Conveyor', '34 cm belt, TT gear motor, ≈ 9 cm/s at full PWM'], ['Colour sensor', 'TCS34725, 50 ms integration, gain 4×'], ['Classifier', 'Euclidean distance in r, g, b chromaticity'], ['Diverter', 'SG90 chute, 5 positions'], ['Display', 'TM1637 4-digit, 0.36"'], ['Libraries', 'Wire, Servo, Adafruit_TCS34725, TM1637Display']],
+    quiz: [
+      { q: 'Why divide each channel by r + g + b before comparing?', options: ['So the result depends on the colour, not on how bright the light is', 'To make the numbers bigger', 'The sensor needs it', 'To save memory'], answer: 0, explain: 'A block closer to the LED reads brighter on every channel; the fractions stay almost the same.' },
+      { q: 'Why stop the belt before reading?', options: ['The sensor integrates for 50 ms: a moving block would smear between colours and the belt', 'To save battery', 'The servo needs it', 'I²C does not work while the motor runs'], answer: 0, explain: 'A stationary block under the sensor gives a clean, repeatable reading.' },
+      { q: 'The receiver output is “open collector”. What does the sketch need?', options: ['INPUT_PULLUP so the pin reads HIGH until the receiver pulls it LOW', 'A 12 V supply', 'An analog pin', 'Nothing at all'], answer: 0, explain: 'Open collector can only pull down; the pull-up supplies the HIGH level.' },
+      { q: 'What happens to a colour that is far from all four references?', options: ['classify() returns NONE and the chute sends it to the 90° reject bin', 'It goes in the red bin', 'The belt stops forever', 'The Uno resets'], answer: 0, explain: 'bestD starts at MAX_DIST, so nothing is matched unless it is close enough.' },
+    ],
+    challenges: [
+      'Add a “calibrate” mode: press a button with a block under the sensor and store its r, g, b fractions as the reference.',
+      'Show the total of all colours when no block has passed for 10 s.',
+      'Replace the chute with two servo flaps along the belt so blocks are pushed off sideways.',
+    ],
+    code: `// Colour sorting line: stop at the sensor, read the colour, turn the chute.
+#include <Wire.h>
+#include <Servo.h>
+#include <Adafruit_TCS34725.h>
+#include <TM1637Display.h>
+
+const int ENA = 5, IN1 = 7, IN2 = 8;           // belt motor on L298N channel A
+const int BEAM = 2;                            // break-beam receiver: LOW = blocked
+const int CHUTE_PIN = 9;
+const int CLK = 3, DIO = 4;                    // TM1637
+const int BELT_PWM = {{belt}};
+const float MAX_DIST = {{tol}} / 100.0;           // how close a colour must be to match
+
+enum { RED, GREEN, NONE, BLUE, YELLOW };
+const char *NAME[] = {"red", "green", "unknown", "blue", "yellow"};
+const int CHUTE_DEG[] = {30, 60, 90, 120, 150};  // one bin per class, 90 = reject
+const uint8_t LETTER[] = {0x50, 0x3D, 0x40, 0x7C, 0x6E};  // r G - b y
+// r, g, b fractions of each block measured under the sensor's LED
+const int CLASSES[] = {RED, GREEN, BLUE, YELLOW};
+const float REF[4][3] = {{0.58, 0.22, 0.20}, {0.27, 0.45, 0.28}, {0.20, 0.31, 0.49}, {0.44, 0.40, 0.16}};
+
+Adafruit_TCS34725 tcs(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+Servo chute;
+TM1637Display display(CLK, DIO);
+int counts[5] = {0};
+
+void belt(int pwm) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, pwm);
+}
+
+int classify(uint16_t r, uint16_t g, uint16_t b) {
+  float sum = (float)r + g + b;
+  if (sum < 30) return NONE;                   // too dark: nothing there
+  float f[3] = {r / sum, g / sum, b / sum};
+  int best = NONE;
+  float bestD = MAX_DIST;
+  for (int i = 0; i < 4; i++) {
+    float d = sqrt(sq(f[0] - REF[i][0]) + sq(f[1] - REF[i][1]) + sq(f[2] - REF[i][2]));
+    if (d < bestD) {
+      bestD = d;
+      best = CLASSES[i];
+    }
+  }
+  return best;
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(BEAM, INPUT_PULLUP);
+  chute.attach(CHUTE_PIN);
+  chute.write(90);
+  display.setBrightness(5);
+  display.showNumberDec(0);
+  if (!tcs.begin()) {
+    Serial.println("No TCS34725 found");
+    while (true) {}
+  }
+  belt(BELT_PWM);
+}
+
+void loop() {
+  if (digitalRead(BEAM) == HIGH) return;       // nothing at the sensor yet
+  belt(0);                                     // stop with the block under the sensor
+  delay(250);                                  // settle; one reading takes 50 ms
+  uint16_t r, g, b, c;
+  tcs.getRawData(&r, &g, &b, &c);
+  int k = classify(r, g, b);
+  counts[k]++;
+  Serial.print(NAME[k]);
+  Serial.print("  r=");
+  Serial.print(r);
+  Serial.print(" g=");
+  Serial.print(g);
+  Serial.print(" b=");
+  Serial.println(b);
+  chute.write(CHUTE_DEG[k]);
+  display.setSegments(&LETTER[k], 1, 0);       // letter, then that colour's count
+  display.showNumberDec(counts[k], false, 3, 1);
+  delay(300);                                  // chute in place before the block arrives
+  belt(BELT_PWM);
+  while (digitalRead(BEAM) == LOW) delay(5);   // wait until the block moves on
+}`,
+    params: { belt: { value: 170, min: 90, max: 255 }, tol: { value: 12, min: 3, max: 40 } },
+    async setup(io, b, p) {
+      b.belt.clear();
+      b.fly.length = 0;
+      b.bins.forEach((bn) => bn.clear().forEach((o) => { o.visible = false; b.pool.push(o); }));
+      b.counts = [0, 0, 0, 0, 0];
+      io.line('pinMode(BEAM, INPUT_PULLUP)');
+      io.line('chute.write(90);');
+      b.chute.setAngle(90);
+      io.pin('D9', '90°', true);
+      io.line('display.showNumberDec(0);');
+      b.disp.showNumber(0);
+      await io.delay(120);
+      io.line('if (!tcs.begin())');
+      await io.delay(80);
+      io.line('belt(BELT_PWM);');
+      b.belt.set(p.belt / 255);
+      io.pin('D5', `PWM ${p.belt}`, true);
+      b.st.running = true;
+      b.st.feedT = 0.5;
+    },
+    async loop(io, b, p) {
+      if (!b.st.blocked) {
+        io.line('if (digitalRead(BEAM) == HIGH) return;');
+        io.pin('D2', 'HIGH', false);
+        await io.delay(20);
+        return;
+      }
+      io.pin('D2', 'LOW · blocked', true);
+      io.line('belt(0);');
+      b.belt.set(0);
+      io.pin('D5', 'PWM 0', false);
+      io.line('delay(250);');
+      await io.delay(250);
+      io.line('tcs.getRawData');
+      const it = b.belt.items.find((t) => Math.abs(t.s - -6) < 1.6);
+      const ref = it ? (BLOCK_RGB[it.obj.userData.key] ?? { r: 0.36, g: 0.2, b: 0.44 }) : { r: 0.33, g: 0.34, b: 0.33 };
+      const bright = it ? 2400 : 12;
+      const raw = ['r', 'g', 'b'].map((ch) => Math.max(0, Math.round(ref[ch] * bright * (1 + (Math.random() - 0.5) * 0.06))));
+      io.pin('SDA', 'I²C 0x29', true);
+      await io.delay(50);
+      io.line('int k = classify(r, g, b);');
+      const k = classify(raw, p.tol / 100);
+      b.counts[k]++;
+      io.line('Serial.println(b);');
+      io.print(`${SORT_NAMES[k]}  r=${raw[0]} g=${raw[1]} b=${raw[2]}`);
+      io.line('chute.write(CHUTE_DEG[k]);');
+      b.chute.setAngle(SORT_DEG[k]);
+      io.pin('D9', `${SORT_DEG[k]}°`, true);
+      io.line('display.showNumberDec(counts[k], false, 3, 1);');
+      const n = String(b.counts[k] % 1000).padStart(3, ' ');
+      b.disp.setSegments([SORT_LETTER[k], ...[...n].map((ch) => SEG[ch] ?? 0)]);
+      io.line('delay(300);');
+      await io.delay(300);
+      io.line('belt(BELT_PWM);', 2);
+      b.belt.set(p.belt / 255);
+      io.pin('D5', `PWM ${p.belt}`, true);
+      io.line('while (digitalRead(BEAM) == LOW)');
+      for (let i = 0; i < 300 && b.st.blocked; i++) await io.delay(20);
+    },
+    reset(b) { b.belt.set(0); b.st.running = false; b.tcs.sample(null); },
+  },
+
+  // ------------------------------------------------------------------ 4 · PID line follower
+  {
+    id: 'ind-line-follower', title: 'PID line follower', icon: 'car', board: 'uno',
+    thumb: () => makeLineSensorArray(v(0, 0, 0)).group,
+    view: { center: [0, 4, 2], size: 120 },
+    build(ctx) {
+      ctx.step('Lay the track mat: white board, 19 mm black tape');
+      const track = ctx.add(makeLineTrack(v(0, 0, 0)));
+      ctx.step('2WD chassis on the start line');
+      const car = makeRobotCar(track.start.pos, { rotY: track.start.rotY, speed: 30 });
+      ctx.add(car);
+      const cg = car.group;
+      const D = car.deckY;
+      const holder = new THREE.Group();
+      holder.position.set(0, D + 2.5, -0.3);
+      holder.rotation.y = -Math.PI / 2;
+      cg.add(holder);
+      holder.add(ctx.board.group);
+      const brass = mat(0xd6b46a, { metal: 0.6, rough: 0.35 });
+      for (const [x, z] of [[-2.2, -3.0], [2.2, -3.0], [-2.2, 2.4], [2.2, 2.4]]) cg.add(at(cyl(0.18, 0.18, 0.95, brass, { seg: 8 }), x, D + 2.02, z));
+      const drv = makeL298N(v(0, 0, 0), { rotY: Math.PI });
+      drv.group.position.set(0, D, 9.2);
+      cg.add(drv.group);
+      // line sensor under the nose on an acrylic bracket, OUT1 on the car's left
+      const arr = makeLineSensorArray(v(0, 0, 0), { rotY: Math.PI });
+      arr.group.position.set(0, 1.0, 13.4);
+      cg.add(arr.group);
+      cg.add(at(box(6.6, 0.25, 1.4, mat(0xbfe6ff, { rough: 0.15, opacity: 0.6 })), 0, car.wheelRadius + 0.92, 12.6));
+      for (const x of [-3.0, 3.0]) cg.add(at(cyl(0.16, 0.16, car.wheelRadius - 0.2, brass, { seg: 8 }), x, 1.15 + (car.wheelRadius - 0.2) / 2, 13.0));
+      cg.updateMatrixWorld(true);
+      const b = ctx.board;
+      const W = (x, y, z) => cg.localToWorld(v(x, y, z));
+      const wires = [];
+      const wire = (a, c, color, opts = {}) => { const w = ctx.wire(a, c, color, opts); wires.push(w); return w; };
+      ctx.step('Uno → L298N: D5 ENA, D7/D8 IN1/IN2, D9/D11 IN3/IN4, D6 ENB');
+      [['D5', 'ENA', 'orange'], ['D7', 'IN1', 'yellow'], ['D8', 'IN2', 'green'], ['D9', 'IN3', 'blue'], ['D11', 'IN4', 'purple'], ['D6', 'ENB', 'white']]
+        .forEach(([p, q, c], i) => wire(b.pin(p), drv.pin(q), c, { lift: 1.0 + i * 0.15 }));
+      ctx.step('Line sensor: OUT1–OUT5 → A0–A4, 5V and GND');
+      ['A0', 'A1', 'A2', 'A3', 'A4'].forEach((p, i) => wire(b.pin(p), arr.pin(`OUT${i + 1}`), ['orange', 'yellow', 'green', 'blue', 'purple'][i], { signal: p, lift: 1.6 + i * 0.12 }));
+      wire(b.pin('5V'), arr.pin('5V'), 'red', { lift: 2.4 });
+      wire(b.pin('GND_3'), arr.pin('GND'), 'black', { lift: 2.6 });
+      ctx.step('Power: battery → L298N 12V → Uno VIN, common ground; motors to OUT1–OUT4');
+      const batR = W(2.5, D + 0.15, 3.8), batB = W(2.5, D + 0.15, 4.4);
+      const motorWires = [wire(batR, drv.pin('12V'), 'red', { lift: 1.0 }), wire(batB, drv.pin('GND'), 'black', { lift: 1.2 })];
+      wire(drv.pin('12V'), b.pin('VIN'), 'red', { lift: 2.0 });
+      wire(drv.pin('GND'), b.pin('GND_2'), 'black', { lift: 1.8 });
+      const PY = car.wheelRadius + 0.95;
+      motorWires.push(
+        wire(W(1.29 - 0.3, PY, 6.6), drv.pin('OUT1'), 'red', { lift: 1.0 }),
+        wire(W(1.29 + 0.3, PY, 6.6), drv.pin('OUT2'), 'black', { lift: 1.2 }),
+        wire(W(-1.29 + 0.3, PY, 6.6), drv.pin('OUT3'), 'red', { lift: 1.0 }),
+        wire(W(-1.29 - 0.3, PY, 6.6), drv.pin('OUT4'), 'black', { lift: 1.2 }),
+      );
+      wires.forEach((w) => cg.attach(w.group));
+      // ---- live anchors
+      const L = { uno: v(0, D + 3.6, -0.3), drv: v(0, D + 3.2, 9.2), arr: v(0, 2.4, 14.2), bat: v(3.4, D + 1.6, 0) };
+      const anchors = Object.fromEntries(Object.keys(L).map((k) => [k, v()]));
+      const sync = () => { for (const k in L) anchors[k].copy(cg.localToWorld(L[k].clone())); };
+      sync();
+      for (const k in anchors) ctx.anchor(k, live(anchors[k]));
+      ctx.anchor('track', track.anchor);
+      // ---- sensors read the mat
+      const read = () => [0, 1, 2, 3, 4].map((i) => {
+        const p = arr.group.localToWorld(arr.sensorLocal(i));
+        return track.onLine(p.setY(0));
+      });
+      ctx.onTick(() => {
+        const s = read();
+        s.forEach((black, i) => arr.set(i, !black));
+        sync();
+      });
+      const plot = ctx.plotter({ title: 'Serial plotter', series: [{ name: 'error', color: '#2aa7a1', min: -320, max: 320 }, { name: 'correction', color: '#ef8a2b', min: -320, max: 320 }] });
+      ctx.interact(car, {
+        name: 'Robot car', hint: 'Put it back or nudge it off the line',
+        controls: [
+          { type: 'button', label: 'Back to the start line', press: () => { car.reset(); sync(); } },
+          { type: 'button', label: 'Nudge it 3 cm sideways', press: () => { const r = new THREE.Vector3(Math.cos(cg.rotation.y), 0, -Math.sin(cg.rotation.y)); cg.position.addScaledVector(r, 3); cg.updateMatrixWorld(true); sync(); } },
+        ],
+        note: () => `Sensors ${read().map((x) => (x ? '█' : '·')).join(' ')} (█ = over the line)`,
+      });
+      return { car, track, arr, read, plot, motorWires, reset() { car.reset(); car.stop(); motorWires.forEach((w) => (w.live = false)); plot.reset(); sync(); } };
+    },
+    callouts: [
+      { anchor: 'arr', x: 0.04, y: 0.17, icon: 'radar', title: '5 × TCRT5000 → A0–A4', text: 'Each reads HIGH over black tape. 1.4 cm apart, 4 mm above the mat.' },
+      { anchor: 'uno', x: 0.36, y: 0.12, icon: 'chip', title: 'PID at 100 Hz', text: 'error → KP·e + KD·Δe → left and right PWM.' },
+      { anchor: 'drv', x: 0.7, y: 0.17, icon: 'motor', title: 'L298N', text: 'BASE + correction on the left, BASE − correction on the right.' },
+      { anchor: 'track', x: 0.04, y: 0.68, icon: 'hand', title: 'Track with a chicane', text: 'Click the car to put it back or nudge it off the line.' },
+    ],
+    overview: {
+      heading: 'PID line follower',
+      text: 'Builds on <b>Obstacle-avoiding robot</b>. Five reflective IR sensors turn “where is the line?” into one number, the error. A PD controller turns that error into a steering correction 100 times a second; the plotter shows how gains change the wobble.',
+      features: [['radar', 'Weighted error −200…+200 from five digital sensors'], ['gear', '<code>KP * error + KD * (error - lastError)</code>'], ['pwm', 'Fixed 10 ms control period with <code>millis()</code>']],
+    },
+    pinout: [
+      ['A0–A4', 'Line sensor OUT1–OUT5', 'Digital reads: HIGH = black line (left → right)'],
+      ['5V, GND_3', 'Line sensor 5V, GND', '≈ 100 mA for five IR LEDs'],
+      ['D5 ~ / D6 ~', 'L298N ENA / ENB', 'PWM speed, jumpers removed'],
+      ['D7, D8 / D9, D11', 'IN1, IN2 / IN3, IN4', 'Left / right motor direction'],
+      ['Battery + → L298N 12V → VIN', 'Battery − → L298N GND → Uno GND', 'Common ground'],
+    ],
+    example: {
+      text: 'Warehouse tuggers and hospital delivery robots still follow lines or magnetic tape. PID is everywhere: cruise control, drone attitude, 3D-printer heaters.',
+      points: ['Set <code>KD</code> to 0 and raise <code>KP</code>: the car snakes, then oscillates off the line', 'Add <code>KD</code> back and watch the plotter: the wobble damps out', 'Too much <code>KD</code> makes the motors buzz between full left and full right'],
+    },
+    specs: [['Sensor', '5-channel TCRT5000 board, digital outputs'], ['Error range', '−200 … +200, ±300 when lost'], ['Loop rate', '100 Hz'], ['Top speed', '≈ 30 cm/s at PWM 255'], ['Track', '1.2 × 0.7 m mat, 19 mm tape, 22 cm curves'], ['Libraries', 'None, plain Arduino']],
+    quiz: [
+      { q: 'Sensors 4 and 5 (right side) see the line. What is the error and the reaction?', options: ['+150: speed up the left wheel, slow the right, turning right', '−150: turn left', '0: go straight', '+300: stop'], answer: 0, explain: '(100 + 200) / 2 = 150; correction is positive, so left = BASE + u and right = BASE − u.' },
+      { q: 'What does the D term do?', options: ['Reacts to how fast the error is changing, braking the turn before it overshoots', 'Adds up past errors', 'Sets the base speed', 'Reads the sensors faster'], answer: 0, explain: 'If the error is shrinking quickly, (error − lastError) is negative and eases the correction off early.' },
+      { q: 'Why run the loop on a fixed 10 ms period?', options: ['The D term compares readings one loop apart, so the time between them must be constant', 'Serial needs it', 'To save power', 'The sensors only update every 10 ms'], answer: 0, explain: 'With a varying period the same KD would mean a different damping every loop.' },
+      { q: 'All five sensors read white. What does readError() do?', options: ['Returns ±300 in the direction the line was last seen so the car turns back', 'Returns 0 and drives straight', 'Stops the motors', 'Resets the Uno'], answer: 0, explain: 'Remembering the last side is the simplest way to recover from overshooting a bend.' },
+    ],
+    challenges: [
+      'Add an I term with an anti-windup limit and see if it helps on long curves.',
+      'Slow <code>BASE</code> down automatically when the error is large (corners) and speed up on straights.',
+      'Add the HC-SR04 from <b>Obstacle-avoiding robot</b> and stop when something is on the track.',
+    ],
+    code: `// PID line follower: five IR sensors find the line, PD steers the motors.
+const int ENA = 5, IN1 = 7, IN2 = 8;           // left motor
+const int ENB = 6, IN3 = 9, IN4 = 11;          // right motor
+const int SENSOR[5] = {A0, A1, A2, A3, A4};    // OUT1 (left) ... OUT5 (right), HIGH = black
+const int BASE = {{base}};                        // cruising PWM
+const float KP = {{kp}} / 10.0;                   // proportional gain
+const float KD = {{kd}} / 10.0;                   // derivative gain
+const unsigned long PERIOD_MS = 10;            // control loop at 100 Hz
+
+int lastError = 0;
+unsigned long lastRun = 0;
+
+void motors(int left, int right) {             // -255..255 each
+  left = constrain(left, -255, 255);
+  right = constrain(right, -255, 255);
+  digitalWrite(IN1, left > 0);
+  digitalWrite(IN2, left < 0);
+  digitalWrite(IN3, right > 0);
+  digitalWrite(IN4, right < 0);
+  analogWrite(ENA, abs(left));
+  analogWrite(ENB, abs(right));
+}
+
+// -200 (line far left) ... 0 (centred) ... +200 (far right)
+int readError() {
+  long sum = 0;
+  int seen = 0;
+  for (int i = 0; i < 5; i++) {
+    if (digitalRead(SENSOR[i]) == HIGH) {
+      sum += (i - 2) * 100;
+      seen++;
+    }
+  }
+  if (seen == 0) return lastError > 0 ? 300 : -300;  // lost: turn back towards it
+  return sum / seen;
+}
+
+void setup() {
+  int pins[] = {ENA, IN1, IN2, ENB, IN3, IN4};
+  for (int p : pins) pinMode(p, OUTPUT);
+  for (int i = 0; i < 5; i++) pinMode(SENSOR[i], INPUT);
+  Serial.begin(115200);
+}
+
+void loop() {
+  if (millis() - lastRun < PERIOD_MS) return;
+  lastRun = millis();
+  int error = readError();
+  float correction = KP * error + KD * (error - lastError);
+  lastError = error;
+  motors(BASE + correction, BASE - correction);
+  Serial.print(error);                         // open the Serial Plotter
+  Serial.print(',');
+  Serial.println(correction);
+}`,
+    params: { base: { value: 160, min: 60, max: 255 }, kp: { value: 6, min: 0, max: 30 }, kd: { value: 30, min: 0, max: 120 } },
+    async setup(io, b) {
+      b.reset();
+      b.lastError = 0;
+      b.n = 0;
+      io.line('for (int p : pins)');
+      await io.delay(80);
+      io.line('Serial.begin(115200);');
+      await io.delay(80);
+    },
+    async loop(io, b, p) {
+      io.line('int error = readError();');
+      const s = b.read();
+      let sum = 0, seen = 0;
+      s.forEach((black, i) => { if (black) { sum += (i - 2) * 100; seen++; } });
+      const error = seen ? Math.trunc(sum / seen) : b.lastError > 0 ? 300 : -300;
+      const u = (p.kp / 10) * error + (p.kd / 10) * (error - b.lastError);
+      b.lastError = error;
+      const l = clamp(Math.trunc(p.base + u), -255, 255), r = clamp(Math.trunc(p.base - u), -255, 255);
+      b.car.setWheels(l / 255, r / 255);
+      b.motorWires.forEach((w) => (w.live = true));
+      b.plot.push(error, Math.round(u));
+      if (++b.n % 10 === 0) {
+        io.line('motors(BASE + correction, BASE - correction);');
+        io.pin('D5', `PWM ${Math.abs(l)}`, true);
+        io.pin('D6', `PWM ${Math.abs(r)}`, true);
+        io.print(`${error},${fmt(u, 2)}`);
+      }
+      await io.delay(10);
+    },
+    reset(b) { b.reset(); },
+  },
+
+  // ------------------------------------------------------------------ 5 · production counter
+  {
+    id: 'ind-counter', title: 'Production counter', icon: 'timer', board: 'uno',
+    thumb: () => makeTM1637(v(0, 0, 0)).showNumber(1234).group,
+    view: { center: [0, 4, -9], size: 48 },
+    build(ctx) {
+      const b = ctx.board;
+      ctx.step('Conveyor behind the Uno, a tote box at the end');
+      const belt = ctx.add(makeConveyor(v(-3, 0, -16), { length: 28, maxSpeed: 8, label: 'Belt conveyor (6 V gear motor)' }));
+      const BX = 10.6; // beam near the end of the belt
+      const tote = ctx.add(makeBin(v(14.2, 0, -16), { color: 0x2f5fbf, width: 6, depth: 7.4, height: 3.2, tag: 'BATCH', label: 'Tote box' }));
+      ctx.step('IR break-beam across the belt just before the end');
+      const beam = ctx.add(makeBreakBeam(v(-3 + BX, 7.0, -20.4), v(-3 + BX, 7.0, -11.6), { out: v(0, 0, 1.6), outA: v(0, 0, -1.6) }));
+      ctx.step('Breadboard: power rails and the NEXT BATCH button on D4');
+      const bb = ctx.breadboard(...BB);
+      ctx.wire(b.pin('5V'), bb.hole(2, 'top+'), 'red', { signal: '5V' });
+      ctx.wire(b.pin('GND'), bb.hole(3, 'top-'), 'black', { signal: 'GND', dir: -1 });
+      const btn = named(ctx.add(makeButton([bb.hole(20, 'e'), bb.hole(22, 'e'), bb.hole(20, 'f'), bb.hole(22, 'f')], 0x3aa65a)), 'Push button');
+      ctx.wire(b.pin('D4'), bb.hole(20, 'a'), 'green', { signal: 'D4', lift: 1.4 });
+      ctx.wire(bb.hole(22, 'j'), bb.hole(23, 'bot-'), 'black', { lift: 0.4 });
+      ctx.wire(bb.hole(28, 'top-'), bb.hole(28, 'bot-'), 'black', { lift: 0.8 });
+      ctx.step('Beam: 5 V and GND to both halves, receiver OUT → D2');
+      ctx.wire(bb.hole(6, 'top+'), beam.pin('RX+'), 'red', { lift: 1.5 });
+      ctx.wire(bb.hole(7, 'top-'), beam.pin('RX-'), 'black', { lift: 1.6 });
+      ctx.wire(b.pin('D2'), beam.pin('OUT'), 'white', { signal: 'D2', lift: 1.8 });
+      ctx.wire(bb.hole(9, 'top+'), beam.pin('TX+'), 'red', { lift: 2, bend: v(0, 7, 0) });
+      ctx.wire(bb.hole(10, 'top-'), beam.pin('TX-'), 'black', { lift: 2, bend: v(0, 7.4, 0) });
+      ctx.step('TM1637 count display: CLK → D3, DIO → D5');
+      const disp = ctx.add(makeTM1637(v(1.5, 0, -7.6)));
+      ctx.wire(b.pin('D3'), disp.pin('CLK'), 'green', { signal: 'D3', lift: 1.2 });
+      ctx.wire(b.pin('D5'), disp.pin('DIO'), 'blue', { signal: 'D5', lift: 1.3 });
+      ctx.wire(bb.hole(12, 'top+'), disp.pin('VCC'), 'red', { lift: 1.6 });
+      ctx.wire(bb.hole(13, 'top-'), disp.pin('GND'), 'black', { lift: 1.7 });
+      ctx.step('Stack light: green D8, amber D10, red D11');
+      const lamp = ctx.add(makeStackLight(v(19, 0, -6)));
+      ctx.wire(b.pin('D8'), lamp.pin('G'), 'green', { signal: 'D8', lift: 2.0 });
+      ctx.wire(b.pin('D10'), lamp.pin('Y'), 'yellow', { signal: 'D10', lift: 2.2 });
+      ctx.wire(b.pin('D11'), lamp.pin('R'), 'red', { signal: 'D11', lift: 2.4 });
+      ctx.wire(bb.hole(27, 'top-'), lamp.pin('GND'), 'black', { lift: 1.4 });
+      ctx.step('Relay on D7 switches the belt motor from the 6 V pack');
+      const relay = ctx.add(makeRelay(v(-13, 0, -5.5)));
+      const bat = ctx.add(makeBatteryPack(v(-21, 0, -4)));
+      ctx.wire(b.pin('D7'), relay.pin('IN'), 'orange', { signal: 'D7', lift: 1.6 });
+      ctx.wire(b.pin('GND_2'), relay.pin('GND'), 'black', { signal: 'GND', dir: -1, lift: 1.6 });
+      ctx.wire(bb.hole(1, 'top+'), relay.pin('VCC'), 'red', { lift: 2.4 });
+      const motorW = [
+        ctx.wire(bat.pin('+'), relay.pin('COM'), 'red', { lift: 1.6 }),
+        ctx.wire(relay.pin('NO'), belt.pin('M+'), 'red', { lift: 1.8 }),
+        ctx.wire(belt.pin('M-'), bat.pin('-'), 'black', { lift: 1.6 }),
+      ];
+      // ---- simulation
+      const root = belt.group.parent;
+      const st = { feedT: 1, jamNext: false, stuck: null, done: false, relay: false };
+      const pool = [];
+      const spawn = () => {
+        if (belt.items.some((t) => t.s < -12 + 5)) return;
+        const par = pool.pop() ?? (() => { const o = makeParcel(3.0, 2.4, 2.8); root.add(o); return o; })();
+        par.visible = true;
+        par.rotation.set(0, 0, 0);
+        belt.place(par, -12, (Math.random() - 0.5) * 1.0);
+      };
+      belt.onEnd((it) => {
+        const o = it.obj;
+        const from = o.position.clone(), to = tote.slot();
+        let t = 0;
+        const f = (dt) => { t = Math.min(1, t + dt / 0.35); o.position.lerpVectors(from, to, t); o.position.y = lerp(from.y, to.y, t * t); if (t >= 1) { tote.drop(o); return true; } return false; };
+        st.fly.push(f);
+      });
+      st.fly = [];
+      const box3 = new THREE.Box3();
+      ctx.onTick((dt) => {
+        belt.set(st.relay ? 1 : 0);
+        motorW.forEach((w) => (w.live = st.relay));
+        if (st.running && st.relay) {
+          st.feedT -= dt;
+          if (st.feedT <= 0) { spawn(); st.feedT = 1.6 + Math.random() * 2.2; }
+        }
+        if (st.stuck) st.stuck.s = BX - 0.4;
+        for (let i = st.fly.length - 1; i >= 0; i--) if (st.fly[i](dt)) st.fly.splice(i, 1);
+        let blocked = false;
+        for (const it of belt.items) {
+          box3.setFromCenterAndSize(it.obj.position.clone().add(v(0, 1.2, 0)), v(3.0, 2.4, 2.8));
+          if (beam.cuts(box3)) { blocked = true; if (st.jamNext && !st.stuck) { st.stuck = it; st.jamNext = false; } }
+        }
+        beam.setBlocked(blocked);
+        st.blocked = blocked;
+      });
+      const press = (on) => { btn.press(on); st.button = on; };
+      ctx.interact(btn, { name: 'NEXT BATCH button (D4)', hint: 'Hold to press: swap the box and restart', hold: { down: () => press(true), up: () => press(false) } });
+      ctx.interact(belt, {
+        name: 'Conveyor', hint: 'Make trouble on the line',
+        controls: [
+          { type: 'button', label: 'Jam the next parcel under the beam', press: () => (st.jamNext = true) },
+          { type: 'button', label: 'Clear the jam', press: () => { if (st.stuck) { st.stuck.obj.visible = false; pool.push(st.stuck.obj); belt.remove(st.stuck.obj); st.stuck = null; } } },
+          { type: 'button', label: 'Press NEXT BATCH', press: () => { press(true); setTimeout(() => press(false), 400); } },
+        ],
+        note: () => `${belt.items.length} parcels on the belt · ${tote.count} in the tote · beam ${st.blocked ? 'BLOCKED' : 'clear'}`,
+      });
+      ctx.anchor('beam', beam.pin('OUT').clone().add(v(0, 1.5, 0)));
+      ctx.anchor('disp', disp.anchor);
+      ctx.anchor('relay', relay.anchor);
+      ctx.anchor('lamp', lamp.anchor);
+      ctx.anchor('btn', btn.anchor);
+      return { belt, beam, disp, lamp, relay, tote, btn, st, pool };
+    },
+    callouts: [
+      { anchor: 'beam', x: 0.36, y: 0.12, icon: 'radar', title: 'Count on the trailing edge', text: 'A parcel counts when the beam clears again: it has left the belt.' },
+      { anchor: 'lamp', x: 0.7, y: 0.17, icon: 'led', title: 'Stack light', text: 'Green running, amber batch complete, red jam.' },
+      { anchor: 'relay', x: 0.04, y: 0.17, icon: 'plug', title: 'Relay on D7', text: 'Switches the 6 V motor circuit. HIGH = belt runs.' },
+      { anchor: 'disp', x: 0.04, y: 0.68, icon: 'timer', title: 'TM1637: count', text: 'Shows the count, “donE” at the end of a batch, “Err” on a jam.' },
+      { anchor: 'btn', x: 0.7, y: 0.68, icon: 'button', title: 'NEXT BATCH (D4)', text: 'Swap the full tote, press, and the line restarts.' },
+    ],
+    overview: {
+      heading: 'Production counter with batches',
+      text: 'Builds on <b>Build a state machine</b> and <b>Switch a lamp</b>. A light barrier counts parcels leaving the belt; every <code>BATCH</code> the relay stops the line so the operator can swap the box. A beam blocked for too long is a jam: stop and show red.',
+      features: [['radar', 'Edge detection with a minimum block time against blips'], ['code', '<code>enum State { RUN, BATCH_DONE, JAMMED }</code>'], ['plug', 'Relay = machine contactor, stack light = status']],
+    },
+    pinout: [
+      ['D2', 'Break-beam OUT', 'INPUT_PULLUP, LOW = blocked'],
+      ['D4', 'NEXT BATCH button → GND', 'INPUT_PULLUP'],
+      ['D7', 'Relay IN', 'Relay VCC 5 V, GND'],
+      ['6 V + → relay COM, NO → motor +', 'Motor − → 6 V −', 'Fit a 1N4007 across the motor (stripe to +)'],
+      ['D8, D10, D11', 'Stack light G, Y, R', '220 Ω per LED on its base board'],
+      ['D3, D5', 'TM1637 CLK, DIO', 'VCC 5 V'],
+    ],
+    example: {
+      text: 'Packing lines count every carton through a photo-eye, close a box after N items, and stop with a red beacon when something jams. PLCs do it with the same logic you write here.',
+      points: ['Set <code>BATCH</code> to 5 and run a few batches', 'Jam a parcel: after <code>JAM_MS</code> the line stops and the red lamp lights', 'Raise <code>MIN_BLOCK_MS</code> above a parcel’s time in the beam and nothing counts: that is the trade-off of filtering'],
+    },
+    specs: [['Sensor', 'IR break-beam, 5 mm, up to 25 cm'], ['Counting', 'Trailing edge, min. block time filter'], ['Output', '1-channel 5 V relay, 10 A contacts'], ['Status', 'Stack light (3 LEDs), TM1637'], ['Jam detection', 'Beam blocked > <code>JAM_MS</code>'], ['Libraries', 'TM1637Display']],
+    quiz: [
+      { q: 'Why count when the beam clears rather than when it is broken?', options: ['Then the parcel has already left the belt, so the batch stops with it in the box', 'It is more accurate in the dark', 'The relay needs it', 'It saves power'], answer: 0, explain: 'With the beam at the end of the belt, a cleared beam means the parcel has dropped. Stopping on the leading edge would leave the last one on the belt.' },
+      { q: 'What does MIN_BLOCK_MS protect against?', options: ['Brief blips (a fly, a flapping label, electrical noise) counting as parcels', 'Jams', 'Long parcels', 'The relay clicking'], answer: 0, explain: 'A real parcel blocks the beam for hundreds of ms; anything shorter is ignored.' },
+      { q: 'Why does a relay switch the motor and not the Uno pin directly?', options: ['The pin can give 20 mA; the motor needs hundreds of mA from its own battery', 'Relays are faster', 'To make it reversible', 'The Uno has no 6 V'], answer: 0, explain: 'The relay coil is driven by the module’s transistor; its contacts switch the separate motor circuit.' },
+      { q: 'What is the diode across the motor for?', options: ['It absorbs the voltage spike when the relay opens the inductive motor circuit', 'It makes the motor faster', 'It powers the LED', 'It is a fuse'], answer: 0, explain: 'A motor is an inductor; interrupting its current makes a spike that pits relay contacts and causes resets.' },
+    ],
+    challenges: [
+      'Show parcels per minute on the display while the line runs.',
+      'Keep a total in EEPROM (<b>Remember settings</b>) so the shift count survives a power cut.',
+      'Add a second beam 5 cm before the first and measure each parcel’s length; reject short ones.',
+    ],
+    code: `// Production counter: count parcels through a light barrier, stop every batch.
+#include <TM1637Display.h>
+
+const int BEAM = 2;                            // break-beam receiver: LOW = blocked
+const int CLK = 3, DIO = 5;                    // TM1637
+const int BUTTON = 4;                          // NEXT BATCH, to GND
+const int RELAY = 7;                           // HIGH = belt runs
+const int LAMP_G = 8, LAMP_Y = 10, LAMP_R = 11;  // stack light
+const int BATCH = {{batch}};
+const unsigned long MIN_BLOCK_MS = {{minms}};     // shorter blips are not parcels
+const unsigned long JAM_MS = {{jam}};            // blocked this long = jam
+
+const uint8_t DONE[] = {0x5E, 0x5C, 0x54, 0x79};  // d o n E
+const uint8_t ERR[] = {0x79, 0x50, 0x50, 0x00};   // E r r
+
+enum State { RUN, BATCH_DONE, JAMMED };
+State state = RUN;
+TM1637Display display(CLK, DIO);
+int count = 0;
+bool wasBlocked = false;
+unsigned long blockedSince = 0;
+
+void lamps(bool g, bool y, bool r) {
+  digitalWrite(LAMP_G, g);
+  digitalWrite(LAMP_Y, y);
+  digitalWrite(LAMP_R, r);
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(BEAM, INPUT_PULLUP);
+  pinMode(BUTTON, INPUT_PULLUP);
+  int outs[] = {RELAY, LAMP_G, LAMP_Y, LAMP_R};
+  for (int p : outs) pinMode(p, OUTPUT);
+  display.setBrightness(5);
+  display.showNumberDec(0);
+  digitalWrite(RELAY, HIGH);                   // start the line
+  lamps(true, false, false);
+}
+
+void loop() {
+  bool blocked = digitalRead(BEAM) == LOW;
+  unsigned long now = millis();
+  if (blocked && !wasBlocked) blockedSince = now;              // parcel arrives
+  if (!blocked && wasBlocked && now - blockedSince >= MIN_BLOCK_MS && state == RUN) {
+    count++;                                                    // parcel has left
+    display.showNumberDec(count);
+    Serial.print("Parcel ");
+    Serial.println(count);
+    if (count >= BATCH) {
+      state = BATCH_DONE;
+      digitalWrite(RELAY, LOW);
+      lamps(false, true, false);
+      display.setSegments(DONE);
+      Serial.println("Batch complete: swap the box");
+    }
+  }
+  wasBlocked = blocked;
+
+  if (state == RUN && blocked && now - blockedSince > JAM_MS) {
+    state = JAMMED;
+    digitalWrite(RELAY, LOW);
+    lamps(false, false, true);
+    display.setSegments(ERR);
+    Serial.println("Jam!");
+  }
+
+  if (state != RUN && digitalRead(BUTTON) == LOW) {
+    delay(30);                                 // debounce
+    if (state == BATCH_DONE) count = 0;
+    state = RUN;
+    display.showNumberDec(count);
+    lamps(true, false, false);
+    digitalWrite(RELAY, HIGH);
+    Serial.println("Running");
+    while (digitalRead(BUTTON) == LOW) delay(5);
+  }
+  delay(2);
+}`,
+    params: { batch: { value: 6, min: 1, max: 50 }, minms: { value: 60, min: 0, max: 2000 }, jam: { value: 3000, min: 1000, max: 8000 } },
+    async setup(io, b, p) {
+      b.belt.clear();
+      b.tote.clear().forEach((o) => { o.visible = false; b.pool.push(o); });
+      b.st.fly.length = 0;
+      b.st.stuck = null;
+      Object.assign(b.st, { state: 'RUN', count: 0, was: false, since: 0 });
+      io.line('pinMode(BEAM, INPUT_PULLUP);');
+      io.line('display.showNumberDec(0);');
+      b.disp.showNumber(0);
+      await io.delay(100);
+      io.line('digitalWrite(RELAY, HIGH);', 1);
+      b.st.relay = true;
+      b.relay.set(true);
+      io.pin('D7', 'HIGH', true);
+      io.line('lamps(true, false, false);', 1);
+      lampsSim(b, 'green');
+      b.st.running = true;
+      b.st.feedT = 0.4;
+    },
+    async loop(io, b, p) {
+      const s = b.st;
+      const blocked = s.blocked;
+      const now = performance.now();
+      io.line('bool blocked = digitalRead(BEAM) == LOW;');
+      io.pin('D2', blocked ? 'LOW' : 'HIGH', blocked);
+      if (blocked && !s.was) { io.line('if (blocked && !wasBlocked) blockedSince = now;'); s.since = now; }
+      if (!blocked && s.was && now - s.since >= p.minms && s.state === 'RUN') {
+        s.count++;
+        io.line('count++;');
+        b.disp.showNumber(s.count);
+        io.print(`Parcel ${s.count}`);
+        if (s.count >= p.batch) {
+          s.state = 'BATCH_DONE';
+          io.line('state = BATCH_DONE;');
+          s.relay = false; b.relay.set(false); io.pin('D7', 'LOW', false);
+          lampsSim(b, 'amber');
+          b.disp.setSegments([0x5e, 0x5c, 0x54, 0x79]);
+          io.print('Batch complete: swap the box');
+        }
+      }
+      s.was = blocked;
+      if (s.state === 'RUN' && blocked && now - s.since > p.jam) {
+        s.state = 'JAMMED';
+        io.line('state = JAMMED;');
+        s.relay = false; b.relay.set(false); io.pin('D7', 'LOW', false);
+        lampsSim(b, 'red');
+        b.disp.setSegments([0x79, 0x50, 0x50, 0]);
+        io.print('Jam!');
+      }
+      if (s.state !== 'RUN' && s.button) {
+        io.line('if (state != RUN && digitalRead(BUTTON) == LOW)');
+        io.pin('D4', 'LOW', true);
+        await io.delay(30);
+        if (s.state === 'BATCH_DONE') { s.count = 0; b.tote.clear().forEach((o) => { o.visible = false; b.pool.push(o); }); }
+        if (s.state === 'JAMMED' && s.stuck) { s.stuck = null; }
+        s.state = 'RUN';
+        b.disp.showNumber(s.count);
+        lampsSim(b, 'green');
+        s.relay = true; b.relay.set(true); io.pin('D7', 'HIGH', true);
+        io.line('Serial.println("Running");');
+        io.print('Running');
+        while (s.button) await io.delay(20);
+        io.pin('D4', 'HIGH', false);
+      }
+      io.line('delay(2);');
+      await io.delay(20);
+    },
+    reset(b) { b.st.relay = false; b.st.running = false; b.relay.set(false); lampsSim(b, null); },
+  },
+
+  // ------------------------------------------------------------------ 6 · room scanner
+  {
+    id: 'ind-lidar-scan', title: 'Room scanner radar', icon: 'radar', board: 'uno',
+    thumb: () => makePanScanner(v(0, 0, 0)).group,
+    view: { center: [0, 4, -16], size: 74 },
+    build(ctx) {
+      const b = ctx.board;
+      ctx.step('Build the cardboard room with a few boxes inside');
+      const room = ctx.add(makeRoom(v(0, 0, -10), { w: 70, d: 44, layouts: ROOMS }));
+      ctx.step('Pan scanner: SG90 with the VL53L0X, looking into the room');
+      const scan = ctx.add(makePanScanner(v(0, 0, -14), { rotY: Math.PI }));
+      ctx.step('Breadboard to share the I²C bus and power');
+      const bb = ctx.breadboard(...BB);
+      ctx.wire(b.pin('5V'), bb.hole(2, 'top+'), 'red', { signal: '5V' });
+      ctx.wire(b.pin('GND'), bb.hole(3, 'top-'), 'black', { signal: 'GND', dir: -1 });
+      ctx.wire(b.pin('SDA'), bb.hole(8, 'a'), 'blue', { signal: 'SDA', lift: 1.4 });
+      ctx.wire(b.pin('SCL'), bb.hole(10, 'a'), 'yellow', { signal: 'SCL', lift: 1.6 });
+      ctx.step('VL53L0X: VIN, GND, SDA, SCL from the breadboard');
+      ctx.wire(bb.hole(5, 'top+'), scan.pin('VIN'), 'red', { lift: 2.0 });
+      ctx.wire(bb.hole(6, 'top-'), scan.pin('GND'), 'black', { lift: 2.1 });
+      ctx.wire(bb.hole(8, 'b'), scan.pin('SDA'), 'blue', { lift: 2.3 });
+      ctx.wire(bb.hole(10, 'b'), scan.pin('SCL'), 'yellow', { lift: 2.5 });
+      ctx.step('SSD1306 OLED on the same bus (address 0x3C)');
+      const oled = ctx.add(named(makeOLED(v(10.6, 0, 7.0)), 'SSD1306 OLED 128×64'));
+      ctx.wire(bb.hole(12, 'j'), oled.pin('GND'), 'black', { lift: 1.0 });
+      ctx.wire(bb.hole(13, 'j'), oled.pin('VCC'), 'red', { lift: 1.1 });
+      ctx.wire(bb.hole(10, 'e'), oled.pin('SCL'), 'yellow', { lift: 1.3 });
+      ctx.wire(bb.hole(8, 'e'), oled.pin('SDA'), 'blue', { lift: 1.5 });
+      ctx.wire(bb.hole(12, 'bot-'), bb.hole(12, 'i'), 'black', { lift: 0.3 });
+      ctx.wire(bb.hole(13, 'bot+'), bb.hole(13, 'i'), 'red', { lift: 0.3 });
+      ctx.wire(bb.hole(29, 'top+'), bb.hole(29, 'bot+'), 'red', { lift: 0.8 });
+      ctx.wire(bb.hole(28, 'top-'), bb.hole(28, 'bot-'), 'black', { lift: 0.7 });
+      ctx.step('Servo: SIG → D9, V+ / V− from a 5 V supply, grounds joined');
+      const psu = ctx.add(makeSupply(v(-10, 0, 2), { rotY: Math.PI / 2, label: '5 V 2 A' }));
+      ctx.wire(b.pin('D9'), scan.pin('SIG'), 'orange', { signal: 'D9', lift: 1.6 });
+      ctx.wire(psu.pin('+'), scan.pin('V+'), 'red', { lift: 1.8 });
+      ctx.wire(psu.pin('-'), scan.pin('V-'), 'black', { lift: 1.6 });
+      ctx.wire(psu.pin('-'), b.pin('GND_2'), 'black', { dir: -1, lift: 1.4 });
+      const plot = ctx.plotter({ title: 'Serial plotter', series: [{ name: 'distance cm', color: '#2aa7a1', min: 0, max: 100 }, { name: 'angle / 2', color: '#ef8a2b', min: 0, max: 100 }] });
+      const st = { layout: 'a' };
+      ctx.interact(room, {
+        name: 'Model room', hint: 'Rearrange the furniture',
+        controls: [{ type: 'choice', label: 'Layout', options: [['a', 'Four boxes'], ['b', 'Long wall'], ['c', 'Empty room']], get: () => st.layout, set: (k) => { st.layout = k; room.setLayout(k); } }],
+      });
+      /** What the VL53L0X reports: nearest surface in its ≈ 25° cone, mm with ±3 % noise. */
+      const measure = () => {
+        const { origin, dir } = scan.ray();
+        let best = Infinity;
+        for (const da of [-6, -3, 0, 3, 6]) {
+          const d = dir.clone().applyAxisAngle(v(0, 1, 0), (da * Math.PI) / 180);
+          best = Math.min(best, room.castRay(origin, d));
+        }
+        if (best > 120) return 8190;
+        return Math.round(best * 10 * (1 + (Math.random() - 0.5) * 0.06));
+      };
+      ctx.anchor('scan', scan.anchor);
+      ctx.anchor('oled', oled.anchor);
+      ctx.anchor('room', room.anchor);
+      ctx.anchor('psu', psu.anchor);
+      return { room, scan, oled, plot, measure, range: new Array(181).fill(0) };
+    },
+    callouts: [
+      { anchor: 'scan', x: 0.36, y: 0.12, icon: 'radar', title: 'VL53L0X on an SG90', text: 'Time of flight: a 940 nm laser pulse and a timer, ≈ 25° cone, up to 1.2 m.' },
+      { anchor: 'room', x: 0.7, y: 0.17, icon: 'hand', title: 'Model room', text: 'Click it to move the furniture, then watch the map change.' },
+      { anchor: 'oled', x: 0.04, y: 0.68, icon: 'chip', title: 'Radar on the OLED', text: 'Half circle = 180°. Rings every MAX_CM / 3; each dot is one reading.' },
+      { anchor: 'psu', x: 0.04, y: 0.17, icon: 'bolt', title: 'Servo on its own 5 V', text: 'Keeps servo current spikes away from the sensor and the Uno.' },
+    ],
+    overview: {
+      heading: 'Room scanner: a home-made lidar',
+      text: 'Builds on <b>Sweep a servo</b>, <b>The I²C bus</b> and <b>OLED graphics</b>. A time-of-flight sensor on a servo measures the distance at every angle, like the spinning lidar on a robot vacuum, and turns the readings into a radar picture of the room.',
+      features: [['radar', 'VL53L0X: millimetres from the travel time of light'], ['servo', 'Sweep 0° → 180° → 0° in <code>STEP</code> degrees'], ['chip', 'Polar to screen: x = r·cos θ, y = r·sin θ']],
+    },
+    pinout: [
+      ['SDA (A4), SCL (A5)', 'VL53L0X + OLED SDA, SCL', 'Shared I²C bus: 0x29 and 0x3C'],
+      ['5V, GND', 'VL53L0X VIN, OLED VCC', 'Both have on-board 3.3 V regulators'],
+      ['D9', 'Servo SIG', 'Servo V+ / V− from the 5 V supply'],
+      ['Supply −', 'Uno GND', 'Common ground'],
+    ],
+    example: {
+      text: 'Robot vacuums, warehouse robots and self-driving cars map their surroundings with spinning lidar: thousands of distance readings per second, turned into points around the robot.',
+      points: ['Lower <code>STEP</code> for a finer map; the sweep gets slower', 'Send the Serial lines to a PC and draw a bigger radar there', 'Switch to an HC-SR04: its 15° beam smears corners much more'],
+    },
+    specs: [['Sensor', 'VL53L0X time-of-flight, 30–1200 mm, ±3 %'], ['Field of view', '≈ 25°'], ['Sweep', '181° in STEP steps, ~40 ms per step'], ['Display', 'SSD1306 128 × 64 over I²C at 400 kHz'], ['RAM', '181-byte range table + 1 KB OLED buffer'], ['Libraries', 'Wire, Servo, VL53L0X (Pololu), Adafruit_GFX, Adafruit_SSD1306']],
+    quiz: [
+      { q: 'How does a VL53L0X measure distance?', options: ['It times how long an infrared laser pulse takes to bounce back', 'It measures how bright the reflection is', 'It uses sound', 'It counts servo steps'], answer: 0, explain: 'Light travels 30 cm per nanosecond; the chip’s photon counters time the round trip.' },
+      { q: 'Why wait SETTLE_MS after pan.write()?', options: ['The servo takes time to reach the angle; reading too early measures in the wrong direction', 'The sensor needs to cool', 'I²C is busy', 'To save power'], answer: 0, explain: 'An SG90 turns about 60° in 0.1 s; a few degrees still take tens of ms to settle.' },
+      { q: 'Why is range[] uint8_t and not int?', options: ['181 ints would take 362 bytes; with the 1 KB OLED buffer the Uno’s 2 KB RAM gets tight', 'Distances are always below 100', 'The servo needs it', 'It is faster to print'], answer: 0, explain: 'A byte holds 0–255 cm, plenty here, and halves the memory.' },
+      { q: 'A reading at 150° of 40 cm appears where on the radar (centre 64, 63; R = 60; MAX_CM = 80)?', options: ['Up and to the left: x ≈ 38, y ≈ 48', 'Right: x ≈ 90', 'At the centre', 'Off screen'], answer: 0, explain: 'r = 30 px; x = 64 + 30·cos150° ≈ 38, y = 63 − 30·sin150° = 48.' },
+    ],
+    challenges: [
+      'Only redraw the OLED every 10° to sweep faster, and see how much time the display took.',
+      'Mark the nearest object of each sweep with a small circle and print its angle.',
+      'Mount the scanner on the robot car (<b>Obstacle-avoiding robot</b>) and turn towards the most open direction.',
+    ],
+    code: `// Room scanner: a VL53L0X on a servo sweeps 180° and draws a radar.
+#include <Wire.h>
+#include <Servo.h>
+#include <VL53L0X.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+const int SERVO_PIN = 9;
+const int STEP = {{step}};                        // degrees between readings
+const int MAX_CM = {{maxcm}};                     // outer ring of the radar
+const int SETTLE_MS = 40;                      // let the servo stop first
+
+Adafruit_SSD1306 oled(128, 64, &Wire, -1);
+VL53L0X tof;
+Servo pan;
+uint8_t range[181];                            // cm at every degree, 0 = nothing
+int angle = 0, dir = 1;
+
+int measureCm() {
+  uint16_t mm = tof.readRangeSingleMillimeters();
+  if (tof.timeoutOccurred() || mm >= 8190) return 0;   // 8190 = out of range
+  return min(mm / 10, 255);
+}
+
+void drawRadar() {
+  const int cx = 64, cy = 63, R = 60;
+  oled.clearDisplay();
+  for (int k = 1; k <= 3; k++)
+    oled.drawCircleHelper(cx, cy, R * k / 3, 0x3, SSD1306_WHITE);   // upper half
+  for (int a = 0; a <= 180; a += 45)
+    oled.drawLine(cx, cy, cx + R * cos(radians(a)), cy - R * sin(radians(a)), SSD1306_WHITE);
+  oled.drawLine(cx, cy, cx + R * cos(radians(angle)), cy - R * sin(radians(angle)), SSD1306_WHITE);
+  for (int a = 0; a <= 180; a++) {
+    if (range[a] == 0 || range[a] > MAX_CM) continue;
+    float r = (float)range[a] * R / MAX_CM;
+    oled.fillRect(cx + r * cos(radians(a)) - 1, cy - r * sin(radians(a)) - 1, 2, 2, SSD1306_WHITE);
+  }
+  oled.display();
+}
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  Wire.setClock(400000);                       // fast I2C: a full redraw takes ~25 ms
+  if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("No OLED");
+    while (true) {}
+  }
+  tof.setTimeout(500);
+  if (!tof.init()) {
+    Serial.println("No VL53L0X");
+    while (true) {}
+  }
+  pan.attach(SERVO_PIN);
+  pan.write(0);
+  delay(500);
+}
+
+void loop() {
+  pan.write(angle);
+  delay(SETTLE_MS);
+  int cm = measureCm();
+  range[angle] = cm;
+  Serial.print(angle);                         // "angle,cm" for a PC radar
+  Serial.print(',');
+  Serial.println(cm);
+  drawRadar();
+  angle += dir * STEP;
+  if (angle > 180 || angle < 0) {              // bounce at the ends
+    dir = -dir;
+    angle += 2 * dir * STEP;
+  }
+}`,
+    params: { step: { value: 3, min: 1, max: 15 }, maxcm: { value: 70, min: 20, max: 120 } },
+    async setup(io, b) {
+      b.range.fill(0);
+      b.angle = 0; b.dir = 1;
+      b.plot.reset();
+      io.line('Wire.setClock(400000);');
+      io.line('if (!oled.begin');
+      b.oled.clear();
+      await io.delay(100);
+      io.line('if (!tof.init())');
+      await io.delay(100);
+      io.line('pan.write(0);');
+      b.scan.setAngle(0);
+      io.pin('D9', '0°', true);
+      await io.delay(500);
+    },
+    async loop(io, b, p) {
+      io.line('pan.write(angle);');
+      b.scan.setAngle(b.angle);
+      io.pin('D9', `${b.angle}°`, true);
+      io.line('delay(SETTLE_MS);');
+      await io.delay(40);
+      io.line('int cm = measureCm();');
+      const mm = b.measure();
+      const cm = mm >= 8190 ? 0 : Math.min(Math.trunc(mm / 10), 255);
+      b.range[b.angle] = cm;
+      b.scan.beam(cm);
+      io.pin('SDA', `${mm} mm`, true);
+      await io.delay(33);
+      io.line('Serial.println(cm);');
+      io.print(`${b.angle},${cm}`);
+      b.plot.push(Math.min(cm, 100), b.angle / 2);
+      io.line('drawRadar();');
+      const pts = [];
+      b.range.forEach((r, a) => { if (r) pts.push([a, r]); });
+      drawRadar(b.oled, b.angle, pts, p.maxcm);
+      await io.delay(25);
+      b.angle += b.dir * p.step;
+      if (b.angle > 180 || b.angle < 0) {
+        io.line('dir = -dir;');
+        b.dir = -b.dir;
+        b.angle += 2 * b.dir * p.step;
+      }
+    },
+    reset(b) { b.scan.beam(0); },
+  },
+
 ];
 
 // ---------------------------------------------------------------- arm lesson data + sim helpers
 const LO = [0, 15, 30, 0, 0], HI = [180, 165, 180, 180, 90];
+// colour sorter: class order RED, GREEN, NONE, BLUE, YELLOW (as the sketch's enum)
+const SORT_DEG = [30, 60, 90, 120, 150];
+const SORT_NAMES = ['red', 'green', 'unknown', 'blue', 'yellow'];
+const SORT_LETTER = [0x50, 0x3d, 0x40, 0x7c, 0x6e];
+const SORT_REF = [[0.58, 0.22, 0.2, 0], [0.27, 0.45, 0.28, 1], [0.2, 0.31, 0.49, 3], [0.44, 0.4, 0.16, 4]];
+/** The sketch's classify(): nearest reference chromaticity within maxD, else NONE (2). */
+function classify([r, g, b], maxD) {
+  const sum = r + g + b;
+  if (sum < 30) return 2;
+  const f = [r / sum, g / sum, b / sum];
+  let best = 2, bd = maxD;
+  for (const [R, G, B, k] of SORT_REF) {
+    const d = Math.hypot(f[0] - R, f[1] - G, f[2] - B);
+    if (d < bd) { bd = d; best = k; }
+  }
+  return best;
+}
+/** Stack light: one lamp on (or none). */
+function lampsSim(b, on) { for (const n of ['green', 'amber', 'red']) b.lamp.set(n, n === on); }
+/** Scanner room layouts: [x, z, w, d, h] in room coordinates (open front at z = 0). */
+const ROOMS = {
+  a: [[-20, -30, 10, 8, 6], [13, -19, 8, 12, 8], [24, -37, 9, 9, 5], [-6, -14, 4, 4, 7]],
+  b: [[2, -26, 24, 3, 6], [-24, -12, 6, 6, 6], [21, -36, 10, 10, 6]],
+  c: [],
+};
 const STACK = { x: 6, y: 8 };
-const IK_BLOCKS = [[-7, 11], [-2, 13], [2, 13]];
+const IK_BLOCKS = [[-7, 11], [-2, 12]];
+const IK_SPARE = [3, 11];
 const IK_LAYOUTS = { a: IK_BLOCKS };
 
 /** Demo routine for the teach lesson: A (−6, 11) → B (6, 11), as recorded poses. */
@@ -679,7 +1712,7 @@ async function goTo(io, b, p, x, y, z, grip, label) {
 
 async function pickAndStack(io, b, p, x, y) {
   io.line('if (stacked >= MAX_STACK)');
-  if (b.stacked >= 4) { io.line('Serial.println("Stack full");'); io.print('Stack full'); return; }
+  if (b.stacked >= 3) { io.line('Serial.println("Stack full");'); io.print('Stack full'); return; }
   const top = Math.max(p.hover, (b.stacked + 1) * 2.5 + 1);
   const zs = 1.25 + b.stacked * 2.5;
   if (!(await goTo(io, b, p, x, y, p.hover, 90, 'if (!goTo(x, y, HOVER, GRIP_OPEN)) return;'))) return;

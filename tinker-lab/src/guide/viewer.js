@@ -295,6 +295,12 @@ export function mountViewer(el, lesson, { startPage = null } = {}) {
   }
 
   return {
+    /** Show a page by key: 'cover', 'parts', a step number, 'done'. */
+    goTo(key) {
+      if (!pages) { startPage = key; return; }
+      const i = pages.findIndex((p) => p.key === String(key));
+      if (i >= 0 && i !== page) go(i);
+    },
     destroy() {
       alive = false;
       cleanup.forEach((f) => f());

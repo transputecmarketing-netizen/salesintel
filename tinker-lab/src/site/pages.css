@@ -223,7 +223,7 @@ html:has(.sub-nav.is-sticky) { scroll-padding-top: 140px; }
 .pg-legal-hero { padding-block: clamp(56px, 8vw, 110px) clamp(28px, 4vw, 48px); }
 .pg-legal-hero .lede { margin-top: 22px; }
 .pg-legal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
-.pg-legal-meta span { font: 400 13px/1 var(--tl-mono); padding: 9px 13px; border-radius: 999px; background: var(--tl-subtle); color: var(--tl-ink-2); }
+.pg-legal-meta > span { font: 400 13px/1 var(--tl-mono); padding: 9px 13px; border-radius: 999px; background: var(--tl-subtle); color: var(--tl-ink-2); }
 .pg-draft { display: flex; align-items: flex-start; gap: 12px; margin-top: 28px; padding: 14px 20px; border-radius: 18px; background: var(--tl-accent-soft); color: var(--tl-accent-ink); font-size: 17px; line-height: 1.45; max-width: 60ch; }
 .pg-draft svg { flex: none; width: 20px; height: 20px; margin-top: 2px; }
 .pg-legal { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: clamp(32px, 6vw, 90px); padding-bottom: clamp(72px, 10vw, 140px); }
@@ -283,7 +283,7 @@ html:has(.sub-nav.is-sticky) { scroll-padding-top: 140px; }
   .pg-board-art .pg-rcard-icon svg { width: 34px; height: 34px; }
   .pg-board footer { padding: 16px 22px 22px; }
   .pg-faq .a { padding-right: 0; }
-  .pg-toc ol { columns: 1; }
+  .pg-toc { display: none; }
   .pg-search { max-width: none; flex-basis: 100%; }
   .pg-tools .wrap { gap: 10px 12px; }
   .pg-chip { height: 34px; padding: 0 13px; font-size: 14px; }
@@ -301,3 +301,12 @@ html:has(.sub-nav.is-sticky) { scroll-padding-top: 140px; }
   .pg-legal { display: block; }
   .reveal { opacity: 1 !important; transform: none !important; }
 }
+
+/* two-column sections: heading one step smaller so it sits beside the prose */
+.pg-cols > .h1 { font-size: clamp(30px, 3.8vw, 50px); line-height: 1.08; }
+.pg-hero .h1 { max-width: 22ch; }
+.pg-mail { margin-top: 40px; }
+/* long details: anchor to the bottom but stay scrollable when they overflow */
+.pg-rcard-detail { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+.pg-rcard-detail > :first-child { margin-top: auto; }
+@media (max-width: 520px) { .pg-rcard-detail { padding: 26px 22px 84px; } .pg-rcard-detail p { font-size: 17px; } }
