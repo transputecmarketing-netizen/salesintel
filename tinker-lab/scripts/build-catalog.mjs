@@ -9,7 +9,6 @@ import { BOARD_INFO } from '../src/scene/boards/index.js';
 const plain = (html = '') => String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
 const catalog = {
-  generated: new Date().toISOString(),
   boards: BOARD_INFO,
   tracks: TRACKS.map((t) => ({
     id: t.id, title: t.title, level: t.level, board: t.board ?? null, lang: t.lang ?? null,
