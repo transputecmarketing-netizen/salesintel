@@ -193,7 +193,7 @@ export const projectsIndustry = [
       const bb = ctx.breadboard(...BB);
       ctx.wire(b.pin('5V'), bb.hole(1, 'bot+'), 'red', { signal: '5V' });
       ctx.wire(b.pin('GND_2'), bb.hole(1, 'bot-'), 'black', { signal: 'GND', dir: -1 });
-      const pots = [], potVal = [0.5, 0.63, 0.29, 0.22, 1];
+      const pots = [], potVal = [0.5, 0.63, 0.27, 0.39, 1];
       const names = ['Base', 'Shoulder', 'Elbow', 'Wrist', 'Gripper'];
       [2, 8, 14, 20, 26].forEach((c, j) => {
         ctx.step(`${names[j]} knob: 10 kΩ pot in row h, wiper → A${j}`);
@@ -940,7 +940,9 @@ void loop() {
       const track = ctx.add(makeLineTrack(v(0, 0, 0)));
       ctx.step('2WD chassis on the start line');
       const car = makeRobotCar(track.start.pos, { rotY: track.start.rotY, speed: 30 });
-      ctx.add(car);
+      ctx.addObject(car.group);
+      // integrate in ≤ 5 ms substeps so a slow frame does not jump the car off the line
+      ctx.onTick((dt) => { const n = Math.ceil(Math.min(dt, 0.1) / 0.005); for (let i = 0; i < n; i++) car.tick(Math.min(dt, 0.1) / n); });
       const cg = car.group;
       const D = car.deckY;
       const holder = new THREE.Group();
@@ -1101,11 +1103,12 @@ void loop() {
   Serial.print(',');
   Serial.println(correction);
 }`,
-    params: { base: { value: 160, min: 60, max: 255 }, kp: { value: 6, min: 0, max: 30 }, kd: { value: 30, min: 0, max: 120 } },
+    params: { base: { value: 160, min: 60, max: 255 }, kp: { value: 5, min: 0, max: 30 }, kd: { value: 15, min: 0, max: 120 } },
     async setup(io, b) {
       b.reset();
       b.lastError = 0;
       b.n = 0;
+      b.lastT = 0;
       io.line('for (int p : pins)');
       await io.delay(80);
       io.line('Serial.begin(115200);');
@@ -1117,7 +1120,11 @@ void loop() {
       let sum = 0, seen = 0;
       s.forEach((black, i) => { if (black) { sum += (i - 2) * 100; seen++; } });
       const error = seen ? Math.trunc(sum / seen) : b.lastError > 0 ? 300 : -300;
-      const u = (p.kp / 10) * error + (p.kd / 10) * (error - b.lastError);
+      // the sketch runs every 10 ms; if the browser runs this loop slower, scale the
+      // derivative so it still means "change per 10 ms" like on the real board
+      const t = performance.now(), ms = b.lastT ? t - b.lastT : 10;
+      b.lastT = t;
+      const u = (p.kp / 10) * error + (p.kd / 10) * (error - b.lastError) * Math.min(1, 10 / ms);
       b.lastError = error;
       const l = clamp(Math.trunc(p.base + u), -255, 255), r = clamp(Math.trunc(p.base - u), -255, 255);
       b.car.setWheels(l / 255, r / 255);
@@ -1429,11 +1436,11 @@ void loop() {
   {
     id: 'ind-lidar-scan', title: 'Room scanner radar', icon: 'radar', board: 'uno',
     thumb: () => makePanScanner(v(0, 0, 0)).group,
-    view: { center: [0, 4, -16], size: 74 },
+    view: { center: [0, 4, -12], size: 60 },
     build(ctx) {
       const b = ctx.board;
       ctx.step('Build the cardboard room with a few boxes inside');
-      const room = ctx.add(makeRoom(v(0, 0, -10), { w: 70, d: 44, layouts: ROOMS }));
+      const room = ctx.add(makeRoom(v(0, 0, -10), { w: 56, d: 36, layouts: ROOMS }));
       ctx.step('Pan scanner: SG90 with the VL53L0X, looking into the room');
       const scan = ctx.add(makePanScanner(v(0, 0, -14), { rotY: Math.PI }));
       ctx.step('Breadboard to share the I²C bus and power');
@@ -1463,7 +1470,9 @@ void loop() {
       ctx.wire(psu.pin('+'), scan.pin('V+'), 'red', { lift: 1.8 });
       ctx.wire(psu.pin('-'), scan.pin('V-'), 'black', { lift: 1.6 });
       ctx.wire(psu.pin('-'), b.pin('GND_2'), 'black', { dir: -1, lift: 1.4 });
-      const plot = ctx.plotter({ title: 'Serial plotter', series: [{ name: 'distance cm', color: '#2aa7a1', min: 0, max: 100 }, { name: 'angle / 2', color: '#ef8a2b', min: 0, max: 100 }] });
+      // close-up of the OLED in a camera panel so the radar is readable
+      ctx.camera({ position: v(10.6, 7, 7.2), target: v(10.6, 0.3, 7.05), fov: 17, title: 'OLED close-up', sub: 'SSD1306 · 128 × 64' });
+      const plot = { push() {}, reset() {} };
       const st = { layout: 'a' };
       ctx.interact(room, {
         name: 'Model room', hint: 'Rearrange the furniture',
@@ -1664,8 +1673,8 @@ function classify([r, g, b], maxD) {
 function lampsSim(b, on) { for (const n of ['green', 'amber', 'red']) b.lamp.set(n, n === on); }
 /** Scanner room layouts: [x, z, w, d, h] in room coordinates (open front at z = 0). */
 const ROOMS = {
-  a: [[-20, -30, 10, 8, 6], [13, -19, 8, 12, 8], [24, -37, 9, 9, 5], [-6, -14, 4, 4, 7]],
-  b: [[2, -26, 24, 3, 6], [-24, -12, 6, 6, 6], [21, -36, 10, 10, 6]],
+  a: [[-16, -24, 8, 7, 6], [11, -15, 7, 10, 7], [19, -30, 8, 8, 5], [-5, -11, 3.5, 3.5, 6]],
+  b: [[2, -21, 20, 3, 6], [-19, -10, 5, 5, 6], [17, -29, 8, 8, 6]],
   c: [],
 };
 const STACK = { x: 6, y: 8 };

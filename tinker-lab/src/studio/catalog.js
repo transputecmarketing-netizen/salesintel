@@ -428,7 +428,7 @@ export const PARTS = [
   },
   {
     type: 'pir', name: 'Motion sensor (PIR)', cat: 'Sensors', keywords: 'hc-sr501 infrared presence',
-    mount: 'free', pins: ['VCC', 'OUT', 'GND'], defaults: {},
+    mount: 'free', pins: ['VCC', 'OUT', 'GND'], defaults: {}, hold: 'motion',
     controls: [{ type: 'hold', key: 'motion', label: 'Wave in front of it' }],
     describe: () => 'HC-SR501 · 5–20 V supply · OUT goes to 3.3 V on motion',
     needs: { power: ['VCC', 'GND'], min: 4.5 },

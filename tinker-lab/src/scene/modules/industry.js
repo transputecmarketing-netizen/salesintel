@@ -2031,7 +2031,7 @@ export function drawRadar(oled, sweep, points, maxCm = 100) {
  */
 export function makeCarPark(pos, opts = {}) {
   const g = new THREE.Group();
-  const W = 50, D = 30, BX = -14, NB = 4, BW = 3.6, BAY_Z = -9.2;
+  const W = 50, D = 34, BX = -14, NB = 4, BW = 3.6, BAY_Z = -9.2;
   const bayX = (i) => -3 + i * BW;
   g.add(roadMat(W, D, (c, s, cw, ch) => {
     const X = (x) => (x + W / 2) * s, Z = (z) => (z + D / 2) * s;
@@ -2053,7 +2053,7 @@ export function makeCarPark(pos, opts = {}) {
   }));
   // back wall of the bays + kerbs
   const wallM = mat(0xd9d4c6, { rough: 0.8 });
-  g.add(at(box(NB * BW + 1, 1.6, 0.5, wallM), bayX(0) - BW / 2 + (NB * BW) / 2, 0.8, -13.1));
+  g.add(at(box(NB * BW + 1, 1.6, 3.6, wallM), bayX(0) - BW / 2 + (NB * BW) / 2, 0.8, -14.75));
   g.add(at(box(W, 0.3, 0.35, wallM, { outline: false }), 0, 0.15, 4.2));
   g.add(at(box(W - (NB * BW + 6), 0.3, 0.35, wallM, { outline: false }), -W / 2 + (W - (NB * BW + 6)) / 2 - 3, 0.15, -4.2));
   g.position.copy(pos ?? V());
@@ -2117,7 +2117,7 @@ export function makeCarPark(pos, opts = {}) {
     feet: {
       barrier: W2(BX - 1.5, 4.5, 0.3),
       outside: W2(BX - 4, 7.9, 0.3), inside: W2(BX + 4, 7.9, 0.3),
-      bay: bays.map((b) => W2(b.x, -14.2, 1.7)),
+      bay: bays.map((b) => W2(b.x, -16.9, 0.3)),
     },
     free: () => bays.filter((b) => !b.occupied).length,
     setRate(r) { rate = r; }, setStay(s) { stay = s; },

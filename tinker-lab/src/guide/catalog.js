@@ -10,6 +10,7 @@ import { lockupSVG } from '../brand/logo.js';
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const strip = (s) => String(s ?? '').replace(/<[^>]+>/g, '');
 
+const plural = (n) => `${n} step${n === 1 ? '' : 's'}`;
 const cache = new Map(); // lesson id → { img, steps }
 
 export function mountIndex(el, list) {
@@ -38,11 +39,11 @@ export function mountIndex(el, list) {
         <section class="g-track" data-track="${esc(track?.id)}">
           <header><h2>${esc(track?.title ?? 'Lessons')}</h2><span>${lessons.length} guide${lessons.length === 1 ? '' : 's'}</span><small>${esc(track?.level ?? '')}</small></header>
           <ul class="g-cards">
-            ${lessons.map((l) => `<li data-q="${esc([l.title, l.id, track?.title, l.level, BOARD_INFO[l.board]?.name, strip(l.overview?.heading)].join(' ').toLowerCase())}">
+            ${lessons.map((l) => `<li data-q="${esc([l.title, l.id, track?.title, l.level, BOARD_INFO[l.board]?.name, strip(l.overview?.heading), strip(l.overview?.text)].join(' ').toLowerCase())}">
               <a class="g-card" href="#${esc(l.id)}" data-id="${esc(l.id)}">
                 <div class="g-thumb">${cache.get(l.id)?.img ? `<img src="${cache.get(l.id).img}" alt="" />` : '<i></i>'}</div>
                 <b>${esc(l.title)}</b>
-                <span>${esc(l.level ?? '')} · ${esc(BOARD_INFO[l.board]?.name ?? l.board ?? '')}<span class="g-cnum">${cache.get(l.id) ? ` · ${cache.get(l.id).steps} steps` : ''}</span></span>
+                <span>${esc(l.level ?? '')}<span class="g-cboard"> · ${esc(BOARD_INFO[l.board]?.name ?? l.board ?? '')}</span><span class="g-cnum">${cache.get(l.id) ? ` · ${plural(cache.get(l.id).steps)}` : ''}</span></span>
               </a></li>`).join('')}
           </ul>
         </section>`).join('')}
@@ -125,7 +126,7 @@ export function mountIndex(el, list) {
     const card = el.querySelector(`.g-card[data-id="${CSS.escape(id)}"]`);
     if (card) {
       card.querySelector('.g-thumb').innerHTML = `<img src="${img}" alt="" />`;
-      card.querySelector('.g-cnum').textContent = ` · ${g.steps.length} steps`;
+      card.querySelector('.g-cnum').textContent = ` · ${plural(g.steps.length)}`;
     }
   }
 

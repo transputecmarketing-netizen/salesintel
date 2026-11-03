@@ -210,6 +210,7 @@ body.g-body {
   .g-card { padding: 6px 10px 12px; border-radius: 14px; }
   .g-card b { font-size: 16.5px; }
   .g-card span { font-size: 13px; }
+  .g-card .g-cboard { display: none; }
   .g-track h2 { font-size: 23px; }
   .g-track header small { display: none; }
   .g-index-top .g-pill span { display: none; }

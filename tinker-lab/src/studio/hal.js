@@ -136,7 +136,8 @@ export function rgbList(arr, n) {
  */
 export function createHal(host) {
   const sim = host.sim, sb = host.board, b = sb.def;
-  const maxAdc = 2 ** b.adcBits - 1;
+  // the runtime expects 0–1023 and rescales to the board's ADC width itself
+  const maxAdc = 1023;
   const lastRead = new Map();
   const trigHigh = new Map();
   const toneTimers = new Map();

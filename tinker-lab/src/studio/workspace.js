@@ -515,9 +515,11 @@ export class Workspace {
     if (!hit) return false;
     if (hit.kind === 'board') { this.select({ kind: 'board', id: 'board' }); return false; }
     this.select({ kind: hit.kind, id: hit.id });
-    if (hit.kind === 'part' || (hit.kind === 'bb' && (e.shiftKey || !ep || true))) {
+    if (hit.kind === 'part' || hit.kind === 'bb') {
       this.drag = { kind: hit.kind, id: hit.id, x: e.clientX, y: e.clientY, moved: false };
       this.stage.canvas.setPointerCapture?.(e.pointerId);
+      const def = hit.kind === 'part' ? this.parts.get(hit.id)?.def : null;
+      if (def?.hold) { this.drag.pressed = true; this.hooks.press?.(hit.id, true); }
     }
     return true;
   }
@@ -533,6 +535,7 @@ export class Workspace {
         if (far) d.moved = true;
       } else if (far && !d.moved) {
         d.moved = true;
+        if (d.pressed) { d.pressed = false; this.hooks.press?.(d.id, false); }
         if (d.kind === 'part') {
           const part = this.project.parts.find((p) => p.id === d.id);
           const ent = this.parts.get(d.id);
@@ -584,6 +587,8 @@ export class Workspace {
     }
     if (!d) return;
     this.drag = null;
+    if (d.pressed) this.hooks.press?.(d.id, false);
+    if (d.kind === 'part' && !d.moved && this.parts.get(d.id)?.def.toggle) this.hooks.click?.(d.id);
     if (d.kind === 'wire-drag') {
       if (d.moved && this.wiring) {
         const ep = this.endpointAt(e);

@@ -18,6 +18,8 @@ export const FIGURES = [
   { name: 'stepper', title: 'Stepper motor', description: 'A stepper motor with a dial needle that steps toward the pointer one detent at a time.' },
   { name: 'led-matrix', title: 'LED matrix', description: 'An 8 by 8 LED matrix module that plays a loop, and glows where the pointer paints it, fading like phosphor.' },
   { name: 'robot-arm', title: 'Robot arm', description: 'A three-joint robot arm that reaches the pointer on its table with simple inverse kinematics, and closes its gripper there.' },
+  { name: 'processor', title: 'Processor', description: 'A processor die with eight cores standing at their load: the core under the pointer rises, and its cache slice follows it up.' },
+  { name: 'pcb', title: 'Circuit board', description: 'A circuit board whose copper nets lift off: the trace under the pointer rises, and the pads on its net follow it up.' },
 ];
 
 const LOAD = {
@@ -27,6 +29,8 @@ const LOAD = {
   stepper: () => import('./stepper.js'),
   'led-matrix': () => import('./led-matrix.js'),
   'robot-arm': () => import('./robot-arm.js'),
+  processor: () => import('./processor.js'),
+  pcb: () => import('./pcb.js'),
 };
 
 /**

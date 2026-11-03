@@ -34,7 +34,7 @@ function rng(seed = 1) {
 
 // ================================================================= wind turbine
 /**
- * Small horizontal-axis wind turbine (model of a ~1.2 m rotor, 12 V DC
+ * Small horizontal-axis wind turbine (model of a 0.5 m micro turbine, 12 V DC
  * generator). Rotor faces local +z. Pins OUT+ / OUT- on the junction box at the
  * base. setWind(m/s) spins the rotor with inertia; setBrake(true) stops it
  * (electrical brake). `rpm` is the modelled real rotor speed.
@@ -107,7 +107,7 @@ export function makeWindTurbine(pos, opts = {}) {
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, H + 2.2, 0) });
   api.hub = g.localToWorld(V(0, 0.7 + H + 0.45, 1.6));
   let wind = 0, rpm = 0, brake = false, ang = 0;
-  const RADIUS_M = 0.6, TSR = 6, RPM_MAX = 1100;
+  const RADIUS_M = 0.25, TSR = 6, RPM_MAX = 3200;
   live(api, {
     get wind() { return wind; },
     get rpm() { return rpm; },
@@ -126,7 +126,7 @@ export function makeWindTurbine(pos, opts = {}) {
       const k = brake ? 2.5 : 0.7; // brakes act faster than the wind spins it up
       rpm += (target - rpm) * Math.min(1, dt * k);
       if (rpm < 0.5) rpm = 0;
-      ang += dt * (rpm / 60) * Math.PI * 2 * 0.12; // animation slowed ~8× so blades stay readable
+      ang += dt * Math.min(rpm / 60, 40) * Math.PI * 2 * 0.06; // animation slowed so the blades stay readable
       rotor.rotation.z = -ang;
     },
   });
@@ -297,14 +297,14 @@ export function makeSolarPanel(pos, opts = {}) {
  * Dual-axis sun tracker: pan servo in the base, tilt servo on the yoke, a 6 V
  * panel and a cross-shaped shade with 4 LDRs (TL, TR, BL, BR) at its top edge.
  * The base board carries the four 10 kΩ divider resistors; its header has
- * TL TR BL BR 3V3 GND 5V PAN TILT. setPan / setTilt take servo degrees
+ * TL TR BL BR 3V3 GND 5V PAN TILT PV+ PV- (panel leads). setPan / setTilt take servo degrees
  * (pan 90 = facing +z, tilt 90 = panel upright facing +z, 0 = flat facing up).
  * ldrLight(sunDir) → [TL, TR, BL, BR] light fractions with cross-wall shading.
  */
 export function makeSolarTracker(pos, opts = {}) {
   const g = new THREE.Group();
   const blue = mat(0x2f5fbf, { rough: 0.5 });
-  const pinNames = ['TL', 'TR', 'BL', 'BR', '3V3', 'GND', '5V', 'PAN', 'TILT'];
+  const pinNames = ['TL', 'TR', 'BL', 'BR', '3V3', 'GND', '5V', 'PAN', 'TILT', 'PV+', 'PV-'];
   const b = makeBreakout({ w: 4.6, d: 3.2, color: PCB.green, pins: pinNames, pinsEdge: 'front', inset: 0.28, label: 'TRACKER', labelPos: [0, -0.4], labelSize: 0.28,
     silk: (P) => { P.text('4 × 10k', 0, 0.05, 0.14); for (let i = 0; i < 4; i++) P.rect(-1.2 + i * 0.8, 0.45, 0.5, 0.18, { fill: '#2a2c33' }); } });
   // base box under the PCB
@@ -500,9 +500,10 @@ export function makeINA219(pos, opts = {}) {
 // ================================================================= voltage sensor
 /** "0–25 V" divider module: 30 kΩ / 7.5 kΩ (÷5). Pins S, + (not connected), - ; input terminals IN+ IN-. */
 export function makeVoltageSensor(pos, opts = {}) {
+  const top = opts.top ?? '30k', bottom = opts.bottom ?? '7.5k', range = opts.range ?? '0-25V';
   const b = makeBreakout({
     w: 2.6, d: 1.4, color: PCB.red, pins: ['S', '+', '-'], pinsEdge: 'right', inset: 0.22,
-    silk: (P) => { P.text('30k', -0.15, -0.4, 0.11); P.text('7.5k', 0.35, -0.4, 0.11); P.text('0-25V', 0.1, 0.45, 0.12, { weight: 700 }); },
+    silk: (P) => { P.text(top, -0.15, -0.4, 0.11); P.text(bottom, 0.35, -0.4, 0.11); P.text(range, 0.1, 0.45, 0.12, { weight: 700 }); },
   });
   const term = screwTerminal(2, 0x2f6fd8);
   term.rotation.y = -Math.PI / 2;
@@ -513,7 +514,7 @@ export function makeVoltageSensor(pos, opts = {}) {
   pinsLocal.set('IN+', V(-0.85 - scr[0].z, b.top + scr[0].y, scr[0].x));
   pinsLocal.set('IN-', V(-0.85 - scr[1].z, b.top + scr[1].y, scr[1].x));
   const api = freeApi(b.group, pinsLocal, pos, opts, { pick: b.group, anchor: V(0, 1.3, 0) });
-  return tag(api, 'module', 'Voltage sensor module (30k/7.5k divider)');
+  return tag(api, 'module', `Voltage divider module (${top} / ${bottom})`);
 }
 
 // ================================================================= dump load
@@ -779,17 +780,19 @@ export function makeWaterTank(pos, opts = {}) {
     for (let i = 0; i <= 10; i++) { const y = h - (i / 10) * h * 0.98 - 3; c.beginPath(); c.moveTo(0, y); c.lineTo(i % 5 ? w * 0.3 : w * 0.55, y); c.stroke(); if (!(i % 5)) c.fillText(`${i * 10}%`, w * 0.35, y - 4); }
   }, { vertical: true }), 0, 0.3 + H * 0.45 + 0.1, R + 0.02));
   // ultrasonic sensor on a bracket over the lid, transducers facing down
-  const us = makeBreakout({ w: 4.5, d: 2.0, color: PCB.blue, pins: ['VCC', 'TRIG', 'ECHO', 'GND'], pinsEdge: 'front', inset: 0.25, label: 'HC-SR04', labelPos: [0, -0.35], labelSize: 0.2 });
   const usY = 0.3 + H + 0.25 + 1.2;
-  us.group.position.set(-0.6, usY, 0);
-  g.add(us.group);
-  for (const x of [-1.25, 1.25]) {
-    const tr = cyl(0.8, 0.8, 1.1, metal(), { seg: 24 });
-    g.add(at(tr, -0.6 + x, usY - 0.55, -0.1));
-    g.add(at(cyl(0.7, 0.7, 0.02, mat(0x2a2c33), { seg: 24, outline: false }), -0.6 + x, usY - 1.11, -0.1));
+  let pinsLocal = new Map();
+  if (opts.sonar !== false) {
+    const us = makeBreakout({ w: 4.5, d: 2.0, color: PCB.blue, pins: ['VCC', 'TRIG', 'ECHO', 'GND'], pinsEdge: 'front', inset: 0.25, label: 'HC-SR04', labelPos: [0, -0.35], labelSize: 0.2 });
+    us.group.position.set(-0.6, usY, 0);
+    g.add(us.group);
+    for (const x of [-1.25, 1.25]) {
+      g.add(at(cyl(0.8, 0.8, 1.1, metal(), { seg: 24 }), -0.6 + x, usY - 0.55, -0.1));
+      g.add(at(cyl(0.7, 0.7, 0.02, mat(0x2a2c33), { seg: 24, outline: false }), -0.6 + x, usY - 1.11, -0.1));
+    }
+    for (const x of [-2.6, 1.4]) g.add(at(box(0.25, 1.25, 0.25, mat(0x9aa0a8)), x, 0.3 + H + 0.85, 0.3));
+    pinsLocal = new Map([...us.pinsLocal].map(([n, p]) => [n, p.clone().add(us.group.position)]));
   }
-  for (const x of [-2.6, 1.4]) g.add(at(box(0.25, 1.25, 0.25, mat(0x9aa0a8)), x, 0.3 + H + 0.85, 0.3));
-  const pinsLocal = new Map([...us.pinsLocal].map(([n, p]) => [n, p.clone().add(us.group.position)]));
   // float switch (low-level cut-off) on the side wall
   const FLOAT_Y = 0.3 + H * 0.2;
   g.add(at(cyl(0.06, 0.06, 1.6, metal(), { seg: 8 }), R - 0.6, FLOAT_Y, 0.8));
@@ -1048,12 +1051,12 @@ export function makeFieldBed(pos, opts = {}) {
 }
 
 // ================================================================= relay board
-/** n-channel 5 V relay board (active-LOW inputs, like the common blue boards). Pins GND IN1..INn VCC; terminals NOk COMk NCk. */
+/** n-channel 5 V relay board with high-level trigger inputs (3.3 V-logic compatible). Pins GND IN1..INn VCC; terminals NOk COMk NCk. */
 export function makeRelayBoard(pos, opts = {}) {
   const n = opts.channels ?? 3;
   const w = 1.9 * n + 0.8;
   const ins = [...Array(n)].map((_, i) => `IN${i + 1}`);
-  const b = makeBreakout({ w, d: 5.0, color: PCB.blue, pins: ['GND', ...ins, 'VCC'], pinsEdge: 'front', inset: 0.22, label: `${n}-CH RELAY`, labelPos: [0, 1.65], labelSize: 0.24 });
+  const b = makeBreakout({ w, d: 5.0, color: PCB.blue, pins: ['GND', ...ins, 'VCC'], pinsEdge: 'front', inset: 0.22, label: `${n}-CH RELAY · HIGH TRIG`, labelPos: [0, 1.65], labelSize: 0.22 });
   const leds = [];
   const pinsLocal = new Map(b.pinsLocal);
   for (let i = 0; i < n; i++) {
@@ -1208,7 +1211,7 @@ export function makeWildfirePost(pos, opts = {}) {
   g.add(rings.group);
   // harness to a junction box at the foot
   g.add(cable([V(-0.4, 4.9, 0.6), V(-0.3, 2.5, 0.4), V(0.5, 0.9, 1.4), V(1.6, 0.8, 1.9)], 0x2a2c33, 0.07));
-  const b = makeBreakout({ w: 2.4, d: 1.3, color: PCB.black, pins: ['5V', '3V3', 'GND', 'SMOKE', 'FLAME', 'DHT'], pinsEdge: 'front', inset: 0.22, label: 'HARNESS', labelPos: [0, -0.25], labelSize: 0.16 });
+  const b = makeBreakout({ w: 2.4, d: 1.3, color: PCB.black, pins: ['5V', '3V3', 'GND', 'SMOKE', 'FLAME', 'DHT'], pinsEdge: 'front', inset: 0.22, label: 'HARNESS', labelPos: [0, -0.35], labelSize: 0.16, silk: (P) => P.text('SMOKE AO ÷2 (10k/10k)', 0, -0.1, 0.1) });
   b.group.position.set(2.0, 0.3, 2.0);
   g.add(at(box(2.5, 0.3, 1.4, mat(0x3a3d46)), 2.0, 0.15, 2.0));
   g.add(b.group);
@@ -1875,4 +1878,49 @@ export function makeRoadCross(pos, opts = {}) {
   g.updateMatrixWorld(true);
   const api = { group: g, pick: m, size: L, roadW: RW, top: 0.12, get anchor() { return g.position.clone().add(V(0, 1, 0)); } };
   return tag(api, 'object', 'Road junction');
+}
+
+// ================================================================= USB webcam
+/**
+ * USB webcam (UVC) clamped under an arm; looks along local +z, pitched down by
+ * opts.pitch (radians) and turned by opts.yaw. pos = world position of the
+ * camera body. The cable runs to opts.cableTo (e.g. a Jetson USB port).
+ * Returns lensWorld / lookDir for the virtual camera.
+ */
+export function makeUSBCam(pos, opts = {}) {
+  const g = new THREE.Group();
+  const body = new THREE.Group();
+  body.add(at(box(2.6, 1.1, 1.0, mat(0x24262c, { rough: 0.5 })), 0, 0, 0));
+  const ring = cyl(0.42, 0.42, 0.12, mat(0x3a3d46), { seg: 24 });
+  ring.rotation.x = Math.PI / 2;
+  body.add(at(ring, 0, 0, 0.55));
+  const lens = cyl(0.3, 0.3, 0.04, mat(0x101a2e, { rough: 0.08, metal: 0.4 }), { seg: 24, outline: false });
+  lens.rotation.x = Math.PI / 2;
+  body.add(at(lens, 0, 0, 0.62));
+  const led = smdLed(0x3fdc6a, { glow: 0.6 });
+  led.group.rotation.x = Math.PI / 2;
+  body.add(at(led.group, 0.9, 0.25, 0.5));
+  led.set(1);
+  body.add(at(box(0.5, 0.5, 0.5, mat(0x3a3d46)), 0, 0.75, -0.1));
+  g.add(body);
+  g.position.copy(pos);
+  g.rotation.set(opts.pitch ?? 0, opts.yaw ?? 0, 0, 'YXZ');
+  g.updateMatrixWorld(true);
+  const W = (x, y, z) => g.localToWorld(V(x, y, z));
+  const extras = [];
+  if (opts.cableTo) {
+    const a = W(-1.3, 0, -0.2), end = opts.cableTo.clone();
+    const mid = a.clone().lerp(end, 0.5);
+    mid.y = Math.max(0.3, Math.min(a.y, end.y) * 0.3);
+    const c = cable([a, W(-1.9, 0.1, -0.3), mid, end.clone().add(V(0, 0.3, 0.6)), end], 0x24262c, 0.07);
+    noRay(c);
+    extras.push(c);
+  }
+  const api = {
+    group: g, pick: g, extras,
+    anchor: W(0, 1.4, 0),
+    lensWorld: W(0, 0, 0.66),
+    lookDir: V(0, 0, 1).transformDirection(g.matrixWorld),
+  };
+  return tag(api, 'module', 'USB webcam (UVC)');
 }
