@@ -692,7 +692,13 @@ export class Workspace {
 
   /** Bounding box of everything (for framing the camera). */
   bounds() {
-    const box = new THREE.Box3().setFromObject(this.root);
+    const box = new THREE.Box3();
+    this.root.updateMatrixWorld(true);
+    this.root.traverse((o) => {
+      if (!o.isMesh || o.isSprite || !o.visible || o.material?.blending === THREE.AdditiveBlending || o.material?.transparent && o.material.opacity === 0) return;
+      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));
+    });
     return box;
   }
 

@@ -132,6 +132,9 @@ void loop() {
       io.line('delay', 2); await io.delay(p.off);
     },
     reset(b, io) { b.led.set(0); io.board.setBuiltinLed(0); },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+    }),
   },
 
   // ------------------------------------------------------------------ 3

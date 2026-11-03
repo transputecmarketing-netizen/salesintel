@@ -221,7 +221,14 @@ function frameAll(instant = false) {
   if (box.isEmpty()) return;
   const c = box.getCenter(new THREE.Vector3());
   const s = box.getSize(new THREE.Vector3());
-  stage.frame({ center: [c.x, 0.6, c.z], size: Math.max(8, Math.max(s.x, s.z * 1.3) * 0.95) }, instant);
+  // the stage fits `size` into a fraction of the canvas; size it so the projected bench fills ~85 %
+  const az = (28 * Math.PI) / 180, el = (36 * Math.PI) / 180;
+  const wide = s.x * Math.cos(az) + s.z * Math.sin(az);
+  const tall = (s.x * Math.sin(az) + s.z * Math.cos(az)) * Math.sin(el) + s.y * Math.cos(el);
+  const fill = stage.compact ? 0.92 : 0.6, hfill = stage.compact ? 0.62 : 0.72;
+  const aspect = stage.w / stage.h;
+  const size = Math.max(6, (wide * fill) / 0.86, (tall * hfill) / 0.8, ((tall * fill) / 0.8) * aspect * 0);
+  stage.frame({ center: [c.x, Math.min(1.2, s.y / 3), c.z], size }, instant);
 }
 
 // ================================================================ editing commands

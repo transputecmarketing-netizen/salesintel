@@ -17,3 +17,9 @@ Paused on 3 November 2026 (usage limit). Resume each workstream from here.
 Lead (integration) still to do after all workstreams finish: wire the intro animation and figures into the landing page (already auto-detected), add the pages' head tags to `/` and `/learn/`, full build, QA of every page and lesson at desktop and phone widths, README update, commit and push.
 
 Note: while workstreams are mid-edit the production build may fail (for example a module importing a file not written yet). Run `npx vite build` after resuming.
+
+## Lead follow-ups (after the runtime agent releases src/main.js)
+- Serial monitor shows "9600 baud" always: read the rate from `Serial.begin(N)` in the lesson code.
+- Download/copy wording: "a .py file on the Raspberry Pi" for `rpi5`, "on the Jetson" for `jetson`/`orin`.
+- Auto power LED and fan: also for `rpi5` and `orin`, not only `jetson`.
+- The `unor4` board has no lessons yet (LED-matrix lessons would suit it).

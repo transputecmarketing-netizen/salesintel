@@ -209,6 +209,7 @@ function varList(vars = []) {
       const kids = Array.isArray(val) ? val.map((x, i) => ({ name: `[${i}]`, type: '', value: x })) : Object.entries(val).map(([k, x]) => ({ name: k, type: '', value: x }));
       return `<li><details><summary><b>${esc(v.name)}</b> <span class="muted">${esc(v.type ?? '')}</span></summary>${varList(kids.slice(0, 64))}</details></li>`;
     }
-    return `<li><b>${esc(v.name)}</b> <span class="muted">${esc(v.type ?? '')}</span> <code>${esc(typeof val === 'string' ? JSON.stringify(val) : String(val))}</code></li>`;
+    const text = typeof val === 'string' && /String|char\s*\*|char\s*\[/.test(v.type ?? '') && !/^".*"$/.test(val) ? JSON.stringify(val) : String(val);
+    return `<li><b>${esc(v.name)}</b> <span class="muted">${esc(v.type ?? '')}</span> <code>${esc(text)}</code></li>`;
   }).join('')}</ul>`;
 }

@@ -155,7 +155,7 @@ function makeMatrix(g) {
   const lensMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const lenses = new THREE.InstancedMesh(new THREE.BoxGeometry(0.11, 0.04, 0.075), lensMat, n);
   const m = new THREE.Matrix4();
-  const OFF = new THREE.Color(0x6b2a22), ON = new THREE.Color(0xff5a42), c = new THREE.Color();
+  const OFF = new THREE.Color(0x5e1f19), ON = new THREE.Color(0xff3524), c = new THREE.Color();
   for (let r = 0; r < MX.rows; r++) for (let col = 0; col < MX.cols; col++) {
     const i = r * MX.cols + col;
     bodies.setMatrixAt(i, m.makeTranslation(mxX(col), TOP + 0.0175, mxZ(r)));
@@ -186,7 +186,7 @@ function makeMatrix(g) {
       if (v <= 0) continue;
       const x = (mxX(col) - MX.x + GW / 2) * k, y = (mxZ(r) - MX.z + GD / 2) * k, rad = 0.2 * k;
       const gr = gctx.createRadialGradient(x, y, 0, x, y, rad);
-      gr.addColorStop(0, `rgba(255,110,80,${0.95 * v})`);
+      gr.addColorStop(0, `rgba(255,70,50,${0.9 * v})`);
       gr.addColorStop(0.35, `rgba(255,60,40,${0.45 * v})`);
       gr.addColorStop(1, 'rgba(255,40,30,0)');
       gctx.fillStyle = gr;

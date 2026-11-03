@@ -22,6 +22,8 @@ import { CodeView } from './ui/code.js';
 import { Runner } from './ui/runner.js';
 import { PanelDock } from './ui/panels.js';
 import { store } from './ui/store.js';
+import { CodeLab } from './runtime/ui/codelab.js';
+import './runtime/ui/codelab.css';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -116,8 +118,13 @@ $('#console-form').addEventListener('submit', (e) => {
   const inp = $('#console-input');
   const text = inp.value;
   if (!text) return;
-  if (!runner.running) { toast('Run the sketch first'); return; }
-  serialQueue.push(text);
+  if (lab.active) {
+    if (!lab.running) { toast('Run your code first'); return; }
+    lab.sendSerial(text);
+  } else {
+    if (!runner.running) { toast('Run the sketch first'); return; }
+    serialQueue.push(text);
+  }
   print(`> ${text}`, 'echo');
   inp.value = '';
 });
@@ -134,27 +141,49 @@ const runner = new Runner({
   noTone: () => audio.noTone(),
   readLine: () => serialQueue.shift() ?? null,
   available: () => serialQueue.length,
-  state(running) {
-    codeCard.dataset.state = running ? 'running' : 'idle';
-    consoleStatus.textContent = running ? (lesson?.lang === 'python' ? 'Running' : 'Running · 9600 baud') : 'Stopped';
-    $('#code-run').setAttribute('aria-label', running ? 'Stop sketch' : 'Run sketch');
-    $('[data-nav="run"]').parentElement.classList.toggle('is-active', running);
-    signalsEl.style.opacity = running ? 1 : 0;
-    if (running) {
-      runStarted = performance.now();
-      for (const w of ctxState?.wires ?? []) {
-        const power = /^(GND|5V|3V3|3\.3V|VCC|VIN|12V)/.test(w.signal ?? '');
-        if (power) w.live = true;
-        if (w.chip) w.chip.textContent = power ? w.signal.replace(/_\d+$/, '') : `${w.signal} · LOW`;
-      }
-    } else {
-      codeView.clearHighlight();
-      for (const w of ctxState?.wires ?? []) w.live = false;
-    }
-  },
+  state: (running) => showRunState(running),
 });
+
+/** Shared "running" look of the card, chips and wires (guided runs and the runtime). */
+function showRunState(running) {
+  codeCard.dataset.state = running ? 'running' : 'idle';
+  consoleStatus.textContent = running ? (lesson?.lang === 'python' ? 'Running' : 'Running · 9600 baud') : 'Stopped';
+  $('#code-run').setAttribute('aria-label', running ? 'Stop sketch' : 'Run sketch');
+  $('[data-nav="run"]').parentElement.classList.toggle('is-active', running);
+  signalsEl.style.opacity = running ? 1 : 0;
+  if (running) {
+    runStarted = performance.now();
+    for (const w of ctxState?.wires ?? []) {
+      const power = /^(GND|5V|3V3|3\.3V|VCC|VIN|12V)/.test(w.signal ?? '');
+      if (power) w.live = true;
+      if (w.chip) w.chip.textContent = power ? w.signal.replace(/_\d+$/, '') : `${w.signal} · LOW`;
+    }
+  } else {
+    codeView.clearHighlight();
+    for (const w of ctxState?.wires ?? []) w.live = false;
+  }
+}
 const codeView = new CodeView($('#code'), {
   onParam: (k, v) => { if (lesson) paramValues.get(lesson.id)[k] = v; },
+});
+
+// "Run my code": an editor and the Tinker Lab Arduino runtime in the code card
+const lab = new CodeLab({
+  card: codeCard,
+  app: $('#app'),
+  getBoard: () => board,
+  getBuilt: () => built,
+  getWires: () => ctxState?.wires ?? [],
+  print: (t, cls) => print(t, cls),
+  lastLine: () => consoleLines.lastElementChild,
+  clearConsole: () => { consoleLines.textContent = ''; },
+  setSignal: (key, text, live) => setSignal(key, text, live),
+  showRunState: (running) => showRunState(running),
+  setStatus: (t) => { consoleStatus.textContent = t; },
+  stopGuided: () => runner.stop(),
+  audio,
+  toast: (m) => toast(m),
+  onRan: () => { if (lesson) markRan(lesson); },
 });
 
 function setSignal(key, text, live) {
@@ -169,6 +198,11 @@ function setSignal(key, text, live) {
 }
 
 function toggleRun(force) {
+  if (lab.active) {
+    const want = force ?? !lab.running;
+    if (want) lab.run(); else lab.stop();
+    return;
+  }
   const run = force ?? !runner.running;
   if (!run) return runner.stop();
   consoleLines.textContent = '';
@@ -203,6 +237,7 @@ function loadLesson(i, { instant = false } = {}) {
   i = (i + lessons.length) % lessons.length;
   if (i === current) return;
   runner.stop();
+  lab.stop();
   closeInspector();
   dock.clear();
   current = i;
@@ -257,11 +292,14 @@ function loadLesson(i, { instant = false } = {}) {
 function finishLoad(i) {
   if (!paramValues.has(lesson.id)) paramValues.set(lesson.id, Object.fromEntries(Object.entries(lesson.params ?? {}).map(([k, p]) => [k, p.value])));
   if (lesson.code) codeView.render(lesson, paramValues.get(lesson.id));
+  lab.load(lesson, paramValues.get(lesson.id));
   const info = BOARD_INFO[lesson.board] ?? {};
   if (!lesson.explainer) $('#code-lang').textContent = `${lesson.lang === 'python' ? (lesson.board === 'pico' ? 'MicroPython' : 'Python 3') : 'C++'} · ${info.name ?? lesson.board}`;
   $('.console-title').textContent = lesson.lang === 'python' ? 'Terminal' : 'Serial monitor';
-  codeCard.classList.remove('has-console');
-  codeCard.classList.toggle('has-input', !!lesson.serialInput);
+  if (!lab.active) {
+    codeCard.classList.remove('has-console');
+    codeCard.classList.toggle('has-input', !!lesson.serialInput);
+  }
   $('#console-input').placeholder = lesson.serialInput?.placeholder ?? 'Type a message and press Enter';
   serialQueue.length = 0;
   consoleLines.textContent = '';
@@ -385,13 +423,14 @@ $('#info-expand').addEventListener('click', () => {
     <section><span class="eyebrow">Specifications</span><div class="spec-grid">${L.specs.map(([k, v]) => `<div class="spec"><small>${esc(k)}</small><b>${v}</b></div>`).join('')}</div></section>`);
 });
 $('#code-expand').addEventListener('click', () => {
+  if (lab.active) { lab.toggleTall(); return; }
   openModal(`<h3>${esc(lesson.title)} · ${lesson.lang === 'python' ? 'program' : 'sketch'}</h3><pre class="code">${$('#code').innerHTML}</pre>`);
   $$('.param', modalBody).forEach((p) => p.removeAttribute('contenteditable'));
 });
 $('#code-copy').addEventListener('click', async () => {
   const where = lesson.lang === 'python' ? (lesson.board === 'pico' ? 'Thonny' : 'a .py file on the Jetson') : 'the Arduino IDE';
   try {
-    await navigator.clipboard.writeText(codeView.text());
+    await navigator.clipboard.writeText(lab.active ? lab.text() : codeView.text());
     toast(`Code copied — paste it into ${where}`);
   } catch {
     toast('Copy failed — select the code manually');
@@ -399,7 +438,7 @@ $('#code-copy').addEventListener('click', async () => {
 });
 $('#code-download').addEventListener('click', () => {
   const ext = lesson.lang === 'python' ? 'py' : 'ino';
-  const blob = new Blob([codeView.text()], { type: 'text/plain' });
+  const blob = new Blob([lab.active ? lab.text() : codeView.text()], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `${lesson.id}.${ext}`;
@@ -457,7 +496,7 @@ function renderChips() {
 
 function updateOverlay() {
   if (!lesson) return;
-  if (runner.running) {
+  if (runner.running || lab.running) {
     for (const w of ctxState.wires) {
       if (!w.chip) continue;
       const p = stage.project(w.chipAt ?? w.mid);
@@ -774,7 +813,7 @@ function setSetting(k, v) {
   if (k === 'labels') stageEl.classList.toggle('no-labels', !v);
   if (k === 'sound' && !v) audio.noTone();
   $(`[data-view="${k}"]`)?.setAttribute('aria-pressed', v);
-  if (k === 'flow' && v && !runner.running) toast('Run the sketch to see current flow');
+  if (k === 'flow' && v && !runner.running && !lab.running) toast('Run the sketch to see current flow');
 }
 
 // ---------------------------------------------------------------- view toolbar & keyboard

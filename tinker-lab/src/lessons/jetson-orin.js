@@ -710,7 +710,7 @@ while True:
       const words = text.split(/(?<=\s)/);
       const tps = 21 * modeOf(st.mode)[2] * (0.95 + Math.random() * 0.1);
       st.busy = true;
-      let n = 0, line = '';
+      let n = 0, line = '', owed = 0;
       const t0 = performance.now();
       for (const w of words) {
         const toks = Math.max(1, Math.round(w.length / 4));
@@ -719,10 +719,15 @@ while True:
         io.line('print(piece, end=""');
         line += w;
         if (line.length > 70 || w.endsWith('\n')) { io.print(line.trimEnd()); line = ''; }
-        st.tps = n / ((performance.now() - t0) / 1000 + 1e-3);
-        b.mon.update();
-        await io.delay((toks / tps) * 1000);
+        owed += (toks / tps) * 1000;
+        if (owed >= 150) { // stream in small batches of tokens
+          await io.delay(owed);
+          owed = 0;
+          st.tps = n / ((performance.now() - t0) / 1000 + 1e-3);
+          b.mon.update();
+        }
       }
+      if (owed) await io.delay(owed);
       if (line) io.print(line.trimEnd());
       const secs = n / tps;
       st.tps = tps;

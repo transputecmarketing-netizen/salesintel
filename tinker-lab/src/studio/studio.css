@@ -301,3 +301,6 @@ kbd { display: inline-block; padding: 1px 8px; border: 1px solid var(--tl-line-2
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* the Run pill while a sketch is running: calm, not greyed out */
+[data-run="running"] #btn-run:disabled { opacity: 1; background: var(--tl-accent-soft); border-color: transparent; color: var(--tl-accent-ink); }

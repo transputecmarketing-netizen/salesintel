@@ -940,9 +940,30 @@ void loop() {
       const track = ctx.add(makeLineTrack(v(0, 0, 0)));
       ctx.step('2WD chassis on the start line');
       const car = makeRobotCar(track.start.pos, { rotY: track.start.rotY, speed: 30 });
+      car.group.userData.label = '2WD robot chassis';
       ctx.addObject(car.group);
-      // integrate in ≤ 5 ms substeps so a slow frame does not jump the car off the line
-      ctx.onTick((dt) => { const n = Math.ceil(Math.min(dt, 0.1) / 0.005); for (let i = 0; i < n; i++) car.tick(Math.min(dt, 0.1) / n); });
+      // The sketch's 100 Hz control step, run on simulation time in 5 ms physics
+      // substeps so a slow browser frame cannot make the car skip the line.
+      const ctrl = { on: false, kp: 0.5, kd: 1.5, base: 160, last: 0, acc: 0, e: 0, u: 0, l: 0, r: 0 };
+      const controlStep = () => {
+        let sum = 0, seen = 0;
+        read().forEach((black, i) => { if (black) { sum += (i - 2) * 100; seen++; } });
+        const e = seen ? Math.trunc(sum / seen) : ctrl.last > 0 ? 300 : -300;
+        const u = ctrl.kp * e + ctrl.kd * (e - ctrl.last);
+        ctrl.last = e;
+        ctrl.l = clamp(Math.trunc(ctrl.base + u), -255, 255);
+        ctrl.r = clamp(Math.trunc(ctrl.base - u), -255, 255);
+        Object.assign(ctrl, { e, u });
+        car.setWheels(ctrl.l / 255, ctrl.r / 255);
+      };
+      ctx.onTick((dt) => {
+        dt = Math.min(dt, 0.1);
+        const n = Math.ceil(dt / 0.005), h = dt / n;
+        for (let i = 0; i < n; i++) {
+          if (ctrl.on && (ctrl.acc += h) >= 0.01) { ctrl.acc -= 0.01; controlStep(); }
+          car.tick(h);
+        }
+      });
       const cg = car.group;
       const D = car.deckY;
       const holder = new THREE.Group();
@@ -1012,7 +1033,7 @@ void loop() {
         ],
         note: () => `Sensors ${read().map((x) => (x ? '█' : '·')).join(' ')} (█ = over the line)`,
       });
-      return { car, track, arr, read, plot, motorWires, reset() { car.reset(); car.stop(); motorWires.forEach((w) => (w.live = false)); plot.reset(); sync(); } };
+      return { car, track, arr, read, plot, motorWires, ctrl, reset() { ctrl.on = false; ctrl.last = 0; ctrl.acc = 0; car.reset(); car.stop(); motorWires.forEach((w) => (w.live = false)); plot.reset(); sync(); } };
     },
     callouts: [
       { anchor: 'arr', x: 0.04, y: 0.17, icon: 'radar', title: '5 × TCRT5000 → A0–A4', text: 'Each reads HIGH over black tape. 1.4 cm apart, 4 mm above the mat.' },
@@ -1106,35 +1127,23 @@ void loop() {
     params: { base: { value: 160, min: 60, max: 255 }, kp: { value: 5, min: 0, max: 30 }, kd: { value: 15, min: 0, max: 120 } },
     async setup(io, b) {
       b.reset();
-      b.lastError = 0;
       b.n = 0;
-      b.lastT = 0;
       io.line('for (int p : pins)');
       await io.delay(80);
       io.line('Serial.begin(115200);');
       await io.delay(80);
     },
     async loop(io, b, p) {
+      const c = b.ctrl;
+      Object.assign(c, { kp: p.kp / 10, kd: p.kd / 10, base: p.base, on: true });
       io.line('int error = readError();');
-      const s = b.read();
-      let sum = 0, seen = 0;
-      s.forEach((black, i) => { if (black) { sum += (i - 2) * 100; seen++; } });
-      const error = seen ? Math.trunc(sum / seen) : b.lastError > 0 ? 300 : -300;
-      // the sketch runs every 10 ms; if the browser runs this loop slower, scale the
-      // derivative so it still means "change per 10 ms" like on the real board
-      const t = performance.now(), ms = b.lastT ? t - b.lastT : 10;
-      b.lastT = t;
-      const u = (p.kp / 10) * error + (p.kd / 10) * (error - b.lastError) * Math.min(1, 10 / ms);
-      b.lastError = error;
-      const l = clamp(Math.trunc(p.base + u), -255, 255), r = clamp(Math.trunc(p.base - u), -255, 255);
-      b.car.setWheels(l / 255, r / 255);
       b.motorWires.forEach((w) => (w.live = true));
-      b.plot.push(error, Math.round(u));
+      b.plot.push(c.e, Math.round(c.u));
       if (++b.n % 10 === 0) {
         io.line('motors(BASE + correction, BASE - correction);');
-        io.pin('D5', `PWM ${Math.abs(l)}`, true);
-        io.pin('D6', `PWM ${Math.abs(r)}`, true);
-        io.print(`${error},${fmt(u, 2)}`);
+        io.pin('D5', `PWM ${Math.abs(c.l)}`, true);
+        io.pin('D6', `PWM ${Math.abs(c.r)}`, true);
+        io.print(`${c.e},${fmt(c.u, 2)}`);
       }
       await io.delay(10);
     },

@@ -575,7 +575,8 @@ net = detectNet(model="wildlife/ssd-mobilenet.onnx", labels="wildlife/labels.txt
 camera = videoSource("csi://0")
 prev, seen, absent, visits = None, {}, {}, {}
 logfile = open("sightings.csv", "a", newline="")
-log = csv.writer(logfile)
+log = csv.writer(logfile)                     # columns: time, species, visit number
+print("Camera trap armed, logging to sightings.csv")
 
 while True:
     img = camera.Capture()
@@ -614,7 +615,7 @@ while True:
       io.line('net = detectNet'); io.print('[TRT]    loading network plan engine: wildlife/ssd-mobilenet.onnx (FP16)'); await io.delay(500);
       io.print('[TRT]    detectNet -- loaded 7 class info entries');
       io.line('camera = videoSource'); io.print('[gstreamer] gstCamera -- nvarguscamerasrc sensor-id=0, 1280x720 @ 30 fps'); await io.delay(250);
-      io.line('logfile = open'); st.running = true;
+      io.line('logfile = open'); io.line('print("Camera trap armed'); io.print('Camera trap armed, logging to sightings.csv'); st.running = true;
     },
     async loop(io, b, p) {
       const st = b.st;
@@ -677,7 +678,7 @@ while True:
     view: { center: [4, 3, 6], size: 44, az: -8 },
     build(ctx) {
       powerOn(ctx);
-      const rig = csiRig(ctx, { riser: 3.2, title: 'Hand tracking', look: 9, lookY: 5.6, fov: 48 });
+      const rig = csiRig(ctx, { riser: 3.2, title: 'Hand tracking', look: 9, lookY: 5.6, fov: 34 });
       ctx.step('Desk mat for your elbow');
       const desk = deskMat(14, 10);
       desk.position.set(CAM.x, MAT_H / 2, MAT_Z0 + 5);
@@ -895,12 +896,12 @@ while cap.isOpened():
       pole.userData.label = 'Camera pole';
       ctx.addObject(pole);
       const camPos = v(RX + 7.5, 14.6, RZ + 5.4);
-      const look = v(RX - 3.2, 0, RZ - 3.2).sub(camPos).normalize();
+      const look = v(RX - 5.5, 0, RZ - 5.5).sub(camPos).normalize();
       const yaw = Math.atan2(look.x, look.z), pitch = Math.asin(-look.y);
       const cam = ctx.add(makeUSBCam(camPos, { yaw, pitch, cableTo: v(0.83, 0.6, 4.6) }));
       cam.extras.forEach((o) => ctx.addObject(o));
       ctx.addObject(feedOnly(floorPlane(RX, RZ, 90, 90, '#9cc27a')));
-      const rig = feedPanel(ctx, { position: cam.lensWorld, target: cam.lensWorld.clone().addScaledVector(cam.lookDir, 10), fov: 52, title: 'Junction camera', sub: 'simulated inference · idle' });
+      const rig = feedPanel(ctx, { position: cam.lensWorld, target: cam.lensWorld.clone().addScaledVector(cam.lookDir, 10), fov: 44, title: 'Junction camera', sub: 'simulated inference · idle' });
       const bb = jetsonBench(ctx);
       ctx.step('North–south signal: red pin 11, amber pin 13, green pin 15');
       const ns = ctx.add(K(makeTrafficLight([bb.hole(5, 'e'), bb.hole(6, 'e'), bb.hole(7, 'e'), bb.hole(8, 'e')]), 'module', 'Traffic-light module (N–S)'));

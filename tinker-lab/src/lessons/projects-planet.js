@@ -675,7 +675,7 @@ void loop() {
       ['Update', 'PMS frame ≈ 1 s, SGP30 every 1 s (needed for its baseline)'],
     ],
     quiz: [
-      { q: 'PM2.5 = 30 µg/m³ and PM10 = 40 µg/m³. Which pollutant sets the AQI?', options: ['PM10, because it is bigger', 'PM2.5: it gives the higher AQI (≈ 89 vs ≈ 37)', 'Neither', 'TVOC'], answer: 1, explain: 'Each pollutant gets its own AQI from its table; the overall AQI is the maximum.' },
+      { q: 'PM2.5 = 30 µg/m³ and PM10 = 40 µg/m³. Which pollutant sets the AQI?', options: ['PM10, because it is bigger', 'PM2.5: it gives the higher AQI (≈ 90 vs ≈ 37)', 'Neither', 'TVOC'], answer: 1, explain: 'Each pollutant gets its own AQI from its table; the overall AQI is the maximum.' },
       { q: 'Why does the PMS5003 need 5 V but can still talk to the ESP32?', options: ['It cannot', 'Its fan runs on 5 V while its UART pins use 3.3 V logic', 'The ESP32 is 5 V tolerant', 'It converts automatically'], answer: 1, explain: 'The datasheet specifies 5 V supply and 3.3 V TTL serial levels.' },
       { q: 'Why is the SGP30’s eCO₂ not a true CO₂ measurement?', options: ['It is estimated from hydrogen and VOC signals', 'It is in the wrong unit', 'It only works outdoors', 'It is measured by the PMS5003'], answer: 0, explain: 'For real CO₂ you need an NDIR sensor such as the SCD40 or MH-Z19.' },
       { q: 'Using the 2024 EPA table, what AQI does PM2.5 = 9.0 µg/m³ give?', options: ['9', '25', '50', '100'], answer: 2, explain: '9.0 µg/m³ is the top of the Good band, which maps to AQI 50.' },
