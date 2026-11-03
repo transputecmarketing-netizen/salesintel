@@ -221,7 +221,7 @@ function frameAll(instant = false) {
   if (box.isEmpty()) return;
   const c = box.getCenter(new THREE.Vector3());
   const s = box.getSize(new THREE.Vector3());
-  stage.frame({ center: [c.x, 0.6, c.z], size: Math.max(9, Math.max(s.x, s.z * 1.25) + 1.5) }, instant);
+  stage.frame({ center: [c.x, 0.6, c.z], size: Math.max(8, Math.max(s.x, s.z * 1.3) * 0.95) }, instant);
 }
 
 // ================================================================ editing commands
@@ -241,7 +241,7 @@ function rotateSelection() {
   const centre = legs.reduce((a, l) => a.add(l), new THREE.Vector3()).multiplyScalar(1 / legs.length).add(leg0);
   const snap = ws.snapBB(def, centre, (part.rot + 1) % 4, `part:${part.id}`);
   if (!snap?.ok) return toast('No room to rotate it here: move it to a clearer spot first.');
-  commit((p) => { const q = p.parts.find((x) => x.id === part.id); q.rot = (q.rot + 1) % 4; q.at = snap.at; }, 'Rotate');
+  commit((p) => { const q = p.parts.find((x) => x.id === part.id); q.rot = (q.rot + 1) % 4; q.at = snap.at; delete q.at2; }, 'Rotate');
 }
 
 function deleteSelection() {
@@ -749,7 +749,7 @@ function burnOut(part, st) {
   const vf = LED_TYPES[part.props.color]?.vf ?? 2;
   const r = Math.ceil(((board.logic - vf) / 0.015) / 10) * 10;
   sticky.set(`burnt:${part.id}`, {
-    w: { id: `burnt:${part.id}`, level: 'danger', part: part.id, title: `The ${def.name.toLowerCase()} burnt out`,
+    w: { id: `burnt:${part.id}`, level: 'danger', part: part.id, title: `The ${def.name} burnt out`,
       text: `${mA(st.peak)} flowed through it; ${LED_MAX_MA} mA is the most a small LED survives. Once an LED turns on it has almost no resistance of its own, so nothing limited the current.`,
       fix: `Put a resistor in series: R = (${board.logic} V − ${vf} V) ÷ 15 mA ≈ ${r} Ω (220 Ω is the usual choice). Then replace the LED.`, replace: true },
     until: Infinity,
@@ -1246,6 +1246,7 @@ $('#tour').addEventListener('click', (e) => {
 window.addEventListener('keydown', (e) => { if (tourStep >= 0 && e.key === 'Escape') endTour(); });
 
 // ================================================================ boot
+const noTour = /[?&]notour/.test(location.search);
 async function boot() {
   const hash = location.hash;
   let loaded = false;
@@ -1257,14 +1258,14 @@ async function boot() {
   if (!loaded && lesson) { await openLesson(lesson); loaded = true; }
   const ex = /[#&]example=([\w-]+)/.exec(hash)?.[1];
   if (!loaded && ex) loaded = openExample(ex);
-  if (loaded) history.replaceState(null, '', location.pathname);
+  if (loaded) history.replaceState(null, '', location.pathname + location.search);
   if (!loaded) {
     const cur = storage.current();
     const p = cur && storage.load(cur);
     if (p) setProject(p);
     else setProject(newProject('uno'));
   }
-  if (!storage.flag('toured') && !/[?&]notour/.test(location.search)) setTimeout(startTour, 600);
+  if (!storage.flag('toured') && !noTour) setTimeout(startTour, 600);
 }
 window.addEventListener('hashchange', () => { if (/[#&](p|lesson|example)=/.test(location.hash)) boot(); });
 boot();

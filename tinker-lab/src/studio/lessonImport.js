@@ -107,7 +107,15 @@ export async function projectFromLesson(id) {
       if (col % 6) for (const row of RAILS) holes.push({ key: `${bbId}:${col}:${row}`, ep: { t: 'hole', bb: bbId, col, row }, pos: api.hole(col, row) });
     }
   });
-  const holeAt = (p) => holes.find((h) => h.pos.distanceTo(p) < 0.05) ?? null;
+  const used = new Set();
+  // a wire may land in the gap of a rail (no hole there on a real board): use the nearest free hole
+  const holeAt = (p) => {
+    const exact = holes.find((h) => h.pos.distanceTo(p) < 0.05);
+    if (exact) return exact;
+    let best = null, bd = 0.3;
+    for (const h of holes) { const d = h.pos.distanceTo(p); if (d < bd && !used.has(h.key)) { bd = d; best = h; } }
+    return best;
+  };
   // parts
   const pinOwners = []; // [{ pos, ep }]
   const lessonText = `${lesson.code} ${JSON.stringify(lesson.specs ?? '')}`;
@@ -131,7 +139,10 @@ export async function projectFromLesson(id) {
     const match = matchBB(api, legs, lessonText);
     if (!match) { report.skipped.push(labelOf(api, legs.length)); continue; }
     const leg0 = match.order[0];
-    project.parts.push({ id: sid, type: match.type, rot: match.rot, props: match.props, at: { bb: leg0.ep.bb, col: leg0.ep.col, row: leg0.ep.row } });
+    const q = { id: sid, type: match.type, rot: match.rot, props: match.props, at: { bb: leg0.ep.bb, col: leg0.ep.col, row: leg0.ep.row } };
+    if (match.stretch) q.at2 = { bb: match.order[1].ep.bb, col: match.order[1].ep.col, row: match.order[1].ep.row };
+    project.parts.push(q);
+    for (const h of match.order) used.add(h.key);
     report.parts++;
   }
   // wires
@@ -141,7 +152,7 @@ export async function projectFromLesson(id) {
       const pin = pinAt.get(key3(p));
       if (pin) return { t: 'board', pin };
       const h = holeAt(p);
-      if (h) return h.ep;
+      if (h) { used.add(h.key); return h.ep; }
       const m = pinOwners.find((o) => o.pos.distanceTo(p) < 0.08);
       return m ? m.ep : null;
     });
@@ -209,9 +220,23 @@ function matchBB(api, legs, text) {
         });
         if (!fits) continue;
         const p = props(type);
+        if (type === 'resistor') return { type, order, rot, props: p };
         const cand = def.build({ holes: order.map((h) => h.pos.clone()), props: p, rot });
         const f = fingerprint(cand.group);
         if (f.n === target.n && Math.abs(f.s - target.s) < 1e-3 * Math.max(1, Math.abs(target.s))) return { type, order, rot, props: p };
+      }
+    }
+  }
+  // two-lead parts with their leads bent to holes off the standard spacing
+  if (legs.length === 2) {
+    for (const type of ['resistor', 'led', 'diode', 'ldr', 'buzzer']) {
+      if (type === 'led' && !api.setColor) continue;
+      if (type === 'resistor') { if (api.setValue) return { type, order: legs, rot: 0, props: props(type), stretch: true }; continue; }
+      if (api.setValue || (type !== 'led' && api.setColor)) continue;
+      for (const order of [legs, [legs[1], legs[0]]]) {
+        const cand = PART[type].build({ holes: order.map((h) => h.pos.clone()), props: props(type), rot: 0 });
+        const f = fingerprint(cand.group);
+        if (f.n === target.n && Math.abs(f.s - target.s) < 1e-3 * Math.max(1, Math.abs(target.s))) return { type, order, rot: 0, props: props(type), stretch: true };
       }
     }
   }

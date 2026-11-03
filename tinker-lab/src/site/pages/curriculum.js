@@ -120,8 +120,8 @@ function lessonHTML(t, l, i, boardName) {
     <span class="n" aria-hidden="true">${pad(i + 1)}</span>
     <span class="t"><a href="/learn/#${esc(l.id)}">${esc(l.title)}</a>${sub ? `<small>${esc(sub)}</small>` : ''}</span>
     <span class="go">
-      <a class="btn btn-ghost" href="/learn/#${esc(l.id)}" aria-label="Open the lesson: ${esc(l.title)}">${lucide('play', { size: 15 })}Lesson</a>
-      <a class="btn btn-soft" href="/guide/#${esc(l.id)}" aria-label="Build guide: ${esc(l.title)}">${lucide('book-open', { size: 15 })}Guide</a>
+      <a class="btn btn-ghost" href="/learn/#${esc(l.id)}" aria-label="Open the lesson: ${esc(l.title)}">${lucide('play', { size: 15 })}<span class="lbl">Lesson</span></a>
+      <a class="btn btn-soft" href="/guide/#${esc(l.id)}" aria-label="Build guide: ${esc(l.title)}">${lucide('book-open', { size: 15 })}<span class="lbl">Guide</span></a>
     </span>
   </li>`;
 }

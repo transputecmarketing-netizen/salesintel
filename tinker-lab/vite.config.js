@@ -17,9 +17,12 @@ function pages(dir, out = {}) {
   return out;
 }
 
+const input = pages(root);
+input['404'] = resolve(root, '404.html');
+
 export default defineConfig({
   build: {
     chunkSizeWarningLimit: 2500,
-    rollupOptions: { input: pages(root) },
+    rollupOptions: { input },
   },
 });

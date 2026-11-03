@@ -1364,7 +1364,7 @@ export function makeIntersection(pos, opts = {}) {
   const APPS = { N: V(0, 0, 1), S: V(0, 0, -1), E: V(-1, 0, 0), W: V(1, 0, 0) };
   const lights = { N: 'red', S: 'red', E: 'red', W: 'red' };
   const lanes = {}, poles = {}, sensors = {}, feet = { pole: {}, sensor: {} }, rate = { N: 6, S: 6, E: 6, W: 6, ...opts.rate };
-  const acc = { N: 0, S: 0, E: 0, W: 0 };
+  const acc = { N: 0.95, S: 0.6, E: 0.85, W: 0.4 };
   for (const [k, h] of Object.entries(APPS)) {
     const rgt = V(-h.z, 0, h.x);
     const off = rgt.clone().multiplyScalar(RW / 4);
@@ -1405,7 +1405,7 @@ export function makeIntersection(pos, opts = {}) {
       }
       traffic.tick(dt);
     },
-    reset() { traffic.clear(); for (const k in lanes) { lanes[k].passed = 0; acc[k] = 0; } },
+    reset() { traffic.clear(); for (const k in lanes) { lanes[k].passed = 0; acc[k] = 0.5 + Math.random() * 0.5; } },
   };
   return api;
 }

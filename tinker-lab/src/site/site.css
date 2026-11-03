@@ -82,7 +82,8 @@ img, svg, video, canvas { display: block; max-width: 100%; }
 .site-head .wrap { height: 68px; display: flex; align-items: center; gap: 28px; }
 .site-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tl-ink); }
 .site-brand .tl-mark { width: 30px; height: auto; }
-.site-brand span { font: 400 21px/1 var(--tl-serif); letter-spacing: -0.01em; }
+.site-brand span { font: 400 21px/1 var(--tl-serif); letter-spacing: -0.01em; white-space: nowrap; }
+.site-brand { flex: none; }
 .site-nav { display: flex; gap: 26px; margin-left: auto; }
 .site-nav a { text-decoration: none; font-size: 16px; color: var(--tl-ink-2); padding: 6px 0; }
 .site-nav a:hover, .site-nav a[aria-current='page'] { color: var(--tl-ink); }

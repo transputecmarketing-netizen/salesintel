@@ -275,6 +275,8 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       return Infinity;
     }
     if (b.k === 'fn' && (a.k === 'fn' || (a.k === 'ptr' && a.to.k === 'fn'))) return 0;
+    if (a.k === 'class' && a.cls.convertTo && b.k !== 'class' && (isArith(b) || b.k === 'ptr')) return 4;
+    if (a.k === 'class' && a.cls.convertTo && b.k === 'class' && b.cls.name === 'String') return 4;
     if (b.isBool && (a.k === 'ptr' || a.k === 'array')) return 3;
     if (b.isBool && a.k === 'class' && a.cls.toBool) return 4;
     if (b.k === 'class') {
@@ -291,6 +293,7 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
   function converter(from, to) {
     const a = canon(from), b = canon(to);
     if (a === ERR || b === ERR || b.k === 'any') return null;
+    if (a.k === 'class' && a.cls.convertTo && !(b.k === 'class' && b.cls === a.cls)) { const cv = a.cls.convertTo; const T_ = T; return (v) => cv(v, b, T_); }
     if (isArith(a) && isArith(b)) {
       if (sameType(a, b)) return null;
       if (a.k === 'int' && b.k === 'int' && a.bits === b.bits && a.unsigned === b.unsigned && !b.isBool) return null;
@@ -300,7 +303,7 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
     if (b.isBool) {
       if (a.k === 'ptr' || a.k === 'nullptr') return (v) => (v == null ? 0 : 1);
       if (a.k === 'array' || a.k === 'fn') return () => 1;
-      if (a.k === 'class') return (v) => (a.cls.toBool(v) ? 1 : 0);
+      if (a.k === 'class') return a.cls.toBool ? (v) => (a.cls.toBool(v) ? 1 : 0) : (v) => (a.cls.convertTo(v, b, T) ? 1 : 0);
     }
     if (b.k === 'ptr') {
       if (a.k === 'array') return (v) => new Ptr(v, 0);
@@ -371,7 +374,7 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
     const a = canon(e.t);
     if (a === ERR) return { s: () => 0, t: T.bool };
     if (a.k === 'class') {
-      if (!a.cls.toBool) { error(node, `could not convert '${node?.kind === 'ident' ? node.name : 'expression'}' from '${typeName(e.t)}' to 'bool'`); return { s: () => 0, t: T.bool }; }
+      if (!a.cls.toBool && !a.cls.convertTo) { error(node, `could not convert '${node?.kind === 'ident' ? node.name : 'expression'}' from '${typeName(e.t)}' to 'bool'`); return { s: () => 0, t: T.bool }; }
     } else if (a.k === 'struct' || a.k === 'void') {
       error(node, `could not convert ${a.k === 'void' ? "'void' expression" : `'${typeName(a)}'`} to 'bool'`);
       return { s: () => 0, t: T.bool };
@@ -573,6 +576,7 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       s = (f) => { const p = inner(f); return p.b[p.o]; };
     }
     sym.used = true;
+    if (sym.cv !== undefined && !sym.ref) { const cv = sym.cv; s = () => cv; }
     return { t, s, at, readonly: sym.isConst, cv: sym.cv, sym, name: sym.name };
   }
   function fnDistance(from, to) {
@@ -720,8 +724,9 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
   function foldConst(e, a, b, op, t, node) {
     if (a.cv === undefined || b.cv === undefined || typeof a.cv !== 'number' || typeof b.cv !== 'number') return e;
     if (isInt(t) && (op === '/' || op === '%') && b.cv === 0) return e;
-    const v = e.s ? e.s({ vm: { fail() {} } }) : undefined;
-    if (v === undefined) return e;
+    let v;
+    try { v = e.s ? e.s({ vm: { fail() {} }, g: [], s: [] }) : undefined; } catch { v = undefined; }
+    if (v === undefined || typeof v !== 'number') return e;
     if (isInt(t) && !canon(t).isBool && ['+', '-', '*', '<<'].includes(op)) {
       const ma = BigInt(Math.trunc(a.cv)), mb = BigInt(Math.trunc(b.cv));
       const exact = op === '+' ? ma + mb : op === '-' ? ma - mb : op === '*' ? ma * mb : ma << mb;
@@ -802,7 +807,9 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
     const cls = ca.k === 'class' ? ca.cls : cb.cls;
     if (cls.ops?.[op]) {
       const o = cls.ops[op];
-      return mk(typeFromString(o.ret), [a, b], (x, y) => o.fn(x, y));
+      const rt = o.ret === 'right' ? decay(b.t) : o.ret === 'left' ? a.t : typeFromString(o.ret);
+      const bt = b.t, at_ = a.t;
+      return mk(rt, [a, b], (x, y) => o.fn(x, y, bt, T, at_));
     }
     error(node, `no match for 'operator${op}' (operand types are '${typeName(a.t)}' and '${typeName(b.t)}')`);
     return errE();
@@ -900,6 +907,12 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       const r = conv(ex(node.right, scope), T.char, node.right);
       const { obj, idx } = l.strIndex;
       return mk(T.char, [obj, idx, r], (o, i, c) => { if (i >= 0 && i < o.s.length) o.s = o.s.slice(0, i) + String.fromCharCode(c & 255) + o.s.slice(i + 1); return c; });
+    }
+    if (canon(l.t).k === 'class' && canon(l.t).cls.assign && node.op === '=' && !l.at && !l.atg) {
+      const r = node.right.kind === 'initlist' ? errE() : ex(node.right, scope);
+      if (r.t === ERR) return errE();
+      const rt = r.t, asg = canon(l.t).cls.assign;
+      return mk(l.t, [l, r], (lv, rv) => { asg(lv, rv, rt); return lv; });
     }
     if (!requireLvalue(l, node, 'assign')) { if (node.right.kind !== 'initlist') ex(node.right, scope); return errE(); }
     const lt = canon(l.t);
@@ -1186,9 +1199,17 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       const pick = pickSig(m.sigs, argEs, node, `${cls.name}::${cal.name}`);
       if (!pick) return errE();
       if (m.check) m.check({ args: argEs, node, warn: (msg, hint) => warn(node, msg, hint), error: (msg, hint) => error(node, msg, hint), T, board });
-      const impl = m.impls ? m.impls[pick.idx] : m.impl;
+      let impl = m.impls ? m.impls[pick.idx] : m.impl;
       let ret = pick.sig.ret;
       if (m.retSame) ret = argEs[0].t;
+      if (m.targ) {
+        if (!cal.targ) { error(cal, `no matching function for call to '${cls.name}::${cal.name}()'`, `Write it with a type, e.g. ${exprText(cal.obj)}.${cal.name}<int>()`); return errE(); }
+        const tt = applyDeclarator(resolveSpec(cal.targ.spec, scope), { ...cal.targ.decl, name: '' }, scope);
+        if (tt === ERR) return errE();
+        if (m.targ === 'ret') ret = tt;
+        const inner = impl, TT = tt;
+        impl = isGen(inner) ? function* (vm, self, ...a) { return yield* inner(vm, self, TT, ...a); } : (vm, self, ...a) => inner(vm, self, TT, ...a);
+      }
       return callImpl(impl, ret, libArgs(pick.sig, argEs, node), objE, node);
     }
     const callee = cal.kind === 'ident' ? ex(cal, scope) : ex(cal, scope);
@@ -1413,6 +1434,11 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       const e = mk(T.char, [o, ie], (s, k) => (k < s.s.length ? s.s.charCodeAt(k) : 0));
       e.strIndex = { obj: o, idx: ie };
       return e;
+    }
+    if (ot.k === 'class' && ot.cls.indexOp) {
+      const io = ot.cls.indexOp;
+      const it = i.t;
+      return mk(typeFromString(io.type), [o, i], (ov, iv) => io.fn(ov, iv, it, T));
     }
     if (ot.k === 'class' && ot.cls.index) {
       const ix = ot.cls.index;
@@ -1943,9 +1969,20 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
       case 'rangefor': {
         const sc = new Scope(scope, curFn);
         sc.from = node.line; sc.to = blockEnd(node.body);
-        const range = ex(node.range, sc);
+        let range;
+        if (node.range.kind === 'initlist') {
+          let it0 = resolveSpec(node.spec, sc);
+          if (canon(it0).k === 'any') it0 = node.range.items.length ? ex(node.range.items[0], sc).t : T.int;
+          range = initE(node.range, arrayOf(it0, node.range.items.length), sc);
+        } else range = ex(node.range, sc);
         if (range.t === ERR) return null;
-        const rt = canon(range.t);
+        let rt = canon(range.t);
+        if (rt.k === 'class' && rt.cls.iterate) {
+          const elT0 = typeFromString(rt.cls.elemType);
+          const itf = rt.cls.iterate;
+          range = mk(arrayOf(elT0, null), [range], (v) => itf(v));
+          rt = canon(range.t);
+        }
         if (rt.k !== 'array' && !isString(rt)) { error(node.range, `'begin' was not declared in this scope`, 'A range-based for loop needs an array.'); return null; }
         const elT = isString(rt) ? T.char : rt.of;
         let t = resolveSpec(node.spec, sc);

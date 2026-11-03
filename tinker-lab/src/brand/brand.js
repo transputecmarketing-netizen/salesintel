@@ -15,6 +15,7 @@ export const BRAND = {
   domain: '[your-domain]',
   legalEffectiveDate: '3 November 2026',
   governingLaw: '[Country / State]',
+  host: 'Vercel Inc.', // hosting provider named in the privacy policy
 };
 
 /** True while any legal placeholder above has not been filled in. */

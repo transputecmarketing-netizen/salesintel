@@ -239,7 +239,10 @@ export class Workspace {
     if (!bb) return null;
     const origin = bb.api.hole(part.at.col, part.at.row);
     const holes = [], keys = [];
-    for (const p of legPositions(def, origin, part.rot)) {
+    // a two-lead part may have its leads bent to any second hole (at2)
+    const bb2 = part.at2 && this.bbs.get(part.at2.bb);
+    const pts = bb2 ? [origin, bb2.api.hole(part.at2.col, part.at2.row)] : legPositions(def, origin, part.rot);
+    for (const p of pts) {
       const h = this.holeAt(p);
       if (!h) return null;
       holes.push(h.pos.clone());
@@ -414,6 +417,7 @@ export class Workspace {
         const part = p.parts.find((x) => x.id === moveId);
         if (!part) return;
         part.rot = rot;
+        delete part.at2;
         if (snap.at) part.at = snap.at; else part.pos = snap.pos;
       } else {
         newId = uid(type.slice(0, 3));
@@ -465,6 +469,7 @@ export class Workspace {
   #finishWire(to) {
     const from = this.wiring.from;
     this.#endWiring();
+    this.#hover(null);
     if (to.key === from.key) return;
     const auto = this.#autoColor(from, to);
     const id = uid('w');

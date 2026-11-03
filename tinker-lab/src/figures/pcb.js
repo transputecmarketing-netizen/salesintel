@@ -50,7 +50,7 @@ const dseg = (p, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = Math.m
 function mount({ stage, svg, read }, value) {
   const bag = disposer();
   let LIFT = value;
-  const C = Cam(45, 0.5, 2.0);
+  const C = Cam(45, 0.5, 2.2);
   fit(C, [[-BX, -BY, 0], [BX, BY, 0], [BX, -BY, 0], [-BX, BY, 0], [-BX, -BY, T + 22], [BX, -BY, T + 22]], 200, 168);
   const P = proj(C), front = facing(C);
   const g = mk('g', {}, svg);
@@ -139,6 +139,6 @@ export default {
   means: 'A circuit board: the trace under the pointer lifts off, and the pads on its net follow it up, the nearest first.',
   rules: [1, 2, 4, 6],
   range: [10, 16, 24],
-  tour: [[293, 194], [210, 223], [146, 158], null],
+  tour: [[303, 197], [228, 195], [141, 157], null],
   mount,
 };

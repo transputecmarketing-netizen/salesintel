@@ -3,7 +3,8 @@
 // project = {
 //   v: 1, id, name, board: 'uno' | 'nano' | 'mega' | 'esp32', code,
 //   breadboards: [{ id, x, z }],
-//   parts: [{ id, type, rot: 0–3, props, at: { bb, col, row } (breadboard parts: hole of leg 0) | pos: [x, z] (free parts) }],
+//   parts: [{ id, type, rot: 0–3, props, at: { bb, col, row } (breadboard parts: hole of leg 0) | pos: [x, z] (free parts),
+//             at2?: { bb, col, row } (two-lead parts whose leads are bent to a non-standard second hole) }],
 //   wires: [{ id, a: Endpoint, b: Endpoint, color }],
 // }
 // Endpoint = { t: 'hole', bb, col, row } | { t: 'board', pin } | { t: 'part', id, pin }
@@ -58,6 +59,7 @@ export function normalizeProject(p) {
     if (def.mount === 'bb') {
       if (!part.at || !bbs.has(part.at.bb)) continue;
       q.at = { bb: part.at.bb, col: part.at.col | 0, row: String(part.at.row) };
+      if (part.at2 && bbs.has(part.at2.bb) && def.legs.length === 2) q.at2 = { bb: part.at2.bb, col: part.at2.col | 0, row: String(part.at2.row) };
     } else q.pos = [Number(part.pos?.[0]) || 0, Number(part.pos?.[1]) || 0];
     out.parts.push(q);
   }

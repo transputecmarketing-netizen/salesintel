@@ -56,8 +56,25 @@ export function parse(tokens, { typeNames = new Set() } = {}) {
     const t = peek(o);
     if (t.k !== 'id') return false;
     if (BUILTIN_TYPE_WORDS.has(t.v) || QUALIFIERS.has(t.v) || t.v === 'struct' || t.v === 'enum' || t.v === 'union' || t.v === 'class') return true;
-    if (types.has(t.v)) return !(peek(o + 1).v === '::');
+    if (types.has(t.v)) {
+      if (peek(o + 1).v === '::') return types.has(`${t.v}::${peek(o + 2).v}`);
+      return true;
+    }
     return false;
+  }
+
+  /** Skip a balanced <...> template argument list; returns its tokens. */
+  function templateArgs() {
+    const start = p;
+    if (!is('<')) return null;
+    let depth = 0;
+    for (let i = 0; ; i++) {
+      const x = peek(i);
+      if (x.k === 'eof' || x.v === ';' || x.v === '{') return null;
+      if (x.v === '<') depth++;
+      else if (x.v === '>') { if (--depth === 0) { const toks = tokens.slice(start + 1, start + i); p = start + i + 1; return toks; } }
+      else if (x.v === '>>') { depth -= 2; if (depth <= 0) { const toks = tokens.slice(start + 1, start + i); p = start + i + 1; return toks; } }
+    }
   }
 
   /** decl-specifiers: qualifiers + base type. */
@@ -117,6 +134,8 @@ export function parse(tokens, { typeNames = new Set() } = {}) {
       if (!sawBase && types.has(t.v)) {
         next();
         spec.name = t.v;
+        if (is('::') && types.has(`${t.v}::${peek(1).v}`)) { next(); spec.name = `${t.v}::${next().v}`; }
+        if (is('<')) spec.targs = templateArgs();
         sawBase = true;
         continue;
       }
@@ -352,7 +371,8 @@ export function parse(tokens, { typeNames = new Set() } = {}) {
     }
     if (types.has(t.v)) {
       const n = peek(1);
-      if (n.v === '(' || n.v === '::' || n.v === '.') return false;
+      if (n.v === '::') return types.has(`${t.v}::${peek(2).v}`);
+      if (n.v === '(' || n.v === '.') return false;
       return true;
     }
     return false;
@@ -604,6 +624,14 @@ export function parse(tokens, { typeNames = new Set() } = {}) {
         next();
         const n = ident('unqualified-id');
         e = { kind: 'member', obj: e, name: n.v, arrow: t.v === '->', line: n.line, col: n.col };
+        if (is('<')) {
+          const save = p;
+          next();
+          if (isTypeStart()) {
+            const targ = parseTypeId();
+            if (accept('>') && is('(')) e.targ = targ; else p = save;
+          } else p = save;
+        }
       } else if (t.v === '++' || t.v === '--') {
         next();
         e = { kind: 'postinc', op: t.v, arg: e, line: t.line, col: t.col };
