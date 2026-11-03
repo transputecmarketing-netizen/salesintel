@@ -193,6 +193,11 @@ export const esp32 = [
       });
       return { state };
     },
+    hw: (b) => {
+      b.state.resetReq = false;
+      // the blue LED on GPIO2 is driven by the runtime; EN restarts the sketch
+      return { pollReset: () => { const r = b.state.resetReq; b.state.resetReq = false; return r ? 'reset' : null; } };
+    },
     callouts: [
       { anchor: 'usb', x: 0.04, y: 0.17, icon: 'usb', title: 'Micro-USB', text: 'Power, uploads and Serial — via the USB-to-UART chip next to it.' },
       { anchor: 'module', x: 0.36, y: 0.12, icon: 'chip', title: 'ESP32-WROOM-32', text: 'Two 240 MHz cores, 520 KB RAM, 4 MB flash, Wi-Fi and Bluetooth under the can.' },
@@ -306,6 +311,34 @@ void loop() {
       const plot = ctx.plotter({ title: 'Signal strength', series: [{ name: 'RSSI dBm', color: '#23a39d', min: -100, max: -30 }] });
       ctx.anchor('router', router.anchor);
       return { router, st, rssi, linkOk, plot };
+    },
+    hw: (b) => {
+      b.st.running = true;
+      b.plot.reset();
+      let buf = '';
+      return {
+        devices: {
+          wifi: {
+            accept: () => b.linkOk(),
+            connected: () => b.linkOk(),
+            rssi: () => b.rssi() + Math.round((Math.random() - 0.5) * 4),
+            networks: [
+              ...(b.linkOk() ? [{ ssid: 'YOUR_WIFI', rssi: b.rssi(), auth: 3 }] : []),
+              { ssid: 'Office-Guest', rssi: -71, auth: 0 }, { ssid: 'Kitchen-Printer', rssi: -78, auth: 3 }, { ssid: 'Cafe-Downstairs', rssi: -86, auth: 3 },
+            ].sort((x, y) => y.rssi - x.rssi),
+            onConnect: () => b.router.activity(),
+          },
+        },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) {
+            const m = /^RSSI: (-?\d+) dBm/.exec(l);
+            if (m) { b.plot.push(Number(m[1])); b.router.activity(); } else if (/Wi-Fi lost/.test(l)) b.plot.push(-100);
+          }
+        },
+      };
     },
     callouts: [
       { anchor: 'antenna', x: 0.04, y: 0.17, icon: 'globe', title: '2.4 GHz antenna', text: 'The ESP32 only sees 2.4 GHz networks — 5 GHz ones are invisible to it.' },
@@ -987,6 +1020,24 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       return { ...c, pad, st, plot };
     },
+    hw: (b) => {
+      b.plot.reset();
+      let threshold = 0, buf = '';
+      return {
+        // a finger adds capacitance, so the touch count falls (≈ 72 untouched, ≈ 14 touched)
+        touchRead: (pin) => (pin === 4 ? Math.max(4, Math.round(72 - b.pad.level * b.pad.level * 58 + (Math.random() - 0.5) * 3)) : 72),
+        digitalWrite: (pin, v) => { if (pin === 2) b.set(v ? 1 : 0); },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) {
+            const m = /touch:(\d+) threshold:(-?\d+)/.exec(l) ?? /baseline:\d+ threshold:(-?\d+)/.exec(l);
+            if (m && m.length === 3) { threshold = Number(m[2]); b.plot.push(Number(m[1]), threshold); }
+          }
+        },
+      };
+    },
     callouts: [
       { anchor: 'pad', x: 0.7, y: 0.17, icon: 'hand', title: 'Copper pad', text: 'Press and hold it: your finger adds capacitance.' },
       { anchor: 'tw', x: 0.36, y: 0.12, icon: 'pins', title: 'GPIO4 = T0', text: 'One of 10 touch-capable pins. No resistor needed.' },
@@ -1316,6 +1367,29 @@ void loop() {
       ctx.anchor('sig', c.sig.mid);
       return { ...c, st, inbox, phone, term };
     },
+    hw: (b) => {
+      b.inbox.length = 0;
+      Object.assign(b.st, { ready: false, linked: false, reported: false, lines: [] });
+      b.phone.update();
+      let line = '';
+      return {
+        digitalWrite: (pin, v) => { if (pin === 5) b.set(v ? 1 : 0); },
+        devices: {
+          bluetooth: {
+            begin: () => { b.st.ready = true; b.phone.update(); },
+            hasClient: () => b.st.linked,
+            read: () => (b.st.linked && b.inbox.length ? `${b.inbox.shift()}\n` : null),
+            write: (text) => {
+              line += text;
+              const parts = line.split('\n');
+              line = parts.pop();
+              for (const p of parts) b.term('in', p.replace(/\r$/, ''));
+              if (parts.length) b.phone.update();
+            },
+          },
+        },
+      };
+    },
     callouts: [
       { anchor: 'antenna', x: 0.04, y: 0.17, icon: 'globe', title: 'Classic Bluetooth', text: 'Same 2.4 GHz antenna as Wi-Fi, speaking the Serial Port Profile.' },
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pins', title: 'GPIO5', text: 'Switched by the commands “on” and “off”.' },
@@ -1483,6 +1557,16 @@ void loop() {
       ctx.anchor('res', res.anchor);
       ctx.anchor('w4', w4.mid);
       return { btn, res, st, plot };
+    },
+    hw: (b) => {
+      b.plot.reset();
+      Object.assign(b.st, { running: true, asleep: false, mA: 78 });
+      return {
+        // button to 3V3 with a 10 kΩ pull-down: HIGH while pressed
+        digitalRead: (pin) => (pin === 4 ? (b.st.pressed ? 1 : 0) : null),
+        sleep: () => { b.st.asleep = true; },
+        wake: () => { b.st.asleep = false; b.st.mA = 78; },
+      };
     },
     callouts: [
       { anchor: 'module', x: 0.04, y: 0.17, icon: 'timer', title: 'RTC timer', text: 'Keeps ticking at ≈ 10 µA while everything else sleeps.' },

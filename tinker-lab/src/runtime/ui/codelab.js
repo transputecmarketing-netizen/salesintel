@@ -312,7 +312,7 @@ export class CodeLab {
     vm.on('state', (s) => this.stateChanged(s));
     vm.on('warning', (w) => { this.flushSerial(); this.h.print(`Warning (line ${w.line}): ${w.message}`, 'sys'); });
     vm.on('error', (e) => this.runtimeError(e));
-    vm.on('reset', (e) => { this.flushSerial(); this.h.print(e.reason === 'deepsleep' ? '— woke from deep sleep: the board restarts at setup() —' : '— the board restarted —', 'sys'); });
+    vm.on('reset', (e) => { this.flushSerial(); this.h.print(e.reason === 'deepsleep' ? '— woke from deep sleep: the board restarts at setup() —' : e.reason === 'power' ? '— power cycled: the sketch starts again —' : '— the board was reset —', 'sys'); });
     vm.on('sleep', (e) => { this.flushSerial(); this.h.print(e.mode === 'deep' ? '— deep sleep —' : '— sleeping until an interrupt —', 'sys'); });
     vm.on('frame', () => this.frame());
     this.h.showRunState(true, { lang: 'cpp' });
@@ -452,6 +452,10 @@ export class CodeLab {
       pulseIn: (p, level, t) => lh.pulseIn?.(p, level, t) ?? 0,
       touchRead: lh.touchRead,
       serialWrite: lh.serialWrite,
+      serialRead: lh.serialRead,
+      pollReset: lh.pollReset,
+      sleep: lh.sleep,
+      wake: lh.wake,
       devices,
     };
   }

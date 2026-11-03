@@ -228,6 +228,8 @@ export class VM {
   runSlice(targetUs, deadline) {
     this.limitUs = targetUs;
     this.deadline = deadline;
+    const rq = this.hal.pollReset?.();
+    if (rq) { this.reboot(new Reset(rq === 'power' ? 'power' : 'reset', 0)); }
     this.pollInterrupts();
     let spins = 0;
     while (this.state === 'running') {
@@ -301,9 +303,11 @@ export class VM {
     this.emit('reset', { reason: e.reason, cause: e.cause });
     this.bootUs = this.us;
     this.frozenUs = 0;
-    const irqs = this.irqs;
     this.initPins();
-    void irqs;
+    // RAM is wiped; EEPROM, the SD card and the battery-backed RTC keep their contents
+    for (const k of [...this.libState.keys()]) if (!['eeprom', 'rtc', 'sd', 'i2c'].includes(k)) this.libState.delete(k);
+    for (const [pin] of this.toneOn ?? []) this.hal.noTone?.(pin);
+    this.toneOn?.clear();
     for (const fn of this.onReboot ?? []) fn();
     this.boot(e.reason === 'deepsleep');
   }
@@ -653,6 +657,10 @@ export class VM {
   /** Pull any device-provided input into a port's RX buffer. */
   uartFill(n) {
     const p = this.port(n);
+    if (n === 0 && this.hal.serialRead) {
+      const got = this.hal.serialRead();
+      if (got) p.rx += toBytes(String(got));
+    }
     if (n !== 0) {
       const dev = this.devices[`serial${n}`];
       const got = dev?.read?.();

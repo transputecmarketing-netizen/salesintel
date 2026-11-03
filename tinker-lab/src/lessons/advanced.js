@@ -5,6 +5,7 @@ import { makeButton, makeBuzzer, makeTrafficLight, makeLED, makeResistor } from 
 import { makeOLED, makeRTC, makeSDCard, makeHC05, makeDHT11 } from '../scene/modules.js';
 import { makeNano } from '../scene/boards/nano.js';
 import { v, ledOnPin } from './helpers.js';
+import { oledImage } from '../runtime/devices.js';
 
 /** Breadboard spot to the right of the (wider) Mega. */
 const BBM = [10.6, -0.6];
@@ -77,6 +78,10 @@ export const advanced = [
       ctx.anchor('led', c.led.anchor);
       return { ...c, btn, state };
     },
+    hw: (b) => ({
+      digitalRead: (pin) => (pin === 2 && b.btn.pressed ? 0 : null),
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+    }),
     callouts: [
       { anchor: 'd2', x: 0.36, y: 0.12, icon: 'bolt', title: 'Pin 2 · interrupt', text: 'A falling edge jumps straight into onPress().' },
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'LED on pin 13', text: 'Toggles with every counted press.' },
@@ -196,6 +201,20 @@ void loop() {
       ctx.anchor('bz', bz.anchor);
       ctx.anchor('dbl', tw[1].mid);
       return { tl, pr, pg, btn, bz, sm: {} };
+    },
+    hw: (b) => {
+      const car = { 22: 'red', 24: 'yellow', 26: 'green' };
+      return {
+        digitalWrite: (pin, v) => {
+          if (car[pin]) b.tl.set(car[pin], !!v);
+          if (pin === 28) b.pr.on(v ? 1 : 0);
+          if (pin === 30) b.pg.on(v ? 1 : 0);
+          if (pin === 34 && !v) b.bz.set(false);
+        },
+        digitalRead: (pin) => (pin === 32 && b.btn.pressed ? 0 : null),
+        tone: (pin, f) => { if (pin === 34) b.bz.set(true, f); },
+        noTone: (pin) => { if (pin === 34) b.bz.set(false); },
+      };
     },
     callouts: [
       { anchor: 'tl', x: 0.04, y: 0.17, icon: 'traffic', title: 'Car lights · 22/24/26', text: 'Driven from the Mega’s double header.' },
@@ -391,6 +410,17 @@ void loop() {
       ctx.anchor('bus', rtcW[0].mid);
       return { rtc, oled, state };
     },
+    hw: (b) => {
+      const oled = { show: (buf, w, h) => b.oled.draw((ctx) => ctx.putImageData(oledImage(ctx, buf, w, h), 0, 0)) };
+      return {
+        devices: {
+          // the DS3231 module also carries an AT24C32 EEPROM at 0x57
+          i2c: (addr) => (addr === 0x57 ? { read: (reg, n) => new Array(n).fill(0xff), write() {} } : null),
+          rtc: { now: () => new Date(), temperature: () => 22.25 },
+          oled: (addr) => (addr === 0x3c && b.state.oledOn ? oled : null),
+        },
+      };
+    },
     callouts: [
       { anchor: 'sda', x: 0.04, y: 0.17, icon: 'serial', title: 'SDA · pin 20', text: 'Data — shared by every device on the bus.' },
       { anchor: 'scl', x: 0.36, y: 0.12, icon: 'timer', title: 'SCL · pin 21', text: 'Clock, driven by the Mega (the controller).' },
@@ -550,6 +580,31 @@ void loop() {
       ctx.anchor('d22', dw.mid);
       return { sd, dht, state, plot };
     },
+    hw: (b) => {
+      const s = b.state;
+      const other = new Map();
+      // log.csv on the card is the lesson's file list, so the 3D card and the sketch agree
+      const files = {
+        get: (k) => (k === 'LOG.CSV' ? (s.file.length ? `${s.file.join('\r\n')}\r\n` : s.created ? '' : undefined) : other.get(k)),
+        set: (k, text) => { if (k === 'LOG.CSV') { s.created = true; s.file.length = 0; s.file.push(...text.split('\r\n').filter((x) => x !== '')); } else other.set(k, text); },
+        has: (k) => (k === 'LOG.CSV' ? s.created || s.file.length > 0 : other.has(k)),
+        delete: (k) => { if (k === 'LOG.CSV') { s.file.length = 0; s.created = false; return true; } return other.delete(k); },
+      };
+      b.plot.reset();
+      let buf = '';
+      return {
+        devices: {
+          sd: { files, get present() { return s.card; } },
+          dht: (pin) => (pin === 22 ? { temperature: () => s.temp + (Math.random() - 0.5) * 0.8, humidity: () => s.hum + (Math.random() - 0.5) * 2 } : null),
+        },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) { const m = /^(\d+),(-?[\d.]+),(\d+)\r?$/.exec(l); if (m) b.plot.push(Number(m[2]), Number(m[3])); }
+        },
+      };
+    },
     callouts: [
       { anchor: 'd22', x: 0.04, y: 0.17, icon: 'thermo', title: 'DHT11 · pin 22', text: 'Temperature and humidity over one data wire.' },
       { anchor: 'spi', x: 0.36, y: 0.12, icon: 'serial', title: 'SPI · pins 50–52', text: 'MISO, MOSI and SCK: the Mega’s hardware SPI.' },
@@ -705,6 +760,26 @@ void loop() {
       ctx.anchor('mode', m.btn.anchor);
       ctx.anchor('bright', br.btn.anchor);
       return { ...c, mode: m.btn, bright: br.btn, state, cfg: {} };
+    },
+    hw: (b) => {
+      const s = b.state;
+      const mem = new Uint8Array(4096).fill(0xff);
+      // EEPROM bytes 0–2 are the lesson's own copy, so the RESET / erase buttons and the note stay in step
+      const eeprom = new Proxy(mem, {
+        get: (t, k) => (typeof k === 'string' && /^[0-2]$/.test(k) ? s.ee[Number(k)] : t[k]),
+        set: (t, k, val) => {
+          if (/^[0-2]$/.test(k)) { if (s.ee[Number(k)] !== (val & 255)) s.writes++; s.ee[Number(k)] = val & 255; } else t[k] = val;
+          return true;
+        },
+      });
+      s.req = null;
+      return {
+        devices: { eeprom },
+        digitalRead: (pin) => ((pin === 2 && b.mode.pressed) || (pin === 3 && b.bright.pressed) ? 0 : null),
+        analogWrite: (pin, v) => { if (pin === 9) b.on(v / 255); },
+        digitalWrite: (pin, v) => { if (pin === 9) b.on(v ? 1 : 0); },
+        pollReset: () => { const r = s.req; s.req = null; if (r) b.led.set(0); return r; },
+      };
     },
     callouts: [
       { anchor: 'reset', x: 0.04, y: 0.17, icon: 'info', title: 'RESET', text: 'Click it: RAM is wiped, EEPROM keeps your settings.' },
@@ -908,6 +983,27 @@ void loop() {
       ctx.anchor('state', st.mid);
       return { hc, state, say, phone };
     },
+    hw: (b) => {
+      const s = b.state;
+      let line = '';
+      return {
+        digitalRead: (pin) => (pin === 22 ? (s.linked ? 1 : 0) : null),
+        devices: {
+          // Serial1 (pins 18/19) is the HC-05: bytes go to and come from the phone
+          serial1: {
+            write: (text) => {
+              if (!s.linked) return;
+              line += text;
+              const parts = line.split('\n');
+              line = parts.pop();
+              for (const p of parts) b.say('board', p.replace(/\r$/, ''));
+              if (parts.length) b.phone.update();
+            },
+            read: () => (s.linked && s.rx.length ? `${s.rx.shift()}\n` : null),
+          },
+        },
+      };
+    },
     callouts: [
       { anchor: 'usb', x: 0.04, y: 0.17, icon: 'usb', title: 'Serial (USB)', text: 'Pins 0/1 go to the computer: your log and serial monitor.' },
       { anchor: 'tx', x: 0.36, y: 0.12, icon: 'serial', title: 'Serial1 · pins 18/19', text: 'TX1 → divider → RXD; TXD → RX1.' },
@@ -1057,6 +1153,15 @@ void loop() {
       ctx.anchor('rw', rw.mid);
       return { rtc, oled, state };
     },
+    hw: (b) => {
+      const oled = { show: (buf, w, h) => b.oled.draw((ctx) => ctx.putImageData(oledImage(ctx, buf, w, h), 0, 0)) };
+      return {
+        devices: {
+          rtc: { now: () => new Date(), temperature: () => b.state.temp + (Math.random() - 0.5) * 0.3 },
+          oled: (addr) => (addr === 0x3c ? oled : null),
+        },
+      };
+    },
     callouts: [
       { anchor: 'chip', x: 0.04, y: 0.17, icon: 'chip', title: 'Nano-style board', text: 'Same ATmega328P as the Uno, on a breadboard-friendly stick.' },
       { anchor: 'sda', x: 0.36, y: 0.12, icon: 'serial', title: 'A4 = SDA, A5 = SCL', text: 'The Nano’s I²C pins, shared by both modules.' },
@@ -1195,6 +1300,16 @@ void loop() {
       ctx.anchor('btn', btn.anchor);
       ctx.anchor('d2', sig.mid);
       return { btn, state, plot };
+    },
+    hw: (b) => {
+      Object.assign(b.state, { running: true, mode: 'awake', ledOn: false, hist: [] });
+      b.plot.reset();
+      return {
+        digitalRead: (pin) => (pin === 2 && b.btn.pressed ? 0 : null),
+        digitalWrite: (pin, v) => { if (pin === 13) b.state.ledOn = !!v; },
+        sleep: () => { b.state.mode = 'asleep'; },
+        wake: () => { b.state.mode = 'awake'; },
+      };
     },
     callouts: [
       { anchor: 'chip', x: 0.04, y: 0.17, icon: 'chip', title: 'ATmega328P', text: '≈ 10 mA awake, under 1 µA in power-down sleep.' },

@@ -3,6 +3,7 @@
 import { makeResistor, makeLED, makePot } from '../scene/components.js';
 import { makeSevenSegment, makeDIP, makeLCD1602, makeOLED } from '../scene/modules.js';
 import { v, BB, clamp, ledGain } from './helpers.js';
+import { oledImage } from '../runtime/devices.js';
 
 /** Arduino map() with integer maths. */
 const amap = (x, a, b, c, d) => Math.trunc(((x - a) * (d - c)) / (b - a) + c);
@@ -53,6 +54,18 @@ export const displaysA = [
       ctx.anchor('dp', wires.D9.mid);
       ctx.anchor('gnd', gw.mid);
       return { seg, res };
+    },
+    hw: (b) => {
+      // segments a…g, dp on pins 2…9; common cathode, so HIGH lights a segment
+      let mask = 0;
+      return {
+        digitalWrite: (pin, v) => {
+          if (pin < 2 || pin > 9) return;
+          const bit = 1 << (pin - 2);
+          mask = v ? mask | bit : mask & ~bit;
+          b.seg.setSegments(mask);
+        },
+      };
     },
     callouts: [
       { anchor: 'a', x: 0.04, y: 0.17, icon: 'pins', title: 'Pins 2–9 → a–g, dp', text: 'One pin per segment; HIGH lights it.' },
@@ -186,6 +199,25 @@ void loop() {
       ctx.anchor('q0', qWires[0].mid);
       return { chip, leds, qWires, state, gain };
     },
+    hw: (b) => {
+      // a 74HC595: DS = D11, SH_CP = D12 (shift on the rising edge), ST_CP = D8 (latch on the rising edge)
+      const st = b.state;
+      st.shift = st.out = 0;
+      const lv = { 8: 0, 11: 0, 12: 0 };
+      return {
+        digitalWrite: (pin, v) => {
+          if (!(pin in lv)) return;
+          const rising = v && !lv[pin];
+          lv[pin] = v;
+          if (pin === 12 && rising) st.shift = ((st.shift << 1) | lv[11]) & 0xff;
+          if (pin === 8 && rising) {
+            st.out = st.shift;
+            b.leds.forEach((l, i) => l.set((st.out >> i) & 1 ? b.gain : 0));
+            b.qWires.forEach((w, i) => (w.live = !!((st.out >> i) & 1)));
+          }
+        },
+      };
+    },
     callouts: [
       { anchor: 'ds', x: 0.04, y: 0.17, icon: 'pins', title: 'Data · pin 11', text: 'One bit at a time into DS (chip pin 14).' },
       { anchor: 'sh', x: 0.36, y: 0.12, icon: 'timer', title: 'Clock · pin 12', text: 'Each rising edge shifts the bits along by one.' },
@@ -316,6 +348,16 @@ void loop() {
       ctx.anchor('vcc', vcc.mid);
       ctx.anchor('gnd', g.mid);
       return { lcd, state, t0: 0 };
+    },
+    hw: (b) => {
+      const lcd = {
+        print: (row, col, text) => b.lcd.print(row, col, text),
+        clear: () => b.lcd.clear(),
+        backlight: (on) => b.lcd.backlight(on),
+        createChar: (i, rows) => ([0, 10, 31, 31, 31, 14, 4, 0].every((r, k) => r === rows[k]) ? '♥' : '█'),
+      };
+      // the LCD only answers at the backpack address chosen on the part
+      return { devices: { lcd: (addr) => (addr === b.state.addr ? lcd : null) } };
     },
     callouts: [
       { anchor: 'sda', x: 0.04, y: 0.17, icon: 'pins', title: 'SDA and SCL', text: 'I²C needs just two signal wires for the whole display.' },
@@ -471,6 +513,15 @@ void loop() {
       ctx.anchor('sda', sda.mid);
       ctx.anchor('scl', scl.mid);
       return { oled, pot, state, history: new Array(64).fill(0), head: 0 };
+    },
+    hw: (b) => {
+      const oled = {
+        show: (buf, w, h) => b.oled.draw((ctx) => ctx.putImageData(oledImage(ctx, buf, w, h), 0, 0)),
+      };
+      return {
+        analogRead: (ch) => (ch === 0 ? clamp(Math.round(b.state.knob * 1023), 0, 1023) : 0),
+        devices: { oled: (addr) => (addr === 0x3c ? oled : null) },
+      };
     },
     callouts: [
       { anchor: 'a0', x: 0.04, y: 0.17, icon: 'wave', title: 'Wiper → A0', text: 'The knob position, 0–1023.' },

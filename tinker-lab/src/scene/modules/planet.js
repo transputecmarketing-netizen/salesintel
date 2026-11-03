@@ -1119,7 +1119,7 @@ export function makeForestPatch(pos, opts = {}) {
   }
   for (let i = 0; i < 6; i++) g.add(at(mesh(new THREE.DodecahedronGeometry(0.35 + r() * 0.3, 0), mat(0x9a968c)), (r() - 0.5) * W * 0.7, 0.15, (r() - 0.5) * D * 0.6));
   // fire
-  const fireAt = opts.fireAt ?? V(-3, 0, 0.6);
+  const fireAt = (opts.fireAt ?? V(-3, 0, 0.6)).clone();
   const fire = new THREE.Group();
   fire.position.copy(fireAt);
   g.add(fire);
@@ -1153,6 +1153,10 @@ export function makeForestPatch(pos, opts = {}) {
     /** Smoke drifts with the wind towards +x. */
     smokeWorld(k) { return g.localToWorld(fireAt.clone().add(V(k * 3, 1 + k * 5, 0))); },
     setFire(x) { level = clamp(x, 0, 1); return api; },
+    /** Move the fire to a local point of the patch. */
+    setFireAt(p) { fireAt.copy(p); fire.position.copy(p); return api; },
+    /** World point of a local spot (e.g. to aim a sensor). */
+    worldOf(p) { return g.localToWorld(p.clone()); },
     tick(dt) {
       t += dt;
       fire.visible = level > 0.01;
@@ -1738,6 +1742,8 @@ export function makeHand(pos, opts = {}) {
     get anchor() { return g.localToWorld(V(0, 13.5, 0)); },
     get gesture() { return gesture; },
     gestures: Object.keys(GEST),
+    /** Tilt the hand at the wrist (radians about the camera axis; + leans towards local −x). */
+    setRoll(r) { hand.rotation.z = r; g.updateMatrixWorld(true); return api; },
     setGesture(name) { gesture = GEST[name] ? name : 'open'; const G = GEST[gesture]; fingers.forEach((f, i) => (f.goal = G.f[i])); thumb.goal = G.t; return api; },
     snap() { fingers.forEach((f) => (f.cur = f.goal)); thumb.cur = thumb.goal; apply(); g.updateMatrixWorld(true); return api; },
     /** 21 landmark world positions (MediaPipe Hands order). */

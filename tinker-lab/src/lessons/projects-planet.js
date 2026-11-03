@@ -1019,7 +1019,8 @@ void loop() {
       const b = ctx.board;
       const bb = benchRails(ctx);
       ctx.step('A patch of forest to protect');
-      const forest = ctx.add(makeForestPatch(v(-7, 0, -16), { w: 26, d: 14 }));
+      const SPOTS = { near: v(9, 0, 3), deep: v(-5, 0, -1) };
+      const forest = ctx.add(makeForestPatch(v(-7, 0, -16), { w: 26, d: 14, fireAt: SPOTS.near }));
       ctx.step('The sensor post at the forest edge, sensors facing the trees');
       const post = ctx.add(makeWildfirePost(v(6, 0, -9.5), { rotY: Math.PI }));
       ctx.step('Harness: 5V → VIN, 3V3 and GND to the rails');
@@ -1055,13 +1056,14 @@ void loop() {
       const lora2 = ctx.add(makeLoRa(v(24, 0, -11.5)));
       spi(lora2, base, bb2, 1, 2);
 
-      const st = { fire: 0, t: 22, h: 55, auto: false, phase: 0, running: false, packets: [], fireA: forest.fireWorld.clone() };
+      const st = { fire: 0, spot: 'near', t: 22, h: 55, auto: false, phase: 0, running: false, packets: [], fireA: forest.fireWorld.clone() };
       const flameSeen = () => {
         if (forest.fire < 0.12) return false;
         const to = forest.fireWorld.clone().sub(post.flameEye);
         const dist = to.length();
-        // IR flame sensor: ≈ 60° cone; range grows with flame size (≈ 1 m for a lighter, metres for a fire)
-        const ang = to.normalize().angleTo(v(0, -0.55, -1).normalize());
+        // IR flame sensor: ≈ 60° cone aimed at the forest edge; range grows with flame size
+        const axis = forest.worldOf(SPOTS.near.clone().add(v(0, 1, 0))).sub(post.flameEye).normalize();
+        const ang = to.normalize().angleTo(axis);
         return ang < THREE.MathUtils.degToRad(35) && dist < 10 + forest.fire * 25;
       };
       ctx.onTick((dt) => {
@@ -1079,8 +1081,10 @@ void loop() {
         name: 'Forest', hint: 'Light a fire or run a hot, dry afternoon',
         controls: [
           { type: 'range', label: 'Fire', min: 0, max: 100, step: 1, get: () => Math.round(st.fire * 100), set: (x) => { st.auto = false; st.fire = x / 100; }, format: (x) => (x ? `${x} %` : 'none') },
+          { type: 'choice', label: 'Where', options: [['near', 'Forest edge (in the flame eye’s view)'], ['deep', 'Deep in the trees (smoke only)']], get: () => st.spot, set: (k) => { st.spot = k; forest.setFireAt(SPOTS[k]); st.fireA.copy(forest.fireWorld); } },
           { type: 'toggle', label: 'Run a dry afternoon (40 s)', get: () => st.auto, set: (x) => (st.auto = x) },
         ],
+        note: () => `Flame eye ${st.flame ? 'sees the fire' : 'sees no flame'}`,
       });
       ctx.interact(post, {
         name: 'Weather at the post', hint: 'The DHT22 sits in the white radiation shield',
@@ -1245,7 +1249,7 @@ void loop() {
       await io.delay(30);
       io.line('int smokeMv = analogReadMilliVolts');
       // smoke at the post: clean air ≈ 300 mV at the pin; drifts up with the fire's smoke reaching it
-      const smokeMv = Math.round(300 + 2000 * st.fire ** 0.8 + noise(15));
+      const smokeMv = Math.round(300 + 2000 * (st.fire * (st.spot === 'deep' ? 0.7 : 1)) ** 0.8 + noise(15));
       io.pin('GPIO34', `${smokeMv} mV`, true);
       const smoke = smokeMv > p.smoke;
       io.line('bool flame = digitalRead'); io.pin('GPIO35', st.flame ? 'LOW' : 'HIGH', st.flame);

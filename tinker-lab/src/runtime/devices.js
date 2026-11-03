@@ -48,3 +48,15 @@ export function serialPlotter(push) {
     }
   };
 }
+
+/** ImageData (white = lit) for a 1-bit display buffer, for makeOLED().draw((ctx) => ctx.putImageData(…)). */
+export function oledImage(ctx, buf, w, h) {
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+  for (let i = 0; i < w * h; i++) {
+    const v = buf[i] ? 255 : 0;
+    d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v;
+    d[i * 4 + 3] = 255;
+  }
+  return img;
+}

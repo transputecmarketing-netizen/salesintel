@@ -17,8 +17,8 @@ export function i2cDevice(vm, addr) {
   if (!cache.has(addr)) cache.set(addr, d.i2c?.(addr) ?? null);
   const dev = cache.get(addr);
   if (dev) return dev;
-  if ((addr === 0x27 || addr === 0x3f) && d.lcd) return { builtin: 'lcd' };
-  if ((addr === 0x3c || addr === 0x3d) && d.oled) return { builtin: 'oled' };
+  if ((addr === 0x27 || addr === 0x3f) && d.lcd?.(addr)) return { builtin: 'lcd' };
+  if ((addr === 0x3c || addr === 0x3d) && d.oled?.(addr)) return { builtin: 'oled' };
   if (addr === 0x68 && d.rtc) return { builtin: 'rtc' };
   return null;
 }
@@ -600,12 +600,14 @@ export function addHardware(R) {
   R.consts('int', { FILE_READ: 1, FILE_WRITE: 0x13, O_READ: 1, O_WRITE: 2, O_APPEND: 4, O_CREAT: 0x10 }, H('SD.h'));
   const fs = (vm) => vm.lib('sd', () => {
     const dev = vm.devices.sd;
-    return { files: dev?.files instanceof Map ? dev.files : new Map(), present: !!dev, begun: false };
+    const files = dev?.files && typeof dev.files.get === 'function' ? dev.files : new Map();
+    return { files, dev, get present() { return !!dev && dev.present !== false; }, begun: false };
   });
   const key = (name) => String(name).replace(/^\/+/, '').toUpperCase();
   const fileWrite = (vm, f, bytes) => {
     if (!f.open || !f.write) return 0;
     const F = fs(vm);
+    if (!F.present) { F.begun = false; return 0; }
     const cur = F.files.get(f.key) ?? '';
     F.files.set(f.key, cur.slice(0, f.pos) + bytes + cur.slice(f.pos + bytes.length));
     f.pos += bytes.length;
@@ -643,6 +645,7 @@ export function addHardware(R) {
       open: M(['File (cstr)', 'File (cstr, uint8_t)'], (vm, sd, name, mode = 1) => {
         const F = fs(vm);
         const k = key(name);
+        if (F.begun && !F.present) F.begun = false; // card pulled out: the library does not recover until SD.begin()
         if (!F.begun) return { open: false, key: k, pos: 0 };
         const w = (mode & 2) !== 0 || mode === 0x13;
         if (!F.files.has(k)) { if (!w) return { open: false, key: k, pos: 0 }; F.files.set(k, ''); }
@@ -666,10 +669,12 @@ export function addHardware(R) {
     const seq = vm.irqSeq;
     const start = vm.us;
     vm.emit('sleep', { mode: 'powerDown', ms: PERIOD_MS[period] });
+    vm.hal.sleep?.('powerDown');
     const max = PERIOD_MS[period] * 1000;
     yield* vm.waitFor(() => vm.irqSeq !== seq, max, 1000);
     if (stopsTimer0) vm.frozenUs += vm.us - start; // Timer0 is stopped: millis() does not advance while asleep
     vm.emit('wake', {});
+    vm.hal.wake?.();
   }
   R.cls({
     name: 'LowPowerClass',

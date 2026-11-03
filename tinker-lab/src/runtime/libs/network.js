@@ -142,7 +142,9 @@ export function addNetwork(R) {
       n.status = ok ? 3 : 1;
       if (ok) { n.dev.onConnect?.(n.ssid); vm.emit('wifi', { connected: true, ssid: n.ssid, ip: n.ip }); }
     }
-    if (n.status === 3 && n.dev.connected && !n.dev.connected()) n.status = 5;
+    if (n.status === 3 && n.dev.connected && !n.dev.connected()) { n.status = 5; vm.emit('wifi', { connected: false }); }
+    // like the ESP32's auto-reconnect: once the network is reachable again, it joins by itself
+    if ((n.status === 1 || n.status === 5) && n.ssid && n.dev.accept?.(n.ssid, n.pass)) { n.status = 'joining'; n.joinAt = vm.us + (n.dev.connectMs ?? 1500) * 1000; }
     return n.status === 'joining' ? 6 : n.status;
   };
   R.cls({
@@ -421,8 +423,10 @@ function* sleepUntil(vm, timerUs, cfg) {
 
 function* deepSleep(vm, timerUs, cfg) {
   vm.emit('sleep', { mode: 'deep', us: timerUs });
+  vm.hal.sleep?.('deep');
   for (const [pin] of vm.toneOn ?? []) vm.hal.noTone?.(pin);
   const cause = yield* sleepUntil(vm, timerUs, cfg);
   // the chip reboots: everything except RTC_DATA_ATTR variables is lost
+  vm.hal.wake?.(cause);
   throw new Reset('deepsleep', cause);
 }

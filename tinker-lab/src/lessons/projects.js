@@ -6,6 +6,7 @@ import {
   makeOLED, makeLCD1602, makeRelay, makeLamp, makeL298N, makePIR, makePerson, makeDHT11, makeKeypad, makeSoilSensor, makeRobotCar,
 } from '../scene/modules.js';
 import { v, clamp, BB, ledOnPin } from './helpers.js';
+import { oledImage } from '../runtime/devices.js';
 
 // ---------------------------------------------------------------- shared helpers
 /** Arduino's integer map(). */
@@ -189,6 +190,26 @@ export const projects = [
       ctx.anchor('a0', aW.mid);
       ctx.anchor('d7', inW.mid);
       return { oled, relay, soil, pump, state, plot, motorWires };
+    },
+    hw: (b) => {
+      b.state.running = true;
+      const oled = { show: (buf, w, h) => b.oled.draw((ctx) => ctx.putImageData(oledImage(ctx, buf, w, h), 0, 0)) };
+      let buf = '';
+      return {
+        analogRead: (ch) => (ch === 0 ? clamp(Math.round(620 - b.state.m * 340 + (Math.random() - 0.5) * 6), 0, 1023) : 0),
+        digitalWrite: (pin, v) => {
+          if (pin !== 7) return;
+          b.relay.set(!!v); b.pump.set(!!v);
+          b.motorWires.forEach((w) => (w.live = !!v));
+        },
+        devices: { oled: (addr) => (addr === 0x3c ? oled : null) },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) { const m = /^Soil (-?\d+)%/.exec(l.trim()); if (m) b.plot.push(Number(m[1]), 35, 60); }
+        },
+      };
     },
     callouts: [
       { anchor: 'relay', x: 0.04, y: 0.17, icon: 'bolt', title: 'Relay on D7', text: 'Switches the pump’s battery circuit — the board never powers the pump.' },
@@ -530,6 +551,31 @@ void loop() {
     thumb: () => makeRobotCar(v(0, 0, -4)).group,
     view: { center: [0, 3, 0], size: 66 },
     build: buildRobot,
+    hw: (b) => {
+      // L298N: ENA D5 / IN1 D7 / IN2 D8 drive the left wheel, ENB D6 / IN3 D9 / IN4 D11 the right one
+      b.reset();
+      const lv = {};
+      const wheel = (en, a, c) => { const duty = lv[en] ?? 0, d = (lv[a] ? 1 : 0) - (lv[c] ? 1 : 0); return (d * duty) / 255; };
+      const update = () => {
+        const l = wheel(5, 7, 8), r = wheel(6, 9, 11);
+        b.car.setWheels(l, r);
+        b.wheelsLive(l !== 0 || r !== 0);
+      };
+      return {
+        digitalWrite: (pin, v) => {
+          if (pin === 3) { if (v) b.ping(); return; }
+          lv[pin] = pin === 5 || pin === 6 ? (v ? 255 : 0) : v;
+          update();
+        },
+        analogWrite: (pin, v) => { lv[pin] = v; update(); },
+        pulseIn: (pin) => {
+          if (pin !== 2) return 0;
+          const cm = b.distance();
+          b.plot.push(Math.min(Math.round(cm), 150), 18);
+          return Math.round((cm * 2) / 0.0343);
+        },
+      };
+    },
     callouts: [
       { anchor: 'us', x: 0.04, y: 0.17, icon: 'radar', title: 'HC-SR04 · D3 / D2', text: 'Pings ahead every 60 ms; distances come from real ray-casts against the blocks.' },
       { anchor: 'uno', x: 0.36, y: 0.12, icon: 'chip', title: 'Uno on the deck', text: 'Runs the drive → back → scan → turn state machine.' },
@@ -991,6 +1037,20 @@ void loop() {
       ctx.anchor('person', person.anchor);
       ctx.anchor('out', outW.mid);
       return { kp, lcd, pir, bz, led, person, state };
+    },
+    hw: (b) => {
+      b.state.keys.length = 0;
+      const lcd = { print: (r, c, t) => b.lcd.print(r, c, t), clear: () => b.lcd.clear(), backlight: (on) => b.lcd.backlight(on) };
+      return {
+        digitalRead: (pin) => (pin === 2 ? (b.state.motion ? 1 : 0) : null),
+        digitalWrite: (pin, v) => { if (pin === 13) b.led.on(v ? 1 : 0); if (pin === 8 && !v) b.bz.set(false); },
+        tone: (pin, f) => { if (pin === 8) b.bz.set(true, f); },
+        noTone: (pin) => { if (pin === 8) b.bz.set(false); },
+        devices: {
+          keypad: () => ({ getKey: () => b.state.keys.shift() ?? null }),
+          lcd: (addr) => (addr === 0x27 ? lcd : null),
+        },
+      };
     },
     callouts: [
       { anchor: 'lcd', x: 0.04, y: 0.17, icon: 'info', title: 'LCD 16×2 (I²C)', text: 'Shows the state and a * for each digit typed.' },

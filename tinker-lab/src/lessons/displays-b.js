@@ -92,6 +92,16 @@ export const displaysB = [
       ctx.anchor('pwr', pwr.mid);
       return { ring, current };
     },
+    hw: (b) => ({
+      devices: {
+        neopixel: (pin, n) => (pin === 6 ? {
+          show: (rgb) => {
+            for (let i = 0; i < b.ring.count; i++) b.ring.setPixel(i, i < n ? rgb[i * 3] : 0, i < n ? rgb[i * 3 + 1] : 0, i < n ? rgb[i * 3 + 2] : 0);
+            b.ring.show();
+          },
+        } : null),
+      },
+    }),
     callouts: [
       { anchor: 'din', x: 0.36, y: 0.12, icon: 'pins', title: 'Data · pin 6', text: 'One wire carries 24 bits of colour per pixel at 800 kHz.' },
       { anchor: 'res', x: 0.7, y: 0.17, icon: 'resistor', title: '330 Ω in series', text: 'Damps spikes on the data line into pixel 0.' },
@@ -224,6 +234,30 @@ void loop() {
       ctx.anchor('in1', wires[0].mid);
       ctx.anchor('in4', wires[3].mid);
       return { st, wires, state };
+    },
+    hw: (b) => {
+      // decode the ULN2003 inputs (IN1–IN4 on D8–D11) into rotor moves, like the real motor:
+      // energised coils pull the rotor to the nearest half-step position; opposite coils just buzz
+      const coils = [0, 0, 0, 0];
+      let phase = ((b.state.half % 8) + 8) % 8, writes = 0;
+      const settle = () => {
+        const idx = HALF_STEPS.findIndex((c) => c.every((x, i) => x === coils[i]));
+        if (idx < 0 || idx === phase) return;
+        const d = (idx - phase + 8) % 8;
+        const n = d <= 3 ? d : d >= 5 ? d - 8 : 0;
+        for (let i = 0; i < Math.abs(n); i++) b.st.step(Math.sign(n));
+        b.state.half += n;
+        phase = idx;
+      };
+      return {
+        digitalWrite: (pin, v) => {
+          if (pin < 8 || pin > 11) return;
+          coils[pin - 8] = v ? 1 : 0;
+          if (++writes % 4 === 0) settle();
+        },
+        // the "Send 45 / 90 …" buttons type into the serial monitor
+        serialRead: () => (b.state.queue.length ? `${b.state.queue.shift()}\n` : null),
+      };
     },
     callouts: [
       { anchor: 'in4', x: 0.04, y: 0.17, icon: 'pins', title: 'Pins 8–11', text: 'Four outputs energise the coils in turn.' },
@@ -362,6 +396,19 @@ void loop() {
       ctx.anchor('d2', bw.mid);
       ctx.anchor('load', load[1].mid);
       return { relay, lamp, btn, load, state, lampOn: false, last: 1 };
+    },
+    hw: (b) => {
+      const set = (on) => {
+        b.state.on = on;
+        b.relay.set(on);
+        b.lamp.set(on);
+        b.load.forEach((w) => { w.live = on; });
+      };
+      return {
+        digitalWrite: (pin, v) => { if (pin === 7) set(!!v); },
+        digitalRead: (pin) => (pin === 2 && b.btn.pressed ? 0 : null),
+        serialRead: () => (b.state.requests.length ? `${b.state.requests.shift()}\n` : null),
+      };
     },
     callouts: [
       { anchor: 'in', x: 0.04, y: 0.17, icon: 'pins', title: 'IN · pin 7', text: 'A logic HIGH turns on the module’s transistor and coil.' },
@@ -518,6 +565,25 @@ void loop() {
       ctx.anchor('gnd', gw.mid);
       return { drv, mA, mB, state };
     },
+    hw: (b) => {
+      // L298N: EN sets the speed (PWM), INx/INy the direction; equal inputs with EN on brake, EN off coasts
+      const lv = {};
+      const M = [{ en: 9, a: 8, c: 7 }, { en: 3, a: 5, c: 4 }];
+      const update = () => {
+        const vf = Math.max(0, b.state.volts - 2) / 7;
+        M.forEach((m, i) => {
+          const duty = lv[m.en] ?? 0, a = lv[m.a] ?? 0, c = lv[m.c] ?? 0;
+          const dir = a && !c ? 1 : c && !a ? -1 : 0;
+          const s = b.state.m[i];
+          if (dir && duty > 0) Object.assign(s, { target: (dir * duty * vf) / 255, tau: 0.35 });
+          else Object.assign(s, { target: 0, tau: !dir && duty > 0 ? 0.08 : 0.6 });
+        });
+      };
+      return {
+        digitalWrite: (pin, v) => { lv[pin] = pin === 9 || pin === 3 ? (v ? 255 : 0) : v; update(); },
+        analogWrite: (pin, v) => { lv[pin] = v; update(); },
+      };
+    },
     callouts: [
       { anchor: 'bat', x: 0.04, y: 0.17, icon: 'bolt', title: 'Motor supply', text: 'Batteries feed the motors; GND is shared with the board.' },
       { anchor: 'in1', x: 0.36, y: 0.12, icon: 'pins', title: 'IN1 / IN2', text: 'HIGH-LOW = forward, LOW-HIGH = reverse, equal = brake.' },
@@ -673,6 +739,11 @@ void loop() {
       ctx.anchor('w4', keys[4].w.mid);
       return { keys: keys.map((x) => x.k), bz, playing: -1 };
     },
+    hw: (b) => ({
+      digitalRead: (pin) => (pin >= 2 && pin <= 9 && b.keys[pin - 2].pressed ? 0 : null),
+      tone: (pin, f) => { if (pin === 10) b.bz.set(true, f); },
+      noTone: (pin) => { if (pin === 10) b.bz.set(false); },
+    }),
     callouts: [
       { anchor: 'w4', x: 0.36, y: 0.12, icon: 'pins', title: 'Pins 2–9', text: 'One input per key, all with INPUT_PULLUP.' },
       { anchor: 'k0', x: 0.04, y: 0.68, icon: 'hand', title: 'Keys C4 … C5', text: 'Press and hold a key to play its note.' },
