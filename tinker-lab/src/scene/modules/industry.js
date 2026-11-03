@@ -1350,13 +1350,12 @@ export function makeIntersection(pos, opts = {}) {
       }
     }
   }));
-  // raised kerb blocks at the four corners
+  // kerbs along each arm (stop short of the junction)
   const kerb = mat(0xd9d4c6, { rough: 0.8 });
+  const kl = E - RW / 2 - 2.2;
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const w = E - RW / 2 - 2.2;
-    g.add(at(box(w, 0.3, w, mat(0xa9cf95, { rough: 0.9 }), { outline: false }), sx * (RW / 2 + 2.2 + w / 2), 0.15, sz * (RW / 2 + 2.2 + w / 2)));
-    g.add(at(box(w + 0.4, 0.34, 0.4, kerb, { outline: false }), sx * (RW / 2 + 2.2 + w / 2), 0.17, sz * (RW / 2 + 2.2)));
-    g.add(at(box(0.4, 0.34, w + 0.4, kerb, { outline: false }), sx * (RW / 2 + 2.2), 0.17, sz * (RW / 2 + 2.2 + w / 2)));
+    g.add(at(box(kl, 0.25, 0.3, kerb, { outline: false }), sx * (RW / 2 + 2.2 + kl / 2), 0.12, sz * (RW / 2 + 0.15)));
+    g.add(at(box(0.3, 0.25, kl, kerb, { outline: false }), sx * (RW / 2 + 0.15), 0.12, sz * (RW / 2 + 2.2 + kl / 2)));
   }
   g.position.copy(pos ?? V());
   g.updateMatrixWorld(true);
@@ -1372,17 +1371,17 @@ export function makeIntersection(pos, opts = {}) {
     lanes[k] = L;
     const yaw = Math.atan2(-h.x, -h.z); // lamps (local +z) face the oncoming car
     const pole = trafficPole();
-    pole.group.position.copy(h.clone().multiplyScalar(-(SL + 0.6)).addScaledVector(rgt, RW / 2 + 1.1)).setY(0.3);
+    pole.group.position.copy(h.clone().multiplyScalar(-(SL + 0.6)).addScaledVector(rgt, RW / 2 + 1.1)).setY(ROAD_Y);
     pole.group.rotation.y = yaw;
     g.add(pole.group);
     pole.show('red');
     poles[k] = pole;
-    const sp = h.clone().multiplyScalar(-(SL + 3)).addScaledVector(rgt, RW / 2 + 1.0);
-    const sens = makeIRObstacle(g.localToWorld(sp.clone().setY(0.3)), { rotY: Math.atan2(-rgt.x, -rgt.z), label: 'IR car sensor' });
+    const sp = h.clone().multiplyScalar(-(SL + 3)).addScaledVector(rgt, RW / 2 + 2.4);
+    const sens = makeIRObstacle(g.localToWorld(sp.clone().setY(ROAD_Y)), { rotY: Math.atan2(-rgt.x, -rgt.z), label: 'IR car sensor' });
     g.attach(sens.group);
     sensors[k] = sens;
     feet.pole[k] = g.localToWorld(pole.group.position.clone().addScaledVector(rgt, 0.6).setY(0.35));
-    feet.sensor[k] = g.localToWorld(sp.clone().addScaledVector(rgt, 0.9).setY(0.35));
+    feet.sensor[k] = g.localToWorld(sp.clone().addScaledVector(rgt, 1.9).setY(0.35));
   }
   const presence = (k) => traffic.occupied(lanes[k], lanes[k].stop - 3.1, lanes[k].stop - 2.9);
   const api = {
@@ -1819,4 +1818,376 @@ export function makeStreet(pos, opts = {}) {
     at: (x, z, y = ROAD_Y) => g.localToWorld(V(x, y, z)),
     tick(dt) { traffic.tick(dt); },
   };
+}
+
+// ================================================================= VL53L0X + pan scanner
+/** GY-VL53L0XV2 time-of-flight breakout (lying flat, sensor facing up). Pins VIN GND SCL SDA GPIO1 XSHUT. */
+function vl53Board() {
+  const b = makeBreakout({
+    w: 2.5, d: 1.3, color: PCB.purple, pins: ['VIN', 'GND', 'SCL', 'SDA', 'GPIO1', 'XSHUT'], pinsEdge: 'back', inset: 0.16, pinLabels: false,
+    holes: [[-1.0, 0.25], [1.0, 0.25]], holeR: 0.1,
+    silk: (P) => P.text('VL53L0X', 0, 0.48, 0.12, { weight: 700 }),
+  });
+  const s = new THREE.Group();
+  s.add(at(box(0.44, 0.1, 0.24, mat(0x16171b)), 0, 0.05, 0));
+  for (const dx of [-0.1, 0.1]) s.add(at(cyl(0.05, 0.05, 0.02, mat(0x4a5a8a, { metal: 0.4 }), { outline: false, seg: 10 }), dx, 0.105, 0));
+  b.on(s, 0, 0.15);
+  return b;
+}
+
+/**
+ * Pan scanner: a stand with an SG90 (shaft up) carrying a bracket with a
+ * VL53L0X (opts.sensor 'vl53', default) or an HC-SR04 ('hcsr04') looking along
+ * the horizontal. Servo 90 = local +Z; 0 = local −X side … 180 = +X side seen from
+ * above with the scanner facing away (rotY = π): 0 right, 180 left, like a radar.
+ * Header at the foot: SIG V+ V− (servo) and VIN GND SCL SDA (VL53L0X) or VIN TRIG ECHO GND.
+ * API: setAngle(deg) (slews), angle, ray() → { origin, dir } world, beam(cm) shows the measured ray.
+ */
+export function makePanScanner(pos, opts = {}) {
+  const g = new THREE.Group();
+  const H = opts.height ?? 5;
+  const us = opts.sensor === 'hcsr04';
+  const dark = mat(0x3a3d46, { rough: 0.6 });
+  g.add(at(box(4.0, 0.4, 3.2, dark), 0, 0.2, 0));
+  g.add(at(box(1.6, H - 2.4, 1.6, mat(0xc9ccd2, { metal: 0.45, rough: 0.4 })), 0, 0.4 + (H - 2.4) / 2, 0.55));
+  const sv = servoBody();
+  sv.position.set(0, H, 0);
+  sv.rotation.y = Math.PI / 2;
+  g.add(sv);
+  const pan = new THREE.Group();
+  pan.position.y = H;
+  g.add(pan);
+  pan.add(servoHorn(1.0));
+  // L-bracket
+  const alu = mat(0xc9ccd2, { metal: 0.5, rough: 0.38 });
+  pan.add(at(box(us ? 4.8 : 2.8, 0.15, 1.4, alu), 0, 0.2, 0));
+  pan.add(at(box(us ? 4.8 : 2.8, us ? 2.4 : 1.8, 0.15, alu), 0, (us ? 1.2 : 0.9) + 0.2, 0.62));
+  let sensorOrigin;
+  if (us) {
+    const board = new THREE.Group();
+    board.add(at(box(4.5, 2.0, 0.14, mat(0x2b62c4, { rough: 0.5 })), 0, 0, 0));
+    for (const s of [-1, 1]) {
+      const can = cyl(0.78, 0.78, 0.62, mat(0xd7d4cb, { metal: 0.55, rough: 0.35 }), { seg: 28 });
+      can.rotation.x = Math.PI / 2;
+      board.add(at(can, s * 1.3, 0.1, 0.38));
+    }
+    board.position.set(0, 1.4, 0.77);
+    pan.add(board);
+    sensorOrigin = V(0, 1.5, 1.2);
+  } else {
+    const b = vl53Board();
+    b.group.rotation.x = Math.PI / 2;
+    b.group.position.set(0, 1.2, 0.71);
+    pan.add(b.group);
+    sensorOrigin = V(0, 1.2, 0.95);
+  }
+  // cable loop from the bracket down to the stand
+  g.add(cable([V(-0.6, H + 0.6, -0.6), V(-1.4, H - 0.6, -1.0), V(-1.6, 1.6, -1.2), V(-1.4, 0.45, -1.3)], 0x6d7079, 0.07));
+  const names = us ? ['SIG', 'V+', 'V-', 'VIN', 'TRIG', 'ECHO', 'GND'] : ['SIG', 'V+', 'V-', 'VIN', 'GND', 'SCL', 'SDA'];
+  const hb = makeBreakout({ w: 0.4 + names.length * PITCH, d: 1.0, color: 0x25262b, pins: names, pinsEdge: 'back', inset: 0.22, labelSide: 'in' });
+  hb.group.position.set(0, 0.4, -1.0);
+  g.add(hb.group);
+  hb.group.updateMatrix();
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, p]) => [n, p.clone().applyMatrix4(hb.group.matrix)]));
+  // measured ray (teaching aid)
+  const beamM = new THREE.MeshBasicMaterial({ color: 0xef8a2b, transparent: true, opacity: 0, depthWrite: false });
+  const beam = noRay(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1, 8), beamM));
+  g.add(beam);
+  const dot = noRay(new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 8), new THREE.MeshBasicMaterial({ color: 0xef8a2b, transparent: true, opacity: 0 })));
+  g.add(dot);
+  let ang = 90, tgt = 90;
+  const pose = () => { pan.rotation.y = (ang - 90) * D2R; };
+  const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, H + 3, 0) });
+  live(api, {
+    kind: 'part',
+    label: us ? 'Pan scanner: SG90 + HC-SR04' : 'Pan scanner: SG90 + VL53L0X',
+    get angle() { return ang; },
+    setAngle(d) { tgt = clamp(d, 0, 180); return api; },
+    ray() {
+      g.updateMatrixWorld(true);
+      const origin = pan.localToWorld(sensorOrigin.clone());
+      const dir = V(0, 0, 1).applyQuaternion(pan.getWorldQuaternion(new THREE.Quaternion())).setY(0).normalize();
+      return { origin, dir };
+    },
+    /** Show the last measurement as a ray of length cm (0 hides it). */
+    beam(cm) {
+      if (!cm) { beamM.opacity = 0; dot.material.opacity = 0; return api; }
+      const { origin, dir } = api.ray();
+      const o = g.worldToLocal(origin.clone()), e = g.worldToLocal(origin.clone().addScaledVector(dir, cm));
+      beam.position.copy(o).lerp(e, 0.5);
+      beam.scale.set(1, cm, 1);
+      beam.quaternion.setFromUnitVectors(V(0, 1, 0), e.clone().sub(o).normalize());
+      dot.position.copy(e);
+      beamM.opacity = 0.55;
+      dot.material.opacity = 0.9;
+      return api;
+    },
+    tick(dt) { ang += clamp(tgt - ang, -600 * dt, 600 * dt); pose(); },
+  });
+  pose();
+  return api;
+}
+
+/** 2D ray (o, d) against an axis-aligned box {x0,x1,z0,z1} → hit distance or Infinity. */
+export function rayBox(ox, oz, dx, dz, b) {
+  let t0 = -Infinity, t1 = Infinity;
+  for (const [o, d, lo, hi] of [[ox, dx, b.x0, b.x1], [oz, dz, b.z0, b.z1]]) {
+    if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) return Infinity; continue; }
+    let a = (lo - o) / d, c = (hi - o) / d;
+    if (a > c) [a, c] = [c, a];
+    t0 = Math.max(t0, a); t1 = Math.min(t1, c);
+  }
+  if (t1 < Math.max(t0, 0)) return Infinity;
+  return Math.max(t0, 0);
+}
+
+/**
+ * Cardboard model room for scanning: floor, low walls (open towards +Z where the
+ * scanner stands) and furniture boxes. opts.w (80), d (50). layouts: { key:
+ * [[x, z, w, d, h, color], ...] } in local coords; setLayout(key). castRay(o, dir) → cm.
+ */
+export function makeRoom(pos, opts = {}) {
+  const w = opts.w ?? 80, d = opts.d ?? 50, T = 1, WH = opts.wallH ?? 7;
+  const g = new THREE.Group();
+  g.add(at(box(w + 2 * T, 0.2, d + T, mat(0xe9e2d0, { rough: 0.9 }), { outline: false }), 0, 0.1, -T / 2));
+  const card = mat(0xd2b07a, { rough: 0.85 });
+  const walls = [];
+  const wall = (x0, x1, z0, z1) => {
+    g.add(at(box(x1 - x0, WH, z1 - z0, card), (x0 + x1) / 2, WH / 2, (z0 + z1) / 2));
+    walls.push({ x0, x1, z0, z1 });
+  };
+  wall(-w / 2 - T, w / 2 + T, -d - T, -d);
+  wall(-w / 2 - T, -w / 2, -d, 0);
+  wall(w / 2, w / 2 + T, -d, 0);
+  const layouts = opts.layouts;
+  const cols = [0x3a6fd0, 0xe5412e, 0x3aa65a, 0xf2c230, 0x8a5cc6, 0x6d7079];
+  const pool = cols.map((c) => { const m = box(1, 1, 1, mat(c, { rough: 0.6 })); g.add(m); return { m, on: false }; });
+  let boxes = [];
+  g.position.copy(pos ?? V());
+  g.rotation.y = opts.rotY ?? 0;
+  g.updateMatrixWorld(true);
+  const api = {
+    group: g, pick: g, kind: 'prop', label: 'Cardboard model room',
+    anchor: g.localToWorld(V(0, WH + 2, -d / 2)),
+    layout: null,
+    setLayout(key) {
+      api.layout = key;
+      boxes = [];
+      pool.forEach((p, i) => {
+        const s = layouts[key][i];
+        p.on = !!s;
+        p.m.visible = !!s;
+        if (!s) return;
+        const [x, z, bw, bd, bh] = s;
+        p.m.scale.set(bw, bh, bd);
+        p.m.position.set(x, bh / 2, z);
+        boxes.push({ x0: x - bw / 2, x1: x + bw / 2, z0: z - bd / 2, z1: z + bd / 2 });
+      });
+      g.updateMatrixWorld(true);
+    },
+    /** Distance (cm) from world origin along world dir (horizontal) to the first wall or box. */
+    castRay(o, dir) {
+      const lo = g.worldToLocal(o.clone());
+      const ld = dir.clone().transformDirection(g.matrixWorld.clone().invert());
+      let best = Infinity;
+      for (const b of [...walls, ...boxes]) best = Math.min(best, rayBox(lo.x, lo.z, ld.x, ld.z, b));
+      return best;
+    },
+  };
+  if (layouts) api.setLayout(Object.keys(layouts)[0]);
+  return api;
+}
+
+/**
+ * Draw a radar screen on an SSD1306 OLED (128 × 64): half-circle with range rings,
+ * a sweep line at `sweep` degrees and the points [[deg, cm], ...] — the same
+ * picture the sketch's drawRadar() makes. maxCm = outer ring.
+ */
+export function drawRadar(oled, sweep, points, maxCm = 100) {
+  oled.draw((c) => {
+    const cx = 64, cy = 63, R = 60;
+    c.lineWidth = 1;
+    c.strokeStyle = '#fff';
+    for (const k of [1 / 3, 2 / 3, 1]) {
+      for (let a = 0; a <= 180; a += 3) c.fillRect(Math.round(cx + R * k * Math.cos(a * D2R)), Math.round(cy - R * k * Math.sin(a * D2R)), 1, 1);
+    }
+    for (let a = 0; a <= 180; a += 45) for (let r = 0; r < R; r += 3) c.fillRect(Math.round(cx + r * Math.cos(a * D2R)), Math.round(cy - r * Math.sin(a * D2R)), 1, 1);
+    c.beginPath();
+    c.moveTo(cx + 0.5, cy + 0.5);
+    c.lineTo(cx + 0.5 + R * Math.cos(sweep * D2R), cy + 0.5 - R * Math.sin(sweep * D2R));
+    c.stroke();
+    for (const [a, cm] of points) {
+      if (!(cm > 0) || cm > maxCm) continue;
+      const r = (cm / maxCm) * R;
+      c.fillRect(Math.round(cx + r * Math.cos(a * D2R)) - 1, Math.round(cy - r * Math.sin(a * D2R)) - 1, 2, 2);
+    }
+  });
+}
+
+// ================================================================= car park
+/**
+ * H0 car park: entry lane (+x, z = +1.8) with a barrier gate, exit lane (−x, z = −1.8),
+ * a row of 4 nose-in bays on the −z side with an FC-51 sensor on each bay's back wall,
+ * and two FC-51s at the barrier (OUTSIDE before it, INSIDE after it).
+ * Cars arrive, wait at the barrier, park in the first free bay, stay a while and leave.
+ * API: barrier, bays [{ occupied, sensor }], sensors { outside, inside }, free(),
+ * arrive() (send a car), setRate(perMin), setStay(s), feet, tick, reset().
+ */
+export function makeCarPark(pos, opts = {}) {
+  const g = new THREE.Group();
+  const W = 50, D = 30, BX = -14, NB = 4, BW = 3.6, BAY_Z = -9.2;
+  const bayX = (i) => -3 + i * BW;
+  g.add(roadMat(W, D, (c, s, cw, ch) => {
+    const X = (x) => (x + W / 2) * s, Z = (z) => (z + D / 2) * s;
+    c.fillStyle = GRASS; c.fillRect(0, 0, cw, ch);
+    c.fillStyle = ASPHALT; c.fillRect(X(-W / 2), Z(-4), W * s, 8 * s);
+    c.fillStyle = '#585b63'; c.fillRect(X(-6), Z(-13.4), (NB * BW + 6) * s, 9.4 * s);
+    c.fillStyle = MARK;
+    for (let i = 0; i <= NB; i++) c.fillRect(X(bayX(0) - BW / 2 + i * BW) - 0.08 * s, Z(-12.4), 0.16 * s, 8.2 * s);
+    for (let i = 0; i < NB; i++) { c.font = `700 ${1.4 * s}px ${SANS}`; c.textAlign = 'center'; c.fillText(`P${i + 1}`, X(bayX(i)), Z(-6.0)); }
+    for (let x = -W / 2 + 1; x < W / 2 - 4; x += 3) if (x < BX - 2.5 || x > BX + 1) c.fillRect(X(x), Z(-0.08), 1.6 * s, 0.16 * s);
+    c.fillRect(X(BX + 0.8), Z(0), 0.3 * s, 3.7 * s);
+    for (const [x, z, dir] of [[-20, 1.8, 1], [6, 1.8, 1], [-8, -1.8, -1], [-22, -1.8, -1]]) {
+      const Xc = X(x), Zc = Z(z);
+      c.fillRect(Xc - 1.1 * s, Zc - 0.12 * s, 2.2 * s, 0.24 * s);
+      c.beginPath(); c.moveTo(Xc + dir * 1.1 * s, Zc - 0.5 * s); c.lineTo(Xc + dir * 1.9 * s, Zc); c.lineTo(Xc + dir * 1.1 * s, Zc + 0.5 * s); c.fill();
+    }
+    c.fillStyle = '#2f5fbf'; c.fillRect(X(-24.4), Z(5.4), 3.4 * s, 3.4 * s);
+    c.fillStyle = '#fff'; c.font = `700 ${2.6 * s}px ${SANS}`; c.fillText('P', X(-22.7), Z(8.0));
+  }));
+  // back wall of the bays + kerbs
+  const wallM = mat(0xd9d4c6, { rough: 0.8 });
+  g.add(at(box(NB * BW + 1, 1.6, 0.5, wallM), bayX(0) - BW / 2 + (NB * BW) / 2, 0.8, -13.1));
+  g.add(at(box(W, 0.3, 0.35, wallM, { outline: false }), 0, 0.15, 4.2));
+  g.add(at(box(W - (NB * BW + 6), 0.3, 0.35, wallM, { outline: false }), -W / 2 + (W - (NB * BW + 6)) / 2 - 3, 0.15, -4.2));
+  g.position.copy(pos ?? V());
+  g.rotation.y = opts.rotY ?? 0;
+  g.updateMatrixWorld(true);
+  const W2 = (x, z, y = ROAD_Y) => g.localToWorld(V(x, y, z));
+  const barrier = makeBarrier(W2(BX, 4.7, ROAD_Y), { length: 4.4, rotY: Math.PI / 2 + (opts.rotY ?? 0), fork: false });
+  g.attach(barrier.group);
+  const sOut = makeIRObstacle(W2(BX - 4, 6.0), { rotY: Math.PI + (opts.rotY ?? 0), label: 'IR sensor (outside)' });
+  const sIn = makeIRObstacle(W2(BX + 4, 6.0), { rotY: Math.PI + (opts.rotY ?? 0), label: 'IR sensor (inside)' });
+  g.attach(sOut.group); g.attach(sIn.group);
+  const bays = [];
+  for (let i = 0; i < NB; i++) {
+    const sens = makeIRObstacle(W2(bayX(i), -14.95, 1.6), { rotY: opts.rotY ?? 0, label: `Bay ${i + 1} sensor` });
+    g.attach(sens.group);
+    bays.push({ i, x: bayX(i), sensor: sens, car: null, reserved: false, get occupied() { return !!this.car && this.car.state === 'parked'; } });
+  }
+  // ---- cars
+  const pool = [];
+  const cars = [];
+  const CL = 5.2;
+  let rate = opts.rate ?? 3, stay = opts.stay ?? 16, acc = 0.6, cycle = 0, wasDown = true;
+  const getCar = () => { const c = pool.pop() ?? makeToyCar(V()); c.group.visible = true; g.add(c.group); return c; };
+  const arc = (cx, cz, r, a0, a1, n = 10) => [...Array(n + 1)].map((_, k) => { const a = a0 + ((a1 - a0) * k) / n; return [cx + Math.cos(a) * r, cz + Math.sin(a) * r]; });
+  const pathTo = (i) => {
+    const x = bayX(i), R = 3.2;
+    return [[BX + 1, 1.8], [x - R, 1.8], ...arc(x - R, 1.8 - R, R, Math.PI / 2, 0).slice(1), [x, BAY_Z]];
+  };
+  const pathOut = (i) => {
+    const x = bayX(i), R = 3.0;
+    return [[x, BAY_Z], [x, -1.8 - R], ...arc(x + R, -1.8 - R, R, Math.PI, Math.PI / 2).slice(1)];
+  };
+  const pathExit = (i) => [[bayX(i) + 3.0, -1.8], [-W / 2 - 4, -1.8]];
+  const follow = (car, dt) => {
+    const P = car.path;
+    let d = car.v * dt;
+    while (d > 0 && car.k < P.length - 1) {
+      const [ax, az] = P[car.k], [bx, bz] = P[car.k + 1];
+      const seg = Math.hypot(bx - ax, bz - az);
+      const rem = seg * (1 - car.t);
+      if (d < rem) { car.t += d / seg; d = 0; } else { d -= rem; car.k++; car.t = 0; }
+    }
+    const k = Math.min(car.k, P.length - 2);
+    const [ax, az] = P[k], [bx, bz] = P[k + 1];
+    const t = car.k >= P.length - 1 ? 1 : car.t;
+    car.x = ax + (bx - ax) * t; car.z = az + (bz - az) * t;
+    let yaw = Math.atan2(bx - ax, bz - az);
+    if (car.rev) yaw += Math.PI;
+    car.yaw = yaw;
+    return car.k >= P.length - 1;
+  };
+  const show = (car) => {
+    car.obj.group.position.set(car.x, ROAD_Y, car.z);
+    car.obj.group.rotation.y = car.yaw;
+  };
+  const freeBay = () => bays.find((b) => !b.car);
+  const api = {
+    group: g, pick: g, kind: 'prop', label: 'H0 car park model',
+    anchor: g.localToWorld(V(0, 4, -6)),
+    barrier, bays, sensors: { outside: sOut, inside: sIn }, cars,
+    feet: {
+      barrier: W2(BX - 1.5, 4.5, 0.3),
+      outside: W2(BX - 4, 7.9, 0.3), inside: W2(BX + 4, 7.9, 0.3),
+      bay: bays.map((b) => W2(b.x, -14.2, 1.7)),
+    },
+    free: () => bays.filter((b) => !b.occupied).length,
+    setRate(r) { rate = r; }, setStay(s) { stay = s; },
+    get rate() { return rate; }, get stay() { return stay; },
+    arrive() {
+      const last = cars.filter((c) => c.state === 'queue').reduce((m, c) => Math.min(m, c.x), Infinity);
+      if (last < -W / 2 + CL + 2) return null;
+      const car = { state: 'queue', x: -W / 2 - 3, z: 1.8, yaw: Math.PI / 2, v: 10, obj: getCar(), bay: null, timer: 0, cycle: -1 };
+      cars.push(car);
+      show(car);
+      return car;
+    },
+    clear() { for (const c of cars.splice(0)) { c.obj.group.visible = false; pool.push(c.obj); } bays.forEach((b) => (b.car = null)); },
+    tick(dt) {
+      dt = Math.min(dt, 0.05);
+      if (barrier.isDown && !wasDown) cycle++;
+      wasDown = barrier.isDown;
+      acc += (rate / 60) * dt;
+      if (acc >= 1 && api.arrive()) acc -= 1;
+      acc = Math.min(acc, 1.2);
+      // queue on the entry lane: stop behind the leader and at the barrier line
+      const queue = cars.filter((c) => c.state === 'queue').sort((a, b) => b.x - a.x);
+      queue.forEach((c, i) => {
+        let limit = i ? queue[i - 1].x - CL - 1.2 : Infinity;
+        const line = BX - 1.4 - CL / 2;
+        const admitted = c.cycle >= 0;
+        if (!admitted) {
+          if (c.x >= line - 0.3 && barrier.isUp && (i === 0) && cycle > api._lastCycle) { c.cycle = cycle; api._lastCycle = cycle; }
+          else limit = Math.min(limit, line);
+        }
+        const target = Math.min(10, Math.sqrt(Math.max(0, 2 * 11 * (limit - c.x))));
+        c.v += clamp(target - c.v, -30 * dt, 9 * dt);
+        if (limit - c.x < 0.02) c.v = 0;
+        c.v = Math.max(0, c.v);
+        c.x = Math.min(c.x + c.v * dt, limit);
+        c.obj.setBrake(c.v < 0.4);
+        if (c.cycle >= 0 && c.x >= BX + 1) {
+          const b = freeBay();
+          if (b) { b.car = c; c.bay = b; c.state = 'enter'; c.path = pathTo(b.i); c.k = 0; c.t = 0; c.rev = false; c.v = 7; }
+          else { c.state = 'exit'; c.path = [[BX + 1, 1.8], [W / 2 + 4, 1.8]]; c.k = 0; c.t = 0; c.rev = false; }
+        }
+        show(c);
+      });
+      for (const c of cars) {
+        if (c.state === 'enter') { c.obj.setBrake(false); if (follow(c, dt)) { c.state = 'parked'; c.timer = stay * (0.6 + Math.random() * 0.8); c.obj.setBrake(false); } show(c); }
+        else if (c.state === 'parked') { c.timer -= dt; if (c.timer <= 0) { c.state = 'out'; c.path = pathOut(c.bay.i); c.k = 0; c.t = 0; c.rev = true; c.v = 4; c.obj.setBrake(true); } }
+        else if (c.state === 'out') { if (follow(c, dt)) { c.state = 'leave'; c.bay.car = null; c.path = pathExit(c.bay.i); c.k = 0; c.t = 0; c.rev = false; c.v = 9; c.obj.setBrake(false); } show(c); }
+        else if (c.state === 'leave' || c.state === 'exit') { c.v = 9; if (follow(c, dt)) c.state = 'gone'; show(c); }
+      }
+      for (let i = cars.length - 1; i >= 0; i--) if (cars[i].state === 'gone') { cars[i].obj.group.visible = false; pool.push(cars[i].obj); cars.splice(i, 1); }
+      // sensors see a car body over their spot
+      const near = (x, z, r = 1.2) => cars.some((c) => {
+        const dx = x - c.x, dz = z - c.z;
+        const fx = Math.sin(c.yaw), fz = Math.cos(c.yaw);
+        const along = dx * fx + dz * fz, side = -dx * fz + dz * fx;
+        return Math.abs(along) < CL / 2 + 0.2 && Math.abs(side) < 1.05 + r;
+      });
+      api.state.outside = near(BX - 4, 1.8, 0.2);
+      api.state.inside = near(BX + 4, 1.8, 0.2);
+      sOut.setDetect(api.state.outside);
+      sIn.setDetect(api.state.inside);
+      for (const b of bays) { b.seen = near(b.x, BAY_Z, 0.1); b.sensor.setDetect(b.seen); }
+    },
+    state: { outside: false, inside: false },
+    _lastCycle: -1,
+    reset() { api.clear(); acc = 0.6; cycle = 0; api._lastCycle = -1; barrier.jump(0); },
+  };
+  return api;
 }
