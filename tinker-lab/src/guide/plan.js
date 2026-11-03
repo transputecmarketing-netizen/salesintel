@@ -287,7 +287,58 @@ function partPhrase(u) {
     let s = `${name} into ${holesText(u.holes)}`;
     if (u.part?.kind === 'led' && u.holes.length === 2) {
       const an = ledAnode(u);
-      if (an) s += ` (long leg + in column ${an.col})`;
+      if (an) s += `, long leg (+) in ${an.row}${an.col}`;
+    }
+    return { verb: 'Push', text: s };
+  }
+  return { verb: 'Place', text: name };
+}
+
+function ledAnode(u) {
+  // makeLED bends the anode leg up to a foot on the +x side of the lens and the
+  // cathode leg to the -x side: follow each leg from its top back to its hole
+  const body = u.part.pick;
+  if (!body) return null;
+  const bx = body.getWorldPosition(new THREE.Vector3()).x;
+  const v = new THREE.Vector3();
+  let anode = null;
+  for (const o of u.part.group.children) {
+    if (!o.isMesh || !/Tube|Cylinder/.test(o.geometry.type)) continue;
+    const pos = o.geometry.attributes.position;
+    let lo = null, hi = null;
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      if (!lo || v.y < lo.y) lo = v.clone();
+      if (!hi || v.y > hi.y) hi = v.clone();
+    }
+    if (hi && hi.x > bx + 0.02) anode = lo;
+  }
+  if (!anode) return null;
+  let best = null, bd = Infinity;
+  for (const h of u.holes) {
+    const p = h.bb.hole(h.col, h.row);
+    const d = Math.hypot(p.x - anode.x, p.z - anode.z);
+    if (d < bd) { bd = d; best = h; }
+  }
+  return bd < 0.12 ? best : null;
+}
+
+function article() {
+  return 'the';
+}
+
+function lower(label) {
+  // keep acronyms and model names, lower-case ordinary first words ("Red LED" → "red LED")
+  return /^[A-Z][a-z]/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+}
+
+function partPhrase(u) {
+  const name = `${article(u.label ?? '')} ${lower(u.label ?? 'part')}`;
+  if (u.holes?.length) {
+    let s = `${name} into ${holesText(u.holes)}`;
+    if (u.part?.kind === 'led' && u.holes.length === 2) {
+      const an = ledAnode(u);
+      if (an) s += `, long leg (+) in ${an.row}${an.col}`;
     }
     return { verb: 'Push', text: s };
   }

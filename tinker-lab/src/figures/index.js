@@ -13,36 +13,10 @@ import HL from './vendor/hairline-kernel.js';
 /** The registry: name, title (for a caption) and description (the default accessible name). */
 export const FIGURES = [
   { name: 'chip', title: 'Inside a chip', description: 'An IC taken apart into its layers: lead frame, die, bond wires and lid. Move across to open the gap, up and down to pick a layer.' },
-  { name: 'breadboard', title: 'Breadboard', description: 'A breadboard whose hidden clips lift out: the hole under the pointer raises its five-hole strip, a power rail rises as one.' },
-  { name: 'servo', title: 'Servo', description: 'A hobby servo whose horn follows the pointer around its shaft on a spring, from 0 to 180 degrees.' },
-  { name: 'stepper', title: 'Stepper motor', description: 'A stepper motor with a dial needle that steps detent by detent toward the pointer.' },
-  { name: 'windmill', title: 'Wind turbine', description: 'A model wind turbine turning in a breeze; moving the pointer fast adds wind, and the generator meter reads the volts.' },
-  { name: 'radar', title: 'Radar', description: 'A radar mast sweeping a range plate; where the pointer is, an echo rises each time the beam passes.' },
-  { name: 'robot-arm', title: 'Robot arm', description: 'A three-joint robot arm that reaches the pointer on the table with simple inverse kinematics and closes its gripper there.' },
-  { name: 'conveyor', title: 'Sorting conveyor', description: 'Crates riding a belt; the crate under the pointer is tagged, and the diverter flips to push it onto the side chute.' },
-  { name: 'led-matrix', title: 'LED matrix', description: 'An 8 by 8 LED matrix module that plays a pattern, and glows where the pointer paints it, fading like phosphor.' },
-  { name: 'solar', title: 'Solar tracker', description: 'A solar panel on a two-axis tracker that tilts to face the pointer as if it were the sun.' },
-  { name: 'processor', title: 'Processor', description: 'A processor die with eight cores standing at their load; the core under the pointer lifts and its cache slice follows.' },
-  { name: 'pcb', title: 'Circuit board', description: 'A circuit board whose copper nets lift off: the trace under the pointer rises and its pads follow it along the net.' },
-  { name: 'gearbox', title: 'Gear train', description: 'A three-gear train: turning the pointer round the big gear drives it, and the smaller gears follow faster and the other way.' },
-  { name: 'traffic', title: 'Traffic lights', description: 'A crossroads with four signals: the side the pointer is on gets green once the others have gone to red.' },
 ];
 
 const LOAD = {
   chip: () => import('./chip.js'),
-  breadboard: () => import('./breadboard.js'),
-  servo: () => import('./servo.js'),
-  stepper: () => import('./stepper.js'),
-  windmill: () => import('./windmill.js'),
-  radar: () => import('./radar.js'),
-  'robot-arm': () => import('./robot-arm.js'),
-  conveyor: () => import('./conveyor.js'),
-  'led-matrix': () => import('./led-matrix.js'),
-  solar: () => import('./solar.js'),
-  processor: () => import('./processor.js'),
-  pcb: () => import('./pcb.js'),
-  gearbox: () => import('./gearbox.js'),
-  traffic: () => import('./traffic.js'),
 };
 
 /**
