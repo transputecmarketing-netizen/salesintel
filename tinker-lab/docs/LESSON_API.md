@@ -139,7 +139,7 @@ Run `dev/modules.html?m=<key>` and `dev/boards.html?b=<id>` to preview parts.
 
 ### Brand and design
 The product is **Tinker Lab**. Import `src/brand/tokens.css` (white background, Newsreader
-300/400/500/600, IBM Plex Mono for code, Tinker orange `--tl-accent`). **No italics anywhere.**
+300/400/500/600, IBM Plex Mono for code, Tinker red `--tl-accent` with Electric Iris `--tl-iris` as secondary). **No italics anywhere.**
 Brand strings and legal placeholders live in `src/brand/brand.js`; the logo in `src/brand/logo.js`
 (`markSVG`, `wordmarkSVG`, `lockupSVG`). Visual first: show it, animate it, then say it in one line.
 

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tinker Lab · figures</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html, body { margin: 0; background: var(--tl-bg); color: var(--tl-ink); }
+      body { font: 300 16px/1.5 var(--tl-serif); -webkit-font-smoothing: antialiased; }
+      main { max-width: 1180px; margin: 0 auto; padding: 40px 20px 64px; }
+      header h1 { font-weight: 300; font-size: 34px; letter-spacing: -0.01em; margin: 0 0 6px; }
+      header p { margin: 0; color: var(--tl-ink-2); max-width: 60ch; }
+      .bar { position: sticky; top: 0; z-index: 3; background: var(--tl-bg); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 14px 0; margin: 18px 0 8px; border-bottom: 1px solid var(--tl-line); }
+      .bar label, .bar .k { font: 400 12px/1 var(--tl-mono); color: var(--tl-muted); }
+      .bar input[type=range] { width: 160px; accent-color: var(--tl-accent); }
+      .bar output { font: 400 12px/1 var(--tl-mono); min-width: 3ch; }
+      .bar button { font: 400 12px/1 var(--tl-mono); height: 30px; padding: 0 12px; border: 1px solid var(--tl-line-2); border-radius: 8px; background: var(--tl-bg); color: var(--tl-ink); cursor: pointer; }
+      .bar button[aria-pressed=true] { background: var(--tl-ink); border-color: var(--tl-ink); color: var(--tl-bg); }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px 24px; margin-top: 24px; }
+      figure { margin: 0; }
+      .plate { position: relative; border: 1px solid var(--tl-line); border-radius: var(--tl-radius-lg); overflow: hidden; background: var(--tl-bg); }
+      .plate .read { position: absolute; top: 10px; right: 12px; z-index: 1; font: 400 11px/1 var(--tl-mono); color: var(--tl-ink-2); pointer-events: none; font-variant-numeric: tabular-nums; }
+      .plate .name { position: absolute; top: 10px; left: 12px; z-index: 1; font: 400 11px/1 var(--tl-mono); color: var(--tl-muted); pointer-events: none; }
+      figcaption { margin-top: 10px; }
+      figcaption b { font-weight: 400; font-size: 19px; display: block; }
+      figcaption span { color: var(--tl-ink-2); font-size: 15px; display: block; margin-top: 2px; }
+      footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--tl-line); color: var(--tl-muted); font-size: 14px; }
+      footer a { color: inherit; }
+      body.one main { max-width: none; padding: 0; }
+      body.one header, body.one footer, body.one figcaption { display: none; }
+      body.one .bar { position: static; margin: 0 0 6px; padding: 6px 0; }
+      body.one .grid { display: block; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Figures</h1>
+        <p>Tinker Lab's own isometric line figures: electronics and maker objects that answer the pointer. Hover one, or press play.</p>
+      </header>
+      <div class="bar">
+        <label for="intensity">intensity</label>
+        <input id="intensity" type="range" min="0" max="1" step="0.01" value="0.5" />
+        <output id="ival" for="intensity">0.50</output>
+        <span class="k">play</span><button id="play" type="button" aria-pressed="false">play</button>
+        <span class="k">accent</span><button id="accent" type="button">red</button>
+      </div>
+      <div class="grid" id="grid"></div>
+      <footer>
+        Drawn with the hairline kernel by Lucas Marques (<a href="https://github.com/lucasmarkes/hairline">github.com/lucasmarkes/hairline</a>), MIT licence; see src/figures/README.md.
+      </footer>
+    </main>
+    <script type="module" src="./figures.js"></script>
+  </body>
+</html>

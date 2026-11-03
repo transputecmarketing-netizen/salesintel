@@ -15,12 +15,16 @@
   --tl-ink: #0c0c0e;
   --tl-ink-2: #44454c;
   --tl-muted: #85868d;
-  --tl-accent: #ff5a1f;      /* Tinker orange: the spark */
-  --tl-accent-ink: #c2410c;  /* accent on white text (AA) */
-  --tl-accent-soft: #fff2eb;
+  --tl-accent: #e5132d;      /* Tinker red: the spark, primary brand colour */
+  --tl-accent-ink: #b80d22;  /* red for text on white (AA) */
+  --tl-accent-soft: #fdecee;
+  --tl-iris: #5b3df5;        /* Electric Iris: secondary brand colour */
+  --tl-iris-ink: #4527d9;    /* iris for text on white (AA) */
+  --tl-iris-soft: #efecff;
+  --tl-gradient: linear-gradient(100deg, #e5132d 0%, #b7179c 52%, #5b3df5 100%);
   --tl-blue: #2456f5;
   --tl-green: #12915a;
-  --tl-red: #e0362b;
+  --tl-red: #e5132d;
   --tl-yellow: #f2b10a;
   --tl-trace: #ebe8e1;       /* the circuit-trace background */
   --tl-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
