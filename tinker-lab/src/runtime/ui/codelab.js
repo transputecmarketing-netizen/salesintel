@@ -43,6 +43,7 @@ export class CodeLab {
     this.openPaths = new Set();
     this.tall = LS.get('tinkerlab:codeTall') === '1';
     this.buildDom();
+    if (import.meta.env?.DEV) window.__codelab = this; // QA hook (dev server only)
   }
 
   // ------------------------------------------------------------------ DOM
