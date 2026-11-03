@@ -136,9 +136,10 @@ export function textOf(v, t, T, { base = 10, digits = 2, forString = false } = {
     if (it.isChar && t.isChar && !t.alias && forString) return String.fromCharCode(v & 255);
     if (base === 10) return String(v);
     // non-decimal: print as unsigned long (or 64-bit) like Print::print(long, base)
-    if (it.bits === 64) return BigInt.asUintN(64, BigInt(v)).toString(base).toUpperCase();
+    if (it.bits === 64) { const x = BigInt.asUintN(64, BigInt(v)).toString(base); return forString ? x : x.toUpperCase(); }
     const u = v < 0 ? (v >>> 0) : v;
-    return fmtUnsigned(u, base);
+    // String(x, HEX) uses utoa (lower case); Print uses upper case
+    return forString ? fmtUnsigned(u, base).toLowerCase() : fmtUnsigned(u, base);
   }
   return String(v);
 }

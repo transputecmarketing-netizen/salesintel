@@ -215,6 +215,7 @@ export function scene(el, api = {}, spec) {
   // ---- cancellable sequences (one per step)
   let token = 0;
   const waits = new Set();
+  const chk = (tok) => { if (tok !== token) throw new Cancel(); };
   function cancelPlay() {
     token++;
     for (const w of waits) if (w.tok !== token) { waits.delete(w); w.rej(new Cancel()); }
@@ -232,6 +233,8 @@ export function scene(el, api = {}, spec) {
     const w = (sec) => wait(sec, tok);
     w.alive = () => tok === token;
     w.check = () => { if (tok !== token) throw new Cancel(); };
+    /** Animate, then stop the sequence if the step changed meanwhile. */
+    w.to = async (...a) => { await to(...a); w.check(); };
     return Promise.resolve().then(() => fn(w)).catch((e) => { if (!(e instanceof Cancel)) console.error(e); });
   }
 
@@ -418,13 +421,15 @@ export function scene(el, api = {}, spec) {
   S.hand = {
     show(x, y) { if (x != null) { hs.x = x; hs.y = y; } to(hs, { o: 1 }, 0.3); },
     hide() { to(hs, { o: 0 }, 0.3); },
-    async move(x, y, dur = 0.9) { to(hs, { o: 1 }, 0.25); await to(hs, { x, y }, dur, { ease: 'inOut' }); },
+    async move(x, y, dur = 0.9) { const tok = token; to(hs, { o: 1 }, 0.25); await to(hs, { x, y }, dur, { ease: 'inOut' }); chk(tok); },
     async tap(x, y) {
+      const tok = token;
       if (x != null) await S.hand.move(x, y);
       hs.rx = hs.x; hs.ry = hs.y;
       await to(hs, { s: 0.86 }, 0.12);
       hs.ring = 1; to(hs, { ring: 0 }, 0.6, { ease: 'out' });
       await to(hs, { s: 1 }, 0.16);
+      chk(tok);
     },
     /** Drag from (x1,y1) to (x2,y2), calling onMove(t) along the way. */
     async drag(x1, y1, x2, y2, dur = 1.4, onMove) {
@@ -445,7 +450,9 @@ export function scene(el, api = {}, spec) {
       const a = S.pt(sl.input, fx(sl.value), 0.75), b = S.pt(sl.input, fx(v), 0.75);
       const v0 = sl.value;
       if (!r0.width) { sl.set(v); return; }
+      const tok = token;
       await S.hand.drag(a.x, a.y, b.x, b.y, dur, (t) => sl.set(lerp(v0, v, t)));
+      chk(tok);
       sl.set(v);
     },
     /** Demonstrate pressing an HTML control (button, toggle). */
@@ -470,12 +477,13 @@ export function scene(el, api = {}, spec) {
     autoT = 0;
     const st = steps[i];
     numEl.textContent = String(i + 1);
-    capEl.textContent = st.cap;
+    capEl.textContent = st.cap.replace(/(\d) (?=[°%A-Za-zΩµτ])/g, '$1\u00a0');
     capEl.classList.remove('is-in'); void capEl.offsetWidth; capEl.classList.add('is-in');
     pills.forEach((p, k) => { p.classList.toggle('is-on', k === i); p.classList.toggle('is-done', k < i); p.setAttribute('aria-current', k === i ? 'step' : 'false'); });
     root.querySelector('[data-nav=prev]').disabled = i === 0;
     root.querySelector('[data-nav=next]').disabled = i === steps.length - 1;
     S.step = i;
+    S.hand.hide();
     try { handle.step?.(i, prev); } catch (e) { console.error(e); }
     if (i === steps.length - 1 && !completed) { completed = true; api.complete?.(); }
   }

@@ -644,8 +644,8 @@ export function makeWaterLab(pos, opts = {}) {
   const g = new THREE.Group();
   const BR = 2.6, BH = 6.2;
   // stand
-  g.add(at(box(9.8, 0.35, 8.2, mat(0x3a3d46, { rough: 0.6 })), 0.2, 0.175, 0.7));
-  g.add(at(cyl(0.14, 0.14, 13, metal(), { seg: 12 }), -3.6, 0.35 + 6.5, -2.4));
+  g.add(at(box(9.8, 0.35, 8.2, mat(0x6b7079, { rough: 0.6 })), 0.2, 0.175, 0.7));
+  g.add(at(cyl(0.14, 0.14, 11, metal(), { seg: 12 }), -3.6, 0.35 + 5.5, -2.4));
   // beaker
   const glass = mat(0xe6f4fb, { rough: 0.05, opacity: 0.28, side: THREE.DoubleSide });
   g.add(at(cyl(BR, BR, BH, glass, { seg: 40 }), 0, 0.35 + BH / 2, 0));
@@ -679,13 +679,13 @@ export function makeWaterLab(pos, opts = {}) {
   g.add(at(box(0.4, 0.3, 2.6, metal()), 0.4, clampY, -1.2));
   const probe = (x, z, r0, len, color, capColor) => {
     const p = new THREE.Group();
-    p.add(at(cyl(r0, r0, len, mat(color, { rough: 0.3, opacity: color === 0xd9eef7 ? 0.7 : 1 }), { seg: 20 }), 0, len / 2, 0));
+    p.add(at(cyl(r0, r0, len, mat(color, { rough: 0.3 }), { seg: 20 }), 0, len / 2, 0));
     p.add(at(cyl(r0 * 1.2, r0 * 1.2, 1.4, mat(capColor, { rough: 0.5 }), { seg: 20 }), 0, len + 0.7, 0));
     p.position.set(x, probeY, z);
     g.add(p);
     return p;
   };
-  const phP = probe(-0.9, -0.6, 0.42, clampY - probeY - 0.6, 0xd9eef7, 0x2a2c33);
+  const phP = probe(-0.9, -0.6, 0.42, clampY - probeY - 0.6, 0xcdd6dd, 0x2a2c33);
   phP.add(at(mesh(new THREE.SphereGeometry(0.42, 16, 10), mat(0xeaf6fb, { rough: 0.05, opacity: 0.75 })), 0, 0, 0));
   const tdsP = probe(0.6, -0.9, 0.36, clampY - probeY - 0.6, 0x24262c, 0x24262c);
   for (const dx of [-0.12, 0.12]) tdsP.add(at(cyl(0.04, 0.04, 0.5, metal(), { seg: 8 }), dx, -0.2, 0));
@@ -717,9 +717,9 @@ export function makeWaterLab(pos, opts = {}) {
     for (const [n, p] of b.pinsLocal) pinsLocal.set(n, p.clone().add(b.group.position));
   }
   // probe cables to the boards
-  g.add(cable([V(-0.9, clampY + 0.75, -0.6), V(-1.2, clampY + 1.6, -0.6), V(-3.6, 8.5, 1.2), V(-3.4, 2.0, 3.0), V(-2.9, 1.0, 3.15), V(-2.9, 0.85, 3.05)], 0x24262c, 0.07));
-  g.add(cable([V(0.6, clampY + 0.75, -0.9), V(1.0, clampY + 1.7, -0.9), V(3.4, 8.5, 0.6), V(1.2, 2.2, 3.0), V(0.3, 1.0, 3.25), V(0.3, 0.85, 3.2)], 0x24262c, 0.06));
-  g.add(cable([V(1.2, probeY + 8.85, 0.5), V(1.6, probeY + 9.5, 0.8), V(4.4, 7.0, 1.8), V(3.6, 2.0, 3.1), V(3.3, 1.0, 3.25), V(3.3, 0.85, 3.2)], 0x24262c, 0.05));
+  g.add(cable([V(-0.9, clampY + 0.75, -0.6), V(-1.4, clampY + 1.3, -0.9), V(-3.3, 8.8, -1.2), V(-3.9, 3.0, 0.6), V(-3.3, 1.0, 2.7), V(-2.9, 0.85, 3.05)], 0x24262c, 0.07));
+  g.add(cable([V(0.6, clampY + 0.75, -0.9), V(1.2, clampY + 1.3, -1.2), V(3.5, 8.6, -1.2), V(3.9, 3.0, 0.5), V(2.8, 1.0, 3.0), V(0.3, 0.85, 3.2)], 0x24262c, 0.06));
+  g.add(cable([V(1.2, probeY + 8.85, 0.5), V(1.7, probeY + 9.4, 0.8), V(4.2, 8.0, 1.2), V(4.4, 2.5, 2.2), V(3.6, 1.0, 3.2), V(3.3, 0.85, 3.2)], 0x24262c, 0.05));
   const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, BH + 1.0, 0) });
   api.phAnchor = g.localToWorld(V(-0.9, clampY + 0.9, -0.6));
   api.tdsAnchor = g.localToWorld(V(0.6, clampY + 0.9, -0.9));
@@ -1275,6 +1275,7 @@ export function makePCA9685(pos, opts = {}) {
   b.on(t, 1.4, -0.75);
   b.on(electrolytic(0.25, 0.6), 2.5, -0.75);
   const pinsLocal = new Map(b.pinsLocal);
+  t.userData.screws.forEach((sc, k) => pinsLocal.set(k ? 'TERM_GND' : 'TERM_V+', V(1.4 - sc.x, b.top + sc.y, -0.75 - sc.z)));
   // 16 × 3-pin servo headers along the front: rows GND (black), V+ (red), PWM (yellow)
   const hdr = new THREE.Group();
   const cols = 16, x0 = -0.2;

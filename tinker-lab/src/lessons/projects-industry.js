@@ -471,7 +471,7 @@ void loop() {
         },
       });
       const plot = ctx.plotter({ title: 'Joint angles', series: [{ name: 'base', color: '#2f5fbf', min: 0, max: 180 }, { name: 'shoulder', color: '#ef8a2b', min: 0, max: 180 }, { name: 'elbow', color: '#3aa65a', min: 0, max: 180 }, { name: 'wrist', color: '#8a5cc6', min: 0, max: 180 }] });
-      ctx.onTick(() => { if (bench.plotOn) plot.push(...toArr(arm.joints).slice(0, 4)); });
+      ctx.onTick(() => { if (state.plotOn) plot.push(...toArr(arm.joints).slice(0, 4)); });
       return { ...bench, pool, state, layout, plot };
     },
     callouts: [
@@ -609,7 +609,7 @@ void loop() {
       b.arm.reset(b.root);
       b.stacked = 0;
       b.plot.reset();
-      b.plotOn = true;
+      b.state.plotOn = true;
       io.line('Serial.begin(9600)');
       io.line('joint[j].write(pos[j]);');
       await io.delay(500);
@@ -631,7 +631,7 @@ void loop() {
       io.print(`Pick at ${x.toFixed(2)}, ${y.toFixed(2)}`);
       await pickAndStack(io, b, p, x, y);
     },
-    reset(b) { b.plotOn = false; },
+    reset(b) { b.state.plotOn = false; },
   },
   // ------------------------------------------------------------------ 3 · colour sorting line
   {

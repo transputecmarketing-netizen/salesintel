@@ -21,7 +21,9 @@ const X0 = -62, X1 = 62, Y0 = -46, Y1 = 46, WH = 20, WT = 3, ZL = 6, NB = 120, B
 const ROBOT = [6, 10], FURN = [[-56, -40, -20, -26, 12], [16, -42, 44, -34, 18], [-58, 2, -46, 30, 9]], REST = [44, 28];
 
 /** Distance along a ray from o in direction d to the nearest box, wall or the bin, and whether the bin was hit. */
-function cast(o, d, bin) {
+function cast(o, dir, bin) {
+  // no component exactly zero, so no slab divides zero by zero
+  const d = dir.map((v) => (Math.abs(v) < 1e-9 ? 1e-9 : v));
   let best = 1e9, onBin = false;
   const slab = (a0, a1, b0, b1) => {
     const tx0 = (a0 - o[0]) / d[0], tx1 = (a1 - o[0]) / d[0], ty0 = (b0 - o[1]) / d[1], ty1 = (b1 - o[1]) / d[1];
@@ -29,7 +31,7 @@ function cast(o, d, bin) {
     return tf >= tn && tn > 0 ? tn : 1e9;
   };
   // the room: the ray leaves through the box it starts in
-  const ex = Math.min(d[0] > 0 ? (X1 - WT - o[0]) / d[0] : (X0 + WT - o[0]) / d[0], d[1] > 0 ? (Y1 - o[1]) / d[1] : (Y0 + WT - o[1]) / d[1]);
+  const ex = Math.min(d[0] > 0 ? (X1 - 1 - o[0]) / d[0] : (X0 + WT - o[0]) / d[0], d[1] > 0 ? (Y1 - 1 - o[1]) / d[1] : (Y0 + WT - o[1]) / d[1]);
   best = ex;
   for (const [a0, b0, a1, b1] of FURN) best = Math.min(best, slab(a0, a1, b0, b1));
   const fx = o[0] - bin[0], fy = o[1] - bin[1], b = fx * d[0] + fy * d[1], c = fx * fx + fy * fy - BR * BR, disc = b * b - c;
@@ -63,6 +65,8 @@ function mount({ stage, svg, read }, value) {
   const dots = Array.from({ length: NB }, () => ({ el: flatDot(g, C, 0.85, 'dot off'), t: -1e9, hit: false, cls: '' }));
   const bx = spring(REST[0], { eps: 0.02 }), by = spring(REST[1], { eps: 0.02 });
   let order = '', drawnBin = '';
+  // the cloud starts whole, one old dot per bearing, so rest already shows the room's outline
+  dots.forEach((D, k) => { const a = (k / NB) * TAU, d = [Math.cos(a), Math.sin(a)], [t] = cast(ROBOT, d, REST); place(D.el, P(ROBOT[0] + d[0] * t, ROBOT[1] + d[1] * t, ZL)); });
 
   function drawBin() {
     const key = bx.x.toFixed(2) + ',' + by.x.toFixed(2);
@@ -119,6 +123,6 @@ export default {
   means: 'A robot vacuum’s lidar sweeps the room and leaves a fading point cloud; the pointer moves the bin it finds.',
   rules: [3, 4, 5, 7],
   range: [0.25, 0.45, 0.8],
-  tour: [[150, 200], [280, 150], [220, 240], null],
+  tour: [[156, 177], [255, 182], [109, 186], null],
   mount,
 };

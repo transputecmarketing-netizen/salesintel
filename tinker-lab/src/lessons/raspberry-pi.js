@@ -982,9 +982,9 @@ if __name__ == "__main__":
       const bb = ctx.breadboard(...BBP);
       const ds = ctx.add(makeTO92([bb.hole(20, 'h'), bb.hole(21, 'h'), bb.hole(22, 'h')], 'DS18B20'));
       const pull = ctx.add(makeResistor(bb.hole(21, 'f'), bb.hole(25, 'f'), 4700));
-      ctx.wire(ctx.board.pin('PIN9'), bb.hole(20, 'j'), 'black', { signal: 'GND', dir: -1, lift: 2.0 });
-      const dq = ctx.wire(ctx.board.pin('GPIO4'), bb.hole(21, 'j'), 'yellow', { signal: 'GPIO4', lift: 2.4 });
-      const vdd = ctx.wire(ctx.board.pin('PIN1'), bb.hole(25, 'j'), 'red', { signal: '3V3', lift: 2.8 });
+      ctx.wire(ctx.board.pin('PIN9'), bb.hole(20, 'j'), 'black', { signal: 'GND', dir: -1, lift: 2.0, chipT: 0.25 });
+      const dq = ctx.wire(ctx.board.pin('GPIO4'), bb.hole(21, 'j'), 'yellow', { signal: 'GPIO4', lift: 2.4, chipT: 0.3 });
+      const vdd = ctx.wire(ctx.board.pin('PIN1'), bb.hole(25, 'j'), 'red', { signal: '3V3', lift: 2.8, chipT: 0.2 });
       ctx.wire(bb.hole(22, 'j'), bb.hole(25, 'i'), 'red', { lift: 0.5 });
       ctx.onTick((dt) => (st.finger = Math.max(0, st.finger - dt / 25)));
       ctx.interact(ds, {

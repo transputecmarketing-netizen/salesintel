@@ -109,7 +109,7 @@ export class Sim {
       if (st.mode === 'OUTPUT' && !p.inputOnly) {
         entry.el = c.V(node, 0, 0, b.outR);
         entry.level = Sim.level(st);
-      } else if (st.mode === 'INPUT_PULLUP' || (st.mode === 'INPUT' && st.value && b.logic === 5)) entry.el = c.V(node, 0, b.logic, b.pullup);
+      } else if (st.mode === 'INPUT_PULLUP' || (st.mode === 'INPUT' && st.value && b.avr)) entry.el = c.V(node, 0, b.logic, b.pullup);
       else if (st.mode === 'INPUT_PULLDOWN') entry.el = c.V(node, 0, 0, b.pullup);
       if (node !== 0) {
         clamps.push(c.D(node, vcc, 1e-12, 1.2), c.D(0, node, 1e-12, 1.2));
@@ -152,12 +152,14 @@ export class Sim {
       let r = solve(c, guess);
       if (!r.ok) r = solve(c, null, { maxIter: 400 });
       ok &&= r.ok;
-      phases.push({ w, v: r.v });
+      phases.push({ w, v: r.v, es: outs.map((g) => g.el.e) });
       guess = r.v;
     }
     this.lastV = phases[phases.length - 1]?.v ?? null;
     // PWM-averaged accessors
-    const avg = (f) => phases.reduce((s, ph) => s + ph.w * f(ph.v), 0);
+    // element currents depend on each phase's source EMFs, so restore them per phase
+    const use = (ph) => { outs.forEach((g, i) => { g.el.e = ph.es[i]; }); return ph.v; };
+    const avg = (f) => phases.reduce((s, ph) => s + ph.w * f(use(ph)), 0);
     const sol = {
       V: (node) => (node == null ? 0 : avg((v) => v[node] ?? 0)),
       I: (el) => (el ? avg((v) => elementCurrent(el, v)) : 0),
@@ -165,11 +167,11 @@ export class Sim {
       P: (el) => avg((v) => { const i = elementCurrent(el, v); return el.kind === 'R' ? i * i * el.r : Math.abs(i * (v[el.a] - v[el.b])); }),
       Iq: (el) => {
         let ic = 0, ib = 0;
-        for (const ph of phases) { const q = elementCurrent(el, ph.v); ic += ph.w * q.ic; ib += ph.w * q.ib; }
+        for (const ph of phases) { const q = elementCurrent(el, use(ph)); ic += ph.w * q.ic; ib += ph.w * q.ib; }
         return { ic, ib };
       },
       /** Peak (worst phase) current: for the instantaneous over-current checks. */
-      Ipeak: (el) => Math.max(...phases.map((ph) => Math.abs(elementCurrent(el, ph.v)))),
+      Ipeak: (el) => Math.max(...phases.map((ph) => Math.abs(elementCurrent(el, use(ph))))),
     };
     const nodeV = new Float64Array(c.n);
     for (let k = 0; k < c.n; k++) nodeV[k] = sol.V(k);

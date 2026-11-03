@@ -1690,9 +1690,10 @@ export function makeStreetLamp(pos, opts = {}) {
     foot: g.localToWorld(V(0, 0.3, -1.4)),
     set(v) {
       level = clamp(v, 0, 1);
-      lens.emissiveIntensity = level * 1.8;
-      glow.material.opacity = level * 0.9;
-      pool.material.opacity = level * 0.6;
+      const seen = Math.sqrt(level); // perceived brightness
+      lens.emissiveIntensity = seen * 1.8;
+      glow.material.opacity = seen * 0.9;
+      pool.material.opacity = seen * 0.6;
       light.intensity = level * 6;
       return api;
     },

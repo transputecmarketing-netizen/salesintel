@@ -21,10 +21,11 @@ export const FIGURES = [
   { name: 'processor', title: 'Processor', description: 'A processor die with eight cores standing at their load: the core under the pointer rises, and its cache slice follows it up.' },
   { name: 'pcb', title: 'Circuit board', description: 'A circuit board whose copper nets lift off: the trace under the pointer rises, and the pads on its net follow it up.' },
   { name: 'solar', title: 'Solar tracker', description: 'A solar panel on a two-axis tracker that turns to face the pointer, as if the pointer were the sun.' },
-  { name: 'gearbox', title: 'Gear train', description: 'A three-gear train: turning the pointer round the big gear drives it, and the smaller gears follow, faster and the other way.' },
+  { name: 'gearbox', title: 'Gear train', description: 'A three-gear train: the big gear’s crank turns to face the pointer, and the smaller gears follow, faster and the other way.' },
   { name: 'windmill', title: 'Wind turbine', description: 'A model wind turbine turning in a breeze; moving the pointer fast adds wind, and the generator meter reads the volts.' },
   { name: 'radar', title: 'Radar', description: 'A radar mast sweeping a range plate; each pass raises an echo over every contact, and a bright one where the pointer is.' },
   { name: 'conveyor', title: 'Sorting conveyor', description: 'Crates riding a belt; the crate under the pointer is tagged, and the diverter swings to push it onto the side chute.' },
+  { name: 'lidar', title: 'Lidar', description: 'A robot vacuum sweeping its room with a lidar that leaves a fading point cloud; the pointer moves the bin it finds.' },
 ];
 
 const LOAD = {
@@ -41,6 +42,7 @@ const LOAD = {
   windmill: () => import('./windmill.js'),
   radar: () => import('./radar.js'),
   conveyor: () => import('./conveyor.js'),
+  lidar: () => import('./lidar.js'),
 };
 
 /**

@@ -94,10 +94,13 @@ function hasPath(project, net, key, defs) {
 }
 
 /** Decode an OLED frame: 1024-byte SSD1306 page buffer, 8192 bytes (one per pixel) or a 2D array. */
-export function oledPixels(buf) {
+export function oledPixels(buf, w = 128, h = 64) {
   const px = new Uint8Array(128 * 64);
   if (!buf) return px;
-  if (buf.length === 1024) {
+  if (buf.length === w * h && w <= 128 && h <= 64 && buf.length !== 1024) {
+    // one entry per pixel (the runtime's Adafruit_SSD1306 buffer); 128×32 panels use the top half
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px[y * 128 + x] = buf[y * w + x] ? 1 : 0;
+  } else if (buf.length === 1024) {
     for (let page = 0; page < 8; page++)
       for (let x = 0; x < 128; x++) {
         const byte = buf[page * 128 + x];
@@ -183,11 +186,11 @@ export function createHal(host) {
       const v = sim.pinVoltage(name);
       if (v == null) {
         if (st.mode === 'OUTPUT') return st.value;
-        if (st.mode === 'INPUT_PULLUP' || (st.mode === 'INPUT' && st.value && b.logic === 5)) return 1;
+        if (st.mode === 'INPUT_PULLUP' || (st.mode === 'INPUT' && st.value && b.avr)) return 1;
         if (st.mode === 'INPUT_PULLDOWN') return 0;
         return floating(name);
       }
-      if (st.mode === 'INPUT' && !(st.value && b.logic === 5) && sim.impedanceAt(name) > 5e6) return floating(name);
+      if (st.mode === 'INPUT' && !(st.value && b.avr) && sim.impedanceAt(name) > 5e6) return floating(name);
       const prev = lastRead.get(pin) ?? 0;
       let r = prev;
       if (v >= b.vih * b.logic) r = 1;
@@ -285,11 +288,11 @@ export function createHal(host) {
       },
       oled(addr) {
         return {
-          show(buffer) {
+          show(buffer, w, h) {
             const hit = findPart(['oled'], (m, p) => (addr == null || p.props.addr === addr || I2C_ADDR.oled.includes(addr)) && m.ok);
             const scr = hit && host.partApi(hit.part.id)?.screen;
             if (!scr) return;
-            const px = oledPixels(buffer);
+            const px = oledPixels(buffer, w, h);
             scr.draw((ctx) => {
               for (let y = 0; y < 64; y++) for (let x = 0; x < 128; x++) if (px[y * 128 + x]) ctx.fillRect(x, y, 1, 1);
             });
@@ -326,13 +329,20 @@ export function createHal(host) {
       },
       keypad() {
         return {
+          // { row, col } of the pressed key (R1–R4 × C1–C4), so the sketch's own key map applies
           getKey() {
             const hit = findPart(['keypad'], (m) => m.ok);
             if (!hit) return null;
             const st = host.partState(hit.part.id);
             if (!st.key || st.key === st.reported) return null;
             st.reported = st.key;
-            return st.key;
+            const k = '123A456B789C*0#D'.indexOf(st.key);
+            return { row: Math.floor(k / 4), col: k % 4 };
+          },
+          isPressed(c) {
+            const hit = findPart(['keypad'], (m) => m.ok);
+            const st = hit && host.partState(hit.part.id);
+            return !!st?.key && (c == null || st.key === c);
           },
         };
       },

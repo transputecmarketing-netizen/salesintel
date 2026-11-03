@@ -43,9 +43,9 @@ export default (el, api) => scene(el, api, {
       d.text(352, 214, 'C', { size: 22, fill: C.ink, weight: 500 });
       d.text(268, 246, 'B', { size: 22, fill: C.ink, weight: 500 });
       d.text(352, 330, 'E', { size: 22, fill: C.ink, weight: 500 });
-      d.text(400, 196, 'collector', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
+      d.text(352, 180, 'collector', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
       d.text(228, 214, 'base', { size: 15, fill: C.muted, mono: true });
-      d.text(400, 350, 'emitter', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
+      d.text(352, 372, 'emitter', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
     });
     const fBase = S.flow(pathOf([[130, BY], [BX, BY], [BX + 6, 288], [330, 312], [330, 420], [85, 420], [85, 310]]), { gap: 30, r: 4.5, color: C.accent, speed: 0, on: false, parent: S.layers.back });
     const fMain = S.flow(pathOf([[470, 216], [470, 140], [bl.right[0], 140], bl.right, bl.left, [bl.left[0], 140], [330, 140], [330, 228], [BX + 6, 252], [BX + 6, 288], [330, 312], [330, 420], [470, 420], [470, 354]]), { gap: 26, r: 6.5, color: C.accent, speed: 0, on: false, parent: S.layers.back });
@@ -59,8 +59,7 @@ export default (el, api) => scene(el, api, {
     gr.line((x) => Math.min(BETA * x, ISAT), { color: C.ink, width: 3 });
     const gdot = gr.dot(C.accent);
     d.into(gG, () => {
-      d.text(gr.px(0.0003), gr.py(0.01) - 20, 'off', { size: 15, fill: C.muted, mono: true });
-      d.text(gr.px(0.0007), gr.py(0.07) - 30, 'amplifies', { size: 15, fill: C.muted, mono: true, anchor: 'end' });
+      d.text(gr.px(0.00095), gr.py(0.05), 'amplifies', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
       d.text(gr.px(1.75e-3), gr.py(ISAT) - 18, 'fully on', { size: 15, fill: C.muted, mono: true });
     });
     const gainT = d.text(RX + 130, 420, '', { size: 18, fill: C.ink, mono: true, parent: gG });

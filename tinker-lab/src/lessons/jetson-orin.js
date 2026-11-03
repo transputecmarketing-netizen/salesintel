@@ -188,8 +188,8 @@ function idleHint(g, w, text = 'Press Run to start the script') {
 }
 
 function walker(ctx, { z, a, b, speed = 1.6, phase = 0.3, shirt }) {
-  const p = ctx.add(makePerson(v(a, MAT_H, z), { shirt, rotY: Math.PI / 2 }));
   const lo = Math.min(a, b), hi = Math.max(a, b);
+  const p = ctx.add(makePerson(v(lo + (hi - lo) * phase, MAT_H, z), { shirt, rotY: Math.PI / 2 }));
   const st = { x: lo + (hi - lo) * phase, dir: 1, t: 0, mode: 'walk', yaw: Math.PI / 2 };
   return {
     person: p, st,
@@ -247,7 +247,7 @@ export const jetsonOrin = [
       { anchor: 'gpio', x: 0.7, y: 0.17, icon: 'pins', title: '40-pin header', text: 'Same Pi-style layout as the Jetson Nano: 3.3 V GPIO, I²C, SPI, PWM.' },
       { anchor: 'csi', x: 0.04, y: 0.68, icon: 'radar', title: 'Two CSI ports', text: '22-pin MIPI connectors for two cameras.' },
       { anchor: 'usb', x: 0.36, y: 0.74, icon: 'usb', title: 'USB · DP · LAN', text: '4 × USB 3.2, DisplayPort and Gigabit Ethernet.' },
-      { anchor: 'ethernet', x: 0.7, y: 0.68, icon: 'bolt', title: 'NVMe underneath', text: 'An M.2 SSD on the underside holds the OS and models.' },
+      { anchor: 'ssd', x: 0.7, y: 0.68, icon: 'bolt', title: 'NVMe underneath', text: 'An M.2 SSD on the underside holds the OS and models.' },
     ],
     overview: {
       heading: 'Orin Nano: the Nano, grown up',
@@ -460,7 +460,7 @@ while True:
       const st = { mode: 'MAXN_SUPER', load: 55, running: false, poses: [], frame: 0 };
       orinPower(ctx, st);
       const d = aiDesk(ctx, { title: 'YOLO11n-pose · TensorRT', lookY: 2.6 });
-      const w1 = walker(ctx, { z: 13.0, a: -16, b: -1.5, speed: 1.4, phase: 0.5, shirt: 0x8a5cc6 });
+      const w1 = walker(ctx, { z: 10.5, a: -14, b: -3.5, speed: 1.2, phase: 0.5, shirt: 0x8a5cc6 });
       w1.st.mode = 'walk';
       ctx.onTick((dt) => w1.step(dt));
       ctx.interact(w1.person, {
@@ -699,7 +699,6 @@ while True:
       io.line('prompt = input("you> ")');
       const q = io.readLine();
       if (q == null) { await io.delay(80); return; }
-      io.print(`you> ${q}`);
       if (/^\s*(q|quit)\s*$/i.test(q)) { io.line('break'); io.print('(script finished)'); st.quit = true; return; }
       io.line('history.append({"role": "user"');
       io.line('stream = ollama.chat');

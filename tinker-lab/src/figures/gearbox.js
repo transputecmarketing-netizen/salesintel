@@ -2,21 +2,21 @@ import HL from './vendor/hairline-kernel.js';
 /**
  * Gearbox: a three-gear train on a mounting plate, as in a toy motor kit: a
  * big driver with a crank pin and lightening holes, an idler, and a small
- * output gear, each on its axle. Turning the pointer round the big gear turns
- * it, on a spring, by the angle swept; the idler and the output follow, each
- * the other way and faster by its tooth ratio, meshing tooth in gap. The
+ * output gear, each on its axle. The pointer is the hand on the crank: the
+ * driver turns on a spring until its pin faces the pointer, the shorter way
+ * round, so circling the pointer winds it; the idler and the output follow,
+ * each the other way and faster by its tooth ratio, meshing tooth in gap. The
  * output is bright at rest, where the eye should start; the driver takes the
- * bright while the pointer holds it. The slider is the drive: degrees of turn
- * per degree swept.
+ * bright while the pointer holds it. The slider is the spring's stiffness.
  *
- * The drive reads only the pointer's angle round the driver's fixed axle.
+ * The crank reads only the pointer's angle round the driver's fixed axle.
  */
 const {
-  Cam, circ, clamp, facing, fillet, fit, poly, prism, proj, rad, rings, unproj,
+  Cam, circ, facing, fillet, fit, poly, prism, proj, rad, rings, unproj,
   spring, stepS, disposer, flatDot, mk, place, pointer, put, register, solid,
 } = HL;
 
-const M = 2.9, Z0 = 9.4, Z1 = 11.6, TAU = Math.PI * 2;
+const PIN = 0.6, M = 2.9, Z0 = 9.4, Z1 = 11.6, TAU = Math.PI * 2;
 const GEARS = [
   { n: 20, c: [0, 0] },
   { n: 10, psi: 0 },
@@ -40,8 +40,7 @@ function teeth(G, a) {
 
 function mount({ stage, svg, read }, value) {
   const bag = disposer();
-  let gain = value, prev = null;
-  const drive = spring(0, { eps: 0.002 });
+  const drive = spring(0, { k: value, c: 1.7 * Math.sqrt(value), eps: 0.002 });
   const C = Cam(45, 0.5, 2.6);
   const xs = GEARS.flatMap((G) => [G.c[0] - G.r - 8, G.c[0] + G.r + 8]), ys = GEARS.flatMap((G) => [G.c[1] - G.r - 8, G.c[1] + G.r + 8]);
   const X0 = Math.min(...xs), X1 = Math.max(...xs), Y0 = Math.min(...ys), Y1 = Math.max(...ys);
@@ -93,7 +92,7 @@ function mount({ stage, svg, read }, value) {
       const k = i === 0 ? 5 : 1, rh = i === 0 ? G.r * 0.55 : G.r * 0.5, sz = i === 0 ? 3.6 : 1.4;
       E.holes.setAttribute('d', Array.from({ length: i === 0 ? k : 0 }, (_, j) => poly(circ(sz, 20).map((q) => P(G.c[0] + rh * Math.cos(a + (j * TAU) / k) + q.u, G.c[1] + rh * Math.sin(a + (j * TAU) / k) + q.v, Z1)))).join(''));
       const pr2 = i === 0 ? G.r * 0.82 : rh;
-      place(E.pin, P(G.c[0] + pr2 * Math.cos(a + 0.6), G.c[1] + pr2 * Math.sin(a + 0.6), Z1));
+      place(E.pin, P(G.c[0] + pr2 * Math.cos(a + PIN), G.c[1] + pr2 * Math.sin(a + PIN), Z1));
     });
   }
   const B = register(stage, (dt) => { const m = stepS(drive, dt); draw(drive.x); return m; });
@@ -108,27 +107,24 @@ function mount({ stage, svg, read }, value) {
   bag.add(pointer(stage, {
     move: (p) => {
       const [x, y] = unproj(C, p[0], p[1], Z1), phi = Math.atan2(y - GEARS[0].c[1], x - GEARS[0].c[0]);
-      if (Math.hypot(x, y) > 6 && prev !== null) {
-        const d = ((phi - prev + 3 * Math.PI) % TAU) - Math.PI;
-        drive.t += clamp(d, -0.6, 0.6) * gain;
-      }
-      prev = phi;
+      // the crank pin turns to face the pointer, the shorter way round from where it is going
+      if (Math.hypot(x, y) > 6) { const want = phi - PIN; drive.t = want + TAU * Math.round((drive.t - want) / TAU); }
       bright(true);
       const a = angles(drive.t);
       read.textContent = `in ${deg(a[0])}° · out ${deg(a[a.length - 1])}°`;
       B.wake();
     },
-    leave: () => { prev = null; bright(false); read.textContent = 'rest'; },
+    leave: () => { bright(false); read.textContent = 'rest'; },
   }));
   bag.add(() => svg.replaceChildren());
-  return { set: (v) => { gain = v; }, destroy: bag.dispose };
+  return { set: (v) => { drive.k = v; drive.c = 1.7 * Math.sqrt(v); }, destroy: bag.dispose };
 }
 
 export default {
   name: 'gearbox',
-  means: 'A gear train: turning the pointer round the big gear drives it, and the smaller gears follow, faster and the other way.',
+  means: 'A gear train: the big gear’s crank turns to the pointer, and the smaller gears follow, faster and the other way.',
   rules: [1, 5, 8, 9],
-  range: [0.5, 1, 2],
+  range: [40, 100, 220],
   tour: [[137, 114], [225, 114], [225, 158], [137, 158], null],
   mount,
 };

@@ -18,7 +18,7 @@ function avrPins({ digital, analog, analogBase, pwm, analogOnly = [] }) {
 
 export const STUDIO_BOARDS = {
   uno: {
-    id: 'uno', name: 'Uno-style', runtime: 'uno', logic: 5, vin: 4.6,
+    id: 'uno', name: 'Uno-style', runtime: 'uno', logic: 5, avr: true, vin: 4.6,
     outR: 25, maxPinMA: 40, recPinMA: 20, pullup: 35000, adcBits: 10, vref: 5,
     vih: 0.6, vil: 0.3, builtinLed: 13, i2c: { SDA: 'A4', SCL: 'A5' },
     pins: avrPins({ digital: 14, analog: range(0, 5), analogBase: 14, pwm: [3, 5, 6, 9, 10, 11] }),
@@ -28,7 +28,7 @@ export const STUDIO_BOARDS = {
     view: { center: [4, 0.6, 0], size: 17 },
   },
   nano: {
-    id: 'nano', name: 'Nano-style', runtime: 'nano', logic: 5, vin: 4.6,
+    id: 'nano', name: 'Nano-style', runtime: 'nano', logic: 5, avr: true, vin: 4.6,
     outR: 25, maxPinMA: 40, recPinMA: 20, pullup: 35000, adcBits: 10, vref: 5,
     vih: 0.6, vil: 0.3, builtinLed: 13, i2c: { SDA: 'A4', SCL: 'A5' },
     pins: avrPins({ digital: 14, analog: range(0, 7), analogBase: 14, pwm: [3, 5, 6, 9, 10, 11], analogOnly: [6, 7] }),
@@ -38,7 +38,7 @@ export const STUDIO_BOARDS = {
     view: { center: [3.2, 0.6, 0], size: 15 },
   },
   mega: {
-    id: 'mega', name: 'Mega 2560-style', runtime: 'mega', logic: 5, vin: 4.6,
+    id: 'mega', name: 'Mega 2560-style', runtime: 'mega', logic: 5, avr: true, vin: 4.6,
     outR: 25, maxPinMA: 40, recPinMA: 20, pullup: 35000, adcBits: 10, vref: 5,
     vih: 0.6, vil: 0.3, builtinLed: 13, i2c: { SDA: 'D20', SCL: 'D21' },
     pins: avrPins({ digital: 54, analog: range(0, 15), analogBase: 54, pwm: [...range(2, 13), 44, 45, 46] }),
@@ -68,9 +68,36 @@ export const STUDIO_BOARDS = {
     joined: [],
     view: { center: [3.4, 0.6, 0], size: 16 },
   },
+  unor4: {
+    // Renesas RA4M1: 5 V I/O but only 8 mA per pin (Arduino's own figure)
+    id: 'unor4', name: 'Uno R4 WiFi-style', runtime: 'unor4', logic: 5,
+    outR: 45, maxPinMA: 8, recPinMA: 8, pullup: 30000, adcBits: 10, vref: 5,
+    vih: 0.7, vil: 0.3, builtinLed: 13, i2c: { SDA: 'A4', SCL: 'A5' },
+    pins: avrPins({ digital: 14, analog: [0, 1, 2, 3, 4, 5], analogBase: 14, pwm: [3, 5, 6, 9, 10, 11] }),
+    power: { '5V': 5, '3V3': 3.3, VIN: 4.6, IOREF: 5 },
+    gnd: ['GND', 'GND_2', 'GND_3'],
+    joined: [['SDA', 'A4'], ['SCL', 'A5']],
+  },
+  nodemcu: {
+    // ESP8266: 3.3 V logic, ~12 mA per pin, one ADC input (A0, 0–3.3 V through the board's divider)
+    id: 'nodemcu', name: 'NodeMCU ESP8266', runtime: 'nodemcu', logic: 3.3,
+    outR: 45, maxPinMA: 12, recPinMA: 12, pullup: 40000, adcBits: 10, vref: 3.3,
+    vih: 0.75, vil: 0.25, builtinLed: 2, builtinActiveLow: true, i2c: { SDA: 'D2', SCL: 'D1' },
+    pins: (() => {
+      const p = {};
+      [16, 5, 4, 0, 2, 14, 12, 13, 15].forEach((gp, i) => (p[`D${i}`] = { num: gp, gpio: true, pwm: gp !== 16 }));
+      p.RX = { num: 3, gpio: true, pwm: true, serial: true };
+      p.TX = { num: 1, gpio: true, pwm: true, serial: true };
+      p.A0 = { num: 17, gpio: false, adc: 0, pwm: false };
+      return p;
+    })(),
+    power: { '3V3': 3.3, '3V3_2': 3.3, '3V3_3': 3.3, VIN: 4.7, VU: 4.7 },
+    gnd: ['GND', 'GND_2', 'GND_3', 'GND_4', 'GND_5'],
+    joined: [['3V3', '3V3_2', '3V3_3'], ['VIN', 'VU']],
+  },
 };
 
-export const STUDIO_BOARD_ORDER = ['uno', 'nano', 'mega', 'esp32'];
+export const STUDIO_BOARD_ORDER = ['uno', 'nano', 'mega', 'esp32', 'unor4', 'nodemcu'];
 
 /** Build the 3D board plus its electrical description. */
 export function makeStudioBoard(type) {

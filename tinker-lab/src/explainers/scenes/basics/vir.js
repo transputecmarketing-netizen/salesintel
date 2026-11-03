@@ -22,7 +22,7 @@ export default (el, api) => scene(el, api, {
 
     // ---------- the circuit
     const bat = battery(S, 200, B, { label: '', len: 130 });
-    const vLab = d.text(186, B + 1, '', { size: 18, fill: '#fff', mono: true, weight: 500 });
+    const vLab = d.text(195, B + 1, '', { size: 18, fill: '#fff', mono: true, weight: 500 });
     const res = resistor(S, 200, T, { len: 92, lead: 22, bands: ['red', 'red', 'brown', 'gold'] });
     wire(S, [bat.minus, [L, B], [L, T], res.a]);
     wire(S, [res.b, [Rr, T], [Rr, B], bat.plus]);
@@ -66,8 +66,8 @@ export default (el, api) => scene(el, api, {
         // the lift (battery): a ladder of steps
         d.rect(HX0 - 18, HB - h, 36, h, { fill: C.accentSoft, stroke: C.accent, strokeWidth: 2.2, roughness: 0.6 });
         for (let y = HB - 12; y > HB - h + 6; y -= 18) d.line(HX0 - 18, y, HX0 + 18, y, { stroke: C.accent, strokeWidth: 1.4, roughness: 0.4 });
-        d.text(HX0 - 28, HB - h / 2, 'battery lifts', { size: 17, anchor: 'end', fill: C.accentInk, mono: true, baseline: 'middle' });
-        d.text((HX0 + HX1) / 2 + 10, HB - h - 16, 'wire', { size: 16, fill: C.muted, mono: true });
+        d.text(HX0 - 10, HB - h - 18, 'battery lifts', { size: 16, anchor: 'start', fill: C.accentInk, mono: true });
+        d.text((HX1 + 10), HB - h + 22, 'wire', { size: 15, fill: C.muted, mono: true, anchor: 'end' });
         d.text((HX1 + HX2) / 2 + 22, HB - h / 2 - 22, 'resistor', { size: 17, fill: C.ink2, mono: true, anchor: 'start' });
         d.arrow(HX2 + 26, HB, HX2 + 26, HB - h, { stroke: C.accent, strokeWidth: 2.2, head: 10 });
         d.text(HX2 + 26, HB - h - 16, `${st.V.toFixed(1)} V`, { size: 18, fill: C.accentInk, mono: true, weight: 500 });

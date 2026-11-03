@@ -264,7 +264,10 @@ kbd { display: inline-block; padding: 1px 8px; border: 1px solid var(--tl-line-2
   .st-app { grid-template-rows: 52px minmax(0, 1fr) 56px; }
   .st-top { gap: 6px; padding: 0 8px; }
   .st-brand-name, .st-status, .st-board-wrap, #btn-examples, #btn-step { display: none; }
-  .st-name { width: auto; flex: 1; min-width: 60px; padding: 5px 6px; }
+  .st-name-wrap { flex: 1; min-width: 0; }
+  .st-name { width: 100%; min-width: 0; padding: 5px 6px; }
+  .st-main { overflow: hidden; }
+  .st-top .pill-icon, #btn-run { width: 32px; height: 32px; }
   .st-run { margin-left: 0; }
   .st-run .lbl { display: none; }
   #btn-run { width: 34px; padding: 0; }
@@ -274,7 +277,7 @@ kbd { display: inline-block; padding: 1px 8px; border: 1px solid var(--tl-line-2
   [data-view="code"] .st-stage, [data-view="monitor"] .st-stage { visibility: hidden; pointer-events: none; }
   [data-view="code"] .st-code { grid-template-rows: 44px minmax(0, 1fr) 0; }
   [data-view="code"] .st-dock { display: none; }
-  [data-view="monitor"] .st-code { grid-template-rows: 0 0 minmax(0, 1fr); }
+  [data-view="monitor"] .st-code { grid-template-rows: minmax(0, 1fr); }
   [data-view="monitor"] .code-head, [data-view="monitor"] .st-editor { display: none; }
   .st-code { border-left: 0; background: var(--tl-bg); z-index: 2; }
   .st-bin { position: absolute; inset: auto 0 0 0; height: 68%; z-index: 20; border: 1px solid var(--tl-line); border-radius: 18px 18px 0 0; box-shadow: var(--tl-shadow); transform: translateY(105%); transition: transform 0.25s ease; }

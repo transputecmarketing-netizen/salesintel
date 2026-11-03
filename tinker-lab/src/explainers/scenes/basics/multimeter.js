@@ -9,7 +9,7 @@ const ANG = { V: -140, mA: -90, ohm: -40, beep: 10 };
 function reading(mode, where) {
   // 9 V battery, 470 Ω resistor, red LED ≈ 2 V → I = 7 V ÷ 470 Ω ≈ 14.9 mA
   const powered = where !== 'alone' && where !== 'wire';
-  if (mode === 'V') return { battery: ['9.00', 'V', 'ok'], resistor: ['7.00', 'V', 'ok'], series: ['', '', 'For volts, touch across a part.'], alone: ['0.00', 'V', 'No battery, no volts.'], wire: ['0.00', 'V', 'A wire has (almost) no volts across it.'] }[where];
+  if (mode === 'V') return { battery: ['9.00', 'V', 'ok'], resistor: ['7.00', 'V', 'ok'], series: ['', '', 'For volts, touch across a part.'], alone: ['0.00', 'V', 'No battery, no volts.'], wire: ['0.00', 'V', 'Battery out: no volts anywhere.'] }[where];
   if (mode === 'mA') return { battery: ['FUSE', '', 'Never! Across a battery the meter is a short circuit.'], resistor: ['', '', 'Wrong: amps must flow through the meter, in series.'], series: ['14.9', 'mA', 'ok'], alone: ['0.0', 'mA', 'Nothing flows here.'], wire: ['', '', 'Wrong: break the loop and go in series.'] }[where];
   if (mode === 'ohm') return powered ? ['', '', 'Power off first: ohms need a dead circuit.'] : where === 'alone' ? ['470', 'Ω', 'ok'] : ['0.2', 'Ω', 'ok'];
   return powered ? ['', '', 'Power off first.'] : where === 'wire' ? ['0.2', 'Ω', 'beep'] : ['470', 'Ω', 'No beep: 470 Ω is not a connection.'];
@@ -86,7 +86,8 @@ export default (el, api) => scene(el, api, {
       st.gap += (gapT - st.gap) * Math.min(1, dt * 8); st.lift += (liftT - st.lift) * Math.min(1, dt * 6);
       gapG.setAttribute('opacity', (1 - st.gap).toFixed(2)); holeG.setAttribute('opacity', st.gap.toFixed(2));
       resG.setAttribute('transform', `translate(0 ${(st.lift * 170).toFixed(1)})`);
-      const powered = st.where !== 'alone';
+      const powered = st.where !== 'alone' && st.where !== 'wire';
+      bat.g.setAttribute('opacity', powered ? 1 : 0.25);
       const closed = powered && (st.where !== 'series' || st.mode === 'mA');
       LED.set(closed ? 0.8 : 0); fl.set(closed);
       const [pr, pb] = pos(st.where);

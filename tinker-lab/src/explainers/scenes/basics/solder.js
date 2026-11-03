@@ -122,7 +122,7 @@ export default (el, api) => scene(el, api, {
       shine.setAttribute('d', cool ? `M${HX - 16} ${BY - 12} q6 -6 10 -${(h * 0.6).toFixed(1)}` : '');
     };
     const ironAt = (p) => { // p: 0 = parked top-right, 1 = touching the joint, -1 = at the sponge
-      const tx = p >= 0 ? 700 + (HX + 16 - 700) * p : 700 + (620 - 700) * -p, ty = p >= 0 ? 260 + (BY - 12 - 260) * p : 260 + (236 - 260) * -p;
+      const tx = p >= 0 ? 600 + (HX + 16 - 600) * p : 600 + (620 - 600) * -p, ty = p >= 0 ? 290 + (BY - 12 - 290) * p : 290 + (236 - 290) * -p;
       S.at(iron, tx, ty);
     };
     S.onTick((dt, t) => {
@@ -161,12 +161,12 @@ export default (el, api) => scene(el, api, {
         st.count = '';
         S.to(st, { ...base }, 0);
         if (i === 0) S.to(st, { safety: 1, temp: 25 }, 0.5);
-        if (i === 1) { st.temp = 25; S.play(async (w) => { await S.to(st, { temp: 350 }, 3, { ease: 'out' }); await S.to(st, { wipe: 1 }, 0.8); for (let k = 0; k < 2; k++) { await S.to(st, { wipe: 0.75 }, 0.25); await S.to(st, { wipe: 1 }, 0.25); } await S.to(st, { wipe: 0 }, 0.6); }); }
-        if (i === 2) { st.temp = 350; S.play(async (w) => { await S.to(st, { iron: 1 }, 1); S.to(st, { heat: 1 }, 2); st.count = '1…'; await w(1); st.count = '2…'; await w(1); st.count = ''; }); }
-        if (i === 3) { st.temp = 350; st.iron = 1; st.heat = 1; S.play(async (w) => { await S.to(st, { feed: 1 }, 0.8); await S.to(st, { fill: 1 }, 1.6, { ease: 'out' }); }); }
-        if (i === 4) { st.temp = 350; st.iron = 1; st.heat = 1; st.feed = 1; st.fill = 1; S.play(async (w) => { await w(0.4); await S.to(st, { feed: 0 }, 0.7); await w(0.3); await S.to(st, { iron: 0, heat: 0 }, 0.9); await w(0.6); st.cool = 1; }); }
+        if (i === 1) { st.temp = 25; S.play(async (w) => { await w.to(st, { temp: 350 }, 3, { ease: 'out' }); await w.to(st, { wipe: 1 }, 0.8); for (let k = 0; k < 2; k++) { await w.to(st, { wipe: 0.75 }, 0.25); await w.to(st, { wipe: 1 }, 0.25); } await w.to(st, { wipe: 0 }, 0.6); }); }
+        if (i === 2) { st.temp = 350; S.play(async (w) => { await w.to(st, { iron: 1 }, 1); S.to(st, { heat: 1 }, 2); st.count = '1…'; await w(1); st.count = '2…'; await w(1); st.count = ''; }); }
+        if (i === 3) { st.temp = 350; st.iron = 1; st.heat = 1; S.play(async (w) => { await w.to(st, { feed: 1 }, 0.8); await w.to(st, { fill: 1 }, 1.6, { ease: 'out' }); }); }
+        if (i === 4) { st.temp = 350; st.iron = 1; st.heat = 1; st.feed = 1; st.fill = 1; S.play(async (w) => { await w(0.4); await w.to(st, { feed: 0 }, 0.7); await w(0.3); await w.to(st, { iron: 0, heat: 0 }, 0.9); await w(0.6); st.cool = 1; }); }
         if (i === 5) { st.fill = 1; st.cool = 1; S.to(st, { joints: 1 }, 0.6); }
-        if (i === 6) { st.fill = 1; st.cool = 1; st.snip = 0; S.play(async (w) => { await w(0.4); await S.to(st, { snip: 1 }, 1.6, { ease: 'linear' }); }); }
+        if (i === 6) { st.fill = 1; st.cool = 1; st.snip = 0; S.play(async (w) => { await w(0.4); await w.to(st, { snip: 1 }, 1.6, { ease: 'linear' }); }); }
       },
     };
   },

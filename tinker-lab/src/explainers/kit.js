@@ -43,8 +43,8 @@ export function battery(S, x, y, o = {}) {
     d.rect(nx, y - h * 0.18, 9, h * 0.36, { fill: '#c7c9cf', fillStyle: 'solid', stroke: C.ink, strokeWidth: 1.6, roughness: 0.4 });
     d.line(x0 + 10, y - h / 2 + 8, x0 + L - 10, y - h / 2 + 8, { stroke: 'rgba(255,255,255,0.35)', strokeWidth: 3, roughness: 0.3 });
     d.text(flip ? x0 + L * 0.14 : x0 + L * 0.86, y + 1, '+', { size: 28, weight: 500, fill: '#fff' });
-    d.text(flip ? x0 + L * 0.86 : x0 + L * 0.14, y + 1, '−', { size: 28, weight: 500, fill: '#fff' });
-    if (o.label) d.text(x - (flip ? -L * 0.12 : L * 0.12), y + 1, o.label, { size: 20, weight: 500, fill: '#fff', mono: true });
+    d.text(flip ? x0 + L * 0.9 : x0 + L * 0.1, y + 1, '−', { size: 28, weight: 500, fill: '#fff' });
+    if (o.label) d.text(flip ? x0 + L * 0.58 : x0 + L * 0.44, y + 1, o.label, { size: Math.min(20, L * 0.16), weight: 500, fill: '#fff', mono: true });
   });
   const plus = flip ? [x - L / 2 - 9, y] : [x + L / 2 + 9, y];
   const minus = flip ? [x + L / 2, y] : [x - L / 2, y];

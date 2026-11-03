@@ -666,7 +666,8 @@ function solveFrame() {
   const total = segs.reduce((s, [, x]) => s + x.dur, 0);
   const now = sim.solve();
   const builtin = ws.board.def.builtinLed;
-  const level = (snap) => { const p = snap?.get(builtin); return p?.mode === 'OUTPUT' ? Sim.level(p) : 0; };
+  const low = ws.board.def.builtinActiveLow;
+  const level = (snap) => { const p = snap?.get(builtin); return p?.mode === 'OUTPUT' ? (low ? 1 - Sim.level(p) : Sim.level(p)) : 0; };
   if (!vm || total <= 0 || segs.length <= 1) {
     now.builtin = level(sim.pins);
     return now;

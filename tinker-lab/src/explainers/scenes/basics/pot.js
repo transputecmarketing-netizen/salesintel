@@ -69,8 +69,8 @@ export default (el, api) => scene(el, api, {
     const r2V = d.text(DX - 36, 330, '', { size: 17, fill: C.irisInk, mono: true, anchor: 'end' });
     d.text(DX + 30, 150, 'R1', { size: 20, fill: C.accentInk, anchor: 'start', weight: 500 });
     d.text(DX + 30, 330, 'R2', { size: 20, fill: C.irisInk, anchor: 'start', weight: 500 });
-    d.text(700, 214, 'Vout', { size: 16, fill: C.muted, mono: true });
-    const vT = d.text(712, 246, '', { size: 26, fill: C.ink, mono: true, weight: 500 });
+    d.text(640, 222, 'Vout', { size: 16, fill: C.muted, mono: true, anchor: 'start' });
+    const vT = d.text(640, 270, '', { size: 26, fill: C.ink, mono: true, weight: 500, anchor: 'start' });
     const fG = d.g(S.layers.top, { opacity: 0 });
     const fT = d.text(630, 458, '', { size: 15, fill: C.ink2, mono: true, parent: fG });
     const aG = d.g(S.layers.top, { opacity: 0 });
@@ -90,9 +90,9 @@ export default (el, api) => scene(el, api, {
       r2Arc.setAttribute('d', st.f > 0.002 ? arcD(A0, a) : '');
       r1Arc.setAttribute('d', st.f < 0.998 ? arcD(a, A0 + SPAN) : '');
       r1Arc.setAttribute('opacity', (st.split * 0.9).toFixed(2)); r2Arc.setAttribute('opacity', (st.split * 0.9).toFixed(2));
-      const [wx, wy] = P(a, R + 44);
+      const [wx, wy] = P(a, R + 60);
       wLab.setAttribute('x', wx.toFixed(1)); wLab.setAttribute('y', wy.toFixed(1));
-      const [x1, y1] = P(a + (A0 + SPAN - a) / 2, R + 40), [x2, y2] = P(A0 + (a - A0) / 2, R + 40);
+      const [x1, y1] = P(a + (A0 + SPAN - a) / 2, R + 62), [x2, y2] = P(A0 + (a - A0) / 2, R + 62);
       r1T.setAttribute('x', x1); r1T.setAttribute('y', y1); r2T.setAttribute('x', x2); r2T.setAttribute('y', y2);
       r1T.setAttribute('opacity', st.split * (st.f < 0.9 ? 1 : 0)); r2T.setAttribute('opacity', st.split * (st.f > 0.1 ? 1 : 0));
       labs.setAttribute('opacity', st.labels.toFixed(2));

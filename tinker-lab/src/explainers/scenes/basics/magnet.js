@@ -48,7 +48,7 @@ export default (el, api) => scene(el, api, {
       for (let i = 0; i < 12; i++) d.ellipse(290 + i * 20, 250, 16, 64, { stroke: C.copper, strokeWidth: 4, fill: 'none', roughness: 0.4 });
       d.text(230, 250, 'S', { size: 34, fill: C.blue, weight: 500 });
       d.text(572, 250, 'N', { size: 34, fill: C.accent, weight: 500 });
-      d.text(400, 330, 'copper coil on an iron nail', { size: 18, fill: C.muted, mono: true });
+      d.text(400, 468, 'copper coil on an iron nail', { size: 18, fill: C.muted, mono: true });
       wire(S, [[290, 282], [290, 400], [340, 400]], { parent: eG, color: C.copper });
       wire(S, [[510, 282], [510, 400], [470, 400]], { parent: eG, color: C.copper });
       battery(S, 405, 400, { len: 120, h: 40, parent: eG, flip: true });
@@ -92,7 +92,7 @@ export default (el, api) => scene(el, api, {
       crankArm = d.g(crankG);
       d.into(crankArm, () => { d.line(MX, MY, MX, MY - 150, { stroke: C.ink2, strokeWidth: 8, roughness: 0.3 }); d.circle(MX, MY - 150, 34, { fill: C.accent, stroke: C.ink, strokeWidth: 2 }); });
     });
-    hint = d.text(MX, 470, 'drag the red handle round and round', { size: 15, fill: C.muted, mono: true, opacity: 0 });
+    hint = d.text(MX, 82, 'drag the red handle round and round', { size: 15, fill: C.muted, mono: true, opacity: 0 });
     const crankHit = d.el('circle', { cx: MX, cy: MY, r: 190, fill: 'transparent' }, crankG);
     let lastA = null, dragW = 0;
     S.drag(crankHit, {

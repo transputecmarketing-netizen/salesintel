@@ -11,7 +11,7 @@
 import { PART } from './catalog.js';
 
 export const WIRE_COLORS = ['red', 'black', 'orange', 'yellow', 'green', 'blue', 'white', 'purple', 'brown'];
-export const BB_SPOT = { uno: [9.4, -0.6], nano: [7.4, -0.6], mega: [10.6, -0.6], esp32: [7.9, -0.6] };
+export const BB_SPOT = { uno: [9.4, -0.6], nano: [7.4, -0.6], mega: [10.6, -0.6], esp32: [7.9, -0.6], unor4: [9.4, -0.6], nodemcu: [8.2, -0.6] };
 
 export const uid = (p = 'x') => `${p}${Math.random().toString(36).slice(2, 8)}`;
 
@@ -44,7 +44,7 @@ export function normalizeProject(p) {
     v: 1,
     id: typeof p.id === 'string' ? p.id : uid('p'),
     name: String(p.name ?? 'Imported project').slice(0, 80),
-    board: ['uno', 'nano', 'mega', 'esp32'].includes(p.board) ? p.board : 'uno',
+    board: ['uno', 'nano', 'mega', 'esp32', 'unor4', 'nodemcu'].includes(p.board) ? p.board : 'uno',
     code: typeof p.code === 'string' ? p.code : BLANK_CODE,
     breadboards: Array.isArray(p.breadboards) ? p.breadboards.filter((b) => b && typeof b.id === 'string').map((b) => ({ id: b.id, x: +b.x || 0, z: +b.z || 0 })) : [],
     parts: [],

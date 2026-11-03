@@ -3,6 +3,7 @@ import { Registry, AVR } from './registry.js';
 import { addCore } from './core.js';
 import { addHardware } from './hardware.js';
 import { addNetwork } from './network.js';
+import { addModules } from './modules.js';
 
 let registry = null;
 
@@ -16,6 +17,7 @@ export function getRegistry() {
   addCore(R);
   addHardware(R);
   addNetwork(R);
+  addModules(R);
   registry = R;
   return R;
 }

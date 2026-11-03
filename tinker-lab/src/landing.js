@@ -185,7 +185,7 @@ async function figures() {
   if (!load) return;
   try {
     const { mountFigure, FIGURES } = await load();
-    const pick = ['chip', 'servo', 'windmill', 'breadboard', 'radar', 'robot-arm'].filter((n) => FIGURES.some((f) => f.name === n)).slice(0, 3);
+    const pick = ['chip', 'robot-arm', 'windmill', 'servo', 'radar', 'breadboard'].filter((n) => FIGURES.some((f) => f.name === n)).slice(0, 3);
     if (!pick.length) return;
     const row = $('#figure-row');
     row.innerHTML = pick.map((n) => {

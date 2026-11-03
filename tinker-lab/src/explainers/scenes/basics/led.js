@@ -80,12 +80,12 @@ export default (el, api) => scene(el, api, {
     });
     const anatLab = d.g(S.layers.top, { opacity: 0 });
     d.into(anatLab, () => {
-      d.text(520, 410, 'anode +', { size: 20, fill: C.accentInk, weight: 500 });
-      d.text(520, 434, 'long leg', { size: 15, fill: C.muted, mono: true });
-      d.text(712, 380, 'cathode −', { size: 20, fill: C.ink, weight: 500 });
-      d.text(712, 404, 'short leg, flat rim', { size: 15, fill: C.muted, mono: true });
-      d.line(560, 400, 586, 380, { stroke: C.muted, strokeWidth: 1.3 });
-      d.line(690, 364, 640, 340, { stroke: C.muted, strokeWidth: 1.3 });
+      d.text(520, 360, 'anode +', { size: 20, fill: C.accentInk, weight: 500 });
+      d.text(520, 384, 'long leg', { size: 15, fill: C.muted, mono: true });
+      d.text(716, 320, 'cathode −', { size: 20, fill: C.ink, weight: 500 });
+      d.text(716, 344, 'short leg, flat rim', { size: 15, fill: C.muted, mono: true });
+      d.line(548, 346, 584, 306, { stroke: C.muted, strokeWidth: 1.3 });
+      d.line(684, 312, 640, 280, { stroke: C.muted, strokeWidth: 1.3 });
       d.text(700, 120, 'the light comes from', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
       d.text(700, 140, 'a tiny chip inside', { size: 15, fill: C.muted, mono: true, anchor: 'start' });
     });

@@ -29,8 +29,8 @@ export default (el, api) => scene(el, api, {
     d.line(X + 70, Y + 50, X + 70, Y + H - 10, { stroke: '#c9a227', strokeWidth: 5, roughness: 0.3 });
     d.rect(X + 6, Y + H - 10, W - 12, 10, { fill: '#9a9ca3', stroke: C.ink, strokeWidth: 1.6, roughness: 0.4 });
     d.text(X + 70, Y + 40, '+', { size: 34, fill: '#fff', weight: 500 });
-    d.text(X + 70, Y + H + 30, '− end', { size: 18, fill: C.ink, mono: true });
-    d.text(X + 70, Y - 34, '+ end', { size: 18, fill: C.accentInk, mono: true });
+    d.text(X - 8, Y + H - 4, '− end', { size: 18, fill: C.ink, mono: true, anchor: 'end' });
+    d.text(X + 44, Y - 8, '+ end', { size: 18, fill: C.accentInk, mono: true, anchor: 'end' });
     const labs = d.g(S.layers.top);
     d.into(labs, () => {
       const lab = (y, ax, t, c) => { d.line(ax, y, 320, y, { stroke: C.muted, strokeWidth: 1.3 }); d.circle(ax, y, 7, { fill: C.muted, stroke: 'none' }); d.text(330, y, t, { size: 20, anchor: 'start', fill: c ?? C.ink2 }); };
@@ -52,7 +52,7 @@ export default (el, api) => scene(el, api, {
       wire(S, [bot, [X + 70, 470], [bl.left[0], 470], bl.left], { parent: extG });
     });
     const fl = S.flow(pathOf([bot, [X + 70, 470], [bl.left[0], 470], bl.left, bl.right, [450, bl.right[1]], [450, 36], [X + 70, 36], top]), { gap: 32, r: 6, speed: 60, on: false });
-    const eLab = d.text(290, 455, 'electrons leave the − end', { size: 17, fill: C.blue, mono: true, opacity: 0 });
+    const eLab = d.text(300, 492, 'electrons leave the − end', { size: 17, fill: C.blue, mono: true, opacity: 0 });
 
     // ---------- right panel: DC vs AC
     const RX = 520;

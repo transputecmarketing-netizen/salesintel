@@ -63,7 +63,7 @@ export const projectsPlanet = [
       const b = ctx.board;
       const bb = benchRails(ctx);
       ctx.step('Stand the micro wind turbine behind the bench, rotor facing the wind');
-      const tur = ctx.add(makeWindTurbine(v(-3, 0, -15)));
+      const tur = ctx.add(makeWindTurbine(v(-3, 0, -15), { height: 11 }));
       ctx.step('Mount the cup anemometer on its own mast');
       const an = ctx.add(makeAnemometer(v(-11, 0, -7)));
       ctx.step('Anemometer reed switch: SIG to GPIO27 (internal pull-up), GND to the – rail');
@@ -100,7 +100,7 @@ export const projectsPlanet = [
       const p8 = ctx.wire(dump.pin('B'), tur.pin('OUT-'), 'black', { lift: 2.6, dir: -1 });
       const charge = [p1, p2, p3, p4, p5, p6], brake = [p7, p8];
 
-      const st = { wind: 7, gust: true, t: 0, w: 7, soc: 0.55, e: { i: 0, vt: 0, bus: 0 }, running: false };
+      const st = { wind: 7, gust: true, t: 0, simT: 0, w: 7, soc: 0.55, e: { i: 0, vt: 0, bus: 0 }, running: false };
       const elec = () => {
         const rpm = tur.rpm, voc = 0.0192 * rpm;
         const vch = 12.2 + st.soc * 0.9 + 0.4; // battery + controller drop
@@ -111,6 +111,7 @@ export const projectsPlanet = [
       };
       ctx.onTick((dt) => {
         st.t += dt;
+        if (st.running) st.simT += dt;
         const g = st.gust ? 1 + 0.22 * Math.sin(st.t * 0.6) + 0.13 * Math.sin(st.t * 1.9 + 1) + 0.08 * Math.sin(st.t * 4.7) : 1;
         st.w = Math.max(0, st.wind * g);
         an.setWind(st.w);
@@ -151,9 +152,8 @@ export const projectsPlanet = [
     },
     callouts: [
       { anchor: 'an', x: 0.04, y: 0.17, icon: 'wave', title: 'Anemometer · GPIO27', text: 'One reed-switch pulse per turn: 0.667 m/s per pulse per second. Click it to change the wind.' },
-      { anchor: 'tur', x: 0.36, y: 0.12, icon: 'gear', title: 'Micro turbine', text: 'Power grows with the cube of wind speed, until the controller limit.' },
       { anchor: 'ina', x: 0.7, y: 0.17, icon: 'bolt', title: 'INA219 · I²C', text: 'Measures the charging current through a 0.1 Ω shunt and the bus voltage.' },
-      { anchor: 'relay', x: 0.04, y: 0.68, icon: 'transistor', title: 'Cut-out brake', text: 'Above CUT_OUT for 3 s the relay shorts the generator into the dump load.' },
+      { anchor: 'relay', x: 0.04, y: 0.68, icon: 'transistor', title: 'Cut-out brake', text: 'Turbine power grows with v³. Above CUT_OUT for 3 s this relay shorts the generator into the dump load.' },
       { anchor: 'div', x: 0.36, y: 0.74, icon: 'resistor', title: '÷21 divider · GPIO34', text: 'Open-circuit voltage can pass 40 V: the divider keeps the ADC under 3.3 V.' },
     ],
     overview: {
@@ -279,7 +279,8 @@ void loop() {
 }`,
     params: { cutin: { value: 3, min: 1, max: 6 }, cutout: { value: 14, min: 8, max: 25 }, log: { value: 10, min: 2, max: 60 } },
     async setup(io, b) {
-      Object.assign(b, { state: 'IDLE', overSec: 0, calmSec: 0, wh: 0, lastLog: now(), t0: now(), last: now(), lastCount: Math.floor(b.an.pulses) });
+      Object.assign(b, { state: 'IDLE', overSec: 0, calmSec: 0, wh: 0, lastLog: now(), t0: now(), lastSim: 0, lastCount: Math.floor(b.an.pulses) });
+      b.st.simT = 0;
       b.st.running = true;
       b.plot.reset();
       io.line('pinMode(ANEMO_PIN'); await io.delay(60);
@@ -289,9 +290,10 @@ void loop() {
     },
     async loop(io, b, p) {
       io.line('if (now - lastSample < 1000) return;');
-      await io.delay(Math.max(20, 1000 - (now() - b.last)));
-      const t = now(), dt = (t - b.last) / 1000;
-      b.last = t;
+      // sample once per second of simulated time (the scene's clock), so pulses and dt always match
+      while (b.st.simT - b.lastSim < 1) await io.delay(40);
+      const t = now(), dt = b.st.simT - b.lastSim;
+      b.lastSim = b.st.simT;
       io.line('unsigned long n = pulses;');
       const tot = Math.floor(b.an.pulses), n = tot - b.lastCount;
       b.lastCount = tot;
@@ -345,7 +347,7 @@ void loop() {
   {
     id: 'eco-solar-tracker', title: 'Solar sun tracker', icon: 'sun',
     thumb: () => makeSolarTracker(v(0, 0, 0)).group,
-    view: { center: [-4.5, 5.5, -2], size: 38, az: -4 },
+    view: { center: [-6, 5, -2], size: 33, az: -4 },
     build(ctx) {
       const b = ctx.board;
       const bb = benchRails(ctx);
@@ -356,7 +358,7 @@ void loop() {
       ctx.step('A fixed panel for comparison, tilted 35° towards the south (+z)');
       const fixed = ctx.add(makeSolarPanel(v(-19, 0, 3), { tilt: 35 }));
       ctx.step('The sun: drag it across the sky');
-      const sun = ctx.add(makeSun(tr.center, { radius: 15, az: -40, el: 35 }));
+      const sun = ctx.add(makeSun(tr.center, { radius: 12, az: -40, el: 35 }));
       ctx.step('LDR dividers to the ADC1 pins: TL 32, TR 33, BL 34, BR 35');
       const wTL = ctx.wire(tr.pin('TL'), b.pin('GPIO32'), 'green', { signal: 'GPIO32', lift: 2.0 });
       ctx.wire(tr.pin('TR'), b.pin('GPIO33'), 'green', { signal: 'GPIO33', lift: 2.2 });
@@ -779,10 +781,9 @@ void loop() {
     async loop(io, b, p) {
       const st = b.st;
       io.line('server.handleClient()');
-      console.warn('DBG', now() - st.lastPoll, p.poll, st.aqi, st.pm25);
-      if (now() - st.lastPoll >= p.poll) {
+      if (now() - st.lastPoll >= p.poll && (st.aqi || st.pm25)) {
         st.lastPoll = now();
-        if (st.aqi || st.pm25) {
+        {
           st.api = { pm25: st.pm25, pm10: st.pm10, aqi: st.aqi, cat: st.cat, tvoc: st.tvoc, eco2: st.eco2 };
           st.polls++;
           st.hist.push(st.pm25); if (st.hist.length > 40) st.hist.shift();
@@ -818,12 +819,12 @@ void loop() {
   {
     id: 'eco-water-quality', title: 'Water-quality monitor', icon: 'thermo',
     thumb: () => makeWaterLab(v(0, 0, 0)).group,
-    view: { center: [-4.5, 4, 0.5], size: 27, az: -6 },
+    view: { center: [-4.5, 4.5, -1], size: 25, az: -6 },
     build(ctx) {
       const b = ctx.board;
       const bb = benchRails(ctx);
       ctx.step('Water lab: beaker in a stand with pH, TDS and DS18B20 probes and their boards');
-      const lab = ctx.add(makeWaterLab(v(-11.5, 0, -3)));
+      const lab = ctx.add(makeWaterLab(v(-9.5, 0, -4.5)));
       ctx.step('Power all three probe boards from the 3.3 V and GND rails');
       ctx.wire(lab.pin('PH_+'), bb.hole(1, 'top+'), 'red', { lift: 2.4 });
       ctx.wire(lab.pin('PH_-'), bb.hole(2, 'top-'), 'black', { lift: 2.2, dir: -1 });
@@ -1013,7 +1014,7 @@ void loop() {
   {
     id: 'eco-wildfire', title: 'Wildfire early warning', icon: 'sun',
     thumb: () => makeWildfirePost(v(0, 0, 0)).group,
-    view: { center: [2, 3.5, -5], size: 46, az: -4 },
+    view: { center: [3, 3.5, -7], size: 42, az: -4 },
     build(ctx) {
       const b = ctx.board;
       const bb = benchRails(ctx);
@@ -1045,13 +1046,13 @@ void loop() {
       const wSck = spi(lora, b, bb, 1, 2);
       ctx.step('Base station: a second ESP32 with its own LoRa module, 2 km away (shortened here)');
       const base = makeESP32();
-      base.group.position.set(22, 0, 0);
+      base.group.position.set(17, 0, -11);
       base.group.updateMatrixWorld(true);
       ctx.add(K({ group: base.group, pick: base.group }, 'board', 'ESP32 DevKit (base station)'));
-      const bb2 = ctx.breadboard(22, 5.6);
+      const bb2 = ctx.breadboard(17, -5.4);
       ctx.wire(base.pin('3V3'), bb2.hole(4, 'top+'), 'red', { lift: 1.0 });
       ctx.wire(base.pin('GND_2'), bb2.hole(6, 'top-'), 'black', { lift: 0.8, dir: -1 });
-      const lora2 = ctx.add(makeLoRa(v(14.5, 0, 3.2)));
+      const lora2 = ctx.add(makeLoRa(v(24, 0, -11.5)));
       spi(lora2, base, bb2, 1, 2);
 
       const st = { fire: 0, t: 26, h: 35, auto: false, phase: 0, running: false, packets: [], fireA: forest.fireWorld.clone() };
@@ -1111,6 +1112,7 @@ void loop() {
       { anchor: 'fire', x: 0.04, y: 0.17, icon: 'sun', title: 'The forest', text: 'Click the trees to light a fire or run a hot, dry afternoon.' },
       { anchor: 'post', x: 0.36, y: 0.12, icon: 'radar', title: 'Sensor post', text: 'MQ-2 smoke, IR flame eye, DHT22 in a radiation shield, solar panel and antenna.' },
       { anchor: 'lora', x: 0.04, y: 0.68, icon: 'globe', title: 'LoRa SX1276 on SPI', text: 'Long range, low power, tiny packets: kilometres on a few milliwatts.' },
+      { anchor: 'base', x: 0.7, y: 0.17, icon: 'chip', title: 'Base station', text: 'Same sketch with BASE_STATION 1: it prints each packet with its RSSI.' },
       { anchor: 'smoke', x: 0.36, y: 0.74, icon: 'wave', title: 'Fire-risk index', text: 'Ångström index from temperature and humidity; smoke or flame raises an ALERT.' },
     ],
     overview: {

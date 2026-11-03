@@ -12,7 +12,10 @@ const H = (...names) => ({ header: names });
 // ------------------------------------------------------------------ I²C presence
 export function i2cDevice(vm, addr) {
   const d = vm.devices;
-  const dev = d.i2c?.(addr);
+  // a device keeps its registers, so ask the HAL once per address
+  const cache = vm.lib('i2c', () => new Map());
+  if (!cache.has(addr)) cache.set(addr, d.i2c?.(addr) ?? null);
+  const dev = cache.get(addr);
   if (dev) return dev;
   if ((addr === 0x27 || addr === 0x3f) && d.lcd) return { builtin: 'lcd' };
   if ((addr === 0x3c || addr === 0x3d) && d.oled) return { builtin: 'oled' };
@@ -215,7 +218,14 @@ export function addHardware(R) {
     methods: {
       ...gfx,
       begin: M(['bool ()', 'bool (uint8_t)', 'bool (uint8_t, uint8_t)', 'bool (uint8_t, uint8_t, bool)', 'bool (uint8_t, uint8_t, bool, bool)'], (vm, d, vcc, addr = 0x3c) => {
-        d.addr = addr; d.begun = true;
+        d.addr = addr;
+        // the library mallocs its frame buffer; on an Uno there may not be enough RAM left
+        const need = (d.w * d.h) / 8;
+        if (vm.T.avr && (vm.globalBytes ?? 0) + need + 128 + 300 > vm.info.ram) {
+          vm.warnOnce('oled-ram', `Not enough RAM for the ${d.w}×${d.h} display buffer (${need} bytes): begin() returns false`, `Global variables already use about ${vm.globalBytes} of the ${vm.info.ram} bytes of RAM. Use smaller arrays, F("text") for strings, or a board with more RAM.`);
+          return 0;
+        }
+        d.begun = true;
         d.dev = vm.devices.oled?.(addr) ?? null;
         vm.us += 100000;
         if (!i2cDevice(vm, addr)) vm.warnOnce('oled-addr', `No I2C device answers at 0x${addr.toString(16)}: the screen stays dark (begin() still returns true, as on real hardware)`, 'Most 128×64 OLEDs use 0x3C; some use 0x3D.');
@@ -756,6 +766,8 @@ function gfxMethods() {
     drawLine: M('void (int16_t, int16_t, int16_t, int16_t, uint16_t)', (vm, d, a, b, e, f, c) => line(d, a, b, e, f, c)),
     drawFastHLine: M('void (int16_t, int16_t, int16_t, uint16_t)', (vm, d, x, y, w, c) => hline(d, x, y, w, c)),
     drawFastVLine: M('void (int16_t, int16_t, int16_t, uint16_t)', (vm, d, x, y, h, c) => vline(d, x, y, h, c)),
+    drawCircleHelper: M('void (int16_t, int16_t, int16_t, uint8_t, uint16_t)', (vm, d, x, y, r, corner, c) => circleHelper(d, x, y, r, corner, c)),
+    fillCircleHelper: M('void (int16_t, int16_t, int16_t, uint8_t, int16_t, uint16_t)', (vm, d, x, y, r, corners, delta, c) => fillCircleHelper(d, x, y, r, corners, delta, c)),
     drawRect: M('void (int16_t, int16_t, int16_t, int16_t, uint16_t)', (vm, d, x, y, w, h, c) => { hline(d, x, y, w, c); hline(d, x, y + h - 1, w, c); vline(d, x, y, h, c); vline(d, x + w - 1, y, h, c); }),
     fillRect: M('void (int16_t, int16_t, int16_t, int16_t, uint16_t)', (vm, d, x, y, w, h, c) => fillRect(d, x, y, w, h, c)),
     fillScreen: M('void (uint16_t)', (vm, d, c) => fillRect(d, 0, 0, W(d), Hh(d), c)),

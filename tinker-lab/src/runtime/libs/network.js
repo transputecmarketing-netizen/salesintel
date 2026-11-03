@@ -23,6 +23,7 @@ export function addNetwork(R) {
       getChipRevision: M('uint8_t ()', () => 3, { boards: ESP32 }),
       getCpuFreqMHz: M('uint32_t ()', (vm) => (vm.board === 'esp32' ? 240 : 80)),
       getFlashChipSize: M('uint32_t ()', () => 4194304),
+      getFlashChipRealSize: M('uint32_t ()', () => 4194304, { boards: ['nodemcu'] }),
       getFreeHeap: M('uint32_t ()', (vm) => (vm.board === 'esp32' ? 294000 : 45000) - (vm.P.globals.length * 16)),
       getHeapSize: M('uint32_t ()', (vm) => (vm.board === 'esp32' ? 327680 : 81920)),
       getMinFreeHeap: M('uint32_t ()', () => 280000, { boards: ESP32 }),

@@ -106,7 +106,8 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
     let ptr = 0;
     while (str.endsWith('*')) { ptr++; str = str.slice(0, -1).trim(); }
     str = str.replace(/^const\s+/, '').replace(/\s+const$/, '');
-    let t = builtinType(str.split(/\s+/)) ?? T.typedefs[str] ?? (registry.classes[str] ? classType(registry.classes[str]) : null) ?? libStruct(str);
+    const rtd = registry.lookup(str, board);
+    let t = builtinType(str.split(/\s+/)) ?? T.typedefs[str] ?? (registry.classes[str] ? classType(registry.classes[str]) : null) ?? libStruct(str) ?? (rtd?.kind === 'typedef' ? { ...typeFromString(rtd.type), alias: str, base: typeFromString(rtd.type) } : null);
     if (!t) { if (str === 'any') t = T.any; else throw new Error(`unknown type in signature: ${str}`); }
     for (let i = 0; i < ptr; i++) t = ptrTo(t, T);
     return t;
@@ -1366,7 +1367,12 @@ export function compileProgram(ast, { board, registry, includes, diagnostics }) 
         if (p.ref && !(argEs[i].at || argEs[i].atg) && !p.constRef) r = Infinity;
         score += r;
       }
+      if (score < Infinity && best && score === best.score) best.tie = true;
       if (score < Infinity && (!best || score < best.score)) best = { info, score };
+    }
+    if (best?.tie && overloads.filter((o) => o.params.length >= argEs.length).length > 1) {
+      error(node, `call of overloaded '${name}(${argEs.map((a) => typeName(a.t, { aka: false })).join(', ')})' is ambiguous`, `Candidates are:\n${overloads.map((o) => '  ' + fnSig(o)).join('\n')}\nCast the argument to pick one, e.g. ${name}((float)x).`);
+      return errE();
     }
     if (!best) {
       if (overloads.length === 1) {

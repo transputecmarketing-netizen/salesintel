@@ -125,8 +125,7 @@ export class VM {
   start() {
     if (this.state === 'running') return;
     if (this.state === 'idle' || this.state === 'stopped' || this.state === 'error') {
-      this.us = 0; this.bootUs = 0; this.frozenUs = 0;
-      this.initPins();
+      if (this.state !== 'idle') { this.us = 0; this.bootUs = 0; this.frozenUs = 0; this.initPins(); this.libState.clear(); }
       this.boot();
     }
     this.targetUs = this.us;
@@ -158,7 +157,10 @@ export class VM {
   /** Run headless for `ms` simulated milliseconds (tests, fast-forward). */
   advance(ms) {
     this.manual = true;
-    if (this.state === 'idle' || this.state === 'stopped') { this.us = 0; this.initPins(); this.boot(); }
+    if (this.state === 'idle' || this.state === 'stopped') {
+      if (this.state !== 'idle') { this.us = 0; this.bootUs = 0; this.frozenUs = 0; this.initPins(); this.libState.clear(); }
+      this.boot();
+    }
     if (this.state !== 'paused' && this.state !== 'error') this.setState('running');
     const target = this.us + ms * 1000;
     let guard = 0;

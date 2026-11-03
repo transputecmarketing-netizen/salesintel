@@ -34,7 +34,7 @@ export default (el, api) => scene(el, api, {
     d.circle(A[0], A[1], 12, { fill: '#fff' }); d.circle(Bc[0], Bc[1], 12, { fill: '#fff' }); d.circle(PX, PY, 13, { fill: '#fff' });
     const lever = d.g();
     d.into(lever, () => { d.line(PX, PY, PX - 54, PY, { strokeWidth: 5, roughness: 0.4 }); d.circle(PX - 36, PY - 12, 16, { fill: C.accent, strokeWidth: 1.5 }); });
-    const swLab = d.text(118, 150, 'charge', { size: 15, fill: C.accentInk, mono: true });
+    const swLab = d.text(205, 148, 'charge', { size: 15, fill: C.accentInk, mono: true });
     const swHit = d.el('rect', { x: 130, y: 40, width: 90, height: 100, fill: 'transparent' });
     S.tap(swHit, () => modeC.set(st.mode === 'charge' ? 'discharge' : 'charge'), 'Flip the switch');
     // the capacitor: two plates
@@ -82,7 +82,7 @@ export default (el, api) => scene(el, api, {
       pts = [];
     };
     drawGraph();
-    const tauT = d.text(645, 400, '', { size: 18, fill: C.ink2, mono: true });
+    const tauT = d.text(645, 425, '', { size: 18, fill: C.ink2, mono: true });
 
     const modeC = S.ui.choice({ options: [['charge', 'Charge'], ['discharge', 'Discharge']], value: 'charge', onChange: (v) => { st.mode = v; st.t = 0; pts = []; } });
     const rS = S.ui.slider({ label: 'R', min: 0, max: 3, step: 1, value: 2, format: (i) => si(RS[i], 'Ω'), onInput: (i) => { st.R = RS[i]; drawGraph(); st.t = 0; } });

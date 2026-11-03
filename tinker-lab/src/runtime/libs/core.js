@@ -229,7 +229,6 @@ export function addCore(R) {
   R.fn('analogSetAttenuation', 'void (int)', () => {}, { boards: ESP32 });
   R.consts('int', { ADC_0db: 0, ADC_2_5db: 1, ADC_6db: 2, ADC_11db: 3 }, { boards: ESP32 });
   R.fn('dacWrite', 'void (uint8_t, uint8_t)', (vm, pin, v) => { vm.hal.analogWrite?.(pin, v); vm.emit('pin', { pin, kind: 'pwm', value: v }); }, { boards: ESP32 });
-  R.fn('analogReadMilliVolts', 'uint32_t (uint8_t)', (vm, pin) => Math.round((vm.analogRead(pin) / 4095) * 3300), { boards: ESP32 });
 
   // ---- time
   R.fn('delay', 'void (unsigned long)', function* (vm, ms) { yield* vm.sleep(ms * 1000); });

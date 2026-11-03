@@ -186,7 +186,6 @@ void loop() {
 }`,
     params: { mingreen: { value: 6, min: 2, max: 20 }, maxgreen: { value: 25, min: 6, max: 60 }, gap: { value: 2500, min: 500, max: 8000 } },
     async setup(io, b) {
-      b.X.reset();
       b.st.plotOn = true;
       b.plot.reset();
       Object.assign(b, { lastNS: 0, lastEW: 0 });
@@ -906,7 +905,7 @@ void loop() {
   {
     id: 'city-street-lights', title: 'Smart street lights', icon: 'sun', board: 'uno',
     thumb: () => { const l = makeStreetLamp(v(0, 0, 0)); l.set(1); return l.group; },
-    view: { center: [-6, 4, -10], size: 66 },
+    view: { center: [-6, 4, -11], size: 58 },
     build(ctx) {
       const SS = v(-4, 0, -14);
       ctx.step('Lay the street model');
@@ -932,7 +931,7 @@ void loop() {
       ctx.wire(ctx.board.pin('GND_2'), bb.hole(18, 'j'), 'black', { signal: 'GND', dir: -1, lift: 1.1 });
       // ---- people walking along the far pavement
       const people = [];
-      const st = { day: 0.15, rate: 5, acc: 0.6 };
+      const st = { day: 0.15, rate: 3, acc: 0.3 };
       const walkZ = RW / 2 + 2.9;
       const spawn = (dir) => {
         const p = makePerson(v(0, 0, 0), { shirt: [0x3b78e7, 0xe5412e, 0x3aa65a, 0xf2c230][(Math.random() * 4) | 0] });
@@ -940,8 +939,7 @@ void loop() {
         street.group.add(p.group);
         people.push({ p, x: dir > 0 ? -36 : 34, dir, v: 3.2 + Math.random() * 1.4, t: Math.random() * 6 });
       };
-      spawn(1); people[0].x = -24;
-      spawn(-1); people[1].x = 14;
+      spawn(1); people[0].x = -34;
       ctx.onTick((dt) => {
         ctx.setDarkness(1 - st.day);
         st.acc += (st.rate / 60) * dt;
@@ -954,8 +952,8 @@ void loop() {
           q.p.group.rotation.y = q.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
           if (Math.abs(q.x) > 36) { street.group.remove(q.p.group); people.splice(i, 1); }
         }
-        // each PIR sees about 16 cm either side along the street (≈ 14 m full size)
-        [-20, 12].forEach((px, i) => pirs[i].trigger(people.some((q) => Math.abs(q.x - px) < 16)));
+        // each PIR sees about 12 cm either side along the street (≈ 10 m full size)
+        [-20, 12].forEach((px, i) => pirs[i].trigger(people.some((q) => Math.abs(q.x - px) < 12)));
       });
       const plot = ctx.plotter({ title: 'Lamp power', series: [{ name: 'adaptive W', color: '#2aa7a1', min: 0, max: 250 }, { name: 'always-on W', color: '#ef8a2b', min: 0, max: 250 }] });
       ctx.interact(ldr, {
