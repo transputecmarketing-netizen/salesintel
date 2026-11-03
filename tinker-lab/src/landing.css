@@ -118,4 +118,10 @@
   .rcard-icon { width: 92px; height: 92px; border-radius: 26px; }
   .rcard-icon svg { width: 46px; height: 46px; }
   .loop-list li { font-size: 17px; padding: 14px 16px; }
+  .board-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .board-tile b { font-size: 15px; }
+  .compare-table { min-width: 0; }
+  .compare-table th { width: 76px; font-size: 14px; }
+  .compare-table .col-ic { width: 46px; height: 46px; border-radius: 14px; }
+  .compare-table td { font-size: 16px; padding: 14px 8px 14px 0; }
 }

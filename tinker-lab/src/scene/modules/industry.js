@@ -1138,3 +1138,685 @@ export function makeStackLight(pos, opts = {}) {
   });
   return api;
 }
+
+// ================================================================= H0 (1:87) toy car
+const CAR_COLORS = [0xe5412e, 0x3a6fd0, 0xf2c230, 0x3aa65a, 0xf3f1e8, 0x8a5cc6, 0x2a2c33, 0xf08a2c, 0x5fb7c9];
+const carGeo = {
+  body: new THREE.BoxGeometry(2.1, 0.72, 5.2),
+  cabin: new THREE.BoxGeometry(1.86, 0.62, 2.7),
+  glassF: new THREE.BoxGeometry(1.7, 0.46, 0.06),
+  glassS: new THREE.BoxGeometry(0.06, 0.42, 2.3),
+  wheel: new THREE.CylinderGeometry(0.4, 0.4, 0.32, 14),
+  lamp: new THREE.BoxGeometry(0.5, 0.18, 0.05),
+};
+/**
+ * H0-scale car (≈ 5.2 cm long), forward = local +Z. API: setBrake(on),
+ * setColor(hex), length, width. Cheap enough to have a dozen on screen.
+ */
+export function makeToyCar(pos, opts = {}) {
+  const g = new THREE.Group();
+  const paint = mat(opts.color ?? CAR_COLORS[(Math.random() * CAR_COLORS.length) | 0], { rough: 0.45 });
+  const glass = mat(0x9fc4d6, { rough: 0.2 });
+  const body = mesh(carGeo.body, paint);
+  body.position.y = 0.66;
+  g.add(body);
+  const cabin = mesh(carGeo.cabin, paint);
+  cabin.position.set(0, 1.32, -0.25);
+  g.add(cabin);
+  for (const z of [1.11, -1.61]) g.add(at(mesh(carGeo.glassF, glass, { outline: false }), 0, 1.34, z));
+  for (const x of [-0.94, 0.94]) g.add(at(mesh(carGeo.glassS, glass, { outline: false }), x, 1.34, -0.25));
+  const tyre = mat(0x24262c);
+  for (const [x, z] of [[-1, 1.6], [1, 1.6], [-1, -1.6], [1, -1.6]]) {
+    const w = mesh(carGeo.wheel, tyre, { outline: false });
+    w.rotation.z = Math.PI / 2;
+    g.add(at(w, x * 0.98, 0.4, z));
+  }
+  const head = mat(0xfff3c4, { emissive: 0xfff0b0, emissiveIntensity: 0.4 });
+  const brake = mat(0x8a1d14, { emissive: 0xff2a1a, emissiveIntensity: 0, unique: true });
+  for (const s of [-1, 1]) {
+    g.add(at(mesh(carGeo.lamp, head, { outline: false }), s * 0.65, 0.75, 2.61));
+    g.add(at(mesh(carGeo.lamp, brake, { outline: false }), s * 0.65, 0.78, -2.61));
+  }
+  g.position.copy(pos ?? V());
+  g.rotation.y = opts.rotY ?? 0;
+  return {
+    group: g, pick: g, kind: 'prop', label: 'Model car (H0)',
+    length: 5.2, width: 2.1,
+    anchor: g.position.clone().add(V(0, 2.4, 0)),
+    setBrake(on) { brake.emissiveIntensity = on ? 1.6 : 0; },
+    setColor(hex) { paint.color?.setHex?.(hex); },
+  };
+}
+
+/** Lightweight lane traffic: cars follow lanes, keep their distance and stop at red lines. */
+function laneTraffic(parent) {
+  const CL = 5.2, GAP = 1.3, ACC = 9, BRAKE = 11;
+  const pool = [];
+  const cars = [];
+  const get = () => {
+    const c = pool.pop() ?? makeToyCar(V());
+    c.group.visible = true;
+    parent.add(c.group);
+    c.group.children[0].material = mat(CAR_COLORS[(Math.random() * CAR_COLORS.length) | 0], { rough: 0.45 });
+    c.group.children[1].material = c.group.children[0].material;
+    return c;
+  };
+  const place = (car) => {
+    const L = car.lane;
+    const p = L.from.clone().lerp(L.to, car.s / L.len);
+    car.obj.group.position.copy(p);
+    car.obj.group.rotation.y = L.yaw;
+  };
+  return {
+    cars, CL,
+    /** lane: { id, from, to (local Vector3), stop: s of the stop line | null, light: () => 'green'|'amber'|'red', v0 } */
+    lane(L) { L.len = L.from.distanceTo(L.to); L.yaw = Math.atan2(L.to.x - L.from.x, L.to.z - L.from.z); L.passed = 0; return L; },
+    spawn(L, v0 = L.v0 ?? 12) {
+      const last = cars.filter((c) => c.lane === L).reduce((m, c) => Math.min(m, c.s), Infinity);
+      if (last < CL + GAP + 1) return null;
+      const car = { lane: L, s: 0, v: v0 * 0.8, v0, obj: get(), passed: false, wait: 0 };
+      cars.push(car);
+      place(car);
+      return car;
+    },
+    clear() { for (const c of cars.splice(0)) { c.obj.group.visible = false; pool.push(c.obj); } },
+    occupied(L, s0, s1) { return cars.some((c) => c.lane === L && c.s + CL / 2 > s0 && c.s - CL / 2 < s1); },
+    waiting(L) { return cars.filter((c) => c.lane === L && !c.passed && c.v < 0.6).length; },
+    tick(dt) {
+      dt = Math.min(dt, 0.05);
+      const byLane = new Map();
+      for (const c of cars) (byLane.get(c.lane) ?? byLane.set(c.lane, []).get(c.lane)).push(c);
+      for (const [L, list] of byLane) {
+        list.sort((a, b) => b.s - a.s);
+        list.forEach((c, i) => {
+          let room = Infinity;
+          const lead = list[i - 1];
+          if (lead) room = lead.s - c.s - CL - GAP;
+          if (L.stop != null && !c.passed) {
+            const light = L.light?.() ?? 'green';
+            const toLine = L.stop - (c.s + CL / 2);
+            const canStop = toLine > (c.v * c.v) / (2 * BRAKE * 1.6) - 0.2;
+            if (light === 'red' || (light === 'amber' && canStop) || (light === 'hold')) room = Math.min(room, toLine - 0.15);
+          }
+          const vMax = Math.sqrt(Math.max(0, 2 * BRAKE * room));
+          const target = Math.min(c.v0, vMax);
+          c.v += clamp(target - c.v, -BRAKE * 3 * dt, ACC * dt);
+          if (room <= 0.02) c.v = 0;
+          c.v = Math.max(0, c.v);
+          c.s += c.v * dt;
+          if (lead) c.s = Math.min(c.s, lead.s - CL - 0.4);
+          if (c.v < 0.6 && !c.passed) c.wait += dt;
+          if (!c.passed && L.stop != null && c.s + CL / 2 > L.stop + 0.1) { c.passed = true; L.passed++; L.onPass?.(c); }
+          c.obj.setBrake(target < c.v - 0.3 || c.v < 0.3);
+          place(c);
+        });
+      }
+      for (let i = cars.length - 1; i >= 0; i--) {
+        const c = cars[i];
+        if (c.s > c.lane.len) { cars.splice(i, 1); c.obj.group.visible = false; pool.push(c.obj); c.lane.onExit?.(c); }
+      }
+    },
+  };
+}
+
+// ================================================================= street furniture
+/** H0 traffic light pole: lamps face local +Z. set(name, on) with name red|amber|green; foot = header end. */
+function trafficPole(height = 5.6) {
+  const g = new THREE.Group();
+  const grey = mat(0x5d6168, { metal: 0.4, rough: 0.45 });
+  g.add(at(cyl(0.22, 0.26, height, grey, { seg: 12 }), 0, height / 2, 0));
+  g.add(at(box(0.9, 0.2, 0.9, mat(0x3a3d46)), 0, 0.1, 0));
+  const head = new THREE.Group();
+  head.add(at(box(1.1, 2.7, 0.7, mat(0x24262c, { rough: 0.6 })), 0, 0, 0));
+  const lamps = {};
+  [['red', 0xe5412e, 0.85], ['amber', 0xf5a623, 0], ['green', 0x3fbf5f, -0.85]].forEach(([n, c, y]) => {
+    const lens = emissiveMat(c, { rough: 0.35 });
+    lens.color.multiplyScalar(0.45);
+    const l = cyl(0.32, 0.32, 0.08, lens, { seg: 18, outline: false });
+    l.rotation.x = Math.PI / 2;
+    head.add(at(l, 0, y, 0.37));
+    const visor = cyl(0.38, 0.38, 0.35, mat(0x1b1d22), { thetaStart: -Math.PI / 2, thetaLength: Math.PI, outline: false, seg: 12 });
+    visor.rotation.x = Math.PI / 2;
+    head.add(at(visor, 0, y, 0.55));
+    const glow = glowSprite(c, 2.2);
+    glow.position.set(0, y, 0.7);
+    head.add(glow);
+    lamps[n] = { lens, glow };
+  });
+  head.position.set(0, height + 1.0, 0.1);
+  g.add(head);
+  return {
+    group: g,
+    set(n, on) { const l = lamps[n]; l.lens.emissiveIntensity = on ? 1.8 : 0; l.glow.material.opacity = on ? 0.9 : 0; },
+    show(n) { for (const k in lamps) this.set(k, k === n); },
+    top: V(0, height + 2.6, 0),
+  };
+}
+
+/** Road / pavement mat painter helper: returns a flat textured slab of size w × d (cm). */
+function roadMat(w, d, draw, res = 12) {
+  const tex = canvasTexture(Math.round(w * res), Math.round(d * res), (c, cw, ch) => draw(c, res, cw, ch));
+  const m = mesh(new THREE.BoxGeometry(w, 0.08, d), [mat(0x7d8088), mat(0x7d8088), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 }), mat(0x7d8088), mat(0x7d8088), mat(0x7d8088)], { outline: false });
+  m.position.y = 0.04;
+  m.receiveShadow = true;
+  return m;
+}
+const ASPHALT = '#4a4d55', PAVE = '#c9c4b6', GRASS = '#9cc58a', MARK = '#f4f2ea';
+export const ROAD_Y = 0.08;
+
+/**
+ * H0 4-way intersection on a printed mat: two 2-lane roads (right-hand traffic),
+ * stop lines, zebra crossings, a traffic-light pole for each approach and an
+ * FC-51 car-presence sensor on the kerb 3 cm before each stop line.
+ * Approaches are named by where cars come FROM: N (driving +z), S (−z), E (−x), W (+x).
+ * opts: arm (32 cm), rate {N,E,S,W} cars/min. API: show(app, 'red'|'amber'|'green'),
+ * light(app), presence(app), waiting(app), passed(app), setRate(app, perMin),
+ * poles, sensors, feet {pole: {app: world}, sensor: {app: world}}, tick, reset().
+ */
+export function makeIntersection(pos, opts = {}) {
+  const RW = 7.4, E = opts.arm ?? 32, SL = RW / 2 + 3.2;
+  const g = new THREE.Group();
+  const size = E * 2;
+  g.add(roadMat(size, size, (c, s, cw, ch) => {
+    const X = (x) => (x + E) * s, Z = (z) => (z + E) * s;
+    c.fillStyle = GRASS; c.fillRect(0, 0, cw, ch);
+    c.fillStyle = PAVE;
+    c.fillRect(X(-E), Z(-RW / 2 - 2.2), size * s, (RW + 4.4) * s);
+    c.fillRect(X(-RW / 2 - 2.2), Z(-E), (RW + 4.4) * s, size * s);
+    c.fillStyle = ASPHALT;
+    c.fillRect(X(-E), Z(-RW / 2), size * s, RW * s);
+    c.fillRect(X(-RW / 2), Z(-E), RW * s, size * s);
+    c.fillStyle = MARK;
+    // centre dashes
+    for (let t = -E; t < E; t += 3) {
+      if (Math.abs(t) < SL || Math.abs(t + 1.6) < SL) continue;
+      c.fillRect(X(t), Z(-0.08), 1.6 * s, 0.16 * s);
+      c.fillRect(X(-0.08), Z(t), 0.16 * s, 1.6 * s);
+    }
+    // stop lines (right half of each approach) and solid centre line up to them
+    c.fillRect(X(-RW / 2), Z(-SL - 0.3), (RW / 2) * s, 0.3 * s); // N (lane x<0)
+    c.fillRect(X(0), Z(SL), (RW / 2) * s, 0.3 * s); // S
+    c.fillRect(X(SL), Z(-RW / 2), 0.3 * s, (RW / 2) * s); // E (lane z<0)
+    c.fillRect(X(-SL - 0.3), Z(0), 0.3 * s, (RW / 2) * s); // W
+    for (const sg of [-1, 1]) {
+      c.fillRect(X(-0.08), Z(sg > 0 ? RW / 2 + 3 : -SL), 0.16 * s, (SL - RW / 2 - 0.3) * s);
+      c.fillRect(X(sg > 0 ? RW / 2 + 3 : -SL), Z(-0.08), (SL - RW / 2 - 0.3) * s, 0.16 * s);
+    }
+    // zebra crossings
+    for (let k = -RW / 2 + 0.3; k < RW / 2 - 0.3; k += 0.9) {
+      for (const sg of [-1, 1]) {
+        c.fillRect(X(k), Z(sg * (RW / 2 + 0.6) - (sg < 0 ? 2.0 : 0)), 0.5 * s, 2.0 * s);
+        c.fillRect(X(sg * (RW / 2 + 0.6) - (sg < 0 ? 2.0 : 0)), Z(k), 2.0 * s, 0.5 * s);
+      }
+    }
+  }));
+  // raised kerb blocks at the four corners
+  const kerb = mat(0xd9d4c6, { rough: 0.8 });
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const w = E - RW / 2 - 2.2;
+    g.add(at(box(w, 0.3, w, mat(0xa9cf95, { rough: 0.9 }), { outline: false }), sx * (RW / 2 + 2.2 + w / 2), 0.15, sz * (RW / 2 + 2.2 + w / 2)));
+    g.add(at(box(w + 0.4, 0.34, 0.4, kerb, { outline: false }), sx * (RW / 2 + 2.2 + w / 2), 0.17, sz * (RW / 2 + 2.2)));
+    g.add(at(box(0.4, 0.34, w + 0.4, kerb, { outline: false }), sx * (RW / 2 + 2.2), 0.17, sz * (RW / 2 + 2.2 + w / 2)));
+  }
+  g.position.copy(pos ?? V());
+  g.updateMatrixWorld(true);
+  const traffic = laneTraffic(g);
+  const APPS = { N: V(0, 0, 1), S: V(0, 0, -1), E: V(-1, 0, 0), W: V(1, 0, 0) };
+  const lights = { N: 'red', S: 'red', E: 'red', W: 'red' };
+  const lanes = {}, poles = {}, sensors = {}, feet = { pole: {}, sensor: {} }, rate = { N: 6, S: 6, E: 6, W: 6, ...opts.rate };
+  const acc = { N: 0, S: 0, E: 0, W: 0 };
+  for (const [k, h] of Object.entries(APPS)) {
+    const rgt = V(-h.z, 0, h.x);
+    const off = rgt.clone().multiplyScalar(RW / 4);
+    const L = traffic.lane({ id: k, from: h.clone().multiplyScalar(-E).add(off).setY(ROAD_Y), to: h.clone().multiplyScalar(E).add(off).setY(ROAD_Y), stop: E - SL, light: () => lights[k] });
+    lanes[k] = L;
+    const yaw = Math.atan2(-h.x, -h.z); // lamps (local +z) face the oncoming car
+    const pole = trafficPole();
+    pole.group.position.copy(h.clone().multiplyScalar(-(SL + 0.6)).addScaledVector(rgt, RW / 2 + 1.1)).setY(0.3);
+    pole.group.rotation.y = yaw;
+    g.add(pole.group);
+    pole.show('red');
+    poles[k] = pole;
+    const sp = h.clone().multiplyScalar(-(SL + 3)).addScaledVector(rgt, RW / 2 + 1.0);
+    const sens = makeIRObstacle(g.localToWorld(sp.clone().setY(0.3)), { rotY: Math.atan2(-rgt.x, -rgt.z), label: 'IR car sensor' });
+    g.attach(sens.group);
+    sensors[k] = sens;
+    feet.pole[k] = g.localToWorld(pole.group.position.clone().addScaledVector(rgt, 0.6).setY(0.35));
+    feet.sensor[k] = g.localToWorld(sp.clone().addScaledVector(rgt, 0.9).setY(0.35));
+  }
+  const presence = (k) => traffic.occupied(lanes[k], lanes[k].stop - 3.1, lanes[k].stop - 2.9);
+  const api = {
+    group: g, pick: g, kind: 'prop', label: 'H0 intersection model',
+    anchor: g.localToWorld(V(0, 6, 0)),
+    lanes, poles, sensors, feet, rate, traffic,
+    show(k, color) { lights[k] = color; poles[k].show(color); },
+    light: (k) => lights[k],
+    presence,
+    waiting: (k) => traffic.waiting(lanes[k]),
+    passed: (k) => lanes[k].passed,
+    setRate(k, r) { rate[k] = r; },
+    poleTop: (k) => g.localToWorld(poles[k].group.position.clone().add(V(0, 7.4, 0))),
+    tick(dt) {
+      for (const k in lanes) {
+        acc[k] += (rate[k] / 60) * dt;
+        if (acc[k] >= 1 && traffic.spawn(lanes[k])) acc[k] -= 1 + Math.random() * 0.6 - 0.3;
+        acc[k] = Math.min(acc[k], 1.5);
+        sensors[k].setDetect(presence(k));
+      }
+      traffic.tick(dt);
+    },
+    reset() { traffic.clear(); for (const k in lanes) { lanes[k].passed = 0; acc[k] = 0; } },
+  };
+  return api;
+}
+
+// ================================================================= wiring loom → header
+/**
+ * Cosmetic cables taped along the model from device feet to a labelled header
+ * block near the controller (each device's own wires run inside the loom).
+ * runs: [[worldFoot, color], ...]; names: header pins (left→right).
+ * Returns a free module with pin(name).
+ */
+export function makeHarness(headerPos, names, runs, opts = {}) {
+  const g = new THREE.Group();
+  const hb = makeBreakout({
+    w: 0.5 + names.length * PITCH, d: 1.7, color: PCB.green, pins: names, pinsEdge: 'front', inset: 0.25, labelSide: 'out',
+    pinText: opts.pinText ?? {}, label: opts.title ?? '', labelPos: [0, -0.45], labelSize: 0.16,
+  });
+  hb.group.position.copy(headerPos);
+  hb.group.rotation.y = opts.rotY ?? 0;
+  g.add(hb.group);
+  hb.group.updateMatrixWorld(true);
+  const entry = hb.group.localToWorld(V(0, 0.1, -0.85));
+  runs.forEach(([p, color, via], i) => {
+    const off = (i - (runs.length - 1) / 2) * 0.09;
+    const e = entry.clone().add(V(off, 0, 0));
+    const pts = [p.clone().setY(0.12), ...(via ?? [V(p.x, 0.12, e.z - 0.6 - i * 0.08)]), e.clone().add(V(0, 0, -0.4)), e];
+    g.add(cable(pts, color ?? 0x6d7079, 0.05, { seg: 64 }));
+  });
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, q]) => [n, hb.group.localToWorld(q.clone())]));
+  const api = freeApi(g, pinsLocal, V(), {}, { pick: hb.group, anchor: headerPos.clone().add(V(0, 1.6, 0)) });
+  api.kind = 'part';
+  api.label = opts.label ?? 'Model wiring loom + header';
+  return api;
+}
+
+// ================================================================= barrier
+/**
+ * Servo barrier (boom gate): housing with an SG90 inside, a red/white boom on a
+ * horizontal pivot. Closed = horizontal along local +X (or −X with opts.mirror),
+ * open = 90° up. opts.length (boom, cm), opts.lamps (level-crossing pair facing
+ * local +Z with a St Andrew's cross), rotY. Header at the foot: SIG 5V GND (+ LA
+ * LB, each lamp an LED with its own 220 Ω). API: setAngle(deg 0 down … 90 up)
+ * (servo slews), angle, setLamps(a, b), isUp (≥ 80°), isDown (≤ 3°).
+ */
+export function makeBarrier(pos, opts = {}) {
+  const g = new THREE.Group();
+  const L = opts.length ?? 6, PH = 2.4, side = opts.mirror ? -1 : 1;
+  const white = mat(0xf3f1e8, { rough: 0.5 });
+  const red = mat(0xd8352a, { rough: 0.5 });
+  g.add(at(box(1.6, 0.25, 1.6, mat(0x3a3d46)), 0, 0.12, 0));
+  g.add(at(box(1.2, PH + 0.5, 1.2, white), 0, 0.25 + (PH + 0.5) / 2, 0));
+  g.add(at(box(1.25, 0.35, 1.25, red, { outline: false }), 0, PH + 0.4, 0));
+  const pivot = new THREE.Group();
+  pivot.position.set(side * 0.2, PH, 0.75);
+  g.add(pivot);
+  const hub = cyl(0.42, 0.42, 0.3, mat(0x24262c), { seg: 16 });
+  hub.rotation.x = Math.PI / 2;
+  pivot.add(hub);
+  const tex = canvasTexture(256, 16, (c) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#d8352a' : '#f3f1e8'; c.fillRect(i * 32, 0, 32, 16); } });
+  const boomMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 });
+  const boom = mesh(new THREE.BoxGeometry(L, 0.32, 0.22), [white, white, boomMat, boomMat, boomMat, boomMat]);
+  boom.position.set(side * (L / 2 + 0.1), 0, 0.05);
+  pivot.add(boom);
+  pivot.add(at(box(1.0, 0.5, 0.26, mat(0x24262c)), -side * 0.7, 0, 0.05));
+  // support fork at the boom tip
+  const fork = new THREE.Group();
+  fork.add(at(box(0.25, PH - 0.15, 0.25, white), 0, (PH - 0.15) / 2, 0));
+  fork.add(at(box(0.6, 0.12, 0.4, mat(0x24262c)), 0, PH - 0.15, 0));
+  fork.position.set(side * (L + 0.1), 0, 0.8);
+  if (opts.fork !== false) g.add(fork);
+  const lamps = [];
+  if (opts.lamps) {
+    const mast = new THREE.Group();
+    mast.add(at(cyl(0.16, 0.16, 3.6, mat(0x5d6168, { metal: 0.4 }), { seg: 10 }), 0, PH + 2.3, 0));
+    const bar = box(2.6, 0.5, 0.3, mat(0x1b1d22));
+    mast.add(at(bar, 0, PH + 2.0, 0.1));
+    for (const s of [-1, 1]) {
+      const lens = emissiveMat(0xe5412e, { rough: 0.35 });
+      lens.color.multiplyScalar(0.45);
+      const l = cyl(0.42, 0.42, 0.1, lens, { seg: 18, outline: false });
+      l.rotation.x = Math.PI / 2;
+      mast.add(at(l, s * 0.95, PH + 2.0, 0.3));
+      const visor = cyl(0.48, 0.48, 0.35, mat(0x1b1d22), { thetaStart: -Math.PI / 2, thetaLength: Math.PI, outline: false, seg: 12 });
+      visor.rotation.x = Math.PI / 2;
+      mast.add(at(visor, s * 0.95, PH + 2.0, 0.5));
+      const glow = glowSprite(0xff3b2f, 2.8);
+      glow.position.set(s * 0.95, PH + 2.0, 0.75);
+      mast.add(glow);
+      lamps.push({ lens, glow });
+    }
+    for (const r of [0.6, -0.6]) {
+      const arm = box(2.6, 0.38, 0.06, white);
+      arm.rotation.z = r;
+      mast.add(at(arm, 0, PH + 3.5, 0.15));
+      const edge = box(2.66, 0.12, 0.05, red, { outline: false });
+      edge.rotation.z = r;
+      mast.add(at(edge, 0, PH + 3.5, 0.19));
+    }
+    mast.add(at(mesh(new THREE.SphereGeometry(0.35, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xd8b45a, { metal: 0.5, rough: 0.35 })), 0, PH + 4.15, 0));
+    g.add(mast);
+  }
+  const names = opts.lamps ? ['SIG', '5V', 'GND', 'LA', 'LB'] : ['SIG', '5V', 'GND'];
+  const hb = makeBreakout({ w: 0.4 + names.length * PITCH, d: 0.9, color: 0x25262b, pins: names, pinsEdge: 'front', inset: 0.22, labelSide: 'out' });
+  hb.group.position.set(-side * 1.5, 0, -0.2);
+  g.add(hb.group);
+  hb.group.updateMatrix();
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, p]) => [n, p.clone().applyMatrix4(hb.group.matrix)]));
+  let ang = 0, tgt = 0;
+  const pose = () => { pivot.rotation.z = side * ang * D2R; };
+  const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(side * L * 0.5, PH + 2.4, 0.8) });
+  live(api, {
+    kind: 'part',
+    label: opts.lamps ? 'Level-crossing barrier (SG90 + 2 red lamps)' : 'Barrier gate (SG90 servo)',
+    get angle() { return ang; },
+    get isUp() { return ang >= 80; },
+    get isDown() { return ang <= 3; },
+    setAngle(d) { tgt = clamp(d, 0, 95); return api; },
+    jump(d) { ang = tgt = clamp(d, 0, 95); pose(); return api; },
+    setLamps(a, b) {
+      [a, b].forEach((on, i) => { const l = lamps[i]; if (!l) return; l.lens.emissiveIntensity = on ? 2 : 0; l.glow.material.opacity = on ? 0.95 : 0; });
+      return api;
+    },
+    lampTop: g.localToWorld(V(0, PH + 4.6, 0)),
+    tick(dt) { ang += clamp(tgt - ang, -400 * dt, 400 * dt); pose(); },
+  });
+  pose();
+  return api;
+}
+
+// ================================================================= railway + train
+/**
+ * H0 railway line along local X with a level crossing at x = 0 (road along Z),
+ * tunnel portals at both ends hiding the train when it is away.
+ * opts.length (track between portals, 110). Train: loco + 2 wagons.
+ * API: send(dir ±1, speed cm/s), train {x (front), dir, speed, running},
+ * occupies(x0, x1) (local X range), tick, reset().
+ */
+export function makeRailway(pos, opts = {}) {
+  const LEN = opts.length ?? 110, G = 0.83;
+  const g = new THREE.Group();
+  const total = LEN + 60;
+  g.add(at(box(total, 0.3, 4.4, mat(0x9a948a, { rough: 0.95 }), { outline: false }), 0, 0.15, 0));
+  const sleepers = new THREE.InstancedMesh(new THREE.BoxGeometry(0.45, 0.2, 2.8), mat(0x6b4a2e, { rough: 0.85 }), Math.floor(total / 1.0));
+  const t = new THREE.Object3D();
+  for (let i = 0; i < sleepers.count; i++) {
+    t.position.set(-total / 2 + 0.5 + i, 0.38, 0);
+    t.updateMatrix();
+    sleepers.setMatrixAt(i, t.matrix);
+  }
+  g.add(sleepers);
+  for (const s of [-1, 1]) g.add(at(box(total, 0.28, 0.16, mat(0xb9bcc2, { metal: 0.6, rough: 0.3 })), 0, 0.62, s * G));
+  // crossing deck between the rails
+  g.add(at(box(8.4, 0.3, 4.4, mat(0x55585f, { rough: 0.9 }), { outline: false }), 0, 0.46, 0));
+  // tunnel portals / hills
+  for (const s of [-1, 1]) {
+    const hill = new THREE.Group();
+    hill.add(at(box(30, 9, 14, mat(0x8fbf7a, { rough: 0.95 })), s * 15, 4.5, 0));
+    hill.add(at(box(0.6, 7.2, 7.4, mat(0xb4a58c, { rough: 0.9 })), 0, 3.6, 0));
+    hill.add(at(box(0.62, 5.2, 4.6, mat(0x15161a)), 0, 2.6, 0));
+    hill.position.x = s * (LEN / 2);
+    g.add(hill);
+  }
+  // train
+  const train = new THREE.Group();
+  const cars = [];
+  const mk = (len, color, loco) => {
+    const c = new THREE.Group();
+    const body = mat(color, { rough: 0.5 });
+    c.add(at(box(len, 2.6, 2.9, body), 0, 2.45, 0));
+    c.add(at(box(len + 0.1, 0.5, 3.0, mat(0x2a2c33)), 0, 1.0, 0));
+    if (loco) {
+      c.add(at(box(len * 0.4, 1.2, 2.9, body), len * 0.12, 4.3, 0));
+      c.add(at(box(0.08, 0.7, 2.2, mat(0x9fc4d6, { rough: 0.2 }), { outline: false }), len * 0.32 + 0.02, 4.35, 0));
+      c.add(at(box(len * 0.5, 0.25, 3.0, mat(0xf2c230)), 0, 1.4, 0));
+    } else {
+      for (let i = 0; i < 3; i++) for (const s of [-1, 1]) c.add(at(box(len * 0.18, 0.8, 0.06, mat(0x9fc4d6, { rough: 0.2 }), { outline: false }), -len * 0.3 + i * len * 0.3, 3.0, s * 1.46));
+      c.add(at(box(len, 0.25, 3.0, mat(0x3a3d46)), 0, 3.85, 0));
+    }
+    for (const dx of [-len * 0.32, len * 0.32]) for (const s of [-1, 1]) {
+      const w = cyl(0.55, 0.55, 0.2, mat(0x24262c), { seg: 14, outline: false });
+      w.rotation.x = Math.PI / 2;
+      c.add(at(w, dx, 0.95, s * G));
+    }
+    c.userData.len = len;
+    train.add(c);
+    cars.push(c);
+    return c;
+  };
+  mk(12, 0xd8352a, true);
+  mk(11, 0x2f5fbf, false);
+  mk(11, 0x2f5fbf, false);
+  g.add(train);
+  const TL = cars.reduce((a, c) => a + c.userData.len + 0.8, -0.8);
+  g.position.copy(pos ?? V());
+  g.rotation.y = opts.rotY ?? 0;
+  g.updateMatrixWorld(true);
+  const st = { x: -(LEN / 2 + TL + 2), dir: 1, speed: 0, running: false };
+  const layout = () => {
+    let x = st.x;
+    cars.forEach((c) => {
+      const l = c.userData.len;
+      c.position.set(x - st.dir * l / 2, 0.45, 0);
+      c.rotation.y = st.dir > 0 ? 0 : Math.PI;
+      x -= st.dir * (l + 0.8);
+    });
+    train.visible = Math.abs(st.x) < LEN / 2 + TL + 1 || st.running;
+  };
+  layout();
+  const api = {
+    group: g, pick: g, kind: 'prop', label: 'H0 railway with level crossing',
+    anchor: g.localToWorld(V(0, 6, 0)),
+    length: LEN, trainLength: TL,
+    train: st,
+    /** Start a train from the portal on the −dir side, driving in direction dir. */
+    send(dir = 1, speed = 16) {
+      st.dir = dir > 0 ? 1 : -1;
+      st.x = -st.dir * (LEN / 2 + 1);
+      st.speed = speed;
+      st.running = true;
+      layout();
+    },
+    /** Is any part of the train within local x range [x0, x1]? */
+    occupies(x0, x1) {
+      if (!st.running) return false;
+      const head = st.x, tail = st.x - st.dir * TL;
+      const lo = Math.min(head, tail), hi = Math.max(head, tail);
+      return hi > x0 && lo < x1;
+    },
+    tick(dt) {
+      if (!st.running) return;
+      st.x += st.dir * st.speed * Math.min(dt, 0.05);
+      if (st.dir * st.x - TL > LEN / 2 + 2) st.running = false;
+      layout();
+    },
+    reset() { st.running = false; st.x = -(LEN / 2 + TL + 2); layout(); },
+    at: (x, y = 0, z = 0) => g.localToWorld(V(x, y, z)),
+  };
+  return api;
+}
+
+// ================================================================= street + lamps + sensors on posts
+/**
+ * H0 street lamp: tapered pole with an arm and an LED head facing down; a pool of
+ * light on the road below (visible as the scene gets dark). Header at the foot:
+ * LED GND (white LED + 100 Ω on the head board). API: set(level 0–1). opts.reach
+ * (arm length, towards local +Z), height.
+ */
+export function makeStreetLamp(pos, opts = {}) {
+  const g = new THREE.Group();
+  const H = opts.height ?? 10, R = opts.reach ?? 2.6;
+  const grey = mat(0x6a6e76, { metal: 0.45, rough: 0.4 });
+  g.add(at(box(1.2, 0.3, 1.2, mat(0x3a3d46)), 0, 0.15, 0));
+  g.add(at(cyl(0.16, 0.26, H, grey, { seg: 12 }), 0, H / 2, 0));
+  const arm = cable([V(0, H - 0.4, 0), V(0, H + 0.4, 0.4), V(0, H + 0.5, R - 0.6), V(0, H + 0.4, R)], 0x6a6e76, 0.12);
+  g.add(arm);
+  const head = new THREE.Group();
+  head.add(at(box(1.0, 0.3, 1.9, mat(0x3a3d46, { rough: 0.5 })), 0, 0, 0));
+  const lens = emissiveMat(0xfff4d6, { rough: 0.3 });
+  head.add(at(box(0.8, 0.06, 1.6, lens, { outline: false }), 0, -0.17, 0));
+  head.position.set(0, H + 0.35, R + 0.3);
+  g.add(head);
+  const glow = glowSprite(0xfff1c8, 3.2);
+  glow.position.set(0, H - 0.1, R + 0.3);
+  g.add(glow);
+  const pool = glowPool(0xffe9b8, opts.pool ?? 12);
+  pool.position.set(0, ROAD_Y + 0.03, R + 0.3);
+  g.add(pool);
+  const light = new THREE.PointLight(0xffe6b0, 0, 16, 1.4);
+  light.position.set(0, H - 0.6, R + 0.3);
+  g.add(light);
+  const hb = makeBreakout({ w: 0.9, d: 0.8, color: 0x25262b, pins: ['LED', 'GND'], pinsEdge: 'front', inset: 0.2, labelSide: 'out' });
+  hb.group.position.set(0, 0.3, -1.0);
+  g.add(hb.group);
+  hb.group.updateMatrix();
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, p]) => [n, p.clone().applyMatrix4(hb.group.matrix)]));
+  const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, H + 1.6, R * 0.5) });
+  let level = 0;
+  live(api, {
+    kind: 'part',
+    label: 'Street lamp (white LED)',
+    get level() { return level; },
+    foot: g.localToWorld(V(0, 0.3, -1.4)),
+    set(v) {
+      level = clamp(v, 0, 1);
+      lens.emissiveIntensity = level * 1.8;
+      glow.material.opacity = level * 0.9;
+      pool.material.opacity = level * 0.6;
+      light.intensity = level * 6;
+      return api;
+    },
+  });
+  return api;
+}
+
+/** HC-SR501-style PIR head on a post, looking along local +Z; header VCC OUT GND at the foot. trigger(on). */
+export function makePIRPost(pos, opts = {}) {
+  const g = new THREE.Group();
+  const H = opts.height ?? 4;
+  g.add(at(box(1.2, 0.3, 1.2, mat(0x3a3d46)), 0, 0.15, 0));
+  g.add(at(cyl(0.18, 0.18, H, mat(0x6a6e76, { metal: 0.4 }), { seg: 10 }), 0, H / 2, 0));
+  const head = new THREE.Group();
+  head.add(at(box(1.8, 1.8, 0.4, mat(0x2c7a46)), 0, 0, 0));
+  const dome = mesh(new THREE.SphereGeometry(0.75, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xf6f3ea, { rough: 0.7 }));
+  dome.rotation.x = Math.PI / 2;
+  head.add(at(dome, 0, 0, 0.2));
+  const led = smdLed(0xff3b2f);
+  led.group.rotation.x = Math.PI / 2;
+  head.add(at(led.group, 0.7, -0.7, 0.2));
+  head.position.set(0, H + 0.6, 0);
+  g.add(head);
+  const hb = makeBreakout({ w: 1.2, d: 0.8, color: 0x25262b, pins: ['VCC', 'OUT', 'GND'], pinsEdge: 'front', inset: 0.2, labelSide: 'out' });
+  hb.group.position.set(0, 0.3, -1.0);
+  g.add(hb.group);
+  hb.group.updateMatrix();
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, p]) => [n, p.clone().applyMatrix4(hb.group.matrix)]));
+  const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, H + 2, 0) });
+  let on = false;
+  live(api, {
+    kind: 'part', label: 'PIR motion sensor (HC-SR501)',
+    get on() { return on; },
+    foot: g.localToWorld(V(0, 0.3, -1.4)),
+    trigger(v) { on = !!v; led.set(on ? 1 : 0); return api; },
+  });
+  return api;
+}
+
+/** Roadside speed camera: box on a post, lens + white flash window facing local +Z. Header FLASH GND. flash(). */
+export function makeSpeedCamera(pos, opts = {}) {
+  const g = new THREE.Group();
+  const H = opts.height ?? 5;
+  g.add(at(box(1.2, 0.3, 1.2, mat(0x3a3d46)), 0, 0.15, 0));
+  g.add(at(cyl(0.22, 0.22, H, mat(0x6a6e76, { metal: 0.4 }), { seg: 10 }), 0, H / 2, 0));
+  const head = new THREE.Group();
+  head.add(at(box(2.0, 1.4, 2.4, mat(0xf2c230, { rough: 0.5 })), 0, 0, 0));
+  head.add(at(box(2.1, 0.2, 2.7, mat(0x2a2c33)), 0, 0.8, 0.1));
+  const lensC = cyl(0.42, 0.42, 0.2, mat(0x15161a, { rough: 0.2 }), { seg: 18 });
+  lensC.rotation.x = Math.PI / 2;
+  head.add(at(lensC, -0.45, 0, 1.25));
+  const flashM = emissiveMat(0xffffff, { rough: 0.2 });
+  flashM.color.setHex(0xd8dde4);
+  head.add(at(box(0.7, 0.5, 0.06, flashM, { outline: false }), 0.5, 0.1, 1.22));
+  head.position.set(0, H + 0.7, 0);
+  g.add(head);
+  const glow = glowSprite(0xffffff, 6);
+  glow.position.set(0.5, H + 0.8, 1.6);
+  g.add(glow);
+  const light = new THREE.PointLight(0xffffff, 0, 30, 1.2);
+  light.position.set(0.5, H + 0.8, 2.0);
+  g.add(light);
+  const hb = makeBreakout({ w: 0.9, d: 0.8, color: 0x25262b, pins: ['FLASH', 'GND'], pinsEdge: 'front', inset: 0.2, labelSide: 'out', pinText: { FLASH: 'F' } });
+  hb.group.position.set(0, 0.3, -1.0);
+  g.add(hb.group);
+  hb.group.updateMatrix();
+  const pinsLocal = new Map([...hb.pinsLocal].map(([n, p]) => [n, p.clone().applyMatrix4(hb.group.matrix)]));
+  const api = freeApi(g, pinsLocal, pos, opts, { pick: g, anchor: V(0, H + 2.2, 0) });
+  let t = 0;
+  live(api, {
+    kind: 'part', label: 'Speed camera with white LED flash',
+    foot: g.localToWorld(V(0, 0.3, -1.4)),
+    set(on) { t = on ? 10 : 0; return api; },
+    flash(ms = 80) { t = ms / 1000; return api; },
+    tick(dt) {
+      t = Math.max(0, t - dt);
+      const v = t > 0 ? 1 : 0;
+      flashM.emissiveIntensity = v * 2.5;
+      glow.material.opacity = v;
+      light.intensity = v * 40;
+    },
+  });
+  return api;
+}
+
+/**
+ * Straight H0 street along local X: asphalt, pavements, kerbs and optional
+ * lane layout ('two-way' | 'one-way'). opts.length (70). API: laneZ(dir),
+ * traffic (laneTraffic: add lanes yourself), at(x, z) world point on the road.
+ */
+export function makeStreet(pos, opts = {}) {
+  const LEN = opts.length ?? 70, RW = opts.oneWay ? 4.4 : 7.4, PW = 4;
+  const g = new THREE.Group();
+  const D = RW + PW * 2 + 6;
+  g.add(roadMat(LEN, D, (c, s, cw, ch) => {
+    const Z = (z) => (z + D / 2) * s;
+    c.fillStyle = GRASS; c.fillRect(0, 0, cw, ch);
+    c.fillStyle = PAVE; c.fillRect(0, Z(-RW / 2 - PW), cw, (RW + 2 * PW) * s);
+    c.strokeStyle = 'rgba(29,36,64,.12)'; c.lineWidth = 1;
+    for (let x = 0; x < LEN; x += 1.5) for (const sg of [-1, 1]) { c.beginPath(); c.moveTo(x * s, Z(sg * (RW / 2 + 0.3))); c.lineTo(x * s, Z(sg * (RW / 2 + PW))); c.stroke(); }
+    c.fillStyle = ASPHALT; c.fillRect(0, Z(-RW / 2), cw, RW * s);
+    c.fillStyle = MARK;
+    if (!opts.oneWay) for (let x = 0; x < LEN; x += 3) c.fillRect(x * s, Z(-0.08), 1.6 * s, 0.16 * s);
+    else for (let x = 4; x < LEN; x += 12) { // arrows
+      const X = x * s, cz = Z(0);
+      c.fillRect(X, cz - 0.12 * s, 2.2 * s, 0.24 * s);
+      c.beginPath(); c.moveTo(X + 2.2 * s, cz - 0.55 * s); c.lineTo(X + 3.1 * s, cz); c.lineTo(X + 2.2 * s, cz + 0.55 * s); c.fill();
+    }
+    for (const sg of [-1, 1]) c.fillRect(0, Z(sg * (RW / 2 - 0.25)) - 0.06 * s, cw, 0.12 * s);
+  }));
+  const kerb = mat(0xd9d4c6, { rough: 0.8 });
+  for (const sg of [-1, 1]) g.add(at(box(LEN, 0.3, 0.35, kerb, { outline: false }), 0, 0.15, sg * (RW / 2 + 0.17)));
+  g.position.copy(pos ?? V());
+  g.rotation.y = opts.rotY ?? 0;
+  g.updateMatrixWorld(true);
+  const traffic = laneTraffic(g);
+  return {
+    group: g, pick: g, kind: 'prop', label: 'H0 street model',
+    anchor: g.localToWorld(V(0, 4, 0)),
+    length: LEN, roadWidth: RW, paveWidth: PW,
+    traffic,
+    /** z of the lane centre for travel direction +1 (+x) or −1 (−x). */
+    laneZ: (dir) => (opts.oneWay ? 0 : dir > 0 ? RW / 4 : -RW / 4),
+    at: (x, z, y = ROAD_Y) => g.localToWorld(V(x, y, z)),
+    tick(dt) { traffic.tick(dt); },
+  };
+}
