@@ -147,7 +147,7 @@ const runner = new Runner({
 /** Shared "running" look of the card, chips and wires (guided runs and the runtime). */
 function showRunState(running) {
   codeCard.dataset.state = running ? 'running' : 'idle';
-  consoleStatus.textContent = running ? (lesson?.lang === 'python' ? 'Running' : 'Running · 9600 baud') : 'Stopped';
+  consoleStatus.textContent = running ? (lesson?.lang === 'python' ? 'Running' : `Running · ${baudOf(lesson)} baud`) : 'Stopped';
   $('#code-run').setAttribute('aria-label', running ? 'Stop sketch' : 'Run sketch');
   $('[data-nav="run"]').parentElement.classList.toggle('is-active', running);
   signalsEl.style.opacity = running ? 1 : 0;
@@ -231,6 +231,12 @@ function afterProgress(msg) {
   else if (msg) toast(msg);
 }
 
+/** The serial speed the lesson's sketch asks for (Serial.begin(N)), 9600 if none. */
+function baudOf(L) {
+  const m = /Serial\.begin\(\s*(\d+)/.exec(L?.code ?? '');
+  return m ? Number(m[1]) : 9600;
+}
+
 // ---------------------------------------------------------------- lesson building
 let untick = null;
 function loadLesson(i, { instant = false } = {}) {
@@ -268,8 +274,11 @@ function loadLesson(i, { instant = false } = {}) {
     return;
   }
   board = getBoard(lesson.board);
-  board.setBuiltinLed(lesson.board === 'jetson' ? 1 : 0);
-  board.setFan?.(lesson.board === 'jetson' ? 0.6 : 0);
+  // Linux boards show their power LED and run their fan as soon as they are on.
+  const linux = ['jetson', 'orin', 'rpi5'].includes(lesson.board);
+  board.setBuiltinLed(['jetson', 'orin'].includes(lesson.board) ? 1 : 0);
+  board.setPowerLed?.(linux ? 1 : 0);
+  board.setFan?.(linux ? 0.6 : 0);
   const scene = buildLessonScene(lesson, { board, dock, onDarkness: (d) => (dimEl.style.opacity = String(d * 0.85)) });
   const { root, st } = scene;
   built = scene.built;
@@ -310,6 +319,8 @@ function finishLoad(i) {
   if (location.hash !== `#${lesson.id}`) history.replaceState(null, '', `#${lesson.id}`);
   const guide = document.getElementById('guide-link');
   if (guide) { guide.href = `/guide/#${lesson.id}`; guide.hidden = !!lesson.explainer; }
+  const studio = document.getElementById('studio-link');
+  if (studio) { studio.href = `/studio/#lesson=${lesson.id}`; studio.hidden = !!lesson.explainer || lesson.lang !== 'cpp'; }
   document.title = `${lesson.title} · Tinker Lab`;
   store.set('last', lesson.id);
   setNav(i === 0 ? 'home' : null);
@@ -428,7 +439,7 @@ $('#code-expand').addEventListener('click', () => {
   $$('.param', modalBody).forEach((p) => p.removeAttribute('contenteditable'));
 });
 $('#code-copy').addEventListener('click', async () => {
-  const where = lesson.lang === 'python' ? (lesson.board === 'pico' ? 'Thonny' : 'a .py file on the Jetson') : 'the Arduino IDE';
+  const where = lesson.lang === 'python' ? ({ pico: 'Thonny', rpi5: 'a .py file on the Raspberry Pi' }[lesson.board] ?? 'a .py file on the Jetson') : 'the Arduino IDE';
   try {
     await navigator.clipboard.writeText(lab.active ? lab.text() : codeView.text());
     toast(`Code copied — paste it into ${where}`);

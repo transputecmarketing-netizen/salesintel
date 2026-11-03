@@ -1,16 +1,9 @@
 import '@fontsource/barlow-semi-condensed/600.css'; // used by the 3D board silkscreens
 import './landing.css';
-import * as THREE from 'three';
 import { mountShell } from './site/shell.js';
 import { lucide, hydrateIcons } from './brand/lucide.js';
 import { markSVG } from './brand/logo.js';
-import { Stage, Thumbnailer } from './scene/stage.js';
-import { makeBoard } from './scene/board.js';
-import { makeBoardOfType, BOARD_INFO } from './scene/boards/index.js';
-import { makeBreadboard } from './scene/breadboard.js';
-import { makeWire } from './scene/wire.js';
-import { makeLED, makeResistor } from './scene/components.js';
-import { TRACKS, lessons } from './lessons/index.js';
+import { TRACKS, lessons, BOARD_INFO } from './lessons/catalog.js';
 import { store } from './ui/store.js';
 
 // Optional modules written by other parts of the project: used when present.
@@ -114,13 +107,17 @@ const ROWS = [
 $('#compare-body').innerHTML = ROWS.map(([t, a, b]) => `<tr><td>${t}</td><td>${a ? YES : NO}</td><td>${b ? YES : NO}</td></tr>`).join('');
 
 // ---------------------------------------------------------------- boards
-function renderBoards() {
-  let th = null;
-  try { th = new Thumbnailer(320, 240); } catch { /* no WebGL */ }
+async function renderBoards() {
+  let th = null, makeBoardOfType = null;
+  try {
+    const [stageMod, boardsMod] = await Promise.all([import('./scene/stage.js'), import('./scene/boards/index.js')]);
+    makeBoardOfType = boardsMod.makeBoardOfType;
+    th = new stageMod.Thumbnailer(320, 240);
+  } catch { /* no WebGL: tiles show an icon */ }
   const used = new Set(lessons.map((l) => l.board).filter(Boolean));
   $('#board-row').innerHTML = Object.entries(BOARD_INFO).filter(([id]) => used.has(id)).map(([id, b]) => {
     let img = '';
-    try { if (th) img = th.render(makeBoardOfType(id).group); } catch { img = ''; }
+    try { if (th && makeBoardOfType) img = th.render(makeBoardOfType(id).group); } catch { img = ''; }
     const first = lessons.find((l) => l.board === id);
     return `<a class="board-tile reveal" href="/learn/#${first.id}"><div class="bimg">${img ? `<img src="${img}" alt="" loading="lazy" width="320" height="240">` : lucide('cpu', { size: 48, stroke: 1.2 })}</div><b>${esc(b.name)}</b><small>${esc(b.language ?? '')}</small></a>`;
   }).join('');
@@ -145,6 +142,9 @@ async function hero() {
       console.warn('intro unavailable, falling back', e);
     }
   }
+  const [THREE, { Stage }, { makeBoard }, { makeBreadboard }, { makeWire }, { makeLED, makeResistor }] = await Promise.all([
+    import('three'), import('./scene/stage.js'), import('./scene/board.js'), import('./scene/breadboard.js'), import('./scene/wire.js'), import('./scene/components.js'),
+  ]);
   const stage = new Stage($('#hero-canvas'), host);
   const root = new THREE.Group();
   const board = makeBoard();

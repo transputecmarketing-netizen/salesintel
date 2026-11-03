@@ -201,7 +201,8 @@ export const colourAt = (i) => COLOURS[i % COLOURS.length];
 let dataPromise;
 /** { TRACKS, lessons, BOARD_INFO, groups: [{ name, tracks }], stats, boardName(id) } */
 export function courseData() {
-  dataPromise ??= Promise.all([import('../../lessons/index.js'), import('../../scene/boards/index.js')]).then(([L, B]) => {
+  dataPromise ??= Promise.all([import('../../lessons/catalog.js')]).then(([L]) => {
+    const B = L;
     const { TRACKS, lessons } = L;
     const { BOARD_INFO } = B;
     const groups = [];

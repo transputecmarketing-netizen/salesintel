@@ -37,7 +37,7 @@
 .code-card.is-lab .lab-editor .cm-editor { position: absolute; inset: 0; }
 .code-card.is-lab .lab-drawer { display: flex; flex-direction: column; flex: none; max-height: 44%; border-top: 1px solid var(--tl-line); background: var(--tl-surface); }
 .code-card.is-lab .lab-drawer.is-open { height: 40%; }
-.code-card.is-lab .console { position: relative; flex: 0 0 34%; height: auto; transform: none; min-height: 90px; }
+.code-card.is-lab .console { position: relative; flex: 0 0 38%; height: auto; transform: none; min-height: 118px; }
 .app.is-lab-tall .code-card.is-lab .console { flex-basis: 30%; }
 
 .lab-tabs { display: flex; align-items: center; gap: 2px; padding: 3px 6px; min-height: 32px; flex: none; }

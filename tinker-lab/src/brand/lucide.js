@@ -1,6 +1,6 @@
 // Lucide icons (ISC licence, lucide.dev) as inline SVG strings.
 // lucide('cpu'), lucide('circuit-board', { size: 32, stroke: 1.5 })
-import { icons } from 'lucide';
+import { icons } from './lucide-icons.js'; // only the icons we use (scripts/build-icons.mjs)
 
 const pascal = (name) => name.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
 const attrs = (o) => Object.entries(o).map(([k, v]) => `${k}="${String(v).replace(/"/g, '&quot;')}"`).join(' ');
