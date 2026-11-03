@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><style>
+html,body{margin:0}
+.f{width:800px;}
+body.dark{background:transparent}html{background:transparent!important}body.light{background:#FFFFFF}
+.dark .f{--hairline-plate:#0A0F1A;--hairline-hi:#E6F0FF;--hairline-edge:#3B8BFF;--hairline-mid:#2C72DB;--hairline-lo:#16336E;--hairline-stroke:1.4}
+
+.light .f{--hairline-plate:#FFFFFF;--hairline-hi:#2C72DB;--hairline-edge:#0A0F1A;--hairline-mid:#5B6B85;--hairline-lo:#C9D3E3;--hairline-stroke:1.4}</style><body><div id="f" class="f"></div>
+<script type="module">
+import * as H from './node_modules/@lucasmarkes/hairline/dist/index.js';
+const q = new URLSearchParams(location.search), name = q.get('n'), t = +(q.get('t') || 1.2); document.body.className = q.get('th') || 'dark';
+const fig = H[name](document.getElementById('f'), { theme: q.get('th') || 'dark', intensity: +(q.get('i') || .7), play: true });
+setTimeout(() => { window.__done = true }, t * 1000);
+</script>

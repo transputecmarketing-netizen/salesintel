@@ -1,7 +1,7 @@
 from aikit import AIBook
 
 def build():
-    b = AIBook("The First 90 Days of AI", num=6, art="horizon", pos="50%")
+    b = AIBook("The First 90 Days of AI", num=6, art="beam", pos="68%")
     b.how = "A week-by-week plan that takes AI from a leadership decision to an everyday habit, with the roles, training, communications and board reporting to match."
     b.art_cover("Playbook No. 06 · Rollout", "The first 90 days", "of AI.", "A practical, week-by-week plan to move from decision to everyday use, with clear owners, safe settings and results your board will believe.")
     b.contents()

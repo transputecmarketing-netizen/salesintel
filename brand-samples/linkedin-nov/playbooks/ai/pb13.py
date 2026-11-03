@@ -1,7 +1,7 @@
 from aikit import AIBook
 
 def build():
-    b = AIBook("AI Skills for Every Team", num=13, art="mesh", pos="80%")
+    b = AIBook("AI Skills for Every Team", num=13, art="glass", pos="76%")
     b.how = "The skills that make AI genuinely useful, how to build them across every role, and how to bring people with you honestly."
     b.art_cover("Playbook No. 13 · People", "AI skills", "for every team.", "Tools are easy to buy. Capability is built. How to help every colleague use AI well, safely and with confidence.")
     b.contents()
