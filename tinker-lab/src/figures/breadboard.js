@@ -23,8 +23,8 @@ const STEP = 45, REST_I = 4, FALL = [1, 0.34, 0.12];
 function mount({ stage, svg, read }, value) {
   const bag = disposer();
   let LIFT = value;
-  const C = Cam(45, 0.5, 2.05);
-  fit(C, [[X0, Y0, 0], [X1, Y1, 0], [X1, Y0, 0], [X0, Y1, 0], [X0, Y0, T + 26], [X1, Y0, T + 26]], 200, 166);
+  const C = Cam(45, 0.5, 2.3);
+  fit(C, [[X0, Y0, 0], [X1, Y1, 0], [X1, Y0, 0], [X0, Y1, 0], [X0, Y0, T + 26], [X1, Y0, T + 26]], 200, 170);
   const P = proj(C), front = facing(C);
   const g = mk('g', {}, svg);
 
@@ -58,12 +58,15 @@ function mount({ stage, svg, read }, value) {
   }
 
   function draw(it, f) {
-    const z0 = T + f * LIFT, z1 = z0 + 0.9 + 2.4 * clamp(f * 3, 0, 1);
+    const z0 = T + f * LIFT, z1 = f > 0.02 ? z0 + 1 + 2.2 * clamp(f * 3, 0, 1) : T;
     const key = z0 + ',' + LIFT;
     if (key === it.drawn) return;
     it.drawn = key;
     it.drop.setAttribute('d', f > 0.02 ? it.ext.map((q) => seg(P(q.u, q.v, z0), P(q.u, q.v, T))).join('') : '');
-    put(it.el, prism(P, front, it.ring, it.inner, f > 0.02 ? z0 : T - 0.01, z1));
+    // flush, a clip is only its five holes in the slot; it shows as a solid once it lifts
+    const up = f > 0.02;
+    it.el.g.setAttribute('visibility', up ? 'visible' : 'hidden');
+    if (up) put(it.el, prism(P, front, it.ring, it.inner, z0, z1));
     it.holes.forEach(([x, y], k) => place(it.dots[k], P(x, y, z1)));
   }
 
@@ -89,7 +92,7 @@ function mount({ stage, svg, read }, value) {
     if (A.kind === 'r' || J.kind === 'r') return A === J ? 0 : A.kind === J.kind && A.h === J.h ? 1 : 9;
     return Math.abs(A.c - J.c) + (A.h === J.h ? 0 : 1);
   }
-  let act = null;
+  let act = -2;
   function choose(a) {
     if (a === act) return;
     const now = performance.now(), from = a >= 0 ? a : act >= 0 ? act : REST_I;
@@ -126,6 +129,6 @@ export default {
   means: 'A breadboard whose clips lift out: the hole under the pointer raises its five-hole strip, a power rail rises as one.',
   rules: [1, 2, 4, 6],
   range: [8, 14, 20],
-  tour: [[176, 150], [262, 214], [292, 112], null],
+  tour: [[201, 163], [202, 215], [272, 161], null],
   mount,
 };

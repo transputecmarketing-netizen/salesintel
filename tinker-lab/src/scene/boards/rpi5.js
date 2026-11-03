@@ -180,6 +180,10 @@ function makeActiveCooler() {
   const ring = mesh(new THREE.CylinderGeometry(FAN.r * 0.95, FAN.r * 0.95, COOL.finH - 0.05, 40, 1, true), mat(0x2b2e36, { rough: 0.6, side: THREE.DoubleSide }), { outline: false });
   ring.position.set(lx(FAN.x), COOL.base + (COOL.finH - 0.05) / 2, lz(FAN.z));
   g.add(ring);
+  // housing walls (front, back, right) under the shroud; the air leaves through the fins on the left
+  const wallH = COOL.finH - 0.05, hw = FAN.r + 0.25;
+  for (const s of [-1, 1]) g.add(at(box(hw * 2, wallH, 0.06, dark), lx(FAN.x), COOL.base + wallH / 2, s * (COOL.d / 2 - 0.08)));
+  g.add(at(box(0.06, wallH, COOL.d - 0.1, dark), lx(FAN.x) + hw - 0.03, COOL.base + wallH / 2, 0));
   const rotor = new THREE.Group();
   rotor.position.set(lx(FAN.x), COOL.base, lz(FAN.z));
   rotor.add(at(cyl(0.42, 0.42, COOL.finH - 0.12, mat(0x2b2d34, { rough: 0.5 }), { seg: 28 }), 0, (COOL.finH - 0.12) / 2, 0));

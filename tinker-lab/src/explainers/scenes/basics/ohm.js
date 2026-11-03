@@ -1,6 +1,6 @@
 // Ohm's law: a power supply, an optional LED, a resistor and a 100 mA fuse, with live sliders.
 import { scene, si, clamp } from '../../engine.js';
-import { wire, led, resistor, graph, pathOf } from '../../kit.js';
+import { wire, led, resistor, graph, pathOf, panel } from '../../kit.js';
 
 const RS = [47, 100, 150, 200, 220, 330, 470, 1000];
 const VF = 2.0; // red LED forward voltage (≈)
@@ -35,16 +35,18 @@ export default (el, api) => scene(el, api, {
 
     // --- wires
     const ledX = 200;
-    wire(S, [[215, B], [L, B], [L, T], [ledX - 9, T], [ledX - 9, T - 8]]);
+    wire(S, [[215, B], [L, B], [L, T], [ledX - 9, T]]);
     const bypass = d.g();
     wire(S, [[ledX - 9, T], [ledX + 9, T]], { parent: bypass, width: 3 });
-    wire(S, [[ledX + 9, T - 20], [ledX + 9, T], [262, T]]);
+    wire(S, [[ledX + 9, T], [262, T]]);
     wire(S, [[418, T], [440, T]]);
     wire(S, [[500, T], [Rt, T], [Rt, B], [405, B]]);
 
     // --- LED (anode on the left: current enters from the + side)
     const ledG = d.g();
     const LED = led(S, ledX, 64, { color: C.accent, leg: 20, parent: ledG });
+    wire(S, [[ledX - 9, T - 9], [ledX - 9, T]], { parent: ledG });
+    wire(S, [[ledX + 9, T - 21], [ledX + 9, T]], { parent: ledG });
     const hot = d.text(ledX, 18, 'too much current!', { size: 18, fill: C.accentInk, weight: 500, opacity: 0 });
 
     // --- resistor + its heat
@@ -74,17 +76,18 @@ export default (el, api) => scene(el, api, {
 
     // --- electrons (they leave the − terminal and return to +)
     const flowPath = pathOf([[405, B], [Rt, B], [Rt, T], [L, T], [L, B], [215, B]], 14);
-    const fl = S.flow(flowPath, { gap: 30, speed: 0, parent: S.layers.back, r: 5 });
-    d.text(Rt + 22, 262, 'electrons', { size: 16, fill: C.blue, anchor: 'start', mono: true });
-    d.arrow(Rt + 14, 300, Rt + 14, 230, { stroke: C.blue, strokeWidth: 2, head: 9 });
+    const fl = S.flow(flowPath, { gap: 36, speed: 0, parent: S.layers.back, r: 6.5 });
+    d.text(Rt - 34, 262, 'electrons', { size: 17, fill: C.blue, anchor: 'end', mono: true });
+    d.arrow(Rt - 22, 300, Rt - 22, 226, { stroke: C.blue, strokeWidth: 2, head: 9 });
 
     // --- formula and graph (right)
-    const fx = 690;
+    const fx = 700;
+    panel(S, 606, 14, 188, 100);
     const formula = d.text(fx, 46, 'V = I × R', { size: 40, weight: 400, fill: C.ink });
-    const fNums = d.text(fx, 88, '', { size: 18, fill: C.ink2, mono: true });
-    const gr = graph(S, 616, 160, 150, 190, { xMax: 12, yMax: 0.12, xLabel: 'volts', yLabel: 'current', xTicks: [[0, '0'], [6, '6'], [12, '12']], yTicks: [[0.05, '50m'], [0.1, '100m']] });
+    const fNums = d.text(fx, 88, '', { size: 16, fill: C.ink2, mono: true });
+    const gr = graph(S, 640, 170, 135, 180, { xMax: 12, yMax: 0.12, xLabel: 'volts', yLabel: 'current', xTicks: [[0, '0'], [6, '6'], [12, '12']], yTicks: [[0.05, '50m'], [0.1, '100m']] });
     gr.line([[0, FUSE], [12, FUSE]], { color: C.accent, width: 1.6, dash: '5 5', parent: gr.g });
-    d.text(766, gr.py(FUSE) - 12, 'fuse', { size: 15, fill: C.accentInk, anchor: 'end', mono: true });
+    d.text(gr.px(0) + 6, gr.py(FUSE) - 12, 'fuse', { size: 15, fill: C.accentInk, anchor: 'start', mono: true });
     const curve = gr.line(() => 0, { color: C.ink, width: 3 });
     const dot = gr.dot(C.blue);
 

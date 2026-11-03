@@ -10,6 +10,26 @@ const ROWS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 const RAILS = ['top-', 'top+', 'bot-', 'bot+'];
 const SMALL = 2.3; // cm: parts smaller than this can share a step
 
+/** Panels do nothing in a guide, but some lessons aim a real camera object at the scene. */
+const GUIDE_DOCK = {
+  ...NULL_DOCK,
+  camera: (opts = {}) => ({ ...NULL_DOCK.camera(opts), camera: new THREE.PerspectiveCamera(opts.fov ?? 50, 4 / 3, 0.1, 200) }),
+};
+
+/** Short names for modules inside wire captions ("Connect D9 to keypad R1"). */
+const SHORT = [
+  [/^OLED/, 'OLED'], [/^LCD/, 'LCD'], [/^DHT11/, 'DHT11'], [/^MPU-6050/, 'MPU-6050'], [/^28BYJ/, 'ULN2003 driver'],
+  [/^Relay/, 'relay'], [/^NeoPixel ring/, 'ring'], [/^NeoPixel strip/, 'strip'], [/^PIR/, 'PIR sensor'], [/^Soil/, 'soil sensor'],
+  [/^Sound/, 'sound sensor'], [/^Gas/, 'MQ-2'], [/^Flame/, 'flame sensor'], [/^Joystick/, 'joystick'], [/^4×4/, 'keypad'],
+  [/^Rotary/, 'encoder'], [/^RTC/, 'RTC'], [/^microSD/, 'SD module'], [/^Bluetooth/, 'HC-05'], [/^L298N/, 'L298N'],
+  [/^IR receiver/, 'IR receiver'], [/^Force/, 'FSR'], [/^Ultrasonic/, 'HC-SR04'], [/^Micro servo/, 'servo'],
+];
+export function shortName(label) {
+  if (!label) return 'module';
+  for (const [re, s] of SHORT) if (re.test(label)) return s;
+  return lower(label.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s+with\s.*$/, '').trim());
+}
+
 const COLOR_WORD = { red: 'red', black: 'black', orange: 'orange', yellow: 'yellow', green: 'green', blue: 'blue', white: 'white', brown: 'brown', purple: 'purple' };
 const an = (w) => (/^[aeiou]/i.test(w) ? 'an' : 'a');
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -50,13 +70,14 @@ export function planGuide(lesson) {
       return lesson.build(ctx);
     },
   };
-  const scene = buildLessonScene(proxy, { board, dock: NULL_DOCK });
+  const scene = buildLessonScene(proxy, { board, dock: GUIDE_DOCK });
   const { root, st } = scene;
   const names = new Map();
   for (const it of st.interactive) if (it.part && it.name) names.set(it.part, it.name);
 
   // ---- units: the board, then one per recorded step
-  const units = [{ kind: 'board', label: board.info?.name ?? board.name ?? 'Board', objects: [board.group], part: board }];
+  const bname = board.info?.name ?? board.name ?? 'Board';
+  const units = [{ kind: 'board', label: /board|kit/i.test(bname) ? bname : `${bname} board`, objects: [board.group], part: board }];
   let bbi = 0;
   for (const s of st.steps) {
     const u = { kind: s.kind, label: s.label, objects: s.objects, part: s.part, wire: s.wire, from: s.from, to: s.to, color: s.color, signal: s.signal, caption: s.caption };
@@ -70,6 +91,8 @@ export function planGuide(lesson) {
     u.size = u.empty ? 0 : u.box.getSize(new THREE.Vector3()).length();
     if (u.kind === 'part' && u.label) u.kind = 'part';
     if (u.empty || u.kind === 'effect') u.silent = true;
+    // unlabelled scenery (desks, hands, props built inside a lesson) is drawn as backdrop, not as a step
+    else if (!u.label && u.kind !== 'wire' && u.kind !== 'board' && u.kind !== 'breadboard') u.scenery = u.silent = true;
   }
 
   const namer = makeNamer(board, bbs, units);
@@ -188,7 +211,7 @@ function makeNamer(board, bbs, units) {
       try { modulePins.push({ u, name, p: part.pin(name) }); } catch { /* skip */ }
     }
   }
-  const short = (label) => (label ?? 'module').replace(/\s*\(.*\)\s*/g, ' ').trim();
+  const short = shortName;
   return {
     /** { type: 'board'|'module'|'hole'|'other', text, pin? } for a world point. */
     end(p) {
@@ -218,7 +241,7 @@ function makeNamer(board, bbs, units) {
         const d = u.box.distanceToPoint(p);
         if (d < bd) { bd = d; pu = u; }
       }
-      if (pu) return { type: 'part', text: `the ${pu.kind === 'board' ? 'board' : short(pu.label)}`, short: short(pu.label) };
+      if (pu) return { type: 'part', text: `the ${pu.kind === 'board' ? 'board' : short(pu.label)}`, short: pu.kind === 'board' ? 'board' : short(pu.label) };
       return { type: 'other', text: 'its terminal' };
     },
   };
@@ -264,11 +287,10 @@ function holesText(holes) {
   const list = (xs) => (xs.length <= 2 ? xs.join(' and ') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
   if (rows.length === 1 && !RAILS.includes(rows[0])) return `row ${rows[0]}, column${cols.length > 1 ? 's' : ''} ${list(cols)}`;
   if (cols.length === 1 && rows.every((r) => !RAILS.includes(r))) return `column ${cols[0]}, rows ${list(rows)}`;
-  const names = holes
-    .slice()
-    .sort((a, b) => a.col - b.col || a.row.localeCompare(b.row))
-    .map((h) => (RAILS.includes(h.row) ? `the ${h.row.replace('top', 'top ').replace('bot', 'bottom ').replace('-', ' −').replace('+', ' +')} rail` : `${h.row}${h.col}`));
-  return `holes ${list(names.slice(0, 6))}`;
+  const plain = holes.filter((h) => !RAILS.includes(h.row)).sort((a, b) => a.col - b.col || a.row.localeCompare(b.row)).map((h) => `${h.row}${h.col}`);
+  const rails = [...new Set(holes.filter((h) => RAILS.includes(h.row)).map((h) => holeName(h)))];
+  if (!rails.length) return `holes ${list(plain.slice(0, 6))}`;
+  return list([...plain.slice(0, 4), ...rails]);
 }
 
 // ---------------------------------------------------------------- captions
@@ -277,8 +299,9 @@ function article() {
 }
 
 function lower(label) {
-  // keep acronyms and model names, lower-case ordinary first words ("Red LED" → "red LED")
-  return /^[A-Z][a-z]/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+  // keep acronyms and model names, lower-case ordinary first words ("Red LED" → "red LED", "NeoPixel" stays)
+  const w = label.split(/[\s-]/)[0];
+  return /^[A-Z][a-z]+$/.test(w) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
 }
 
 function partPhrase(u) {
@@ -290,7 +313,7 @@ function partPhrase(u) {
       const an = ledAnode(u);
       if (an) s += `, long leg (+) in ${an.row}${an.col}`;
     }
-    return { verb: 'Push', text: s };
+    return { verb: /^push/i.test(u.label) ? 'Fit' : 'Push', text: s };
   }
   return { verb: 'Place', text: name };
 }
@@ -329,10 +352,10 @@ function wirePhrase(u, namer, first = true) {
   const rank = { board: 0, module: 1, part: 2, hole: 3, other: 4 };
   if (rank[b.type] < rank[a.type]) [a, b] = [b, a];
   const color = COLOR_WORD[u.color] ?? 'coloured';
-  let s = first ? `Connect ${a.text} to ${b.text} with ${an(color)} ${color} jumper` : `${a.text} to ${b.text} with ${an(color)} ${color} one`;
   const sig = u.signal ? prettyPin(u.signal) : null;
-  if (sig && ![a, b].some((e) => e.text === sig || e.pin === u.signal || e.text.endsWith(` ${sig}`) || (e.short ?? '') === sig)) s += ` (${sig})`;
-  return s;
+  let at = a.text;
+  if (sig && ![a, b].some((e) => e.text === sig || e.pin === u.signal || e.text.endsWith(` ${sig}`) || (e.short ?? '') === sig)) at += ` (${sig})`;
+  return first ? `Connect ${at} to ${b.text} with ${an(color)} ${color} jumper` : `${at} to ${b.text} with ${an(color)} ${color} one`;
 }
 
 function captionFor(vis, namer, board, units) {

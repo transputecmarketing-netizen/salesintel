@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>For educators · Tinker Lab</title>
+    <meta name="description" content="Use Tinker Lab in class: nothing to install, no accounts, a link to every lesson, quizzes, printable build guides and a curriculum map from beginner to advanced." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="%VITE_SITE_URL%/educators/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tinker Lab" />
+    <meta property="og:title" content="Tinker Lab for educators" />
+    <meta property="og:description" content="Use Tinker Lab in class: nothing to install, no accounts, a link to every lesson, quizzes, printable build guides and a curriculum map from beginner to advanced." />
+    <meta property="og:url" content="%VITE_SITE_URL%/educators/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Tinker Lab crest and wordmark with the line: Learn how things work. Then build them." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tinker Lab for educators" />
+    <meta name="twitter:description" content="Use Tinker Lab in class: nothing to install, no accounts, a link to every lesson, quizzes, printable build guides and a curriculum map from beginner to advanced." />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
+  </head>
+  <body class="site page-educators">
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="site-head"></header>
+    <nav class="sub-nav is-sticky" aria-label="On this page">
+      <div class="wrap"><b>For educators</b><a href="#class">In class</a><a href="#map">Curriculum map</a><a href="#privacy">Privacy</a><a href="#limits">Limits</a><a href="#faq">FAQ</a></div>
+    </nav>
+
+    <main id="main">
+      <section class="pg-hero center">
+        <div class="wrap">
+          <span class="pg-hero-icon c-blue" aria-hidden="true"><i data-lucide="presentation" data-size="46"></i></span>
+          <h1 class="display reveal">Share a link.<br /><span class="dim">Start the lesson.</span></h1>
+          <p class="lede reveal">Tinker Lab runs in a web browser, so a class can begin without installing anything or creating accounts. Every lesson has its own address, a short quiz and a build guide you can print.</p>
+          <div class="pg-actions reveal">
+            <a class="btn btn-primary btn-lg" href="/curriculum/">Browse the curriculum</a>
+            <a class="btn btn-ghost btn-lg" href="/learn/">Open a lesson</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-tight" id="class" aria-labelledby="class-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="class-title">Made to fit your lesson plan.<br /><span class="dim">You still lead the lesson.</span></h2>
+          </div>
+        </div>
+        <div class="pg-rail" tabindex="0" aria-label="Using Tinker Lab in class">
+          <article class="pg-rcard c-blue" data-icon="monitor-smartphone">
+            <h3><small>No installs</small>It runs in the browser.</h3>
+            <div class="pg-rcard-detail"><p>Any up-to-date browser with WebGL should work, on laptops, Chromebooks and most tablets. There are no plug-ins, no admin rights and no student accounts. Try it on your school devices before the lesson.</p></div>
+          </article>
+          <article class="pg-rcard c-red" data-icon="link">
+            <h3><small>A link to any lesson</small>Put it on the board, or in a message.</h3>
+            <div class="pg-rcard-detail"><p>Each lesson has a stable address, such as <code>/learn/#blink</code>. Share it and everyone opens the same circuit with the same code.</p></div>
+          </article>
+          <article class="pg-rcard c-iris" data-icon="list-checks">
+            <h3><small>Quizzes and challenges</small>Check understanding as you go.</h3>
+            <div class="pg-rcard-detail"><p>Lessons end with a few quiz questions, each with an explanation, and challenges that go from a warm-up to a stretch task. They work well as an exit ticket or for homework.</p></div>
+          </article>
+          <article class="pg-rcard c-green" data-icon="printer">
+            <h3><small>Build guides to print</small>For the day the real parts come out.</h3>
+            <div class="pg-rcard-detail"><p>Each lesson has a step-by-step build guide with the parts list, the wiring and the code. Print one per bench, or per pair.</p><a class="btn btn-ghost btn-sm" href="/guide/">Build guides</a></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="map" aria-labelledby="map-title">
+        <div class="wrap">
+          <div class="pg-head split">
+            <h2 class="h1 reveal" id="map-title">From the first circuit<br /><span class="dim">to edge AI.</span></h2>
+            <p class="lede reveal"><span data-stat="lessons"></span> lessons in <span data-stat="tracks"></span> tracks, mapped by level. A track that spans two levels appears in both.</p>
+          </div>
+          <div class="pg-map" id="map-grid"><p class="pg-loading">Loading the curriculum</p></div>
+          <p class="pg-note reveal" id="map-start"></p>
+        </div>
+      </section>
+
+      <section class="section-tight" id="privacy" aria-labelledby="privacy-title">
+        <div class="wrap pg-cols">
+          <h2 class="h1 reveal" id="privacy-title">No student data.<br /><span class="dim">No accounts, no analytics, no tracking.</span></h2>
+          <div class="pg-prose reveal">
+            <p>Progress is saved only in the browser on the device being used. We never see it.</p>
+            <p>Our hosting provider may keep standard server logs, such as IP address and browser type, for security and for a limited time. Apart from those logs, nothing about a student leaves the device, and we do not use the logs to identify anyone.</p>
+            <p><a href="/legal/privacy/">Privacy policy</a> · <a href="/transparency/">What we store</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="limits" aria-labelledby="limits-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="limits-title">Honest limits.<br /><span class="dim">Worth knowing before you plan.</span></h2>
+          </div>
+          <ul class="pg-icons two">
+            <li data-icon="flask-conical" class="c-amber reveal"><h3>A model, not the hardware</h3><p>The simulation is a teaching model. Real parts add loose wires, noisy readings and the wrong resistor from the drawer. Leave time for that when you move to the bench.</p></li>
+            <li data-icon="users" class="c-iris reveal"><h3>No class dashboard</h3><p>Without accounts there is no teacher view of results. If you need to see answers, ask students to show you the quiz screen or note their scores.</p></li>
+            <li data-icon="hard-drive" class="c-blue reveal"><h3>Progress lives on one device</h3><p>It does not follow a student to another computer, and on a shared computer the next student sees it. Use separate browser profiles, or clear the data between classes on the <a href="/legal/cookies/#clear">cookie page</a>.</p></li>
+            <li data-icon="box" class="c-red reveal"><h3>The 3D bench needs WebGL</h3><p>Very old devices or locked-down browsers may not show the 3D view. A quick check on one school device before the lesson saves a lot of time.</p></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-tight" id="faq" aria-labelledby="faq-title">
+        <div class="wrap-narrow">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="faq-title">Questions teachers ask.</h2>
+          </div>
+          <div class="pg-faq">
+            <details><summary>Is it free?</summary><div class="a"><p>Yes. You can open every lesson without paying and without signing up.</p></div></details>
+            <details><summary>Do students need accounts or email addresses?</summary><div class="a"><p>No. There are no accounts at all. Students open a link and start.</p></div></details>
+            <details><summary>What age is it for?</summary><div class="a"><p>We have not set an age. As a rough guide, the tracks in the Start here group suit younger learners with an adult nearby, and the advanced tracks suit secondary school, college and adult learners. You know your class better than we do: try the first lesson of a track yourself and decide.</p></div></details>
+            <details><summary>Do we need any hardware?</summary><div class="a"><p>No. Every lesson works on screen. When you want to build for real, the build guide lists the exact parts and wiring.</p></div></details>
+            <details><summary>Is the code real?</summary><div class="a"><p>Yes. Lessons use Arduino C++, MicroPython and Python as you would write them for the board. In the browser, the Arduino code is interpreted and the 3D bench follows along; on a real board you compile and upload it in the usual way.</p></div></details>
+            <details><summary>Does it work on tablets and phones?</summary><div class="a"><p>The layout works down to phone width and the 3D bench responds to touch. A larger screen is more comfortable for reading and editing code.</p></div></details>
+            <details><summary>Does it work offline?</summary><div class="a"><p>It needs an internet connection to load. We have not built an offline version.</p></div></details>
+            <details><summary>Is it safe for children to use?</summary><div class="a"><p>There are no accounts, no chat or comments, no ads and no tracking. Children cannot be contacted through the site. When you move to real parts, keep to low-voltage projects and supervise younger students; our <a href="/legal/terms/#safety">terms</a> include a short safety section.</p></div></details>
+            <details><summary>I found a mistake, or I want a lesson on something.</summary><div class="a"><p>Please write to <a data-mailto="contactEmail" data-subject="Tinker Lab for educators"></a>. Tell us the lesson and what you saw.</p></div></details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section pg-manifesto" aria-label="Get started">
+        <div class="wrap-narrow">
+          <p class="pg-statement reveal">Try one lesson yourself first. <span class="dim">It takes a few minutes, and you will know whether it suits your class.</span></p>
+          <div class="pg-actions reveal">
+            <a class="btn btn-primary btn-lg" href="/learn/">Open the first lesson</a>
+            <a class="btn btn-ghost btn-lg" href="/contact/">Contact us</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer id="site-foot"></footer>
+    <script type="module" src="/src/site/pages/educators.js"></script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Curriculum · Tinker Lab</title>
+    <meta name="description" content="Every Tinker Lab track and lesson, from what electricity is to robots and edge AI, with search and level filters." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="%VITE_SITE_URL%/curriculum/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tinker Lab" />
+    <meta property="og:title" content="The Tinker Lab curriculum" />
+    <meta property="og:description" content="Every Tinker Lab track and lesson, from what electricity is to robots and edge AI, with search and level filters." />
+    <meta property="og:url" content="%VITE_SITE_URL%/curriculum/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Tinker Lab crest and wordmark with the line: Learn how things work. Then build them." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Tinker Lab curriculum" />
+    <meta name="twitter:description" content="Every Tinker Lab track and lesson, from what electricity is to robots and edge AI, with search and level filters." />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
+  </head>
+  <body class="site page-curriculum">
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="site-head"></header>
+    <main id="main">
+      <section class="pg-hero">
+        <div class="wrap">
+          <p class="eyebrow">Curriculum</p>
+          <h1 class="h1 reveal">Everything you can learn here,<br /><span class="dim">in one list.</span></h1>
+          <p class="lede reveal"><span data-stat="lessons"></span> lessons in <span data-stat="tracks"></span> tracks, from what electricity is to robots and edge AI. Each lesson opens in the lesson app, and each has a build guide.</p>
+          <nav class="pg-jump" id="jump" aria-label="Jump to a group"></nav>
+        </div>
+      </section>
+
+      <div class="pg-tools" role="search">
+        <div class="wrap">
+          <label class="pg-search"><span class="sr">Search lessons</span><i data-lucide="search" data-size="18"></i><input id="q" type="search" placeholder="Search: servo, Wi-Fi, soil sensor" autocomplete="off" spellcheck="false" /></label>
+          <div class="pg-chips" id="levels" role="group" aria-label="Filter by level"></div>
+          <div class="pg-chips" id="board-filter" hidden></div>
+          <span class="pg-count" id="count" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div id="groups"><p class="pg-loading">Loading the curriculum</p></div>
+      <p class="pg-empty" id="empty" hidden>No lessons match. Try a shorter word, or <button class="btn btn-ghost btn-sm" type="button" id="reset">clear the filters</button></p>
+    </main>
+    <footer id="site-foot"></footer>
+    <script type="module" src="/src/site/pages/curriculum.js"></script>
+  </body>
+</html>

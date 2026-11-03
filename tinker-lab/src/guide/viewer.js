@@ -48,7 +48,7 @@ export function pagesOf(guide) {
 export function partsListHTML(guide, thumbs, { compact = false } = {}) {
   const inv = guide.plan.inventory;
   const groups = [
-    ['Board', inv.filter((e) => e.group === 'board' || e.group === 'breadboard')],
+    ['Board and breadboard', inv.filter((e) => e.group === 'board' || e.group === 'breadboard')],
     ['Components', inv.filter((e) => e.group === 'part')],
     ['Jumper wires', inv.filter((e) => e.group === 'wire')],
     ['Also on the desk', inv.filter((e) => e.group === 'prop')],
@@ -64,6 +64,15 @@ export function partsListHTML(guide, thumbs, { compact = false } = {}) {
         </li>`).join('')}
       </ul>
     </section>`).join('');
+}
+
+/** A one-line summary for the cover (the overview heading, unless it just repeats the title). */
+export function lede(lesson) {
+  const h = String(lesson.overview?.heading ?? '').replace(/<[^>]+>/g, '').trim();
+  if (h && h.toLowerCase() !== String(lesson.title).toLowerCase()) return `<p class="g-lede">${esc(h)}</p>`;
+  const t = String(lesson.overview?.text ?? '').replace(/<[^>]+>/g, '').trim();
+  const first = t.split(/(?<=[.!?])\s+/)[0];
+  return first ? `<p class="g-lede">${esc(first)}</p>` : '';
 }
 
 export function coverMetaHTML(guide) {
@@ -270,7 +279,7 @@ export function mountViewer(el, lesson, { startPage = null } = {}) {
     if (p.type === 'cover')
       return `<p class="g-eyebrow">Build guide${lesson.track?.title ? ` · ${esc(lesson.track.title)}` : ''}</p>
         <h1 class="g-h1">${esc(lesson.title)}</h1>
-        ${lesson.overview?.heading ? `<p class="g-lede">${esc(lesson.overview.heading)}</p>` : ''}
+        ${lede(lesson)}
         ${coverMetaHTML(guide)}
         <div class="g-ctas"><button class="g-pill is-primary" data-to="parts">${lucide('package', { size: 17 })}<span>See the parts</span></button><button class="g-pill" data-to="1">${lucide('play', { size: 17 })}<span>Start at step 1</span></button></div>`;
     if (p.type === 'parts')

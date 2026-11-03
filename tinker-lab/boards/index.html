@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Boards · Tinker Lab</title>
+    <meta name="description" content="The boards you can learn on in Tinker Lab: Uno-style, Mega, Nano, ESP32, Pico and Jetson Nano-style models, with specs and lesson counts." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="%VITE_SITE_URL%/boards/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tinker Lab" />
+    <meta property="og:title" content="Boards in Tinker Lab" />
+    <meta property="og:description" content="The boards you can learn on in Tinker Lab: Uno-style, Mega, Nano, ESP32, Pico and Jetson Nano-style models, with specs and lesson counts." />
+    <meta property="og:url" content="%VITE_SITE_URL%/boards/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Tinker Lab crest and wordmark with the line: Learn how things work. Then build them." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Boards in Tinker Lab" />
+    <meta name="twitter:description" content="The boards you can learn on in Tinker Lab: Uno-style, Mega, Nano, ESP32, Pico and Jetson Nano-style models, with specs and lesson counts." />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
+  </head>
+  <body class="site page-boards">
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="site-head"></header>
+    <main id="main">
+      <section class="pg-hero center">
+        <div class="wrap">
+          <span class="pg-hero-icon c-iris" aria-hidden="true"><i data-lucide="cpu" data-size="46"></i></span>
+          <h1 class="display reveal">The boards on the bench.<br /><span class="dim">Drawn simply, specified properly.</span></h1>
+          <p class="lede reveal">Every lesson runs on one of these <span data-stat="boards"></span> board models. They are simplified drawings made for teaching, and they follow the specifications of the boards they are based on, so what you learn carries over.</p>
+        </div>
+      </section>
+
+      <section class="section-tight" aria-label="Boards">
+        <div class="wrap">
+          <div class="pg-boards" id="boards"><p class="pg-loading">Loading the boards</p></div>
+          <p class="pg-note reveal" id="no-board"></p>
+        </div>
+      </section>
+
+      <section class="section pg-manifesto" aria-labelledby="which-title">
+        <div class="wrap-narrow">
+          <h2 class="pg-statement reveal" id="which-title">Not sure where to start? <span class="dim">Begin with the Uno-style board. The first Arduino lessons use it, and the ideas carry over to every other board here.</span></h2>
+          <div class="pg-actions reveal">
+            <a class="btn btn-primary btn-lg" href="/curriculum/?board=uno">Uno-style lessons</a>
+            <a class="btn btn-ghost btn-lg" href="/curriculum/">All lessons</a>
+          </div>
+          <p class="pg-note reveal" style="margin-inline:auto">Arduino, ESP32, Raspberry Pi, Pico, NVIDIA and Jetson are trademarks of their owners. These are stylised models, not product images, and Tinker Lab is not affiliated with the makers. Before you connect a real board, check its own pinout.</p>
+        </div>
+      </section>
+    </main>
+    <footer id="site-foot"></footer>
+    <script type="module" src="/src/site/pages/boards.js"></script>
+  </body>
+</html>

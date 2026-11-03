@@ -58,7 +58,8 @@ export function createGuide(lesson) {
   function setStep(k) {
     units.forEach((u, j) => {
       const s = stepOf.get(j) ?? 0;
-      art.setState(j, k < 0 ? 'normal' : s < k ? 'old' : s === k ? 'new' : 'hidden');
+      if (u.scenery) art.setState(j, k < 0 ? 'normal' : 'old');
+      else art.setState(j, k < 0 ? 'normal' : s < k ? 'old' : s === k ? 'new' : 'hidden');
     });
     pose(k, 1);
   }
@@ -102,7 +103,7 @@ export function createGuide(lesson) {
     focus.max.y = Math.max(focus.max.y, fc.y + 1.5); // room for the arrow
     const vFull = fitBox(sofar, aspect, az, 1.14);
     const vFocus = fitBox(focus, aspect, az, 1.25);
-    if (vFull.half <= vFocus.half * 1.45) return vFull;
+    if (vFull.half <= vFocus.half * 1.9) return vFull;
     const half = Math.max(vFocus.half * 1.35, Math.min(vFull.half, 3.2));
     const t = THREE.MathUtils.clamp((half - vFocus.half) / Math.max(0.01, vFull.half - vFocus.half), 0, 0.6);
     return { target: vFocus.target.clone().lerp(vFull.target, t), half };

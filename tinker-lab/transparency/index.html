@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Transparency · Tinker Lab</title>
+    <meta name="description" content="What Tinker Lab stores and what it does not, how the simulation differs from real hardware, how AI was used to make it, and the open-source work it builds on." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="%VITE_SITE_URL%/transparency/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tinker Lab" />
+    <meta property="og:title" content="Transparency at Tinker Lab" />
+    <meta property="og:description" content="What Tinker Lab stores and what it does not, how the simulation differs from real hardware, how AI was used to make it, and the open-source work it builds on." />
+    <meta property="og:url" content="%VITE_SITE_URL%/transparency/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Tinker Lab crest and wordmark with the line: Learn how things work. Then build them." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Transparency at Tinker Lab" />
+    <meta name="twitter:description" content="What Tinker Lab stores and what it does not, how the simulation differs from real hardware, how AI was used to make it, and the open-source work it builds on." />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
+  </head>
+  <body class="site page-transparency">
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="site-head"></header>
+    <nav class="sub-nav is-sticky" aria-label="On this page">
+      <div class="wrap"><b>Transparency</b><a href="#store">What we store</a><a href="#dont">What we don't</a><a href="#simulations">Simulations</a><a href="#ai">AI</a><a href="#credits">Credits</a><a href="#trademarks">Trademarks</a></div>
+    </nav>
+
+    <main id="main">
+      <section class="pg-hero center">
+        <div class="wrap">
+          <span class="pg-hero-icon c-ink" aria-hidden="true"><i data-lucide="eye" data-size="46"></i></span>
+          <h1 class="display reveal">What happens here,<br /><span class="dim">written down plainly.</span></h1>
+          <p class="lede reveal">What we store and what we do not, where the simulation stops being exact, how AI was used to make Tinker Lab, and whose work it is built on.</p>
+        </div>
+      </section>
+
+      <section class="section-tight" id="store" aria-labelledby="store-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="store-title">We store very little,<br /><span class="dim">and only in your browser.</span></h2>
+          </div>
+          <div class="pg-table-wrap reveal">
+            <table class="pg-table">
+              <thead><tr><th scope="col">What</th><th scope="col">Why</th><th scope="col">Where</th><th scope="col">How long</th></tr></thead>
+              <tbody>
+                <tr><td>Lesson progress<small><code>tinkerlab:done</code> <code>tinkerlab:last</code></small></td><td data-label="Why">To tick off finished lessons and reopen the one you were on.</td><td data-label="Where">Your browser's local storage, on this device</td><td data-label="How long">Until you clear it</td></tr>
+                <tr><td>Quiz answers<small><code>tinkerlab:quiz</code></small></td><td data-label="Why">To show which questions you have answered.</td><td data-label="Where">Your browser's local storage</td><td data-label="How long">Until you clear it</td></tr>
+                <tr><td>Settings<small><code>tinkerlab:settings</code></small></td><td data-label="Why">To remember your preferences in the lesson app.</td><td data-label="Where">Your browser's local storage</td><td data-label="How long">Until you clear it</td></tr>
+                <tr><td>Code drafts and builds<small>other <code>tinkerlab:</code> keys</small></td><td data-label="Why">So your edits to lesson code and your Studio builds are still there next time.</td><td data-label="Where">Your browser's local storage</td><td data-label="How long">Until you clear it</td></tr>
+                <tr><td>Server logs<small>kept by our hosting provider</small></td><td data-label="Why">Standard request logs (IP address, browser user agent, page requested, time) for security and to keep the site running.</td><td data-label="Where">The hosting provider's servers</td><td data-label="How long">A limited period set by the provider</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pg-storage reveal" data-storage></div>
+        </div>
+      </section>
+
+      <section class="section" id="dont" aria-labelledby="dont-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="dont-title">What we do not do.<br /><span class="dim">If this ever changes, this page changes first.</span></h2>
+          </div>
+          <div class="pg-table-wrap reveal">
+            <table class="pg-check">
+              <thead><tr><th scope="col"><span class="sr">Question</span></th><th scope="col" class="col"><span class="col-ic" aria-hidden="true"><i data-lucide="circuit-board" data-size="30"></i></span>Tinker Lab</th><th scope="col"><span class="sr">Details</span></th></tr></thead>
+              <tbody>
+                <tr><td>Do you need an account?</td><td class="mark" data-mark="no"></td><td class="detail">Open any lesson and start.</td></tr>
+                <tr><td>Do we collect analytics?</td><td class="mark" data-mark="no"></td><td class="detail">No page counters, no usage tracking, no session recording.</td></tr>
+                <tr><td>Do we show ads?</td><td class="mark" data-mark="no"></td><td class="detail">None, and no ad networks are loaded.</td></tr>
+                <tr><td>Tracking pixels or third-party cookies?</td><td class="mark" data-mark="no"></td><td class="detail">We set no cookies at all. See the <a href="/legal/cookies/">cookie policy</a>.</td></tr>
+                <tr><td>Do fonts or icons load from other companies?</td><td class="mark" data-mark="no"></td><td class="detail">Fonts and icons are served from this site.</td></tr>
+                <tr><td>Is your progress sent to us?</td><td class="mark" data-mark="no"></td><td class="detail">It never leaves your browser.</td></tr>
+                <tr><td>Is anything you type sent to an AI service?</td><td class="mark" data-mark="no"></td><td class="detail">There is no chatbot. Your code runs in your browser.</td></tr>
+                <tr><td>Is your progress saved?</td><td class="mark" data-mark="yes" data-label="Yes, locally"></td><td class="detail">In your browser's local storage, on this device only.</td></tr>
+                <tr><td>Does our host keep server logs?</td><td class="mark" data-mark="yes" data-label="Yes"></td><td class="detail">Standard logs, for security, for a limited time.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="simulations" aria-labelledby="sim-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="sim-title">The simulation is a teaching model.<br /><span class="dim">Real hardware is messier, and that is fine.</span></h2>
+          </div>
+          <ul class="pg-icons">
+            <li data-icon="code-xml" class="c-iris reveal"><h3>Arduino code is interpreted</h3><p>The Arduino runtime interprets Arduino C++ in your browser. It is not the official compiler, and it does not run every program exactly as a real board would.</p></li>
+            <li data-icon="file-code" class="c-blue reveal"><h3>Python lessons are modelled</h3><p>MicroPython and Python lessons show the real program; the 3D bench follows it step by step as a model of what the board would do.</p></li>
+            <li data-icon="timer" class="c-amber reveal"><h3>Timing is approximate</h3><p>Delays and speeds are close, not exact. Microsecond timing, interrupts under load and PWM frequencies are simplified.</p></li>
+            <li data-icon="zap" class="c-red reveal"><h3>Electricity is illustrated</h3><p>Current flow, voltages and brightness are drawn to explain, not solved like a circuit simulator. Electrical noise, loose contacts and part tolerances are mostly left out.</p></li>
+            <li data-icon="thermometer" class="c-green reveal"><h3>Sensors behave nicely</h3><p>Real sensors drift, need time to warm up, and get confused by sunlight, echoes or a cold draught. Expect noisier readings on your desk.</p></li>
+            <li data-icon="cpu" class="c-ink reveal"><h3>Boards are stylised</h3><p>The models are drawn from scratch for teaching. They follow the real layouts closely enough to learn from, but always check your own board's pinout before you connect power.</p></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-tight" id="ai" aria-labelledby="ai-title">
+        <div class="wrap pg-cols">
+          <h2 class="h1 reveal" id="ai-title">Made with AI assistance.<br /><span class="dim">Reviewed by people.</span></h2>
+          <div class="pg-prose reveal">
+            <p>Much of Tinker Lab was created with the help of AI tools: lesson text, quiz questions, example programs, the 3D models and the code of this website. People reviewed that work and corrected what was wrong.</p>
+            <p>Reviewing catches a lot, but not everything. If you find a mistake, a wrong value or code that would not work on a real board, please write to <a data-mailto="contactEmail" data-subject="Mistake in a lesson"></a> and we will fix it.</p>
+            <p>AI does not run behind the scenes while you use the site. Nothing you type or build is sent to an AI service.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="credits" aria-labelledby="credits-title">
+        <div class="wrap">
+          <div class="pg-head">
+            <h2 class="h1 reveal" id="credits-title">Built on open source.<br /><span class="dim">Thank you to the people who made it.</span></h2>
+          </div>
+          <div class="pg-table-wrap reveal">
+            <table class="pg-table">
+              <thead><tr><th scope="col">Project</th><th scope="col">What it does here</th><th scope="col">Licence</th></tr></thead>
+              <tbody>
+                <tr><td><a class="link-arrow" href="https://threejs.org/" rel="noopener">three.js</a></td><td data-label="What it does here">Draws the 3D bench, boards and parts.</td><td data-label="Licence">MIT</td></tr>
+                <tr><td><a class="link-arrow" href="https://codemirror.net/" rel="noopener">CodeMirror</a></td><td data-label="What it does here">The code editor in lessons and the Studio.</td><td data-label="Licence">MIT</td></tr>
+                <tr><td><a class="link-arrow" href="https://roughjs.com/" rel="noopener">Rough.js</a></td><td data-label="What it does here">Hand-drawn style diagrams.</td><td data-label="Licence">MIT</td></tr>
+                <tr><td><a class="link-arrow" href="https://hairline.lucasmarkes.com/" rel="noopener">Hairline</a></td><td data-label="What it does here">Isometric line drawings that respond to the pointer.</td><td data-label="Licence">MIT</td></tr>
+                <tr><td><a class="link-arrow" href="https://lucide.dev/" rel="noopener">Lucide</a></td><td data-label="What it does here">The icons.</td><td data-label="Licence">ISC</td></tr>
+                <tr><td><a class="link-arrow" href="https://fonts.google.com/specimen/Newsreader" rel="noopener">Newsreader</a></td><td data-label="What it does here">The typeface you are reading.</td><td data-label="Licence">SIL Open Font License 1.1</td></tr>
+                <tr><td><a class="link-arrow" href="https://github.com/IBM/plex" rel="noopener">IBM Plex Mono</a></td><td data-label="What it does here">The typeface for code.</td><td data-label="Licence">SIL Open Font License 1.1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="pg-note reveal">Fonts are bundled through Fontsource and served from this site. Each project keeps its own copyright; the licences allow the use made of them here.</p>
+        </div>
+      </section>
+
+      <section class="section-tight" id="trademarks" aria-labelledby="tm-title">
+        <div class="wrap pg-cols">
+          <h2 class="h2 reveal" id="tm-title">Trademarks.</h2>
+          <div class="pg-prose reveal">
+            <p>Arduino, ESP32, ESP8266, NodeMCU, Raspberry Pi, Pico, NVIDIA, Jetson and other product names mentioned on this site are trademarks of their respective owners. We use the names only to say which hardware a lesson is about.</p>
+            <p>Tinker Lab is independent. It is not affiliated with, endorsed by or sponsored by any of these companies. The board models are stylised illustrations, not official product images.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer id="site-foot"></footer>
+    <script type="module" src="/src/site/pages/transparency.js"></script>
+  </body>
+</html>

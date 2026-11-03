@@ -199,7 +199,7 @@ void main() {
 
 const IDENT3 = new THREE.Matrix3();
 
-function faceMaterial({ color, map = null, decal = false, side = THREE.FrontSide }) {
+function faceMaterial({ color, map = null, decal = false, side = THREE.FrontSide, tintScale = 1 }) {
   const m = new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: color.clone() },
@@ -223,6 +223,7 @@ function faceMaterial({ color, map = null, decal = false, side = THREE.FrontSide
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,
   });
+  m.userData.tintScale = tintScale;
   return m;
 }
 
@@ -335,7 +336,7 @@ class Unit {
     if (!vis) return;
     const s = STYLE[state] ?? STYLE.normal;
     for (const m of this.faces.values()) {
-      m.uniforms.uTintAmt.value = s.tint;
+      m.uniforms.uTintAmt.value = s.tint * (m.userData.tintScale ?? 1);
       m.uniforms.uFade.value = m.uniforms.uDecal.value > 0.5 ? s.fade * 1.4 : s.fade;
     }
     this.hulls.forEach((h, i) => {
@@ -413,7 +414,7 @@ export function toLineArt(root, { units: specs = [] } = {}) {
       if (map?.opaque && family === 'face') base.lerp(new THREE.Color(1, 1, 1), 0.5);
       const side = m.side ?? THREE.FrontSide;
       const key = `${base.getHexString()}|${map?.texture.uuid ?? ''}|${decal}|${side}`;
-      out.push(u.face(key, () => faceMaterial({ color: base, map: map?.texture ?? null, decal, side })));
+      out.push(u.face(key, () => faceMaterial({ color: base, map: map?.texture ?? null, decal, side, tintScale: family === 'wire' ? 0.12 : family === 'lens' ? 0.4 : 1 })));
     }
     if (!anyShown) { mesh.visible = false; return; }
     mesh.material = Array.isArray(mesh.material) ? out : out[0];

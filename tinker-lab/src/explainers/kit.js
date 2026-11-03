@@ -56,7 +56,7 @@ export function bulb(S, x, y, o = {}) {
   const { d, C } = S;
   const r = o.r ?? 36;
   const g = d.g(o.parent);
-  const glow = d.glow(x, y, r * 3.2, C.yellow);
+  const glow = d.glow(x, y, r * 3.2, C.yellow, o.glowParent);
   let warm, fil, crack;
   d.into(g, () => {
     d.circle(x, y, r * 2, { fill: '#fff', fillStyle: 'solid', stroke: C.ink, roughness: 0.9 });
@@ -101,7 +101,7 @@ export function led(S, x, y, o = {}) {
   const { d, C } = S;
   const col = o.color ?? C.accent, s = o.size ?? 1;
   const g = d.g(o.parent);
-  const glow = d.glow(x, y, 70 * s, col);
+  const glow = d.glow(x, y, 70 * s, col, o.glowParent);
   let lit;
   d.into(g, () => {
     const w = 34 * s, h = 46 * s;
@@ -183,8 +183,8 @@ export function graph(S, x, y, w, h, o = {}) {
     if (o.grid) for (let i = 1; i <= 4; i++) d.line(x, y + h - (h * i) / 4, x + w, y + h - (h * i) / 4, { stroke: C.line, strokeWidth: 1, roughness: 0.4 });
     d.arrow(x, y + h, x + w + 16, y + h, { strokeWidth: 2, roughness: 0.5, head: 10 });
     d.arrow(x, y + h, x, y - 16, { strokeWidth: 2, roughness: 0.5, head: 10 });
-    if (o.xLabel) d.text(x + w + 8, y + h + 24, o.xLabel, { size: 18, anchor: 'end', fill: C.muted, mono: true });
-    if (o.yLabel) d.text(x + 10, y - 22, o.yLabel, { size: 18, anchor: 'start', fill: C.muted, mono: true });
+    if (o.xLabel) d.text(x + w / 2, y + h + 46, o.xLabel, { size: 17, fill: C.muted, mono: true });
+    if (o.yLabel) d.text(x + 12, y - 20, o.yLabel, { size: 17, anchor: 'start', fill: C.muted, mono: true });
     for (const [v, t] of o.xTicks ?? []) { d.line(px(v), y + h - 5, px(v), y + h + 5, { strokeWidth: 1.5, roughness: 0.3 }); d.text(px(v), y + h + 22, t, { size: 16, fill: C.muted, mono: true }); }
     for (const [v, t] of o.yTicks ?? []) { d.line(x - 5, py(v), x + 5, py(v), { strokeWidth: 1.5, roughness: 0.3 }); d.text(x - 10, py(v), t, { size: 16, fill: C.muted, mono: true, anchor: 'end' }); }
   });
@@ -202,6 +202,11 @@ export function graph(S, x, y, w, h, o = {}) {
     return { el: c, at(xv, yv) { c.setAttribute('cx', px(xv).toFixed(1)); c.setAttribute('cy', py(yv).toFixed(1)); } };
   };
   return { g, plotG, px, py, line, dot, dOf, clear: () => { while (plotG.firstChild) plotG.firstChild.remove(); } };
+}
+
+/** A soft hand-drawn panel behind a group of things. */
+export function panel(S, x, y, w, h, o = {}) {
+  return S.d.rect(x, y, w, h, { fill: o.fill ?? S.C.subtle, stroke: o.stroke ?? S.C.line, strokeWidth: 1.4, roughness: 1.4, bowing: 2, parent: o.parent ?? S.layers.back });
 }
 
 /** A label with a short leader line: from the point (ax, ay) to the text at (tx, ty). */

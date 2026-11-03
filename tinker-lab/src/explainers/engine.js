@@ -156,7 +156,8 @@ export function scene(el, api = {}, spec) {
     /** A plain (non-rough) SVG element. */
     el: (tag, attrs = {}, parent = cur) => mk(tag, attrs, parent),
     /** A soft radial glow; returns the circle (set its opacity). */
-    glow(cx, cy, r, color = C.yellow, parent = layers.fx) {
+    glow(cx, cy, r, color = C.yellow, parent) {
+      parent ??= layers.fx;
       return mk('circle', { cx, cy, r, fill: `url(#${glowDef(color)})`, opacity: 0, 'pointer-events': 'none' }, parent);
     },
     /** Rebuild a group's contents (for drawings that depend on a value). */
