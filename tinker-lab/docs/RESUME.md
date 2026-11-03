@@ -23,3 +23,4 @@ Note: while workstreams are mid-edit the production build may fail (for example 
 - Download/copy wording: "a .py file on the Raspberry Pi" for `rpi5`, "on the Jetson" for `jetson`/`orin`.
 - Auto power LED and fan: also for `rpi5` and `orin`, not only `jetson`.
 - The `unor4` board has no lessons yet (LED-matrix lessons would suit it).
+- Add an "Open in Studio" button in the lesson app linking to `/studio/#lesson=<id>` (C++ lessons).

@@ -28,3 +28,20 @@ export function mpu6050Device(get) {
     },
   };
 }
+
+/**
+ * A serialWrite() for lesson HALs that feeds the Serial Plotter format to a panel:
+ * each line of numbers ("12 34", "12,34", "a:12 b:34") becomes push(...values).
+ */
+export function serialPlotter(push) {
+  let buf = '';
+  return (text) => {
+    buf += text;
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      const vals = line.trim().split(/[\s,]+/).filter(Boolean).map((tok) => Number(tok.includes(':') ? tok.split(':').pop() : tok));
+      if (vals.length && vals.every((v) => Number.isFinite(v))) push(...vals);
+    }
+  };
+}

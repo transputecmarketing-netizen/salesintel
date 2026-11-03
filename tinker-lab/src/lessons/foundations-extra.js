@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { makeLED, makeResistor, makeButton } from '../scene/components.js';
 import { v, BB, ledOnPin, LED_COLORS, OHMS, ledGain } from './helpers.js';
+import { serialPlotter } from '../runtime/devices.js';
 
 /**
  * Compact LED: pin → wire into row a, resistor bridging the centre channel
@@ -63,6 +64,10 @@ export const foundationsExtra = [
       ctx.anchor('rail', bb.hole(22, 'bot-'));
       ctx.anchor('gndw', gw.mid);
       return { red, amber, green };
+    },
+    hw: (b) => {
+      const lamps = { 12: b.red, 11: b.amber, 10: b.green };
+      return { digitalWrite: (pin, v) => lamps[pin]?.on(v ? 1 : 0) };
     },
     callouts: [
       { anchor: 'red', x: 0.04, y: 0.17, icon: 'led', title: 'Red · pin 12', text: 'Stop. Stays on longest in the sequence.' },
@@ -175,6 +180,11 @@ void loop() {
       ctx.anchor('sig', c.sig.mid);
       return { ...c, plot };
     },
+    hw: (b) => ({
+      analogWrite: (pin, v) => { if (pin === 9) b.on(v / 255); },
+      digitalWrite: (pin, v) => { if (pin === 9) b.on(v ? 1 : 0); },
+      serialWrite: serialPlotter((v) => b.plot.push(v)),
+    }),
     callouts: [
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pwm', title: 'Pin ~9 · PWM', text: 'Switches on and off ≈ 490 times a second.' },
       { anchor: 'led', x: 0.7, y: 0.17, icon: 'led', title: 'Breathing LED', text: 'The longer it’s on in each pulse, the brighter it looks.' },
@@ -263,6 +273,9 @@ void loop() {
       ctx.anchor('gndw', gw.mid);
       return { leds, pins };
     },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { const i = b.pins.indexOf(pin); if (i >= 0) b.leds[i].on(v ? 1 : 0); },
+    }),
     callouts: [
       { anchor: 'wires', x: 0.36, y: 0.12, icon: 'pins', title: 'Pins 7 → 2', text: 'Listed left to right in the LEDS[] array.' },
       { anchor: 'first', x: 0.04, y: 0.17, icon: 'led', title: 'LEDS[0]', text: 'Arrays count from 0, so the first LED is index 0.' },
@@ -350,6 +363,7 @@ void loop() {
       ctx.anchor('sig', c.sig.mid);
       return c;
     },
+    hw: (b) => ({ digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); } }),
     callouts: [
       { anchor: 'usb', x: 0.04, y: 0.17, icon: 'usb', title: 'USB serial', text: 'Your typed text travels down the USB cable at 9600 baud.' },
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pins', title: 'Pin 13', text: 'Driven by whatever command arrives.' },
@@ -482,6 +496,15 @@ void loop() {
       ctx.anchor('chip', ctx.board.anchors.chip);
       return { ...c, btn, state };
     },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+      // real contacts chatter for a few ms after each press or release
+      digitalRead: (pin) => {
+        if (pin !== 2) return null;
+        if (performance.now() - b.state.edgeAt < b.state.bounceMs) return Math.random() < 0.5 ? 0 : null;
+        return b.state.down ? 0 : null;
+      },
+    }),
     callouts: [
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'LED remembers', text: 'Stays on after you let go — the state lives in a variable.' },
       { anchor: 'd2', x: 0.36, y: 0.12, icon: 'pins', title: 'Pin 2 · input', text: 'INPUT_PULLUP: HIGH when released, LOW while pressed.' },
@@ -605,6 +628,10 @@ void loop() {
       ctx.anchor('gndw', gw.mid);
       return { a, bl, btn, state };
     },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { if (pin === 12) b.a.on(v ? 1 : 0); if (pin === 11) b.bl.on(v ? 1 : 0); },
+      digitalRead: (pin) => (pin === 2 && b.state.down ? 0 : null),
+    }),
     callouts: [
       { anchor: 'a', x: 0.04, y: 0.17, icon: 'led', title: 'Task 1 · pin 12', text: 'Toggles every RATE_A ms.' },
       { anchor: 'b', x: 0.36, y: 0.12, icon: 'led', title: 'Task 2 · pin 11', text: 'Toggles every RATE_B ms, on its own clock.' },

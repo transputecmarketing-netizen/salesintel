@@ -54,7 +54,10 @@ export default (el, api) => scene(el, api, {
       d.line(670, 438, 730, 438, { stroke: C.muted, strokeWidth: 2, roughness: 0.2 });
       d.text(400, 52, 'a flat map: real GPS solves the same puzzle in 3-D', { size: 14, fill: C.muted, mono: true });
     });
-    const circG = d.g(bG);
+    const clipId = `${S.uid}map`;
+    const cp = d.el('clipPath', { id: clipId }, S.svg.querySelector('defs'));
+    d.el('rect', { x: 32, y: 32, width: 736, height: 436 }, cp);
+    const circG = d.g(bG, { 'clip-path': `url(#${clipId})` });
     const circles = SATS.map(([x, y, k]) => {
       const c = d.el('circle', { cx: x, cy: y, fill: 'none', stroke: col(k), 'stroke-width': 3, opacity: 0 }, circG);
       const s = d.g(bG, { opacity: 0 });
@@ -99,10 +102,9 @@ export default (el, api) => scene(el, api, {
       {
         const s = orbits[0].sats[1], m = s.el.getAttribute('transform').match(/[-\d.]+/g);
         linkL.setAttribute('x1', EX); linkL.setAttribute('y1', EY - ER - 8); linkL.setAttribute('x2', m[0]); linkL.setAttribute('y2', m[1]);
-        const km = 20200 * (Math.hypot(+m[0] - EX, +m[1] - (EY - ER)) / (OR - ER));
         linkT.setAttribute('x', (EX + +m[0]) / 2 + 10); linkT.setAttribute('y', (EY - ER + +m[1]) / 2);
-        linkT.textContent = `≈ ${Math.round(km / 100) * 100} km · ${(km / 299792.458 * 1000).toFixed(0)} ms`;
-        rdD.set(st.map > 0.5 ? `${((Math.hypot(SATS[0][0] - st.rx, SATS[0][1] - st.ry) * M_PER_PX) / 299.792458 + st.err).toFixed(2)} µs` : `${(km / 299792.458 * 1000).toFixed(1)} ms`);
+        linkT.textContent = '20,200 km or more · ≈ 0.07 s';
+        rdD.set('≈ 67–86 ms');
       }
       // ---------- map: distances = (true range + clock error × c), shown as circles
       bG.setAttribute('opacity', st.map.toFixed(2));

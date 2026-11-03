@@ -16,6 +16,8 @@ export const foundations = [
     build(ctx) {
       return {};
     },
+    // The L LED on pin 13 is driven by the runtime itself; nothing else is wired.
+    hw: () => ({}),
     callouts: [
       { anchor: 'usb', x: 0.04, y: 0.17, icon: 'usb', title: 'USB port', text: 'Uploads your sketch and powers the board from a computer.' },
       { anchor: 'chip', x: 0.37, y: 0.13, icon: 'chip', title: 'Microcontroller', text: 'The ATmega328P — the tiny computer that runs your code.' },
@@ -155,6 +157,11 @@ void loop() {
       ctx.anchor('res', c.res.anchor);
       return { ...c, btn, last: 1 };
     },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+      // pressed: the switch pulls D2 to GND; released: the pin floats (INPUT_PULLUP reads HIGH)
+      digitalRead: (pin) => (pin === 2 && b.btn.pressed ? 0 : null),
+    }),
     callouts: [
       { anchor: 'd2', x: 0.36, y: 0.13, icon: 'pins', title: 'Pin 2 · input', text: 'Reads HIGH normally and LOW while the button is pressed.' },
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'LED on pin 13', text: 'Turns on while you hold the button.' },
@@ -238,6 +245,11 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       return { ...c, pot, state };
     },
+    hw: (b) => ({
+      analogRead: (ch) => (ch === 0 ? Math.round(b.state.knob * 1023) : 0),
+      analogWrite: (pin, v) => { if (pin === 9) b.on(v / 255); },
+      digitalWrite: (pin, v) => { if (pin === 9) b.on(v ? 1 : 0); },
+    }),
     callouts: [
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'LED on pin ~9', text: 'Brightness follows the knob using PWM.' },
       { anchor: 'a0', x: 0.4, y: 0.72, icon: 'wave', title: 'Analog pin A0', text: 'Reads the wiper voltage as 0–1023.' },
@@ -311,6 +323,11 @@ void loop() {
       ctx.anchor('b', wb.mid);
       ctx.anchor('res', rR.anchor);
       return { rgb, rR, rG, rB, color: [0, 0, 0] };
+    },
+    hw: (b) => {
+      const ch = { 9: 0, 10: 1, 11: 2 };
+      const set = (pin, v) => { if (pin in ch) { b.color[ch[pin]] = v; b.rgb.set(...b.color); } };
+      return { analogWrite: set, digitalWrite: (pin, v) => set(pin, v ? 255 : 0) };
     },
     callouts: [
       { anchor: 'r', x: 0.04, y: 0.17, icon: 'pins', title: 'Red · pin ~9', text: 'Each colour has its own PWM pin.' },
@@ -410,6 +427,11 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       return { ...c, ldr, state };
     },
+    hw: (b) => ({
+      // LDR from 5 V to A0, 10 kΩ from A0 to GND
+      analogRead: (ch) => (ch === 0 ? Math.round((1023 * 10000) / (10000 + 200000 * 10 ** (-2.3 * b.state.light))) : 0),
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+    }),
     callouts: [
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'Night light', text: 'Turns on when the reading drops below the threshold.' },
       { anchor: 'a0', x: 0.36, y: 0.12, icon: 'wave', title: 'A0', text: 'Brighter light = higher reading.' },
@@ -485,6 +507,11 @@ void loop() {
       ctx.anchor('gnd', g.mid);
       return { bz };
     },
+    hw: (b) => ({
+      tone: (pin, f) => { if (pin === 8) b.bz.set(true, f); },
+      noTone: (pin) => { if (pin === 8) b.bz.set(false); },
+      digitalWrite: (pin) => { if (pin === 8) b.bz.set(false); },
+    }),
     callouts: [
       { anchor: 'd8', x: 0.36, y: 0.12, icon: 'pins', title: 'Pin 8', text: '<code>tone()</code> flips it hundreds of times a second.' },
       { anchor: 'gnd', x: 0.04, y: 0.17, icon: 'gnd', title: 'GND', text: 'Completes the circuit.' },
@@ -564,6 +591,14 @@ void loop() {
       ctx.anchor('sig', sig.mid);
       ctx.anchor('rb', rb.anchor);
       return { motor, motorWires: [m1, m2] };
+    },
+    hw: (b) => {
+      const set = (pin, s) => {
+        if (pin !== 9) return;
+        b.motor.set(s / 255);
+        b.motorWires.forEach((w) => { w.live = s > 0; w.speed = 0.3 + s / 255; });
+      };
+      return { analogWrite: set, digitalWrite: (pin, v) => set(pin, v ? 255 : 0) };
     },
     callouts: [
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pwm', title: 'Pin ~9', text: 'PWM sets how fast the motor spins.' },
@@ -650,6 +685,11 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       return { ...c, state };
     },
+    hw: (b) => ({
+      // TMP36: 10 mV per °C with a 500 mV offset, read by the 10-bit ADC (5 V reference)
+      analogRead: (ch) => (ch === 0 ? Math.round(((b.state.temp + (Math.random() - 0.5) * 0.4) / 100 + 0.5) * 1023 / 5) : 0),
+      digitalWrite: (pin, v) => { if (pin === 13) b.on(v ? 1 : 0); },
+    }),
     callouts: [
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'Alarm LED', text: 'Lights when it gets hotter than ALARM_C.' },
       { anchor: 'a0', x: 0.36, y: 0.12, icon: 'wave', title: 'A0', text: 'Reads the sensor voltage.' },
@@ -728,6 +768,7 @@ void loop() {
       ctx.anchor('sig', s.mid);
       return { servo };
     },
+    hw: (b) => ({ devices: { servo: (pin) => (pin === 9 ? { write: (deg) => b.servo.set(deg) } : null) } }),
     callouts: [
       { anchor: 'sig', x: 0.36, y: 0.12, icon: 'pwm', title: 'Signal · pin 9', text: 'A pulse every 20 ms; its width sets the angle.' },
       { anchor: 'power', x: 0.04, y: 0.68, icon: 'plug', title: '5V and GND', text: 'Red and brown wires power the servo.' },
@@ -808,6 +849,11 @@ void loop() {
       ctx.anchor('echo', echo.mid);
       return { us, block, ping, state, zFor };
     },
+    hw: (b) => ({
+      digitalWrite: (pin, v) => { if (pin === 9 && v) b.ping.fire(b.zFor(b.state.cm) - b.us.front.z - 0.3); },
+      // the echo pulse lasts the round trip at 343 m/s
+      pulseIn: (pin) => (pin === 10 ? Math.round((b.state.cm * 2) / 0.0343 + (Math.random() - 0.5) * 8) : 0),
+    }),
     callouts: [
       { anchor: 'trig', x: 0.04, y: 0.17, icon: 'pins', title: 'Trig · pin 9', text: 'A 10 µs pulse sends out the ultrasound.' },
       { anchor: 'echo', x: 0.36, y: 0.12, icon: 'pins', title: 'Echo · pin 10', text: 'Stays HIGH for as long as the echo takes.' },
@@ -913,6 +959,17 @@ void loop() {
       ctx.anchor('tl', tl.anchor);
       ctx.anchor('car', car.anchor);
       return { us, tl, car, ping, state, zFor };
+    },
+    hw: (b) => {
+      b.state.running = true;
+      const lamp = { 4: 'red', 3: 'yellow', 2: 'green' };
+      return {
+        digitalWrite: (pin, v) => {
+          if (lamp[pin]) b.tl.set(lamp[pin], !!v);
+          if (pin === 9 && v) b.ping.fire(b.zFor(b.state.cm) - b.us.front.z - 0.3);
+        },
+        pulseIn: (pin) => (pin === 10 ? Math.round((b.state.cm * 2) / 0.0343) : 0),
+      };
     },
     callouts: [
       { anchor: 'us', x: 0.04, y: 0.17, icon: 'radar', title: 'Distance sensor', text: 'Watches how far away the car is.' },

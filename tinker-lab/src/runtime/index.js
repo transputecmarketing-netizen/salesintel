@@ -17,7 +17,7 @@ import { VM } from './vm.js';
 import { getRegistry } from './libs/index.js';
 
 export { VM } from './vm.js';
-export { mpu6050Device } from './devices.js';
+export { mpu6050Device, serialPlotter } from './devices.js';
 
 /** Libraries a sketch can #include in the simulator. */
 export const SUPPORTED_LIBRARIES = [

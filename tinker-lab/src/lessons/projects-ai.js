@@ -700,7 +700,7 @@ while True:
       robot.deck.add(esp.group);
       robot.group.updateMatrixWorld(true);
       const st = { running: false, gesture: 'open', point: 'up', inView: true, command: 'STOP', cur: null, streak: 0, last: null, lm: [], lastSend: 0, t: 0, robotPos: robot.group.position, sent: 0 };
-      const ROLL = { left: 0.55, up: 0, right: -0.55 };
+      const ROLL = { left: -0.75, up: 0, right: 0.75 }; // camera looks +z, so image right is world −x
       const pose = () => {
         hand.setGesture(st.gesture);
         hand.group.rotation.z = st.gesture === 'point' ? ROLL[st.point] : 0;

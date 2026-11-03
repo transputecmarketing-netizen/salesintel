@@ -38,7 +38,7 @@ export default (el, api) => scene(el, api, {
       a0T = d.text(350, 246, '', { size: 26, fill: '#fff', mono: true, weight: 500 });
       vT = d.text(230, 214, '', { size: 15, fill: C.ink, mono: true });
     });
-    const rT = d.text(X - 34, 155, '', { size: 15, fill: C.ink, mono: true, anchor: 'end', weight: 500 });
+    const rT = d.text(X + 36, 176, '', { size: 16, fill: C.ink, mono: true, anchor: 'start', weight: 500 });
     // heat / light source next to the sensor
     const flame = d.g();
     d.into(flame, () => d.path('M0 0 C -24 -10, -18 -40, 0 -66 C 6 -44, 26 -36, 18 -12 C 14 -2, 6 2, 0 0 Z', { fill: C.yellow, stroke: C.accent, strokeWidth: 2.2 }));
@@ -47,7 +47,6 @@ export default (el, api) => scene(el, api, {
     const sun = d.g();
     const sunGlow = d.glow(0, 0, 90, C.yellow, sun);
     d.into(sun, () => { d.circle(0, 0, 44, { fill: C.yellow, stroke: C.accent, strokeWidth: 2 }); for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; d.line(Math.cos(a) * 30, Math.sin(a) * 30, Math.cos(a) * 44, Math.sin(a) * 44, { stroke: C.accent, strokeWidth: 2.5 }); } });
-    const darkG = d.el('rect', { x: 0, y: 0, width: 800, height: 500, fill: '#0c0c0e', opacity: 0, 'pointer-events': 'none' }, S.layers.back);
     const drawSensor = () => {
       d.seed = 333;
       d.redraw(sensG, () => {
@@ -100,7 +99,6 @@ export default (el, api) => scene(el, api, {
       ice.setAttribute('transform', `translate(${X - 90} 190)`); ice.setAttribute('opacity', ntcOn ? cold.toFixed(2) : 0);
       const lit = clamp((st.L + 1) / 5);
       S.at(sun, X - 100, 110, 0, 0.5 + lit * 0.6); sun.setAttribute('opacity', ntcOn ? 0 : (0.25 + lit * 0.75).toFixed(2)); sunGlow.setAttribute('opacity', lit.toFixed(2));
-      darkG.setAttribute('opacity', ntcOn ? 0 : ((1 - lit) * 0.12).toFixed(3));
       tS.show(ntcOn); lS.show(!ntcOn);
       const V = (5 * 10000) / (R + 10000);
       divG.setAttribute('opacity', st.div.toFixed(2));

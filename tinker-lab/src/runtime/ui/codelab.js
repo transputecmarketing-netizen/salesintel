@@ -451,6 +451,7 @@ export class CodeLab {
       noTone: (p) => { lh.noTone?.(p); self.h.audio?.noTone(); },
       pulseIn: (p, level, t) => lh.pulseIn?.(p, level, t) ?? 0,
       touchRead: lh.touchRead,
+      serialWrite: lh.serialWrite,
       devices,
     };
   }
