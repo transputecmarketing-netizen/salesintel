@@ -8,6 +8,7 @@ import {
 import { makeWire } from '../scene/wire.js';
 import { glowSprite } from '../scene/kit.js';
 import { v, BB, clamp, ledOnPin, ledGain } from './helpers.js';
+import { serialPlotter, mpu6050Device } from '../runtime/devices.js';
 
 /** Arduino map() with integer maths. */
 const amap = (x, a, b, c, d) => Math.trunc(((x - a) * (d - c)) / (b - a) + c);
@@ -105,6 +106,15 @@ export const sensorsB = [
       ctx.anchor('sw', wsw.mid);
       ctx.anchor('sig', wsig.mid);
       return { joy, servo, plot, state };
+    },
+    hw: (b) => {
+      b.state.running = true;
+      return {
+        analogRead: (ch) => (ch === 0 ? clamp(Math.round(512 + b.state.x * 511) + noise(3), 0, 1023) : ch === 1 ? clamp(Math.round(512 + b.state.y * 511) + noise(3), 0, 1023) : 0),
+        digitalRead: (pin) => (pin === 2 && b.joy.pressed ? 0 : null),
+        devices: { servo: (pin) => (pin === 9 ? { write: (deg) => b.servo.set(deg) } : null) },
+        serialWrite: serialPlotter((x, y, sw) => b.plot.push(x, y, sw)),
+      };
     },
     callouts: [
       { anchor: 'a0', x: 0.04, y: 0.17, icon: 'wave', title: 'VRX → A0, VRY → A1', text: 'Two pots inside: each axis gives 0–1023, about 512 at rest.' },
@@ -235,6 +245,25 @@ void loop() {
       ctx.anchor('led', c.led.anchor);
       return { ...c, fsr, plot, state };
     },
+    hw: (b) => {
+      let buf = '';
+      return {
+        // voltage divider: 5 V → FSR → A0 → fixed resistor → GND
+        analogRead: (ch) => {
+          if (ch !== 0) return 0;
+          const g = b.state.grams;
+          return g < 2 ? 0 : clamp(Math.round((1023 * b.state.rFixed) / (b.state.rFixed + 700000 / g)) + noise(2), 0, 1023);
+        },
+        analogWrite: (pin, v) => { if (pin === 9) b.on(v / 255); },
+        digitalWrite: (pin, v) => { if (pin === 9) b.on(v ? 1 : 0); },
+        serialWrite: (t) => {
+          buf += t;
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const l of lines) { const m = /^(\d+)/.exec(l.trim()); if (m) b.plot.push(Number(m[1])); }
+        },
+      };
+    },
     callouts: [
       { anchor: 'led', x: 0.04, y: 0.17, icon: 'led', title: 'LED on pin ~9', text: 'Glows brighter the harder you press.' },
       { anchor: 'a0', x: 0.36, y: 0.12, icon: 'wave', title: 'A0 · divider midpoint', text: 'More force → lower FSR resistance → higher voltage.' },
@@ -345,6 +374,30 @@ void loop() {
       ctx.anchor('dt', wdt.mid);
       ctx.anchor('sw', wsw.mid);
       return { enc, plot, state, counter: 0, lastClk: 1 };
+    },
+    hw: (b) => {
+      // each queued click plays the quadrature sequence on CLK / DT over ~24 ms
+      const CW = [[1, 0], [0, 0], [0, 1], [1, 1]], CCW = [[0, 1], [0, 0], [1, 0], [1, 1]];
+      let cur = null, last = '';
+      const level = () => {
+        const now = performance.now();
+        if (!cur && b.state.queue.length) cur = { seq: b.state.queue.shift() > 0 ? CW : CCW, t: now };
+        if (!cur) return [1, 1];
+        const i = Math.floor((now - cur.t) / 6);
+        if (i >= 4) { cur = null; return [1, 1]; }
+        return cur.seq[i];
+      };
+      b.state.queue.length = 0;
+      return {
+        digitalRead: (pin) => {
+          if (pin === 4) return b.enc.pressed ? 0 : null;
+          if (pin !== 2 && pin !== 3) return null;
+          const [clk, dt] = level();
+          const k = `${clk}${dt}`;
+          if (k !== last) { last = k; b.plot.push(clk, dt); }
+          return pin === 2 ? clk : dt;
+        },
+      };
     },
     callouts: [
       { anchor: 'clk', x: 0.04, y: 0.17, icon: 'pins', title: 'CLK → pin 2', text: 'Pulses once for every click of the knob.' },
@@ -513,6 +566,10 @@ void loop() {
       ctx.anchor('vcc', live[0].w.mid);
       return { mpu, plot, state, gravity };
     },
+    hw: (b) => ({
+      devices: { i2c: (addr) => (addr === 0x68 ? mpu6050Device(() => ({ ...b.gravity(), noise: 70 / 16384 })) : null) },
+      serialWrite: serialPlotter((p, r) => b.plot.push(p, r)),
+    }),
     callouts: [
       { anchor: 'vcc', x: 0.04, y: 0.17, icon: 'plug', title: '5V and GND', text: 'The GY-521 has its own 3.3 V regulator.' },
       { anchor: 'sda', x: 0.36, y: 0.12, icon: 'pins', title: 'SDA → A4, SCL → A5', text: 'I²C: two shared wires for data and clock.' },
@@ -660,6 +717,20 @@ void loop() {
       ctx.anchor('leds', leds[1].led.anchor);
       ctx.anchor('res', leds[0].res.anchor);
       return { leds, rx, remote, state, on: [false, false, false] };
+    },
+    hw: (b) => {
+      b.state.events.length = 0;
+      return {
+        digitalWrite: (pin, v) => { if (pin >= 5 && pin <= 7) b.leds[pin - 5].on(v ? 1 : 0); },
+        devices: {
+          ir: (pin) => (pin === 2 ? {
+            next: () => {
+              const ev = b.state.events.shift();
+              return ev ? { address: 0x00, command: IR_CODES[ev.key] ?? 0, repeat: !!ev.repeat } : null;
+            },
+          } : null),
+        },
+      };
     },
     callouts: [
       { anchor: 'res', x: 0.04, y: 0.17, icon: 'resistor', title: 'Pins 5, 6, 7', text: 'Each through 220 Ω to an LED, cathodes in the − rail.' },
@@ -810,6 +881,16 @@ void loop() {
       ctx.anchor('servo', servo.anchor);
       ctx.anchor('sig', ws.mid);
       return { kp, servo, green, red, state, entered: '' };
+    },
+    hw: (b) => {
+      b.state.queue.length = 0;
+      return {
+        digitalWrite: (pin, v) => { if (pin === 11) b.green.on(v ? 1 : 0); if (pin === 12) b.red.on(v ? 1 : 0); },
+        devices: {
+          keypad: () => ({ getKey: () => b.state.queue.shift() ?? null }),
+          servo: (pin) => (pin === 10 ? { write: (deg) => b.servo.set(deg) } : null),
+        },
+      };
     },
     callouts: [
       { anchor: 'kp', x: 0.04, y: 0.17, icon: 'hand', title: 'Keypad', text: 'Click it and type 1 2 3 4 #.' },

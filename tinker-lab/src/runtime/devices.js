@@ -1,8 +1,8 @@
 // Ready-made virtual I²C devices that lesson HALs can return from devices.i2c(addr).
 
 /**
- * MPU-6050 accelerometer / gyro registers. `get()` returns { pitch, roll } in degrees
- * (and optional { temp } in °C). Accelerometer at ±2 g: 16384 LSB per g.
+ * MPU-6050 accelerometer / gyro registers. `get()` returns { pitch, roll } in degrees, or
+ * { ax, ay, az } in g, plus optional { temp } in °C and { noise } in g. Accelerometer at ±2 g: 16384 LSB per g.
  */
 export function mpu6050Device(get) {
   let awake = false;
@@ -11,10 +11,13 @@ export function mpu6050Device(get) {
       if (bytes[0] === 0x6b && bytes.length > 1) awake = (bytes[1] & 0x40) === 0;
     },
     read(reg, n) {
-      const { pitch = 0, roll = 0, temp = 24 } = get() ?? {};
+      const g = get() ?? {};
+      const { pitch = 0, roll = 0, temp = 24, noise = 0 } = g;
       const p = (pitch * Math.PI) / 180, r = (roll * Math.PI) / 180;
-      // gravity vector in the sensor frame (matches atan2(-ax, √(ay²+az²)) and atan2(ay, az))
-      const ax = -Math.sin(p), ay = Math.cos(p) * Math.sin(r), az = Math.cos(p) * Math.cos(r);
+      // gravity vector in the sensor frame (matches atan2(-ax, √(ay²+az²)) and atan2(ay, az)),
+      // or the caller's own { ax, ay, az } in g
+      const jitter = () => (noise ? (Math.random() - 0.5) * 2 * noise : 0);
+      const ax = (g.ax ?? -Math.sin(p)) + jitter(), ay = (g.ay ?? Math.cos(p) * Math.sin(r)) + jitter(), az = (g.az ?? Math.cos(p) * Math.cos(r)) + jitter();
       const s16 = (v) => { const x = Math.max(-32768, Math.min(32767, Math.round(v))); return [(x >> 8) & 255, x & 255]; };
       const regs = new Array(128).fill(0);
       if (awake) {
