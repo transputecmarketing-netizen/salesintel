@@ -239,10 +239,10 @@ void loop() {
       const beamA = ctx.add(makeBreakBeam(W(A_X, 1.0, -RW / 2 - 0.7), W(A_X, 1.0, RW / 2 + 0.7), { outA: v(0, 0, -1.4), outB: v(0, 0, 1.4), label: 'IR break-beam A' }));
       const beamB = ctx.add(makeBreakBeam(W(B_X, 1.0, -RW / 2 - 0.7), W(B_X, 1.0, RW / 2 + 0.7), { outA: v(0, 0, -1.4), outB: v(0, 0, 1.4), label: 'IR break-beam B' }));
       ctx.step('Speed sign: TM1637 and an 8×8 matrix on posts facing the traffic');
-      const sign = ctx.add(makeTM1637(W(17, 0, 4.6), { post: 5.5, rotY: -Math.PI / 4 }));
-      const face = ctx.add(makeLedMatrix(W(19.5, 0, 7.6), { post: 5.5, rotY: -Math.PI / 4 }));
+      const sign = ctx.add(makeTM1637(W(15, 0, 4.8), { post: 5.5, rotY: -Math.PI / 4 }));
+      const face = ctx.add(makeLedMatrix(W(21, 0, 4.8), { post: 5.5, rotY: -Math.PI / 4 }));
       ctx.step('Speed camera with a white LED flash');
-      const cam = ctx.add(makeSpeedCamera(W(27, 0, 4.4), { rotY: -Math.PI / 3 }));
+      const cam = ctx.add(makeSpeedCamera(W(28, 0, 4.6), { rotY: -Math.PI / 3 }));
       ctx.step('The loom brings every device to one header');
       const rxFoot = (bm) => bm.pin('OUT').clone();
       const hdr = ctx.add(makeHarness(v(-3.5, 0, -3.6), ['BEAM_A', 'BEAM_B', 'FLASH', 'CLK', 'DIO', 'DIN', 'CS', 'MCLK', '5V', 'GND'],

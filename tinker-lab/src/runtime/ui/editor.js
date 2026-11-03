@@ -150,10 +150,6 @@ export function createEditor(parent, { doc = '', onChange, onBreakpoints } = {})
   return {
     view,
     get text() { return view.state.doc.toString(); },
-    setText(text, { keepHistory = true } = {}) {
-      if (keepHistory) view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } });
-      else view.setState(EditorState.create({ doc: text, extensions: view.state.facet ? state.facet ? [] : [] : [] }));
-    },
     replaceAll(text) {
       view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, effects: setExec.of({ line: 0 }) });
     },
