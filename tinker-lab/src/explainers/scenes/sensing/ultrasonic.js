@@ -33,8 +33,8 @@ export default (el, api) => scene(el, api, {
     const wallG = d.g();
     d.into(wallG, () => {
       d.rect(0, 90, 34, 270, { fill: C.subtle2, fillStyle: 'hachure', hachureGap: 7, stroke: C.ink, strokeWidth: 2 });
-      d.circle(17, 70, 26, { fill: C.accent, stroke: C.ink, strokeWidth: 1.5 });
-      d.path('M10 70 h14 M17 63 v14', { stroke: '#fff', strokeWidth: 2.5, roughness: 0 });
+      d.circle(17, 70, 30, { fill: '#fff', stroke: C.ink, strokeWidth: 1.6 });
+      d.path('M5 70 h24 M5 70 l6 -5 M5 70 l6 5 M29 70 l-6 -5 M29 70 l-6 5', { stroke: C.ink, strokeWidth: 2, roughness: 0.2 });
     });
     const wallHit = d.el('rect', { x: -30, y: 40, width: 94, height: 330, fill: 'transparent' }, wallG);
     S.drag(wallHit, { move: (x) => { st.wall = clamp(x, SX + 30, SX + 200 * PX_PER_CM); st.t = 0; } });
@@ -43,7 +43,7 @@ export default (el, api) => scene(el, api, {
     const backA = arcs(S, 0, SY, { n: 4, gap: 14, spread: 0.55, color: C.accent, width: 3.5, angle: Math.PI });
     // the distance ruler
     const ruler = d.g();
-    const distT = d.text(0, 392, '', { size: 22, fill: C.ink, mono: true, weight: 500 });
+    const distT = d.text(0, 402, '', { size: 22, fill: C.ink, mono: true, weight: 500 });
     // ---------- timeline (echo pin)
     panel(S, 40, 410, 720, 80);
     d.text(56, 432, 'echo pin', { size: 14, fill: C.muted, mono: true, anchor: 'start' });
@@ -52,7 +52,7 @@ export default (el, api) => scene(el, api, {
     const slowT = d.text(744, 476, '', { size: 13, fill: C.muted, mono: true, anchor: 'end' });
     // the formula
     const mathG = d.g(S.layers.top, { opacity: 0 });
-    const mathT = d.text(470, 60, '', { size: 21, fill: C.ink, mono: true, parent: mathG });
+    const mathT = d.text(470, 28, '', { size: 21, fill: C.ink, mono: true, parent: mathG });
     // bats and a parking sensor
     const batG = d.g(S.layers.top, { opacity: 0 });
     let bat;

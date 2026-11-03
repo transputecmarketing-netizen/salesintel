@@ -23,9 +23,11 @@ export default (el, api) => scene(el, api, {
     let plane;
     d.into(aG, () => {
       d.line(40, 420, 760, 420, { stroke: C.line2, strokeWidth: 2 });
-      d.path('M80 420 L100 320 L120 420', { stroke: C.ink, strokeWidth: 2.4, fill: 'none' });
-      d.path('M70 300 Q100 250 150 260 L120 330 Z', { fill: '#fff', stroke: C.ink, strokeWidth: 2.4 });
-      d.line(110, 296, 140, 286, { stroke: C.ink, strokeWidth: 2 });
+      d.path('M70 420 L104 318 L138 420 M86 372 L122 372', { stroke: C.ink, strokeWidth: 2.4, fill: 'none' });
+      d.path('M66 232 Q 70 330 170 318 Z', { fill: C.subtle, stroke: C.ink, strokeWidth: 2.6 });
+      d.line(104, 300, 146, 270, { stroke: C.ink, strokeWidth: 2.2 });
+      d.circle(148, 270, 12, { fill: C.ink, stroke: 'none' });
+      d.text(110, 446, 'radar dish', { size: 15, fill: C.muted, mono: true });
       plane = d.g(aG);
       d.into(plane, () => {
         d.path('M-50 0 L40 -6 Q56 0 40 6 L-50 4 Z', { fill: '#fff', stroke: C.ink, strokeWidth: 2.2 });
@@ -33,7 +35,7 @@ export default (el, api) => scene(el, api, {
         d.path('M-48 0 L-56 -18 L-44 -18 L-38 -2 Z', { fill: C.accent, stroke: C.ink, strokeWidth: 1.6 });
       });
     });
-    const out = arcs(S, 148, 282, { n: 3, gap: 16, spread: 0.32, color: C.iris, angle: -0.25, parent: aG });
+    const out = arcs(S, 150, 268, { n: 3, gap: 16, spread: 0.32, color: C.iris, angle: -0.25, parent: aG });
     const back = arcs(S, 0, 0, { n: 3, gap: 16, spread: 0.35, color: C.accent, angle: Math.PI - 0.25, parent: aG });
     const aT = d.text(400, 460, '', { size: 18, fill: C.ink2, mono: true, parent: aG });
 
@@ -56,7 +58,7 @@ export default (el, api) => scene(el, api, {
         d.circle(44, 0, 16, { fill: '#c7c9cf', stroke: 'none' }); d.circle(150, 0, 16, { fill: '#c7c9cf', stroke: 'none' });
       });
       d.text(300, 196, 'sent', { size: 15, fill: C.irisInk, mono: true, anchor: 'start' });
-      d.text(300, 316, 'echo (squashed: hugely exaggerated)', { size: 15, fill: C.accentInk, mono: true, anchor: 'start' });
+      d.text(170, 340, 'echo (squashed: hugely exaggerated)', { size: 15, fill: C.accentInk, mono: true, anchor: 'start' });
     });
     const fT = d.text(400, 450, '', { size: 18, fill: C.ink, mono: true, parent: bG });
 

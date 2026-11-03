@@ -1149,7 +1149,8 @@ finally:
       }
       io.line('show(green, "amber")'); show(green, 'amber');
       io.line('time.sleep(AMBER)');
-      for (let k = 0; k < 60; k++) await queues(); // AMBER = 3 s (the sim keeps drawing boxes meanwhile)
+      const ta = now();
+      while (now() - ta < 3000) await queues(); // AMBER = 3 s (the sim keeps drawing boxes meanwhile)
       io.line('show(green, "red")'); show(green, 'red');
       await io.delay(1000);
       io.line('green, other = other, green');

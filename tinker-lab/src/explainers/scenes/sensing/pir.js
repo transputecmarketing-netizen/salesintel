@@ -70,7 +70,7 @@ export default (el, api) => scene(el, api, {
       outP = d.el('path', { fill: 'none', stroke: C.accent, 'stroke-width': 2.6 }, gG);
     });
     const hist = [], ohist = [];
-    const alarm = d.text(SX, 60, 'MOTION!', { size: 34, fill: C.accent, weight: 500, opacity: 0 });
+    const alarm = d.text(660, 440, 'MOTION!', { size: 34, fill: C.accent, weight: 500, opacity: 0 });
 
     const zoneVal = (x) => { // which zone sees the person: +1 for an A zone, −1 for B, smooth at the edges
       const a = Math.atan2(PY - SY, x - SX);

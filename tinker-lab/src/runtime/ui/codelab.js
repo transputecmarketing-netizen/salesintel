@@ -351,8 +351,7 @@ export class CodeLab {
   paused(p) {
     this.flushSerial();
     this.editor.setExecLine(p.line, { paused: true, scroll: true });
-    if (p.reason === 'breakpoint') this.h.setStatus?.(`Paused · breakpoint, line ${p.line}`);
-    else this.h.setStatus?.(`Paused · line ${p.line}`);
+    this.h.setStatus?.(`Paused · line ${p.line}`);
     this.h.audio?.noTone();
     if (!this.drawerOpen || this.tab === 'problems') this.openTab('vars');
     this.updateTools();
@@ -380,6 +379,8 @@ export class CodeLab {
     if (now - (this.lastPoll ?? 0) > 120) {
       this.lastPoll = now;
       this.pollInputs();
+      const stateEl = this.drawer.querySelector('.lab-state');
+      if (this.vm?.state === 'running') stateEl.textContent = `Running · ${(this.vm.millis() / 1000).toFixed(1)} s`;
       if (this.drawerOpen && this.tab !== 'problems' && this.vm?.state === 'running') this.renderDrawer();
       if (performance.now() - this.startedAt > 3000) this.h.onRan?.();
     }

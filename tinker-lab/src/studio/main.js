@@ -702,6 +702,7 @@ function solveFrame() {
 
 let lastWarnRender = 0, lastModules = 0, lastInspector = 0;
 stage.onTick((dt) => {
+  if (!sim.net) return; // nothing loaded yet
   hal?.tick?.();
   const res = solveFrame();
   frameResult = res;

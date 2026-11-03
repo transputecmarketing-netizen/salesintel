@@ -65,7 +65,7 @@ export const projectsPlanet = [
       ctx.step('Stand the micro wind turbine behind the bench, rotor facing the wind');
       const tur = ctx.add(makeWindTurbine(v(-3, 0, -15), { height: 11 }));
       ctx.step('Mount the cup anemometer on its own mast');
-      const an = ctx.add(makeAnemometer(v(-11, 0, -7)));
+      const an = ctx.add(makeAnemometer(v(-15, 0, -2.5)));
       ctx.step('Anemometer reed switch: SIG to GPIO27 (internal pull-up), GND to the – rail');
       const wAn = ctx.wire(an.pin('SIG'), b.pin('GPIO27'), 'yellow', { signal: 'GPIO27', lift: 2.2, dir: -1 });
       ctx.wire(an.pin('GND'), bb.hole(1, 'top-'), 'black', { signal: 'GND', lift: 2.6, dir: -1 });
@@ -75,7 +75,7 @@ export const projectsPlanet = [
       ctx.wire(b.pin('VIN'), relay.pin('VCC'), 'red', { signal: '5V', lift: 2.8 });
       ctx.wire(b.pin('GND'), relay.pin('GND'), 'black', { signal: 'GND', lift: 3.0, dir: -1 });
       ctx.step('Dump load: the brake resistor the relay switches across the generator');
-      const dump = ctx.add(makeDumpLoad(v(-15.5, 0, -9.5)));
+      const dump = ctx.add(makeDumpLoad(v(-6, 0, -9.5)));
       ctx.step('200 kΩ / 10 kΩ divider: turbine voltage into GPIO34');
       const div = ctx.add(makeVoltageSensor(v(6, 0, -9), { top: '200k', bottom: '10k', range: '0-69V' }));
       const wDiv = ctx.wire(div.pin('S'), b.pin('GPIO34'), 'green', { signal: 'GPIO34', lift: 2.0, dir: -1 });
@@ -1055,7 +1055,7 @@ void loop() {
       const lora2 = ctx.add(makeLoRa(v(24, 0, -11.5)));
       spi(lora2, base, bb2, 1, 2);
 
-      const st = { fire: 0, t: 26, h: 35, auto: false, phase: 0, running: false, packets: [], fireA: forest.fireWorld.clone() };
+      const st = { fire: 0, t: 22, h: 55, auto: false, phase: 0, running: false, packets: [], fireA: forest.fireWorld.clone() };
       const flameSeen = () => {
         if (forest.fire < 0.12) return false;
         const to = forest.fireWorld.clone().sub(post.flameEye);

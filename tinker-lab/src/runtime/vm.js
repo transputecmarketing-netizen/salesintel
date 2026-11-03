@@ -143,7 +143,7 @@ export class VM {
   frame(t) {
     if (this.state !== 'running') return;
     const real = now();
-    const dt = Math.min(100, Math.max(0, real - this.lastReal));
+    const dt = Math.min(250, Math.max(0, real - this.lastReal));
     this.lastReal = real;
     this.targetUs = Math.max(this.targetUs, this.us) + dt * 1000 * this.speed;
     if (this.targetUs - this.us > 250000 * this.speed) this.targetUs = this.us + 250000 * this.speed;
