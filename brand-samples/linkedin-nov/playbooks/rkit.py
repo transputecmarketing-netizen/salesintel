@@ -19,7 +19,7 @@ class HotBook(AIBook):
         <div style="font-weight:300;font-size:12.5pt;line-height:1.5;color:rgba(255,255,255,.82);margin-top:7mm;width:160mm">{lede}</div></div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:15mm;display:flex;justify-content:space-between;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:{GREY};border-top:.25mm solid rgba(174,186,204,.25);padding-top:4mm"><span>Transputec playbook</span><span>transputec.com</span></div>''', True, folio=False)
     def art_back(s, title, lede, cta, next_title=""):
-        nx = f'<div style="margin-top:14mm;padding-top:6mm;border-top:.25mm solid rgba(174,186,204,.25);width:150mm"><div class="lab" style="color:{BRIGHT}">Read the companion report</div><div style="font-size:11pt;margin-top:2.4mm;color:#fff">{next_title}</div></div>' if next_title else ""
+        nx = f'<div style="margin-top:14mm;padding-top:6mm;border-top:.25mm solid rgba(174,186,204,.25);width:150mm"><div class="lab" style="color:{BRIGHT}">{"Read the companion report" if "report" in next_title.lower() else "Next in the series"}</div><div style="font-size:11pt;margin-top:2.4mm;color:#fff">{next_title}</div></div>' if next_title else ""
         s._wrap(f'''<div style="position:absolute;inset:0;background:url(art2/{s.art}.jpg) 82% center/cover;opacity:.55"></div>{glow(40,-60,240,.25)}
         <img src="hl/dark/{s.fig}.png" style="position:absolute;right:-10mm;bottom:20mm;width:120mm;mix-blend-mode:screen;opacity:.6">
         <div style="position:absolute;left:18mm;right:18mm;top:44mm"><img src="{LOGO_W}" style="height:6mm">
