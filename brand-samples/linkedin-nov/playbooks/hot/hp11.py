@@ -2,9 +2,9 @@ from rkit import HotBook, S
 
 
 def build():
-    b = HotBook("The Code That Opens the Door", 11, "frames", "lockers")
+    b = HotBook("One Code, Full Access", 11, "frames", "lockers")
     b.how = "A practical guide to device code phishing in Microsoft 365: how the trick works, why MFA does not stop it, and what to do this week, this month and this quarter."
-    b.art_cover("Playbook No. 11 · Identity and phishing", "The code that", "opens the door.",
+    b.art_cover("Playbook No. 11 · Identity and phishing", "One code,", "full access.",
                 "Phishing that gets past MFA by sending staff to a genuine Microsoft sign-in page. How device code phishing works, and how to shut it down in your tenant.")
     b.contents()
 

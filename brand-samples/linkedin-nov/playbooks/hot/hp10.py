@@ -147,5 +147,5 @@ def build():
         (9, "NCSC, Managing the cyber risk of agentic AI (interim blog), 20 Aug 2026. ncsc.gov.uk/blogs/managing-the-cyber-risk-of-agentic-ai"),
         (10, "NCSC, Exercise in a Box. ncsc.gov.uk/information/exercise-in-a-box")])
     b.art_back("Ready for attacks<br>at machine speed?", "Transputec helps UK organisations map and shrink their external exposure, harden identities and supplier apps, and run round-the-clock detection with containment you have agreed in advance.", "Book an exposure review",
-        "No. 11 · The code that opens the door")
+        "No. 11 · One code, full access")
     return b
