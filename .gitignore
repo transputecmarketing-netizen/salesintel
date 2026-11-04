@@ -43,3 +43,4 @@ next-env.d.ts
 /drizzle/meta
 brand-samples/linkedin-nov/*.zip
 brand-samples/hairline/node_modules/
+brand-samples/physics9/node_modules/
