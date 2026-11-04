@@ -27,6 +27,9 @@ class HotBook(AIBook):
         <div style="font-weight:300;font-size:12.5pt;line-height:1.55;color:rgba(255,255,255,.82);margin-top:7mm;width:150mm">{lede}</div>
         <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{BLUE};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:500;font-size:10pt">{cta}</span><span style="border:.3mm solid rgba(255,255,255,.4);border-radius:99px;padding:3.6mm 7mm;font-size:10pt">transputec.com</span></div>{nx}</div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:15mm;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.7)">Transputec · Hot Topics · No. {s.num:02d}</div>''', True, folio=False)
+    def sources(s, items, note="Sources were accessed in November 2026. Where reports differ, we say so in the text. Early reporting on live incidents can change."):
+        it = "".join(f'<div style="display:grid;grid-template-columns:9mm 1fr;gap:3mm;padding:3.2mm 0;border-top:.25mm solid #E3E8F0;break-inside:avoid"><div style="font-weight:600;color:{BLUE};font-size:8.6pt">{n}</div><div style="font-size:8.2pt;line-height:1.5;color:#3A4559;word-break:break-word">{t}</div></div>' for n, t in items)
+        s._wrap(f'{s._hd("Sources", "Sources and notes", note)}<div style="margin-top:8mm;columns:2;column-gap:9mm">{it}</div>', sec="Sources")
     def figpage(s, ey, title, lede, fig, items, sec):
         it = "".join(f'<div style="padding:5mm 0;border-top:.25mm solid #E3E8F0;display:grid;grid-template-columns:10mm 1fr;gap:3mm"><div style="font-weight:700;color:{BLUE};font-size:12pt">{i+1:02d}</div><div><div style="font-weight:600;font-size:11pt">{t}</div><div class="tx" style="margin-top:1.2mm;font-size:9.6pt">{x}</div></div></div>' for i, (t, x) in enumerate(items))
         s._wrap(s._hd(ey, title, lede) + f'<img src="hl/light/{fig}.png" style="display:block;width:120mm;margin:6mm auto 2mm">' + f'<div style="border-bottom:.25mm solid #E3E8F0">{it}</div>', sec=sec)
@@ -57,9 +60,6 @@ class RBook(HotBook):
     def timeline(s, title, lede, events, sec="Timeline"):
         ev = "".join(f'<div style="display:grid;grid-template-columns:30mm 6mm 1fr;gap:4mm;padding-bottom:6mm"><div style="font-weight:600;font-size:9.4pt;color:{BLUE};text-align:right;padding-top:.4mm">{d}</div><div style="position:relative"><div style="width:4mm;height:4mm;border-radius:50%;background:#fff;border:1mm solid {BLUE};position:relative;z-index:1"></div></div><div><div style="font-weight:600;font-size:10.6pt">{t}</div><div class="tx" style="margin-top:1mm;font-size:9.4pt">{x}</div></div></div>' for d, t, x in events)
         s._wrap(s._hd("Timeline", title, lede) + f'<div style="margin-top:10mm;position:relative"><div style="position:absolute;left:38mm;top:2mm;bottom:8mm;border-left:.6mm solid #C9D3E3"></div>{ev}</div>', sec=sec)
-    def sources(s, items, note="Sources were accessed in November 2026. Where reports differ, we say so in the text. Early reporting on live incidents can change."):
-        it = "".join(f'<div style="display:grid;grid-template-columns:9mm 1fr;gap:3mm;padding:3.2mm 0;border-top:.25mm solid #E3E8F0;break-inside:avoid"><div style="font-weight:600;color:{BLUE};font-size:8.6pt">{n}</div><div style="font-size:8.2pt;line-height:1.5;color:#3A4559;word-break:break-word">{t}</div></div>' for n, t in items)
-        s._wrap(f'{s._hd("Sources", "Sources and notes", note)}<div style="margin-top:8mm;columns:2;column-gap:9mm">{it}</div>', sec="Sources")
     def rep_back(s, title, lede, cta, companion=""):
         cp = f'<div style="margin-top:14mm;padding-top:6mm;border-top:.25mm solid #E3E8F0;width:150mm"><div class="lab" style="color:{BLUE}">Put it into practice</div><div style="font-size:11pt;margin-top:2.4mm">{companion}</div></div>' if companion else ""
         s._wrap(f'''<div style="position:absolute;left:0;right:0;bottom:0;height:7mm;background:linear-gradient(90deg,{NAVY},{BLUE},{BRIGHT})"></div>
