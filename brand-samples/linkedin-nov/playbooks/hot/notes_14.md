@@ -1,0 +1,35 @@
+# Notes 14: the real business cost of a cyber incident (verified 8 Nov 2026)
+
+## Ahold Delhaize, October 2026
+- Q3 2026 release, 4 Nov 2026: "In October, a cybersecurity incident affected our business" and, on current estimates, is expected to reduce Q4 net sales by EUR 200m to 250m and underlying and IFRS operating income by EUR 75m to 100m. Incremental response and remediation costs expected to have a "marginal impact" on 2026 IFRS operating income. CEO: "we took some systems offline"; impact "mainly affected our online capabilities in the Benelux and the U.S., as well as our Benelux supply-chain operations"; "Bol was not impacted"; "most of the disruption was contained within two weeks, work continues to fully restore our normal operations". Guidance: underlying op margin "around 4.0%" -> "approaching 4.0%"; diluted underlying EPS growth mid-to-high single digit -> low single digit; FCF at least EUR 2.3bn -> around EUR 2.1bn (FCF change also reflects Serbian supplier payment rules). Q3 net sales EUR 23.1bn (+1.9% constant FX); IFRS op income EUR 976m. Release does not mention ransomware, insurance, data. https://newsroom.aholddelhaize.com/ahold-delhaize-reports-resilient-q3-2026-results-and-updates-2026-guidance-to-reflect-business-disruption-caused-by-recent-cybersecurity-incident/
+- NOTE: the "up to EUR 250m" in the brief is the top of a EUR 200m to 250m range. Written as such.
+- NL Times 4 Nov 2026: nearly two weeks Albert Heijn could not deliver online orders, stock shelves or show correct electronic shelf prices; websites, apps, loyalty programmes of AH, Etos, Gall & Gall down. https://nltimes.nl/2026/11/04/cyberattack-cost-albert-heijn-parent-ahold-delhaize-estimated-eu250-million
+- DutchNews 13 Oct 2026: systems off since Sunday afternoon (11 Oct); all five US chains incl. Stop & Shop, Food Lion websites offline Monday, online ordering suspended; Delhaize IT problems; spokesperson told Reuters no reason to link to separate French supermarket attack. https://www.dutchnews.nl/2026/10/albert-heijn-and-sister-chains-abroad-hit-by-likely-cyberattack/
+- NL Times 13 Oct 2026: several distribution centres stopped, empty shelves; no evidence of data theft so far. https://nltimes.nl/2026/10/13/albert-heijn-parent-ahold-delhaize-finds-evidence-data-theft-cyber-incident
+- IBTimes UK (Oct 2026): disruption began 11 Oct after suspicious IT activity; disclosed 12 Oct; DCs operating again by 15 Oct; website/app back 18 Oct; orders cancelled through 22 Oct; deliveries restart from 23 Oct; US sites (Stop & Shop, Giant Food, Hannaford, Food Lion) still offline 19 Oct; expert estimate "at least EUR 10m" excluding IT specialist costs. https://www.ibtimes.co.uk/albert-heijn-deliveries-resume-after-cyber-incident-1826826
+- NOS 19 Oct 2026: police report filed Sunday 18 Oct after police and prosecutors urged it; "malicious action by third parties"; reported to Dutch NCSC within 24h, required under Cybersecurity Act in force since August; no indication sensitive data stolen. https://nos.nl/artikel/2635852-moederbedrijf-albert-heijn-doet-na-ruim-een-week-aangifte-van-cyberaanval
+- NOS 4 Nov 2026: distribution centres stopped, empty shelves, sites/apps down several days. https://nos.nl/artikel/2637977-ahold-delhaize-ziet-schade-van-tientallen-miljoenen-door-cyberaanval
+- No public claim by any group found; company has not said ransomware. Left out.
+- Earlier incident: Nov 2024 US incident (Hannaford, Giant Food etc), INC Ransom claim April 2025, company confirmed files likely exfiltrated. SecurityWeek 18 Apr 2025 https://www.securityweek.com/ahold-delhaize-confirms-data-stolen-in-ransomware-attack/
+
+## Comparators
+- M&S: disclosed 22 Apr 2025; 21 May 2025 expected ~GBP 300m hit to 2025/26 operating profit before mitigation. The Register https://www.theregister.com/2025/05/21/ms_cyberattack_disruption/
+- M&S online orders paused 25 Apr, resumed 10 Jun 2025 (46 days). ESM/Reuters https://www.esmmagazine.com/technology/ms-resumes-online-orders-after-46-day-cyberattack-pause-290083
+- M&S H1 (5 Nov 2025): total direct cost ~GBP 136m (101.6m in H1 incl 83m systems response/recovery, ~34m H2), max GBP 100m insurance claim; profit down 55.4% to GBP 184.1m; UK online sales -42.9%; FHB sales -16.4%. https://theregister.com/2025/11/05/ms_pegs_cyberattack_cleanup_costs/
+- Co-op H1 (25 Sep 2025): GBP 206m revenue hit, GBP 80m profit hit; 6.5m members' data stolen; food availability reduced as systems proactively taken offline. The Record https://therecord.media/retailer-the-co-op-cyberattack-lost-revenue
+- Co-op 26 Mar 2026 (unaudited): GBP 285m direct revenue impact; GBP 107m impact to profitability "as the Group restricted its own systems"; underlying op loss includes direct cyber impact GBP 86m. https://www.co-operative.coop/media/news-releases/co-op-navigates-headwinds-and-looks-forward-with-confidence-clarity-and
+- JLR release 14 Nov 2025: announced incident 2 Sep 2025, shut down all global systems; phased restart from 8 Oct; GBP 196m cyber costs (exceptional); Q2 revenue GBP 4.9bn down 24% (also tariffs, Jaguar wind-down); GBP 500m supplier financing; GBP 1.5bn UKEF-guaranteed loan; liquidity GBP 6.6bn. https://media.jlr.com/corporate/news/2025/11/jlr-performance-impacted-challenging-quarter
+- CMC 22 Oct 2025: GBP 1.9bn UK impact, 5,000+ organisations, Category 3 of 5, "most economically damaging cyber event" in UK; majority from lost manufacturing output at JLR and suppliers; could be higher. The Record https://therecord.media/jaguar-land-rover-cyberattack-economic-impact ; Infosecurity https://www.infosecurity-magazine.com/news/jlr-hack-uk-costliest-ever-19bn/
+
+## UK context
+- NCSC 14 Oct 2025: 204 nationally significant incidents in 12 months to Aug 2025 (89 prior year), 18 highly significant, 429 total. https://www.ncsc.gov.uk/news/uk-experiencing-four-nationally-significant-cyber-attacks-weekly
+- Ministerial letter 13 Oct 2025: three asks (Cyber Governance Code; Early Warning; Cyber Essentials in supply chain); "plan and exercise how you would continue operations and rebuild following a destructive cyber incident". https://www.gov.uk/government/publications/ministerial-letter-on-cyber-security-to-leading-uk-companies/ministerial-letter-on-cyber-security
+- Cyber Security Breaches Survey 2025/26 (30 Apr 2026): 43% businesses breach/attack; board responsibility 31% (27% prior); formal IR plan 25%; insurance 47% (10% specific policy); supplier review 15%. https://www.gov.uk/government/statistics/cyber-security-breaches-survey-20252026/cyber-security-breaches-survey-20252026
+- Cyber Governance Code of Practice, 8 Apr 2025, five principles. techUK https://www.techuk.org/insights/news/government-publishes-cyber-governance-code-of-practice
+
+## Own calculations (labelled as such in text)
+- AD operating income loss / sales loss: 75/200 = 37.5%, 100/250 = 40%.
+- EUR 250m about 1.1% of Q3 net sales EUR 23.1bn.
+
+## Left out (unverified)
+- Attacker identity / ransomware for Oct 2026 AD incident; any data theft; insurance recovery for AD; Co-op insurance status; CSRB parliamentary status (no primary source reachable); share price reactions.
