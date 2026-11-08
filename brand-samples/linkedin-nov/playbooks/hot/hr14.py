@@ -85,8 +85,8 @@ def build():
     b.opener("01", "Anatomy<br>of a loss.", "What happened at Ahold Delhaize, what the company has said, and what it has not.",
              [("01", "What happened"), ("02", "The outlook, before and after"), ("03", "How downtime becomes lost sales")])
     b.essay("What happened", "Two weeks offline, one quarter dented", [
-        f"Ahold Delhaize is one of the largest food retailers in the world, with more than 9,000 supermarkets in nine countries.{C('nos4')} Its brands include Albert Heijn in the Netherlands, Delhaize in Belgium, and Food Lion, Stop & Shop, Giant Food and Hannaford in the United States.",
-        f"The trouble began on the afternoon of Sunday 11 October.{C('dn')} The company described a cybersecurity incident, brought in external experts and took certain systems offline.{C('nl13')} Within a day the websites and apps of Albert Heijn, Etos and Gall & Gall were down, and the websites of the US chains followed.",
+        f"Ahold Delhaize is one of the largest food retailers in the world, with more than 9,000 supermarkets in nine countries.{C('nos4')} Its brands include Albert Heijn in the Netherlands, Delhaize in Belgium, and Food Lion, Stop & Shop, Giant Food and Hannaford in the United States. It has been here before: a November 2024 incident disrupted some US brands, and the company later confirmed files had likely been taken.{C('sw')}",
+        f"The trouble began on the afternoon of Sunday 11 October.{C('dn')} The company described a cybersecurity incident, brought in external experts and took certain systems offline.{C('nl13')} Within a day Dutch and US websites and apps were down.",
         f"The effects reached the shop floor. Several Dutch distribution centres stopped, fresh products ran short, and for nearly two weeks electronic shelf labels could not always show correct prices.{C('nl13', 'nl4')} Stores stayed open. Distribution centres were running again by 15 October, but home deliveries did not restart until 23 October.{C('ib')}",
         f"On the nature of the attack the company has said little. It called it a malicious action by third parties and filed a police report on 18 October.{C('nos19')} It has not said whether ransomware was involved, and no group has been confirmed as responsible. In mid-October it had found no evidence of data theft.{C('nl13')} We do not speculate beyond that.",
         f"The numbers came on 4 November: €200 million to €250 million less fourth-quarter net sales, €75 million to €100 million less operating income, and a lower full-year outlook.{C('ad')} The chief executive said most of the disruption was contained within two weeks, but that work to fully restore normal operations continues.",
@@ -175,7 +175,9 @@ def build():
         ("Recovery time objective", "The maximum time a service can be down before the damage becomes unacceptable."),
         ("Waiting period", "The time an insurance policy requires before business interruption cover starts to pay.")])
     b.mark("", "Sources")
-    b.sources(C.items())
+    it = C.items()
+    b.sources(it[:12])
+    b.sources(it[12:], note="Sources continued.")
     b.rep_back("Know your number<br>before you need it.", "Transputec helps UK organisations put a price on cyber risk, test how they would keep trading through an outage and invest where it shortens downtime most.",
                "Book a cyber resilience review", "Playbook No. 14 · Count the Cost: the companion playbook")
     return b
