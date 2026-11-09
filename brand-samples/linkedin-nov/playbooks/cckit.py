@@ -149,7 +149,7 @@ class CCBook(RBook):
         r = "".join(f'''<div style="display:grid;grid-template-columns:1fr 46mm;gap:8mm;padding:5mm 0;border-top:.25mm solid rgba(255,255,255,.14)"><div style="font-size:10.4pt;line-height:1.5">{st}</div>
           <div><div style="font-family:JBM;font-size:8.4pt;color:{SKY};letter-spacing:.06em">{m}</div><div style="font-size:8.2pt;line-height:1.45;color:{MUTE};margin-top:1mm">{MODULES[m]}</div></div></div>''' for st, m in rows)
         s._wrap(s._hd("Platform", title, lede) + f'<div style="margin-top:9mm;border-bottom:.25mm solid rgba(255,255,255,.14)">{r}</div>', True, sec,
-                bg=f'<div style="position:absolute;right:-60mm;bottom:-60mm;width:170mm;opacity:.35">{dial()}</div>')
+                bg=f'<div style="position:absolute;right:-78mm;top:-78mm;width:170mm;opacity:.4">{dial()}</div>')
 
 
 class CCReport(CCBook):
