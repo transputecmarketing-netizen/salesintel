@@ -102,8 +102,8 @@ class CCBook(RBook):
     def art_back(s, title, lede, cta="Request a demo", next_title=""):
         nx = f'<div style="margin-top:12mm;padding-top:5mm;border-top:.3mm solid rgba(255,255,255,.18);width:150mm"><div style="font-family:JBM;font-size:6.8pt;letter-spacing:.16em;text-transform:uppercase;color:{SKY}">{"Read the companion report" if "report" in next_title.lower() else "Next in the series"}</div><div style="font-size:11pt;margin-top:2.4mm;color:#fff">{next_title}</div></div>' if next_title else ""
         s._wrap(f'''<div style="position:absolute;inset:0;background:radial-gradient(110% 70% at 20% 85%,#16263A 0%,{INK} 60%)"></div>
-        <div style="position:absolute;right:-40mm;bottom:-40mm;width:170mm;opacity:.9">{dial(arc=(150, 300), red=(300, 322), needle=311)}</div>
-        <div style="position:absolute;left:18mm;right:18mm;top:30mm"><img src="{LOGO}" style="height:24mm">
+        <div style="position:absolute;right:-62mm;top:-48mm;width:190mm;opacity:.9">{dial(arc=(150, 300), red=(300, 322), needle=311)}</div>
+        <div style="position:absolute;left:18mm;right:18mm;top:96mm"><img src="{LOGO}" style="height:24mm">
         <div style="font-weight:600;font-size:34pt;line-height:1.05;letter-spacing:-.04em;margin-top:16mm">{title}</div>
         <div style="font-weight:300;font-size:12.5pt;line-height:1.55;color:rgba(255,255,255,.78);margin-top:7mm;width:150mm">{lede}</div>
         <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">{cta}</span><span style="border:.3mm solid rgba(255,255,255,.4);border-radius:99px;padding:3.6mm 7mm;font-size:10pt">crises-control.com</span></div>{nx}</div>
