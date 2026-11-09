@@ -1,6 +1,6 @@
 # Crises Control industry series: brief for writers
 
-Crises Control (crises-control.com, operated by Transputec Ltd) is an incident management platform for operational resilience: mass alerting, coordination, task execution, live visibility and audit reporting. Each week it publishes, for one industry, a CRISIS PLAYBOOK and an INTELLIGENCE REPORT as downloadable lead magnets. Readers: UK (and some international) leaders in resilience, business continuity, security, operations, risk and compliance. The client has asked for stunning design and PERFECT content: accurate, specific, genuinely useful, beautifully written.
+Crises Control (crises-control.com) is an incident management platform for operational resilience: mass alerting, coordination, task execution, live visibility and audit reporting. Each week it publishes, for one industry, a CRISIS PLAYBOOK and an INTELLIGENCE REPORT as downloadable lead magnets. Readers: UK (and some international) leaders in resilience, business continuity, security, operations, risk and compliance. The client has asked for stunning design and PERFECT content: accurate, specific, genuinely useful, beautifully written.
 
 ## Files
 Working dir: /home/user/salesintel/brand-samples/linkedin-nov/playbooks
@@ -28,6 +28,7 @@ Must include: one firsthour() page (a realistic T+ timeline for this industry's 
 rep_cover, contents, mark+summary (bottom line), mark+findings (6 to 7), facts (6 sourced figures, each with S(n)), timeline (6 to 9 dated events), 2 to 3 parts (mark+opener; essays with citations, tables, figpage, compare/matrix), "What it means for UK organisations in <industry>", recommendations (steps or principles), questions for the board, glossary, mark("", "Sources") + sources() (15 to 30 sources; numbered in order of first use; two pages allowed), rep_back.
 
 ## Hard rules
+0. BRAND: these are Crises Control documents. Use ONLY the Crises Control name. Never mention Transputec anywhere (text, sources list labels, footers, sign-offs). The foreword is signed by "The Crises Control team" (the default).
 1. NO em dashes or en dashes anywhere. British spelling. Plain, confident, specific; not AI-sounding (avoid "in today's fast-paced world", "unlock", "delve", "game-changer", "revolutionise", "harness", "landscape is evolving", "navigate the complexities", "robust", "seamless").
 2. Accuracy over drama; balanced; do not name or blame individuals.
 3. Crises Control appears as a helpful partner only on the platform() page, the closing pages and lightly in CTAs; the rest is vendor-neutral, practical expertise.

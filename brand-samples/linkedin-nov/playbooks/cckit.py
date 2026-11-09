@@ -75,6 +75,7 @@ class CCBook(RBook):
         h = h.replace('<img src="../../assets/logo-blue.svg" style="height:3.4mm">', wm(INK)).replace('<img src="../../assets/logo-white.svg" style="height:3.4mm">', wm("#FFFFFF"))
         h = h.replace("../../assets/logo-white.svg", LOGO).replace("../../assets/logo-blue.svg", LOGO)
         h = h.replace("<style>", "<style>" + MONO + ".run{top:9mm!important}.run span{font-family:JBM;letter-spacing:.12em!important}.folio span:first-child{font-family:JBM;letter-spacing:.04em}", 1)
+        h = h.replace("transputec.com", "crises-control.com").replace("Transputec Ltd", "Crises Control").replace("Transputec", "Crises Control")
         open(path, "w", encoding="utf8").write(h)
 
     # ------------------------------------------------------------- covers
@@ -92,6 +93,12 @@ class CCBook(RBook):
         <div style="position:absolute;left:18mm;right:18mm;bottom:26mm">{strip()}</div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:13mm;display:flex;justify-content:space-between;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5)"><span>Prepare · Communicate · Protect</span><span>crises-control.com</span></div>''', True, folio=False)
 
+    def foreword(s, title, paras, sign="The Crises Control team"):
+        p = "".join(f'<p class="tx" style="font-size:11pt;line-height:1.7;margin-top:{0 if i==0 else 5}mm">{t}</p>' for i, t in enumerate(paras))
+        s._wrap(f'''<div class="ey">Foreword</div><h1 style="margin-top:4mm;width:170mm">{title}</h1>
+        <div style="margin-top:12mm;width:160mm">{p}</div>
+        <div style="margin-top:12mm;display:flex;gap:5mm;align-items:center"><img src="{LOGO}" style="width:16mm"><div><div style="font-weight:600;font-size:11pt">{sign}</div><div class="tx" style="font-size:9pt">Crises Control</div></div></div>''', sec="Foreword")
+
     def art_back(s, title, lede, cta="Request a demo", next_title=""):
         nx = f'<div style="margin-top:12mm;padding-top:5mm;border-top:.3mm solid rgba(255,255,255,.18);width:150mm"><div style="font-family:JBM;font-size:6.8pt;letter-spacing:.16em;text-transform:uppercase;color:{SKY}">{"Read the companion report" if "report" in next_title.lower() else "Next in the series"}</div><div style="font-size:11pt;margin-top:2.4mm;color:#fff">{next_title}</div></div>' if next_title else ""
         s._wrap(f'''<div style="position:absolute;inset:0;background:radial-gradient(110% 70% at 20% 85%,#16263A 0%,{INK} 60%)"></div>
@@ -100,7 +107,7 @@ class CCBook(RBook):
         <div style="font-weight:600;font-size:34pt;line-height:1.05;letter-spacing:-.04em;margin-top:16mm">{title}</div>
         <div style="font-weight:300;font-size:12.5pt;line-height:1.55;color:rgba(255,255,255,.78);margin-top:7mm;width:150mm">{lede}</div>
         <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">{cta}</span><span style="border:.3mm solid rgba(255,255,255,.4);border-radius:99px;padding:3.6mm 7mm;font-size:10pt">crises-control.com</span></div>{nx}</div>
-        <div style="position:absolute;left:18mm;right:18mm;bottom:14mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55)">Crises Control is operated by Transputec Ltd · {s.KIND} No. {s.num:02d}</div>''', True, folio=False)
+        <div style="position:absolute;left:18mm;right:18mm;bottom:14mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55)">Crises Control · {s.KIND} No. {s.num:02d} · crises-control.com</div>''', True, folio=False)
 
     def opener(s, num, word, line, items):
         it = "".join(f'<div style="display:flex;gap:4mm;padding:4mm 0;border-top:.3mm solid rgba(255,255,255,.14);font-size:10pt"><span style="font-family:JBM;color:{SKY};width:10mm">{a}</span><span>{b}</span></div>' for a, b in items)
@@ -166,4 +173,4 @@ class CCReport(CCBook):
         <div class="lede" style="margin-top:7mm;width:150mm">{lede}</div>
         <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">{cta}</span><span style="border:.3mm solid #C9D3E3;border-radius:99px;padding:3.6mm 7mm;font-size:10pt">crises-control.com</span></div>{cp}</div>
         <div style="position:absolute;left:0;right:0;bottom:0;height:5mm;background:linear-gradient(90deg,{NAVY_CC},{BLUE} 70%,{RED} 70%,{RED})"></div>
-        <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">Crises Control is operated by Transputec Ltd · {s.KIND} No. {s.num:02d}</div>''', folio=False)
+        <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">Crises Control · {s.KIND} No. {s.num:02d} · crises-control.com</div>''', folio=False)
