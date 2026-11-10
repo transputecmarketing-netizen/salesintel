@@ -56,3 +56,27 @@ New pages in cp06.py (no new facts or sources; all practical content is labelled
 - Part 03: downtime procedure checklist by department (table) and a downtime results and back-entry log (form; example row uses an NHS test-range number); outstanding actions tracker (day one, 16:00).
 - New Part 04 "Rehearse and review": tabletop exercise (6 injects), post-incident review template (hot debrief 48 h, structured 28 days, multi-agency 8 weeks, S8), then the existing plan, questions and checklist.
 - Platform rows rewritten in lifecycle order (SOS to CRAiG, current CRAiG capability only); "Audit & Reporting" name used. Glossary adds RACI and back-entry.
+
+## Round 3 revision (BRIEF3): international, evergreen, standard toolkit
+Titles unchanged (both already international). Playbook 45 pages, 18 sources (one page). Report 29 pages, 35 sources (two pages).
+
+Playbook restructure: foreword (UK Synnovis labelled, US Ascension, UK heat critical incident), executive summary, introduction (narrative in own words), Part 01 Declare and decide (generic incident levels table with a labelled UK row, essay with UK/US asides, TWO regions pages: emergency preparedness; cyber/data incident reporting), Part 02 Incident scenarios (severity, three-scenarios table, first hour, swimlane, usecase with Scenario 1 cyber/IT downtime, 2 mass casualty at night, 3 cooling/power failure; call-in rules; tracker), Part 03 Keep patients safe (downtime essay, downtime checklist, results log form with a non-NHS illustrative ID, partners grid, long incidents, first week/month/quarter plan), Part 04 Practical toolkit in the fixed order (RACI, decision log with O type example, escalation, six messages incl. regulator, supplier and media, exercise, PIR). General guidance now says hospital/health system, incident command, emergency operations centre, regional health authority, ambulance service, suppliers; NHS/ICB/EPRR only in UK-labelled text.
+
+New verified facts (all fetched):
+- 42 CFR 482.15 (Cornell LII): all-hazards program; plan, policies, communication plan, training and testing each reviewed "at least every 2 years"; training at least every 2 years; exercises "at least twice per year"; events and exercises analysed and documented.
+- Joint Commission revised EM standards: effective July 2022 for accredited hospitals and CAHs (ASPR TRACIE listing; jointcommission.org itself returned 403).
+- HICS Guidebook 5th edition, May 2014, California EMSA (ASPR TRACIE).
+- HIPAA 45 CFR 164.404(b): individuals within 60 calendar days of discovery; 164.408: 500+ to HHS contemporaneously.
+- NIS2 (European Commission FAQ): early warning 24 h from awareness, notification within 72 h, final report one month later; transposition 17 Oct 2024; health a high-criticality sector. EUR-Lex itself could not be fetched.
+- CER (Commission Home Affairs page): health among 11 sectors; transposition 17 Oct 2024; risk assessment 17 Jan 2026; critical entities identified by 17 Jul 2026; critical entities take resilience measures and notify incidents. A 24 h CER deadline was NOT verified, so not stated.
+- Civil Contingencies Act 2004 Sch. 1 Part 1: NHS England, ICBs, foundation trusts providing ambulance or A&E services are Category 1 responders.
+- DHA framework DHA/PHPD/MA-01 (PDF text extracted): issued 14 Nov 2024, effective 14 Jan 2025; applies to DHA-licensed facilities; annual HVA (7.x/6.2), focal point preferably from incident command, 24/7 phone and email for DHA (7.2, 7.3), EOC for hospitals (7.4), at least one exercise a year with report to DHA (7.13).
+- Abu Dhabi Media Office, 8 May 2025: ADCMC and DoH launched the Abu Dhabi Standard for Business Continuity in Healthcare Activities, applying to all healthcare providers.
+- AE/SCNS/NCEMA 7000:2021 named as the national BCMS standard (ENEC page); report only.
+- CBAHI: Cureus 2025 narrative review says accreditation is explicitly linked to hospital operating licence renewal.
+- JCI 8th edition hospital standards published 1 July 2024, effective 1 January 2025 (PR Newswire via AAP).
+- Ascension (AP, 10 May 2024): 140 hospitals in 19 states; several diverted ambulances; EHR and MyChart offline; paper records; downtime procedures "for some time".
+- Change Healthcare (Healthcare Dive, 27 Jan 2025): Feb 2024 attack; about 190 million people; providers could not get reimbursed, verify insurance or file prior authorisations.
+
+Not used / could not verify: ADHICS (DoH Abu Dhabi cyber standard) details and incident reporting windows (doh.gov.ae returned 503); Saudi MOH and NCA requirements for hospitals; GDPR text (EUR-Lex blocked); Joint Commission EM chapter detail beyond effective date; CER 24 h notification. Removed from the playbook: RCN staff survey figure, OPEL, NHS cyber operations centre line, WannaCry WhatsApp point (kept in the report), NHSBT donor appeal (kept in the report).
+Product claims changed: platform rows rewritten to CAPABILITIES.md (escalation "under the rules you configure", location "where available", Incident Manager launched by an authorised user, Audit & Reporting PDF/CSV export, CRAiG beta current capability only); exec summary support lines specific to healthcare.
