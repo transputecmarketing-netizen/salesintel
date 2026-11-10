@@ -44,27 +44,27 @@ DEMO = {
    "A concierge raises a fire alarm alert from the building, with location where available.", "Residents, the duty manager and contractors are alerted; acknowledgements come back by flat.",
    "The incident is activated, roles assigned and the evacuation decision logged.", "Welfare checks for residents with assistance needs become owned tasks.",
    "The duty manager sees buildings, residents reached and jobs outstanding.", "A defensible record of every message and decision is produced.",
-   "CRAiG helps the duty manager find information and guidance in the platform."]),
+   "CRAiG helps the duty manager find information in the platform and summarise the incident so far."]),
  "Retail": dict(title="Watch a multi-store outage<br>run end to end.", steps=[
    "A store manager reports tills down, with location where available.", "Store managers and regional managers are alerted; each store acknowledges.",
    "Head office activates the incident and assigns store, regional and head office roles.", "Fallback, customer messaging and cash procedures become tasks in every store.",
    "Head office sees which stores are trading, closed or at risk.", "The incident timeline is produced for insurers and the review.",
-   "CRAiG helps head office find information and guidance in the platform."]),
+   "CRAiG helps head office find information in the platform and summarise the incident so far."]),
  "Transport and Logistics": dict(title="Watch a hub power loss<br>run end to end.", steps=[
    "A depot supervisor reports a power loss, with location where available.", "Drivers, depots and partners are alerted; drivers acknowledge and report their status.",
    "The duty manager activates the incident and assigns network roles.", "Rerouting, customer updates and welfare checks become owned tasks.",
    "Operations sees sites affected, who has acknowledged, locations shared and actions outstanding.", "The response record is produced for partners, insurers and regulators.",
-   "CRAiG helps the duty manager find information and guidance in the platform."]),
+   "CRAiG helps the duty manager find information in the platform and summarise the incident so far."]),
  "Hospitality": dict(title="Watch a venue lockdown<br>run end to end.", steps=[
    "A door supervisor raises a lockdown alert in one touch with SOS.", "Every member of staff on shift across the venue is alerted and acknowledges.",
    "The duty manager activates the incident and assigns roles by area.", "Lockdown, guest communication and head count become owned tasks.",
    "Head office sees every venue, area secured and staff accounted for.", "A timeline of the first fifteen minutes is produced.",
-   "CRAiG helps the duty manager find information and guidance in the platform."]),
+   "CRAiG helps the duty manager find information in the platform and summarise the incident so far."]),
  "Healthcare": dict(title="Watch a pathology outage<br>run end to end.", steps=[
    "A laboratory manager reports a system outage, with location where available.", "On-call, clinical and digital leads are alerted; call-in responses come back.",
    "The incident is declared, roles assigned and partners added.", "Downtime procedures in each department become owned tasks.",
    "The incident team sees services affected, staff mobilised and actions outstanding.", "The record for assurance, regulators and the after-action review is produced.",
-   "CRAiG helps the incident team find information and guidance in the platform."]),
+   "CRAiG helps the incident team find information in the platform and summarise the incident so far."]),
 }
 
 def _chip(text, bg=None, fg="#fff", border=None):

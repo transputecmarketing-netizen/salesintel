@@ -41,7 +41,7 @@ IND = {
           "A building management system fault or tampering incident that needs contractors at 3am."]),
  "Retail": dict(
    short="retail",
-   example="When card payments fail on Black Friday, a message to stores is minute one. Trading through it depends on which stores acknowledged, who switched to the fallback, what customers were told, and an accurate picture for head office.",
+   example="When card payments fail on the busiest trading day of the year, a message to stores is minute one. Trading through it depends on which stores acknowledged, who switched to the fallback, what customers were told, and an accurate picture for head office.",
    good=["Every store manager and on-call colleague reached in minutes, on more than one channel.",
          "Store-by-store acknowledgement, with escalation when a store stays silent.",
          "Escalation from store to region to head office runs by rule.",
@@ -77,10 +77,10 @@ IND = {
          "Public protection procedures (such as those required under Martyn's Law in the UK) run as owned tasks.",
          "A live view of staff, areas secured and guests accounted for.",
          "A timeline that shows what the venue did and when, for the regulator or an inquiry.",
-         "Shift-level drills, including the festive season and the busiest nights."],
+         "Shift-level drills, including peak seasons and the busiest nights."],
    bring=["A lockdown or invacuation on your busiest night.",
           "A fire, medical emergency or spiking incident with guests to protect.",
-          "A booking or payment system outage during the festive season."]),
+          "A booking or payment system outage during peak season."]),
  "Healthcare": dict(
    short="healthcare",
    example="When pathology goes down at 08:10, the alert is minute one. Keeping patients safe depends on who declared what, which staff came in, which downtime procedures started, what partners and patients were told, and a record for the after-action review.",
@@ -94,7 +94,7 @@ IND = {
          "Exercises that include a cyber attack on clinical systems, not just a major incident."],
    bring=["A cyber attack that takes a clinical system or pathology offline.",
           "A major incident that needs staff called in out of hours.",
-          "A winter pressure or heatwave critical incident across several sites."]),
+          "A seasonal surge or heatwave critical incident across several sites."]),
 }
 
 QS = [("Does it stop at the message?", "Ask what the platform does after the alert is sent: tasks, log, escalation, recovery."),

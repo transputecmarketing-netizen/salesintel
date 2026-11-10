@@ -1,7 +1,8 @@
-# Notes 05: Hospitality (week of 7 December 2026)
+# Notes 05: Hospitality
 
-Playbook: CC-05-Playbook-Ready-for-Martyns-Law.html (39 pages after round 2 revision, 13 sources unchanged)
-Report: CC-05-Report-The-Protect-Duty.html (22 pages, 18 sources)
+Playbook: CC-05-Playbook-Every-Guest-Every-Shift.html (45 pages after round 3, 19 sources)
+Report: CC-05-Report-Safe-in-a-Crowd.html (28 pages, 23 sources)
+(Round 1 and 2 titles were "Ready for Martyn's Law" and "The Protect Duty".)
 Back pages point to each other.
 
 ## Key verified facts
@@ -71,3 +72,29 @@ New pages:
 - **Platform rows:** rewritten as 7 lifecycle outcomes (SOS to CRAiG) under the title "How the modules work together in a hospitality incident". The name "Audit & Reporting" is used. CRAiG is described only as helping users find information in the incident.
 
 Existing pages kept: the first hour (its text now covers the failure points, tracking replies by area and the hand-off to the tracker), the roles steps, the comms flow, other emergencies, messages, the festive steps, the plan, the checklist and the glossary.
+
+## Round 3 revision (BRIEF3, 10 November 2026)
+Retitled for an international audience: playbook "Every guest. Every shift." (short "Every Guest Every Shift"), report "Safe in a crowd." (short "Safe in a Crowd"). next_title and companion updated in both files. Old HTML and PDF deleted.
+
+Playbook restructured to the standard order: foreword, executive summary, introduction (narrative in the intro lede), Part 01 "Know your duties" (two regions pages, UK Martyn's Law essay labelled United Kingdom, four procedures, other emergencies), Part 02 "Incident scenarios" (severity, first hour, three-venue swimlane, three scenarios, tracker), Part 03 "Respond and recover" (roles, comms flow, guest communication table, peak readiness, two templates, plan), Part 04 Practical toolkit (index, readiness, RACI shift matrix, decision log, escalation, messages incl. a regulator/licensing authority template, exercise, PIR), questions/checklist/glossary, platform, sources. Seasonal (December/Christmas/festive) framing removed; "999" replaced by "emergency services".
+
+### New regional facts verified (primary sources)
+- **US, OSHA 29 CFR 1910.38** (osha.gov): EAP required where an OSHA standard requires one; written, oral allowed with 10 or fewer employees; minimum elements (reporting, evacuation, critical operations, accounting for employees, rescue/medical, contacts); alarm system; review on assignment, role change, plan change.
+- **US, CISA "Mass Gatherings: Security Awareness for Soft Targets and Crowded Places" action guide** (PDF read in full): Connect, Plan, Train, Report; PA scripts; train staff on "Run, Hide, Fight". Undated; guidance.
+- **US, SAFETY Act** (safetyact.gov benefits page): liability protections for products, services, software; Designation caps liability at insurance set by DHS; Certification adds Government Contractor Defense. safetyact.gov listing shows stadium and arena operators among approvals. Phrased as "by application".
+- **EU, SWD(2019) 140 final, 20 March 2019** (full text read): implements the October 2017 Action Plan COM(2017) 612 (18.10.2017); Operators Forum included hospitality; good practices: vulnerability assessments, security plan, appoint and train a security lead plus backup, crisis management plan "to alert, confine and/or evacuate" with spokesperson and key messages, smartphone apps for staff communication. Described as reference good practices (guidance).
+- **EU, OSH Framework Directive 89/391/EEC** (EU-OSHA summary page): employers take necessary measures for first aid, fire-fighting, evacuation of workers. EUR-Lex itself would not load from this environment.
+- **UK, MHSWR 1999 reg 8** (legislation.gov.uk): procedures for serious and imminent danger; nominate competent persons for evacuation.
+- **Dubai, SIRA Administrative Resolution No. 13 of 2025, Preventive Systems Manual** (issued 14 April 2025, in force on publication): luxury hotels need a surveillance room with all means of communication with guards, hotel officials, emergency, rescue and ambulance services; 24-hour guards per risk analysis; security operations manager or supervisor around the clock. (Earlier SIRA hotel requirements v4.0, 14 Feb 2022, similar.)
+- **Saudi Arabia, Ministry of Tourism, Tourism Accommodation Facility Regulations services guide (V.1 2022)**: licence requires a valid Civil Defense permit and connection to the Shomoos platform.
+- **UAE, AE/SCNS/NCEMA 7000:2021** (ENEC-hosted copy): "applicable to all UAE entities"; organisations must endeavour to continue essential operations within predefined minimum levels.
+
+### Not used / could not verify
+- A current, dated CISA soft targets resource guide (cisa.gov topic page returned 403/404); used the action guide instead.
+- Abu Dhabi and Qatar hotel security or civil defence rules: not verified, not stated.
+- Saudi Civil Defense detailed safety criteria (evacuation plans etc.): not found in primary source.
+- Whether hotels hold SAFETY Act approvals: not stated.
+
+### Kit notes
+- Contents page: 11 standard entries overflow with the kit's fixed 8mm row padding. Worked around with a scoped <style> in b.how (cp05 only); remove if the kit is fixed.
+- ccextra IND["Hospitality"] still says "including the festive season" and "during the festive season" (evergreen); ccprac DEMO line "CRAiG helps the duty manager find information and guidance in the platform" (check "guidance" against CAPABILITIES).
