@@ -2,7 +2,7 @@
 Content is written once here, with industry-specific lines in IND, and inserted by CCBook.build."""
 
 DIMS = [("Alert", "Can you reach the right people on more than one channel within minutes, day or night?"),
-        ("Acknowledge", "Do you know who has seen the alert, and does silence trigger escalation automatically?"),
+        ("Acknowledge", "Do you know who has seen the alert, and does silence trigger escalation by rule?"),
         ("Escalate", "Are escalation paths set by role and time, not by whoever remembers who to call?"),
         ("Coordinate", "Is there one shared workspace and log for the incident, not scattered calls, chats and inboxes?"),
         ("Execute", "Are your procedures turned into owned tasks with deadlines that someone can track?"),
@@ -30,7 +30,7 @@ IND = {
    example="When a fire alarm sounds in a high-rise at 02:10, a text to residents is minute one. Keeping everyone safe depends on which residents need help, which contractor is on the way, who changed the evacuation strategy, and a record you can stand behind later.",
    good=["Residents, staff and contractors reached on several channels, including people without smartphones.",
          "Acknowledgement tracked by block and by flat; vulnerable residents followed up first.",
-         "Out-of-hours escalation to the duty manager and contractor is automatic.",
+         "Out-of-hours escalation to the duty manager and contractor follows rules set in advance.",
          "One log for the incident, shared by housing, repairs, the fire service liaison and communications.",
          "Awaab's Law and fire safety actions run as tasks with owners and deadlines.",
          "A live view of buildings, residents contacted and jobs outstanding.",
@@ -74,7 +74,7 @@ IND = {
          "Acknowledgement from each area of the venue, with escalation when one stays silent.",
          "One duty manager can start evacuation, invacuation or lockdown for the whole site.",
          "One incident log shared by the duty manager, security, head office and emergency services liaison.",
-         "Public protection procedures under Martyn's Law run as owned tasks.",
+         "Public protection procedures (such as those required under Martyn's Law in the UK) run as owned tasks.",
          "A live view of staff, areas secured and guests accounted for.",
          "A timeline that shows what the venue did and when, for the regulator or an inquiry.",
          "Shift-level drills, including the festive season and the busiest nights."],
@@ -86,11 +86,11 @@ IND = {
    example="When pathology goes down at 08:10, the alert is minute one. Keeping patients safe depends on who declared what, which staff came in, which downtime procedures started, what partners and patients were told, and a record for the after-action review.",
    good=["Clinical, on-call and support staff reached on several channels, at any hour.",
          "Call-in responses tracked, with escalation when key roles stay silent.",
-         "Declaration and escalation follow the EPRR framework by role.",
+         "Declaration and escalation follow your emergency preparedness framework by role.",
          "One incident log shared by the incident team, clinical leads, partners and communications.",
          "Downtime procedures run as owned tasks in every affected department.",
          "A live view of staff mobilised, services affected and actions outstanding.",
-         "A timeline that supports EPRR assurance, the ICO and the after-action review.",
+         "A timeline that supports assurance, data protection regulators and the after-action review.",
          "Exercises that include a cyber attack on clinical systems, not just a major incident."],
    bring=["A cyber attack that takes a clinical system or pathology offline.",
           "A major incident that needs staff called in out of hours.",
@@ -98,7 +98,7 @@ IND = {
 }
 
 QS = [("Does it stop at the message?", "Ask what the platform does after the alert is sent: tasks, log, escalation, recovery."),
-      ("Can it prove who acknowledged?", "Delivery is not acknowledgement. Ask how silence is detected and escalated."),
+      ("Can it prove who acknowledged?", "Delivery is not acknowledgement. Ask how silence is spotted and escalated, and what you must configure."),
       ("Does it run your procedures?", "Ask whether your plans become owned tasks with deadlines, or stay as documents."),
       ("Is there one shared picture?", "Ask what leaders see live, and whether it needs someone to update a spreadsheet."),
       ("Does it work when your systems do not?", "Ask how teams coordinate if email, chat or your network is down."),
@@ -160,10 +160,18 @@ def add_pages(b):
     import ccuse
     uc = ccuse.page(b)
     if uc: P.insert(1, uc)
+    if not any(p[2] == "Where Crises Control fits" for p in b.pages):
+        import ccprac as _cp; _n = len(b.pages); _cp.capabilities_page(b, False, "What is standard, what is configured"); cap = b.pages.pop()
+        P.insert(1, dict(body=cap[0], dark=False, sec=cap[2]))
+    rd = next((i for i, pg in enumerate(b.pages) if "__READINESS__" in pg[0]), None)
+    if rd is not None:
+        sc = P.pop(2 if uc else 1)
+        body = sc["body"].replace('<div class="ey">Readiness assessment</div>', '<div class="ey">Toolkit 01 · Readiness assessment</div>', 1)
+        b.pages[rd] = (b.pages[rd][0].replace("__READINESS__", body),) + tuple(b.pages[rd][1:])
     plat = [i for i, p in enumerate(b.pages) if p[2] == "Where Crises Control fits"]
     src = next((t for t in b.toc if t[1] == "Sources"), None)
     if plat:
-        ins(b, plat[0], [P[0]]); ins(b, plat[-1] + 2, P[1:], ("", "Use cases, readiness assessment and buyer's guide"))
+        ins(b, plat[0], [P[0]]); ins(b, plat[-1] + 2, P[1:], ("", "Use cases and buyer's guide" if rd is not None else "Use cases, readiness assessment and buyer's guide"))
     else:
         at = src[2] - 1 if src else len(b.pages) - 1
         ins(b, at, P, ("", "Coordination, use cases, readiness and buyer's guide"))

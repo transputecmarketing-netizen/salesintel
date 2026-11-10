@@ -11,13 +11,13 @@ LINE, LINE_D = "#3A3A3A26", "rgba(247,246,248,.16)"
 MONO = "font-family:'Roboto Mono'"
 
 # Framework, Section 7: one connected lifecycle. Verbs from Section 11 (product structure).
-LIFE = [("SOS", "Escalate", "Frontline staff report an incident in one touch from a mobile device."),
+LIFE = [("SOS", "Escalate", "Frontline staff raise an alert from the mobile app, with location where available."),
         ("Ping", "Start", "Alerting and activation: reach people and collect acknowledgements and responses."),
-        ("Incident Manager", "Coordinate", "Activate the incident, assign roles, control communication and keep the timeline."),
+        ("Incident Manager", "Coordinate", "Authorised users activate the incident and its response plan, assign roles, control communication and keep the timeline."),
         ("Task Manager", "Execute", "Assign actions, track completion and escalate what stalls, with clear accountability."),
         ("Control Centre", "Operate", "Real-time view of incidents, timelines, task status and assets."),
         ("Audit & Reporting", "Prove", "Incident records, response analysis and task accountability, ready to report."),
-        ("CRAiG", "Assist", "AI assistant that helps users find information and work through the incident.")]
+        ("CRAiG", "Assist", "AI assistant (beta) that answers questions and summarises incident data. People make every decision.")]
 ALIAS = {"Audit Trail": "Audit & Reporting"}
 PILLARS = [("Alerting and activation", "Reach the right people immediately."),
            ("Operational coordination", "Structure communication and response activities."),
@@ -37,8 +37,8 @@ LANDING = {"Financial Services and Insurance": "https://www.crises-control.com/o
 DEMO = {
  "Financial Services and Insurance": dict(title="Watch a payments outage<br>run end to end.", steps=[
    "A branch colleague reports customers cannot pay by card.", "The incident team and executives are alerted; acknowledgements come back by role.",
-   "Card payments is declared against its impact tolerance; roles and the bridge are set.", "Workarounds, customer messages and the supervisor notification become owned tasks.",
-   "The executive watches services, tasks and time remaining against tolerance.", "The timeline for the self-assessment and the regulator is produced.",
+   "Card payments is declared against its impact tolerance; roles are assigned and the incident workspace opens.", "Workarounds, customer messages and the supervisor notification become owned tasks.",
+   "The executive watches services, tasks and time remaining against tolerance.", "The timeline for the board, auditors and the regulator is produced.",
    "CRAiG helps the incident lead find information and work through the platform as the incident runs."]),
  "Property, Housing and Facilities": dict(title="Watch a night-time fire<br>run end to end.", steps=[
    "A concierge raises a fire alarm alert from the building, with location where supported.", "Residents, the duty manager and contractors are alerted; acknowledgements come back by flat.",
@@ -56,14 +56,14 @@ DEMO = {
    "Operations sees sites, drivers, vehicles and actions outstanding.", "The response record is produced for partners, insurers and regulators.",
    "CRAiG helps the duty manager find information and guidance in the platform."]),
  "Hospitality": dict(title="Watch a venue lockdown<br>run end to end.", steps=[
-   "A door supervisor raises a lockdown alert in one touch.", "Every member of staff on shift across the venue is alerted and acknowledges.",
+   "A door supervisor raises a lockdown alert in one touch with SOS.", "Every member of staff on shift across the venue is alerted and acknowledges.",
    "The duty manager activates the incident and assigns roles by area.", "Lockdown, guest communication and head count become owned tasks.",
    "Head office sees every venue, area secured and staff accounted for.", "A timeline of the first fifteen minutes is produced.",
    "CRAiG helps the duty manager find information and guidance in the platform."]),
  "Healthcare": dict(title="Watch a pathology outage<br>run end to end.", steps=[
    "A laboratory manager reports a system outage, with location where supported.", "On-call, clinical and digital leads are alerted; call-in responses come back.",
    "The incident is declared, roles assigned and partners added.", "Downtime procedures in each department become owned tasks.",
-   "The incident team sees services affected, staff mobilised and actions outstanding.", "The record for EPRR assurance and the after-action review is produced.",
+   "The incident team sees services affected, staff mobilised and actions outstanding.", "The record for assurance, regulators and the after-action review is produced.",
    "CRAiG helps the incident team find information and guidance in the platform."]),
 }
 
@@ -188,7 +188,7 @@ def platform(s, title, lede, rows, sec="Where Crises Control fits"):
     flow = f'<div style="position:relative;display:flex;margin-top:9mm"><div style="position:absolute;left:7%;right:7%;top:7.5mm;border-top:.4mm solid rgba(22,161,237,.5)"></div>{nodes}</div>'
     pil = "".join(f'<div style="flex:1;border-top:.6mm solid {SKY};padding-top:3mm"><div style="font-weight:700;font-size:10.4pt">{a}</div><div style="font-size:8.6pt;line-height:1.45;color:rgba(247,246,248,.75);margin-top:1.4mm">{b}</div></div>' for a, b in PILLARS)
     s._wrap(f'''<div class="ey">The platform</div><h1 style="margin-top:4mm;width:172mm;font-size:28pt">One connected platform,<br><span style="color:{SKY}">from first alert to final report.</span></h1>
-      <div style="margin-top:5mm;width:168mm;font-weight:300;font-size:11pt;line-height:1.55;color:rgba(247,246,248,.82)">{POSITIONING} Each module does one job; the value comes from how they work together across the incident.</div>
+      <div style="margin-top:5mm;width:168mm;font-weight:300;font-size:11pt;line-height:1.55;color:rgba(247,246,248,.82)"><b style="color:#fff">Most organisations can send alerts. Few can manage incidents end-to-end.</b> {POSITIONING} Each module of this incident management software does one job; the value comes from how they work together across the incident.</div>
       {flow}
       <div style="margin-top:11mm;font-family:'Roboto Mono';font-size:7pt;letter-spacing:.16em;color:{RED};text-transform:uppercase">The outcomes</div>
       <div style="display:flex;gap:5mm;margin-top:3mm">{pil}</div>
@@ -221,7 +221,7 @@ def cta_page(s, dark=True, next_title=""):
       <div style="position:absolute;left:18mm;right:18mm;top:42mm">
         <div style="{MONO};font-size:7.4pt;letter-spacing:.16em;color:{RED};text-transform:uppercase">Book your {s.industry.lower()} platform demonstration</div>
         <div style="font-weight:700;font-size:32pt;line-height:1.04;letter-spacing:-.035em;margin-top:4mm;color:{fg}">{d["title"]}</div>
-        <div style="font-weight:300;font-size:11pt;line-height:1.55;color:{sub};margin-top:5mm;width:168mm">A live, 30-minute demonstration built around a {s.industry.lower()} incident. You will see one incident move through the whole platform, not a tour of features, and you can bring your own scenario.</div>
+        <div style="font-weight:300;font-size:11pt;line-height:1.55;color:{sub};margin-top:5mm;width:168mm"><b style="color:{fg}">Most organisations can send alerts. Few can manage incidents end-to-end.</b> In a live, 30-minute demonstration built around a {s.industry.lower()} incident, you will see how our incident management software, an Operational Incident Coordination Platform, takes one incident from first alert to final report. Bring your own scenario.</div>
         <div style="{MONO};font-size:7pt;letter-spacing:.16em;color:{SKY if dark else BLUE};text-transform:uppercase;margin-top:8mm">What you will see</div>
         <div style="margin-top:2mm;border-bottom:.25mm solid {line}">{steps}</div>
         <div style="margin-top:8mm;display:grid;grid-template-columns:1fr auto;gap:8mm;align-items:center;border-radius:4mm;padding:6mm 7mm;background:{'rgba(247,246,248,.06)' if dark else LIGHT};border:.3mm solid {line}">
@@ -229,7 +229,7 @@ def cta_page(s, dark=True, next_title=""):
             <div style="margin-top:4mm;font-size:9pt;line-height:1.7;color:{fg}"><a href="{url}" style="color:{SKY if dark else BLUE};text-decoration:none;{MONO};font-size:8pt">{short}</a><br><span style="{MONO};font-size:8pt;color:{sub}">+44 (0) 20 8584 1385 · contactus@crises-control.com</span></div></div>
           <div style="text-align:center"><a href="{url}">{_qr(url, 92)}</a><div style="{MONO};font-size:6.4pt;letter-spacing:.1em;color:{sub};margin-top:1.6mm">SCAN TO BOOK</div></div></div>
         {nx}</div>
-      <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;display:flex;justify-content:space-between;{MONO};font-size:6.6pt;letter-spacing:.14em;text-transform:uppercase;color:{sub}"><span>Crises Control · Operational Incident Coordination Platform</span><span>www.crises-control.com</span></div>'''
+      <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;display:flex;justify-content:space-between;{MONO};font-size:6.6pt;letter-spacing:.14em;text-transform:uppercase;color:{sub}"><span>Crises Control · Operational Incident Coordination Platform</span><span>Last reviewed: {REVIEWED}</span></div>'''
     bg = (f'<div style="position:absolute;inset:0;background:radial-gradient(110% 70% at 85% 10%,#0A3165 0%,{INK} 60%)"></div><div style="position:absolute;right:-96mm;bottom:-96mm;width:170mm;opacity:.35">{dial()}</div>' if dark
           else f'<div style="position:absolute;right:-96mm;bottom:-90mm;width:170mm;opacity:.5">{dial(dark=False)}</div><div style="position:absolute;left:0;right:0;bottom:0;height:5mm;background:linear-gradient(90deg,#0A3165,{BLUE} 70%,{RED} 70%,{RED})"></div>')
     s._wrap(bg + body, dark, folio=False)
@@ -239,3 +239,131 @@ def attach(cls):
     for f in (raci, escalation, swimlane, tracker, exercise, pir, form, depmap, platform):
         setattr(cls, f.__name__, f)
     cls.art_back = lambda s, title="", lede="", cta="", next_title="": cta_page(s, True, next_title)
+
+
+# ================================================================ round 3: standard toolkit, executive summary, regional notes
+REVIEWED = "November 2026"
+NARRATIVE = "Most organisations can send alerts. Few can manage incidents end-to-end."
+CATEGORY = "Operational Incident Coordination Platform"
+TOOLKIT = [("readiness", "Readiness assessment", "Score eight areas from 0 to 3 and find your weakest link."),
+           ("raci", "Roles and responsibilities matrix", "Who is responsible, accountable, consulted and informed for each activity."),
+           ("decisionlog", "Incident decision log", "Record every material decision, who made it and why, as it happens."),
+           ("escalation", "Escalation workflow", "Four levels, their triggers, who is alerted and who decides."),
+           ("messages", "Communication templates", "Ready-to-send messages for staff, customers, regulators, partners and media."),
+           ("exercise", "Tabletop exercise", "A ready-to-run scenario with timed injects and questions for the room."),
+           ("pir", "Post-incident review template", "Eight prompts that turn an incident into lessons and owned actions.")]
+TK = {k: (i + 1, n) for i, (k, n, _) in enumerate(TOOLKIT)}
+
+def _tk_mark(key): return f"<!--TK:{key}-->"
+
+def _toolify(fn, key):
+    import inspect, functools
+    sig = inspect.signature(fn)
+    @functools.wraps(fn)
+    def w(s, *a, tool=False, **k):
+        if tool:
+            ba = sig.bind(s, *a, **k); n, name = TK[key]
+            ba.arguments["ey"] = f"Toolkit {n:02d} · {name}"; ba.arguments["sec"] = "Practical toolkit"
+            r = fn(*ba.args, **ba.kwargs)
+            body, *rest = s.pages[-1]; s.pages[-1] = (_tk_mark(key) + body, *rest); return r
+        return fn(s, *a, **k)
+    return w
+
+def decisionlog(s, title, lede, example, sec="Practical toolkit", rows=12, note="", tool=True):
+    """Standard incident decision log. example: (time, decision, options considered, decided by, rationale, evidence)."""
+    cols = [("Time", 0.7), ("Decision", 2), ("Options considered", 1.8), ("Decided by", 1.3), ("Rationale", 1.8), ("Evidence or reference", 1.2)]
+    n, name = TK["decisionlog"]
+    form(s, f"Toolkit {n:02d} · {name}" if tool else name, title, lede, cols, sec if tool else name, rows=rows, example=example,
+         note=note or "Log decisions as they are made, not afterwards. Include decisions not to act. The log is the backbone of the timeline your board, auditors and regulators will ask for.")
+    if tool: body, *rest = s.pages[-1]; s.pages[-1] = (_tk_mark("decisionlog") + body, *rest)
+
+def readiness(s):
+    """Toolkit 01: the readiness assessment, filled in at build time by ccextra (industry wording)."""
+    s._wrap(_tk_mark("readiness") + "__READINESS__", sec="Practical toolkit")
+
+def toolkit_index(s, title="Seven tools for your next incident", lede=None):
+    """Index page for the Practical toolkit part. Page numbers are filled in at render time."""
+    s._tki = (title, lede or "The same seven tools appear in every Crises Control playbook, with examples for your industry. Copy them, adapt them and rehearse with them.")
+    s._wrap("__TOOLKIT__", sec="Practical toolkit")
+
+def toolkit_body(s, pages_offset):
+    title, lede = s._tki
+    pos = {}
+    for i, p in enumerate(s.pages):
+        for k in TK:
+            if p[0].startswith(_tk_mark(k)) and k not in pos: pos[k] = i + 1 + pages_offset
+    rows = "".join(f'''<div style="display:grid;grid-template-columns:16mm 1fr 14mm;gap:4mm;padding:4.4mm 0;border-top:.25mm solid {LINE};align-items:center">
+        <div style="{MONO};font-size:15pt;color:{RED}">{i+1:02d}</div><div><div style="font-weight:700;font-size:12pt;color:{INK}">{n}</div><div style="font-size:9pt;line-height:1.4;color:{GREY};margin-top:.8mm">{d}</div></div>
+        <div style="{MONO};font-size:9pt;color:{BLUE};text-align:right">{pos.get(k, 0):02d}</div></div>''' for i, (k, n, d) in enumerate(TOOLKIT))
+    return s._hd("Practical toolkit", title, lede) + f'<div style="margin-top:8mm;border-bottom:.25mm solid {LINE}">{rows}</div>' + \
+        f'<div style="margin-top:6mm;padding:4mm 5mm;border-left:1mm solid {BLUE};background:{LIGHT};font-size:9pt;line-height:1.5;color:{INK}">Every tool works on paper. In Crises Control the same roles, escalation rules, templates and logs can be set up in the platform, so they run during the incident and leave a record afterwards.</div>'
+
+def execsum(s, title, challenges, risks, recs, good, support=None, sec="Executive summary"):
+    """One-page executive summary. Each argument is a list of short points (under ~22 words each)."""
+    support = support or [f"Crises Control is an {CATEGORY}: alerting, coordination, task execution, live visibility and audit reporting in one place.",
+                          "It supports your plan; it does not replace it. Roles, escalation rules and templates are configured to match how you work."]
+    def blk(n, h, pts, c=BLUE):
+        li = "".join(f'<div style="display:grid;grid-template-columns:3.2mm 1fr;gap:2mm;padding:1.2mm 0;font-size:8.7pt;line-height:1.42;color:{INK}"><span style="width:1.6mm;height:1.6mm;border-radius:50%;background:{c};margin-top:1.6mm"></span><span>{p}</span></div>' for p in pts)
+        return f'<div style="break-inside:avoid;margin-bottom:5mm"><div style="{MONO};font-size:6.8pt;letter-spacing:.14em;color:{c};text-transform:uppercase">{n} · {h}</div><div style="border-top:.3mm solid {c};margin-top:1.6mm;padding-top:1mm">{li}</div></div>'
+    s._wrap(f'''<div class="ey">Executive summary</div><h2 style="margin-top:4mm;width:174mm;font-size:21pt">{title}</h2>
+      <div style="margin-top:6mm;display:grid;grid-template-columns:1fr 1fr;gap:0 8mm">
+        <div>{blk("01", "The operational challenge", challenges)}{blk("02", "Incidents and risks to prepare for", risks, RED)}</div>
+        <div>{blk("03", "Key recommendations", recs)}{blk("04", "What effective coordination looks like", good, NAVY2)}</div></div>
+      <div style="margin-top:1mm;border-radius:3mm;background:{INK};color:#fff;padding:5mm 6mm"><div style="{MONO};font-size:6.8pt;letter-spacing:.14em;color:{SKY};text-transform:uppercase">05 · How Crises Control supports the response</div>
+        <div style="font-weight:700;font-size:11.5pt;margin-top:2mm">{NARRATIVE}</div>
+        {"".join(f'<div style="font-size:8.7pt;line-height:1.45;color:rgba(247,246,248,.85);margin-top:1.6mm">{p}</div>' for p in support)}</div>''', sec=sec)
+
+REGION_COL = {"United Kingdom": BLUE, "United States": NAVY2, "European Union": SKY, "Middle East": RED}
+def regions(s, ey, title, lede, items, sec, note=""):
+    """Regional sidebar page. items: (region, what applies, practical note) for United Kingdom, United States, European Union, Middle East.
+    Cite with S(n) inside the text. Keep each 'what applies' under ~45 words."""
+    cards = "".join(f'''<div style="border:.3mm solid {LINE};border-top:1.4mm solid {REGION_COL.get(r.split(' (')[0], BLUE)};border-radius:2.4mm;padding:3.6mm 4.4mm;break-inside:avoid;margin-bottom:4mm;background:#fff">
+        <div style="{MONO};font-size:6.8pt;letter-spacing:.14em;color:{REGION_COL.get(r.split(' (')[0], BLUE)};text-transform:uppercase">Regional note · {r}</div>
+        <div style="font-size:9pt;line-height:1.45;color:{INK};margin-top:2mm">{w}</div>
+        <div style="font-size:8.3pt;line-height:1.4;color:{GREY};margin-top:2mm"><span style="{MONO};font-size:6.4pt;letter-spacing:.1em;color:{BLUE}">IN PRACTICE </span>{p}</div></div>''' for r, w, p in items)
+    q = note or "A summary for orientation, not legal advice. Requirements depend on sector, size, licence and jurisdiction, and change over time. Confirm the current text with your legal and compliance teams."
+    s._wrap(s._hd(ey, title, lede) + f'<div style="margin-top:6mm;columns:2;column-gap:4mm">{cards}</div><div style="margin-top:1mm;font-size:7.8pt;line-height:1.45;color:{GREY}">{q}</div>', sec=sec)
+
+
+def attach3(cls):
+    for key, fn in (("raci", cls.raci), ("escalation", cls.escalation), ("messages", cls.messages), ("exercise", cls.exercise), ("pir", cls.pir)):
+        setattr(cls, key, _toolify(getattr(fn, "__wrapped__", fn), key))
+    cls.platform = platform
+    for f in (decisionlog, readiness, toolkit_index, execsum, regions):
+        setattr(cls, f.__name__, f)
+
+
+CAPS = [("Standard", "Included in how each module works.", [
+            "SOS press-and-hold alert from the mobile app, raising an incident and sharing location where available",
+            "Ping alerts by push, SMS, voice, email and desktop, with one-tap acknowledgement",
+            "Incident Manager workspace, roles and a single communication log",
+            "Task Manager tasks with owners and deadlines when a plan is activated",
+            "Control Centre live view of status, acknowledgements, tasks and locations",
+            "Audit & Reporting: timestamped records, exportable as PDF or CSV",
+            "CRAiG (beta): answers questions and summarises your incident data within each user's permissions"]),
+        ("Configured", "Set up by your team to match your plans.", [
+            "Response plans, task lists and message templates per incident type",
+            "Groups, sites and audiences to target",
+            "Escalation rules and timings when people do not respond",
+            "Cascading from one channel to the next",
+            "Response options people can choose when they acknowledge"]),
+        ("Integrations", "Connected to your other systems, where configured.", [
+            "Directory sync with Microsoft Entra ID, SCIM or scheduled file import",
+            "Single sign-on with Entra ID, Google Workspace or Okta",
+            "The Microsoft Teams app, enabled by your administrator",
+            "Triggers from monitoring or other systems, set up as an integration project"])]
+
+def capabilities_page(s, dark=True, sec="Where Crises Control fits"):
+    fg, sub, line = ("#fff", "rgba(247,246,248,.78)", LINE_D) if dark else (INK, GREY, LINE)
+    cols = "".join(f'''<div style="flex:1;border-top:.8mm solid {[SKY, BLUE, RED][i]};padding-top:3mm"><div style="{MONO};font-size:7pt;letter-spacing:.14em;color:{[SKY, SKY if dark else BLUE, RED][i]};text-transform:uppercase">{h}</div>
+        <div style="font-size:8.4pt;line-height:1.4;color:{sub};margin-top:1.4mm">{d}</div>
+        {"".join(f'<div style="font-size:8.6pt;line-height:1.42;color:{fg};padding:2.2mm 0;border-top:.25mm solid {line}">{x}</div>' for x in xs)}</div>''' for i, (h, d, xs) in enumerate(CAPS))
+    s._wrap(f'''<div class="ey">What is standard, what is configured</div><h2 style="margin-top:4mm;width:172mm">Clear about what the platform does.</h2>
+      <div style="margin-top:5mm;width:168mm;font-weight:300;font-size:10.6pt;line-height:1.55;color:{sub}">Some capabilities work as standard. Others depend on how your team sets up plans, groups and rules, or on connecting your own systems. Your demonstration and implementation plan confirm what applies to you.</div>
+      <div style="display:flex;gap:6mm;margin-top:9mm">{cols}</div>
+      <div style="margin-top:8mm;padding:4mm 5mm;border-left:1mm solid {RED};background:{'rgba(247,246,248,.05)' if dark else LIGHT};font-size:9pt;line-height:1.5;color:{fg}">Crises Control does not detect incidents on its own. Incidents are raised by people, through SOS, the app or the web, or by connected systems where an integration has been configured. From that point the platform coordinates the response.</div>''',
+      dark, sec, bg=(f'<div style="position:absolute;right:-96mm;top:-96mm;width:170mm;opacity:.3">{__import__("cckit").dial()}</div>' if dark else ""))
+
+_platform2 = platform
+def platform(s, title, lede, rows, sec="Where Crises Control fits"):
+    _platform2(s, title, lede, rows, sec); capabilities_page(s, True, sec)

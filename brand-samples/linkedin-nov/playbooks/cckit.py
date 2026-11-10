@@ -19,13 +19,13 @@ CC = "../../crises-control/assets/"
 LOGO = CC + "cc-logo.svg"
 MONO = "@font-face{font-family:'Roboto Mono';font-weight:400;src:url(../../crises-control/assets/fonts/robotomono-400.woff2)}@font-face{font-family:'Roboto Mono';font-weight:500;src:url(../../crises-control/assets/fonts/robotomono-500.woff2)}"
 SEV = {1: ("SEV 1", RED), 2: ("SEV 2", "#0A3165"), 3: ("SEV 3", BLUE), 4: ("SEV 4", SKY)}
-MODULES = {"Ping": "Mass alerting by push, SMS, voice and email, with acknowledgement tracking and escalation on no response.",
+MODULES = {"Ping": "Mass alerting by push, SMS, voice and email, with acknowledgement tracking; escalation on no response follows rules you configure.",
            "Incident Manager": "A workspace per incident: team coordination, a single communication log and message templates.",
-           "Task Manager": "Digitised procedures: tasks assigned with owners, deadlines and escalation paths.",
+           "Task Manager": "Digitised procedures: tasks assigned with owners and deadlines when a plan is activated; timings and escalation are configured.",
            "Control Centre": "A live view of tasks, communications, locations and escalations.",
-           "Audit Trail": "Audit & Reporting: incident records, response analysis and task accountability, ready to report.",
-           "SOS": "One-touch mobile escalation with GPS location for frontline staff.",
-           "CRAiG": "AI assistant that helps users interact with the platform, find information and work through the incident."}
+           "Audit Trail": "Audit & Reporting: timestamped incident records, response analysis and task accountability, exportable as PDF or CSV.",
+           "SOS": "Press-and-hold mobile alert for frontline staff, sharing location where available, that raises an incident.",
+           "CRAiG": "AI assistant (beta) that answers questions and summarises your own incident data, within each user's permissions."}
 
 def dial(size=520, ticks=60, arc=(200, 330), red=(330, 352), needle=338, dark=True, fig=None, figw=None):
     """The Crises Control dial: tick ring, a blue arc, a red sector and a needle. Angles in degrees, 0 = top, clockwise."""
@@ -99,7 +99,6 @@ class CCBook(RBook):
           <div><span style="color:{RED}">●</span> T+00:00 &nbsp;Incident declared</div><div><span style="color:{SKY}">●</span> T+00:02 &nbsp;Alert sent · push, SMS, voice</div><div><span style="color:{AMBER}">●</span> T+01:30 &nbsp;Escalated · no response</div><div><span style="color:{GREEN}">●</span> T+04:10 &nbsp;Team acknowledged</div></div>
         <img src="{LOGO}" style="position:absolute;left:18mm;top:16mm;height:19mm">
         <div style="position:absolute;left:18mm;top:40mm;font-family:JBM;font-size:7pt;letter-spacing:.16em;color:{SKY};text-transform:uppercase">{s.KIND} · No. {s.num:02d}</div>
-        <div style="position:absolute;left:18mm;top:45mm;font-family:JBM;font-size:7pt;letter-spacing:.16em;color:rgba(255,255,255,.55);text-transform:uppercase">Week of {s.week}</div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:52mm"><span style="display:inline-block;padding:1.4mm 3.6mm;border:.3mm solid {RED};color:#fff;border-radius:99px;font-size:7.4pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase"><span style="display:inline-block;width:1.8mm;height:1.8mm;border-radius:50%;background:{RED};margin-right:2mm;vertical-align:.2mm"></span>{s.industry}</span>
         <div style="font-weight:600;font-size:54pt;line-height:.98;letter-spacing:-.055em;margin-top:7mm">{t1}<br><span style="color:{SKY}">{t2}</span></div>
         <div style="font-weight:300;font-size:12.5pt;line-height:1.5;color:rgba(255,255,255,.78);margin-top:6mm;width:158mm">{lede}</div></div>
@@ -172,7 +171,7 @@ class CCReport(CCBook):
     def rep_cover(s, kicker, title, sub, dateline=None):
         s._wrap(f'''<div style="position:absolute;left:0;right:0;top:0;height:5mm;background:linear-gradient(90deg,{NAVY_CC},{BLUE} 70%,{RED} 70%,{RED})"></div>
         <img src="{LOGO}" style="position:absolute;left:18mm;top:15mm;height:19mm">
-        <div style="position:absolute;right:18mm;top:17mm;text-align:right;font-family:JBM;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">{s.KIND} · No. {s.num:02d}<div style="margin-top:1.6mm;color:{RED}">Week of {s.week}</div></div>
+        <div style="position:absolute;right:18mm;top:17mm;text-align:right;font-family:JBM;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">{s.KIND} · No. {s.num:02d}<div style="margin-top:1.6mm;color:{RED}">Incident management guide</div></div>
         <div style="position:absolute;left:30mm;right:30mm;top:38mm">{dial(dark=False, fig=('ind:' + INDART[s.industry]) if s.industry in INDART else s.fig, figw=80)}</div>
         <div style="position:absolute;left:18mm;right:18mm;top:192mm"><span style="font-family:JBM;font-size:7.4pt;letter-spacing:.16em;text-transform:uppercase;color:{BLUE}">{s.industry} · {kicker}</span>
         <div style="font-weight:600;font-size:38pt;line-height:1.03;letter-spacing:-.045em;margin-top:5mm;color:{INK}">{title}</div>
@@ -194,4 +193,16 @@ class CCReport(CCBook):
 # Framework-aligned practical tools, platform pages and final call to action (see ccprac.py).
 import ccprac as _ccprac
 _ccprac.attach(CCBook)
+_ccprac.attach3(CCBook)
+
+def _html(s, offset=0, total=None):
+    keep = list(s.pages)
+    s.pages = [((_ccprac.toolkit_body(s, offset),) + p[1:]) if p[0] == "__TOOLKIT__" else p for p in s.pages]
+    try: return RBook.html(s, offset, total)
+    finally: s.pages = keep
+CCBook.html = _html
+
+def _sources(s, items, note=None):
+    RBook.sources(s, items, note or ("Sources were accessed in November 2026. Where reports differ, we say so in the text. Regulatory summaries are for orientation, not legal advice. Last reviewed: " + _ccprac.REVIEWED + "."))
+CCBook.sources = _sources
 CCReport.rep_back = lambda s, title="", lede="", cta="", companion="": _ccprac.cta_page(s, False, companion)
