@@ -70,7 +70,7 @@ IND = {
  "Hospitality": dict(
    short="hospitality",
    example="When an attack happens outside a busy venue at 22:15, the alert is minute one. Protecting guests depends on every member of staff knowing their role, lockdown or invacuation starting at once, guests being told clearly, and a record of the first fifteen minutes.",
-   good=["Every member of staff on shift reached in seconds, including agency and new starters.",
+   good=["Every member of staff on shift reached within minutes, including agency and new starters.",
          "Acknowledgement from each area of the venue, with escalation when one stays silent.",
          "One duty manager can start evacuation, invacuation or lockdown for the whole site.",
          "One incident log shared by the duty manager, security, head office and emergency services liaison.",

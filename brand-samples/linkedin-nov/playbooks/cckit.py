@@ -207,7 +207,8 @@ CCBook.html = _html
 def _sources(s, items, note=None):
     tail = "Regulatory summaries are for orientation, not legal advice. Last reviewed: " + _ccprac.REVIEWED + "."
     note = note or "Sources were accessed in November 2026. Where reports differ, we say so in the text."
-    if "legal advice" not in note: note = note.rstrip() + " " + tail
+    if note.startswith("Sources continued"): pass
+    elif "legal advice" not in note: note = note.rstrip() + " " + tail
     elif "Last reviewed" not in note: note = note.rstrip() + " Last reviewed: " + _ccprac.REVIEWED + "."
     RBook.sources(s, items, note)
 CCBook.sources = _sources

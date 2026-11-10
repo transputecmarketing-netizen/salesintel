@@ -192,8 +192,8 @@ def build():
     b.mark("", "Sources")
     items = [(f"{n:02d}", SRC[k]) for k, n in sorted(order.items(), key=lambda x: x[1])]
     assert set(order) == set(SRC), set(SRC) - set(order)
-    b.sources(items[:17], "Sources were accessed in November 2026. Legal duties are summarised for orientation, not legal advice. Where reports differ, we say so in the text.")
-    b.sources(items[17:], "Sources continued. Secondary reporting is used only where primary statements were not published.")
+    b.sources(items[:16], "Sources were accessed in November 2026. Legal duties are summarised for orientation, not legal advice. Where reports differ, we say so in the text.")
+    b.sources(items[16:], "Sources continued. Secondary reporting is used only where primary statements were not published.")
     b.rep_back("Is every resident<br>reached?", "Crises Control is an Operational Incident Coordination Platform. It helps landlords, managing agents and facilities teams alert residents, occupiers, staff and contractors on several channels, track who has responded, coordinate the tasks that follow and keep a complete, timestamped record of every decision.", "Request a demo",
         companion="Crisis playbook No. 02 · Every resident reached")
     return b

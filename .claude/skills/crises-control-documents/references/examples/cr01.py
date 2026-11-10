@@ -7,52 +7,53 @@ def build():
     def R(*n):
         for x in n: order.setdefault(x, len(order) + 1)
         return S(*sorted(order[x] for x in n))
-    b.how = "An evidence-based look at UK operational resilience regulation for banks, insurers, payment and investment firms: what the rules require, what the 20 October 2026 Google Cloud outage revealed, and what boards should do next."
+    b.how = "An evidence-based look at operational resilience regulation for banks, insurers, payment and investment firms in the UK, the US, the EU and the Middle East: what the rules require, what the 20 October 2026 cloud outage revealed, and what boards should do next."
     b.rep_cover("Operational resilience", "Resilience,<br>regulated.",
-        "The impact tolerance deadline has passed, four cloud providers are now overseen as critical third parties, and a six-hour outage in London tested both. What the evidence shows, and what UK financial firms should do now.")
+        "Regulators in the UK, the US, the EU and the Gulf now ask firms to prove their critical services survive severe disruption. A six-hour cloud outage in London put that to the test. What the evidence shows, and what financial firms everywhere should do.")
     b.contents()
 
     # ------------------------------------------------------------------ summary and findings
     b.mark("", "Executive summary")
     b.summary("The rules now assume disruption will happen. The question is whether firms can prove they stay within tolerance.", [
         f"On 20 October 2026 a power failure at a data centre hosting europe-west2-b, one of Google Cloud's London zones, disrupted services across the region for six hours and eight minutes, according to Google's final incident report.{R('gcp')} Customers of Lloyds, HSBC and Revolut reported problems with apps, payments and cash withdrawals.{R('yahoo', 'reuters')}",
-        f"The outage landed in a regulatory regime that had just matured. Since 31 March 2025 UK banks, insurers, payment firms and other in-scope firms have been expected to remain within impact tolerances for each important business service.{R('ps213')} In July 2026 HM Treasury designated Google Cloud EMEA, Amazon Web Services EMEA, Microsoft Ireland Operations and Oracle Corporation UK as critical third parties.{R('hmt')} From 18 March 2027 new FCA and PRA incident and third-party reporting rules apply.{R('ps262', 'ps726')}",
-        f"The FCA's review of 2025 self-assessments found progress, but also communications strategies rarely tested in exercises and few workarounds for losing usual channels.{R('fca1y')} Its own data shows retail banks reported 446 major operational incidents in 2025.{R('foi')}",
-        "This report sets out what the rules require, what the October outage shows about concentration and redundancy, and what boards in financial services and insurance should ask for now."],
+        f"The outage landed in a UK regime that had just matured. Since 31 March 2025 UK banks, insurers, payment firms and other in-scope firms have been expected to remain within impact tolerances for each important business service.{R('ps213')} In July 2026 HM Treasury designated Google Cloud EMEA, Amazon Web Services EMEA, Microsoft Ireland Operations and Oracle Corporation UK as critical third parties.{R('hmt')} From 18 March 2027 new FCA and PRA incident and third-party reporting rules apply.{R('ps262', 'ps726')}",
+        f"The UK FCA's review of 2025 self-assessments found progress, but also communications strategies rarely tested in exercises and few workarounds for losing usual channels.{R('fca1y')} Its own data shows retail banks reported 446 major operational incidents in 2025.{R('foi')}",
+        f"The same question is being asked elsewhere. The EU's DORA has applied since 17 January 2025,{R('dora')} US banking agencies ask the largest banks to set a tolerance for disruption,{R('sound')} and the UAE Central Bank's operational risk regulation took effect on 14 September 2026.{R('cbuae')} This report sets out what the rules require, what the outage shows and what boards should ask for."],
         "Oversight of cloud providers does not move responsibility. Each firm must still show, with evidence, that its important business services stay within tolerance when a critical supplier fails, and that it can reach staff, customers and supervisors when its usual channels are down.")
 
     b.mark("", "Key findings")
     b.findings("Seven things the evidence tells us", [
-        ("The deadline has passed. Supervisors now want evidence.", f"Firms had until 31 March 2025 to be able to remain within tolerance. The FCA is now reviewing annual self-assessments and questioning claims not backed by severe testing.{R('ps213', 'fca1y')}"),
-        ("Communications are a weak link.", f"The FCA found limited evidence that communications strategies are tested in scenario exercises, and little detail on workarounds when usual channels are unavailable.{R('fca1y')}"),
+        ("The UK deadline has passed. Supervisors now want evidence.", f"UK firms had until 31 March 2025 to be able to remain within tolerance. The FCA is now reviewing annual self-assessments and questioning claims not backed by severe testing.{R('ps213', 'fca1y')}"),
+        ("Communications are a weak link.", f"The UK FCA found limited evidence that communications strategies are tested in scenario exercises, and little detail on workarounds when usual channels are unavailable.{R('fca1y')}"),
         ("A zone failure became a regional problem.", f"Google reports that demand surges on neighbouring zones and control plane dependencies spread impact beyond europe-west2-b.{R('gcp')}"),
         ("Redundancy failed in combination.", f"One utility feed was out for repairs, the other failed, and a control system fault stopped generators starting before batteries ran out.{R('gcp')}"),
-        ("Concentration is now overseen, but responsibility is not transferred.", f"Regulators say firms remain responsible for managing their own third-party arrangements under the critical third parties regime.{R('boe')}"),
-        ("Reporting is getting faster and more uniform.", f"From March 2027 most FCA firms report within 24 hours of meeting a threshold; payment firms keep a 4-hour clock; DORA sets 4 and 24 hours.{R('ps262', 'dr301')}"),
-        ("IT failures are routine, not rare.", f"Retail banks reported 446 major operational incidents to the FCA in 2025, led by change management and third-party failure.{R('foi')}")])
+        ("Concentration is now overseen, but responsibility is not transferred.", f"UK regulators say firms remain responsible for managing their own third-party arrangements under the critical third parties regime.{R('boe')}"),
+        ("Reporting clocks are measured in hours.", f"DORA sets 4 and 24 hours; the UAE Central Bank 4 hours; US banks 36 hours; from March 2027 most UK FCA firms 24 hours.{R('dr301', 'cbuae', 'cirn', 'ps262')}"),
+        ("IT failures are routine, not rare.", f"UK retail banks reported 446 major operational incidents to the FCA in 2025, led by change management and third-party failure.{R('foi')}")])
 
     b.facts("Operational resilience in six figures", "Each figure is sourced. Where sources measure different things, we say so in the analysis that follows.", [
         ("6h 08m", f"Duration of the main impact across Google Cloud's London region on 20 October 2026.{R('gcp')}"),
         ("38", f"Google Cloud products listed as affected on the incident's status page.{R('gcp')}"),
-        ("446", f"Major operational incidents reported to the FCA by retail banks in 2025.{R('foi')}"),
-        ("803 hours", f"Unplanned outages at nine major banks and building societies, January 2023 to February 2025.{R('tc25')}"),
-        ("Over 40%", f"Share of cyber incidents reported to the FCA in 2025 that involved a third party.{R('fcanews')}"),
-        ("4", f"Cloud providers designated as critical third parties by HM Treasury, effective 13 July 2026.{R('hmt', 'si777')}")], "At a glance")
+        ("446", f"Major operational incidents reported to the UK FCA by retail banks in 2025.{R('foi')}"),
+        ("803 hours", f"Unplanned outages at nine major UK banks and building societies, January 2023 to February 2025.{R('tc25')}"),
+        ("Over 40%", f"Share of cyber incidents reported to the UK FCA in 2025 that involved a third party.{R('fcanews')}"),
+        ("4", f"Cloud providers designated as UK critical third parties by HM Treasury, effective 13 July 2026.{R('hmt', 'si777')}")], "At a glance")
 
-    b.timeline("From policy to a real test", "Key dates in UK and EU operational resilience regulation, and the October 2026 outage.", [
+    b.timeline("From policy to a real test", "Key dates in operational resilience regulation across four regions, and the October 2026 outage.", [
+        ("30 October 2020", "US sound practices", f"The Federal Reserve, OCC and FDIC publish sound practices for operational resilience at the largest banks.{R('sound')}"),
         ("29 March 2021", "UK rules published", f"The FCA publishes PS21/3 and the PRA SS1/21. Rules apply from 31 March 2022.{R('ps213', 'ss121')}"),
-        ("1 January 2025", "CTP regime in force", f"Rules for critical third parties take effect, ready for any designation by HM Treasury.{R('boe')}"),
+        ("18 December 2023", "US cyber disclosure", f"Listed companies begin disclosing material cyber incidents on Form 8-K Item 1.05.{R('sec8k')}"),
         ("17 January 2025", "DORA applies", f"EU financial entities must report major ICT-related incidents under DORA.{R('cbi')}"),
-        ("31 January 2025", "Barclays outage", f"Some customers lose access to services for up to three days, prompting Treasury Committee letters to banks.{R('tc25')}"),
-        ("31 March 2025", "Transition ends", f"Firms must be able to remain within impact tolerances for each important business service.{R('ps213')}"),
+        ("31 March 2025", "UK transition ends", f"UK firms must be able to remain within impact tolerances for each important business service.{R('ps213')}"),
         ("18 November 2025", "EU names critical providers", f"The European Supervisory Authorities designate critical ICT providers, including Google Cloud EMEA.{R('esas')}"),
-        ("18 March 2026", "Reporting rules final", f"FCA PS26/2 and PRA PS7/26 set incident and third-party reporting rules, applying from 18 March 2027.{R('ps262', 'ps726')}"),
+        ("18 March 2026", "UK reporting rules final", f"FCA PS26/2 and PRA PS7/26 set incident and third-party reporting rules, applying from 18 March 2027.{R('ps262', 'ps726')}"),
         ("13 July 2026", "First UK designations", f"AWS, Google Cloud, Microsoft and Oracle come under direct oversight.{R('hmt', 'si777')}"),
+        ("14 September 2026", "UAE regulation in force", f"The UAE Central Bank's Operational Risk Management Regulation takes effect for licensed financial institutions.{R('cbuae')}"),
         ("20 October 2026", "London cloud outage", f"A power failure in europe-west2-b disrupts services across the region; banks report customer impact.{R('gcp', 'yahoo')}")])
 
     # ------------------------------------------------------------------ PART 01
     b.mark("01", "The rules")
-    b.opener("01", "The<br>rules.", "Four overlapping regimes now shape how financial firms prepare for, report and recover from disruption.", [("01", "The UK regime four years on"), ("02", "Who must do what"), ("03", "Two reporting clocks")])
+    b.opener("01", "The<br>rules.", "Regulators in every major market now shape how financial firms prepare for, report and recover from disruption.", [("01", "The UK regime four years on"), ("02", "One question, four regions"), ("03", "Reporting clocks, region by region")])
     b.essay("The rules", "The UK regime, four years on", [
         f"The UK approach, set out by the FCA in PS21/3 and the PRA in SS1/21, applies to banks, building societies, PRA-designated investment firms, insurers, recognised investment exchanges, enhanced scope SM&CR firms and payment and e-money firms.{R('ps213')} It asks each firm to identify its important business services, set an impact tolerance for each, map what supports them and test against severe but plausible scenarios.{R('ps213', 'ss121')}",
         f"The PRA is specific about tolerances. Each must include a time metric, applies at peak times as well as normal ones, and must hold whether or not a third party delivers part of the service. The board approves the services, the tolerances and the written self-assessment.{R('ss121')}",
@@ -61,7 +62,16 @@ def build():
         f"On communications, the FCA restated that firms must maintain an internal and external strategy that delivers clear, timely and relevant messaging. It found limited evidence of that strategy being tested, and firms not considering in detail what to do when usual channels are unavailable.{R('fca1y')}",
         f"It also challenged confidence. Some self-assessments stated there was no scenario the firm could not recover from, without evidence from sufficiently severe testing.{R('fca1y')}"],
         "The rules", "Some self-assessments claimed no scenario could defeat the firm, without severe testing to prove it.")
-    b.table("At a glance", "Who must do what", "A simplified summary. Read the rules themselves for scope and detail.", ["Regime", "What it requires", "Status"], [
+    b.regions("Regional notes", "One question, four regions", "Impact tolerance is a UK term. Other regulators ask a similar question in their own words. Check which regimes apply to each legal entity in your group.", [
+        ("United Kingdom", f"FCA PS21/3 and PRA SS1/21: important business services, impact tolerances with a time metric, mapping, severe but plausible testing and a board-approved self-assessment. In force since 31 March 2022; firms had to be able to stay within tolerance by 31 March 2025.{R('ps213', 'ss121')}",
+         "Treat the tolerance as the trigger for your top escalation level."),
+        ("United States", f"No single impact tolerance rule. The 2020 interagency Sound Practices ask the largest banks' boards to set a tolerance for disruption for critical operations and core business lines, without changing existing rules.{R('sound')} The FFIEC Business Continuity Management booklet (2019) guides examiners.{R('ffiec')} NYDFS Part 500 requires covered entities to keep incident response and business continuity plans, tested at least annually.{R('nydfs')}",
+         "Guidance, not law, for most firms; examiners still expect to see the evidence."),
+        ("European Union", f"DORA, Regulation (EU) 2022/2554, applies from 17 January 2025 to EU financial entities, including UK and US groups' EU subsidiaries: ICT risk management, ICT business continuity, resilience testing, crisis communication plans, major incident reporting and a register of ICT providers.{R('dora', 'cbi')}",
+         "Map important business services to DORA's critical or important functions once, for both regimes."),
+        ("Middle East", f"<b>UAE:</b> the Central Bank's Operational Risk Management Regulation (Circular 1/2026), in force from 14 September 2026: critical operations, mapping and board-approved disruption tolerances.{R('cbuae')} <b>Saudi Arabia:</b> SAMA's Business Continuity Management Framework (2017): impact analysis, recovery objectives and annual testing.{R('sama')} <b>DIFC:</b> the DFSA consulted in 2026 on impact tolerances (CP 170); proposed, not yet in force.{R('dfsa')}",
+         "Firms in financial free zones follow their own regulator's rulebook; confirm which applies.")], "The rules")
+    b.table("At a glance", "UK and EU: who must do what", "A simplified summary. Read the rules themselves for scope and detail.", ["Regime", "What it requires", "Status"], [
         ("Operational resilience (FCA PS21/3, PRA SS1/21)", f"Important business services, impact tolerances, mapping, scenario testing, communications strategy, board-approved self-assessment.{R('ps213', 'ss121')}", "In force since 31 March 2022; tolerance deadline 31 March 2025."),
         ("Critical third parties", f"Designated providers are overseen on the critical services they provide to the sector. Firms remain responsible for their own arrangements.{R('boe')}", "Rules from 1 January 2025; first designations from 13 July 2026."),
         ("Incident and third-party reporting (FCA PS26/2, PRA PS7/26)", f"One incident definition, thresholds, staged reports, notification of material third-party arrangements and an annual register.{R('ps262', 'ps726')}", "Published 18 March 2026; applies from 18 March 2027."),
@@ -73,6 +83,15 @@ def build():
         ("Updates", f"Enhanced reporting firms give material updates as the incident develops.{R('ps262')}", f"Intermediate report within 72 hours of the initial notification.{R('dr301')}"),
         ("Final report", f"Enhanced firms: within 30 working days of resolution, 60 at the latest.{R('ps262')}", f"No later than one month after the latest intermediate report.{R('dr301')}"),
         ("Third parties", f"Notify new or significantly changed material arrangements; submit a register annually.{R('ps262')}", f"Maintain a register of information on all ICT service arrangements.{R('esas')}")], "The rules")
+    b.regions("Regional notes", "Reporting clocks, region by region", "One incident can start several clocks in several jurisdictions. Some run from detection, some from a decision about severity or materiality.", [
+        ("United Kingdom", f"Payment service providers report major operational or security incidents within 4 hours of detection. From 18 March 2027 most firms make an initial report within 24 hours of determining a threshold is met.{R('ps262')}",
+         "Name who determines that a threshold is met; that decision starts the clock."),
+        ("United States", f"Banks notify their primary federal regulator within 36 hours of determining a significant computer-security incident.{R('cirn')} NYDFS covered entities notify within 72 hours, and within 24 hours of any extortion payment.{R('nydfs')} Listed companies file Form 8-K Item 1.05 within four business days of determining a cyber incident is material.{R('sec8k')}",
+         "Materiality and severity decisions need owners and a record."),
+        ("European Union", f"DORA: initial report within 4 hours of classifying an incident as major and no later than 24 hours from awareness; intermediate within 72 hours; final within one month.{R('dr301')}",
+         "Classification is a decision. Log who made it, and when."),
+        ("Middle East", f"<b>UAE:</b> notify the Central Bank within 4 hours of an event that significantly affects critical operations, with a summary within 24 hours.{R('cbuae')} <b>Saudi Arabia:</b> report medium and high disruptive incidents to SAMA promptly, and submit a post-incident report once operations are restored.{R('sama')}",
+         "Keep supervisor contacts for every jurisdiction outside your normal systems.")], "The rules")
 
     # ------------------------------------------------------------------ PART 02
     b.mark("02", "The outage")
@@ -97,49 +116,49 @@ def build():
         ("Recovery time", f"Storage recovery meant hours between power returning and service.{R('gcp')}", "Set recovery assumptions from real incidents, not from supplier marketing."),
         ("Notification speed", f"Google lists faster automated customer notification as an action.{R('gcp')}", "Detect impact with your own monitoring. Do not wait for a status page.")], "The outage", "34mm 1fr 1fr")
     b.essay("The pattern", "A pattern, not a one-off", [
-        f"October was not the first time technology failure has stopped customers paying or being paid. In early 2025 Barclays customers lost access to some services for up to three days from 31 January, the self-assessment tax deadline. Barclays told the Treasury Committee that 56% of online payments failed during the incident, and expected to pay between £5 million and £7.5 million in compensation.{R('tc25')}",
+        f"October was not the first time technology failure has stopped customers paying or being paid. In the UK, in early 2025, Barclays customers lost access to some services for up to three days from 31 January, the self-assessment tax deadline. Barclays told the Treasury Committee that 56% of online payments failed during the incident, and expected to pay between £5 million and £7.5 million in compensation.{R('tc25')}",
         f"The Committee's letters to nine banks and building societies found at least 158 IT failure incidents and at least 803 hours of unplanned outages between January 2023 and February 2025, more than 33 days. Firms cited third-party suppliers, system changes and internal software faults.{R('tc25')}",
-        f"FCA data points the same way. Retail banks reported 446 major operational incidents in 2025. The top drivers were change management at 24.22% and third-party failure at 20.85%.{R('foi')} Across all firms, the FCA says over 40% of cyber incidents reported to it in 2025 involved a third party.{R('fcanews')}",
-        f"Consumer groups are watching. In September 2026 Which? analysed FCA data on 21 banks and building societies and found Santander and its Cahoot brand reported the most incidents between April 2025 and March 2026, at 38.{R('which')}",
+        f"UK FCA data points the same way. Retail banks reported 446 major operational incidents in 2025. The top drivers were change management at 24.22% and third-party failure at 20.85%.{R('foi')} Across all firms, the FCA says over 40% of cyber incidents reported to it in 2025 involved a third party.{R('fcanews')}",
+        f"Consumer groups are watching. In September 2026 the UK consumer group Which? analysed FCA data on 21 banks and building societies and found Santander and its Cahoot brand reported the most incidents between April 2025 and March 2026, at 38.{R('which')}",
         f"Concentration is now a policy issue in its own right. The EU designated Google Cloud EMEA and others as critical ICT providers in November 2025; the UK followed in July 2026.{R('esas', 'hmt')} The October outage was the first major test of a newly designated UK critical third party.",
         "The lesson is not that cloud is unsafe. Google's report shows layers of redundancy that usually work. It is that rare combinations happen, and every firm relying on one region needs to know what its customers experience when they do."],
         "The pattern", "Rare combinations happen. Every firm relying on one region needs to know what its customers experience when they do.")
 
     # ------------------------------------------------------------------ PART 03
     b.mark("03", "What to do")
-    b.opener("03", "What to<br>do now.", "What the evidence means for UK financial firms, and the steps that turn compliance into readiness.", [("01", "What it means for the UK"), ("02", "Recommendations"), ("03", "Questions for the board")])
-    b.essay("UK relevance", "What it means for UK organisations in Financial Services and Insurance", [
-        f"First, the critical third parties regime is a backstop, not a shield. The Bank of England, PRA and FCA describe it as complementing existing outsourcing and operational resilience rules, with regulated firms remaining responsible for managing their own third-party arrangements.{R('boe')} The PRA's expectation that firms stay within tolerance whether or not they use third parties still applies.{R('ss121')}",
-        f"Second, the 18 March 2027 reporting rules will expose weak incident processes. Firms must decide quickly whether an incident meets a threshold and report within 24 hours of that decision; payment firms keep a 4-hour clock from detection. Material third-party arrangements must be notified and registered.{R('ps262', 'ps726')} That needs a severity model, named decision makers and data captured as the incident runs.",
-        f"Third, communications deserve the same rigour as technology. The FCA's March 2026 findings point to untested strategies and no plan for losing usual channels.{R('fca1y')} DORA goes further for EU entities, requiring crisis communication plans for responsible disclosure of major incidents to clients, counterparts and, where appropriate, the public.{R('dora')}",
-        f"Fourth, groups with EU subsidiaries must run two sets of clocks. DORA has applied since 17 January 2025, with initial notification within 4 hours of classifying a major incident and no later than 24 hours from awareness.{R('cbi', 'dr301')}",
-        "Insurers should note that important business services include claims, which peak in exactly the events, such as storms and floods, that also stress suppliers and staff.",
+    b.opener("03", "What to<br>do now.", "What the evidence means for financial firms wherever they operate, and the steps that turn compliance into readiness.", [("01", "What it means for the industry"), ("02", "Recommendations"), ("03", "Questions for the board")])
+    b.essay("What it means", "What it means for organisations in Financial Services and Insurance", [
+        f"First, oversight of critical suppliers does not move responsibility. <b>United Kingdom:</b> the regulators describe the critical third parties regime as complementing existing rules, with firms remaining responsible for their own third-party arrangements.{R('boe')} <b>European Union:</b> DORA requires every financial entity to keep a register of its ICT service arrangements, whether or not a provider is designated as critical.{R('esas')}",
+        f"Second, reporting clocks are measured in hours almost everywhere. DORA's initial report is due within 4 hours of classification;{R('dr301')} the UAE Central Bank expects notice within 4 hours of an event affecting critical operations;{R('cbuae')} US banks have 36 hours;{R('cirn')} and from March 2027 most UK firms report within 24 hours of determining a threshold is met.{R('ps262')} Meeting any of them needs a severity model, named decision makers and data captured as the incident runs.",
+        f"Third, communications deserve the same rigour as technology. The UK FCA found untested strategies and no plan for losing usual channels.{R('fca1y')} DORA requires crisis communication plans for EU entities,{R('dora')} and NYDFS Part 500 expects a communication plan for employees, regulators and third parties.{R('nydfs')}",
+        "Fourth, groups that operate across regions run several clocks and several definitions at once. A single dependency map and a single incident log, mapped to each regime, is easier to defend than four separate processes.",
+        "Insurers should note that critical services include claims, which peak in exactly the events, such as storms and floods, that also stress suppliers and staff.",
         "The practical test for any board: take the 20 October timeline, overlay your own services, and ask when you would have known, who you would have told, and whether you would have stayed within tolerance."],
-        "UK relevance", "Take the 20 October timeline, overlay your own services, and ask whether you would have stayed within tolerance.")
+        "What it means", "Take the 20 October timeline, overlay your own services, and ask whether you would have stayed within tolerance.")
     b.steps("Recommendations", "Six steps for financial firms", "In priority order.", [
         ("Map cloud concentration to important business services", f"Record region and zone dependencies for each service, including through suppliers, and test a regional loss.{R('gcp', 'fca1y')}"),
         ("Build out-of-band communications", f"Reach the response team, customers and supervisors without corporate email, chat or single sign-on.{R('fca1y')}"),
         ("Test communications in every scenario", f"Include customer, staff, supplier and supervisor messages, timed against tolerance.{R('fca1y')}"),
-        ("Prepare for the 2027 rules, and DORA", f"Agree thresholds, decision owners and data for a 24-hour initial report and a third-party register, in one model that also meets DORA clocks.{R('ps262', 'ps726', 'dr301')}"),
+        ("Build one model for every reporting clock", f"Agree thresholds, decision owners and data once, mapped to each regime that applies: UK, DORA, US and Gulf clocks alike.{R('ps262', 'ps726', 'dr301', 'cbuae')}"),
         ("Make supplier notification a contractual test", "Ask critical suppliers how fast and how they will tell you, including about maintenance windows."),
-        ("Strengthen the self-assessment", f"Severe scenarios, confidence ratings, remediation owners and real incidents as evidence.{R('fca1y')}")], "What to do")
-    b.questions("For the board", "Questions boards should ask this quarter", "Answers should be specific, dated and owned.", [
+        ("Strengthen the evidence", f"Severe scenarios, confidence ratings, remediation owners and real incidents as evidence.{R('fca1y')}")], "What to do")
+    b.questions("For the board", "Questions boards should ask", "Answers should be specific, dated and owned.", [
         ("Exposure", ["Which important business services depend on a single cloud region, directly or through a supplier?", "If our main region failed for six hours on payday, which tolerances would we breach?", "Which suppliers would tell us first, and how?"]),
-        ("Readiness", ["Can we reach staff, customers and supervisors without email and chat?", "Are we ready to report within 24 hours of meeting a threshold from March 2027?", "Does our self-assessment show severe testing, or only confidence?"])], "What to do")
+        ("Readiness", ["Can we reach staff, customers and supervisors without email and chat?", "Do we know every reporting clock that applies to each entity, and who starts it?", "Does our self-assessment show severe testing, or only confidence?"])], "What to do")
     b.glossary("Terms used in this report", [
-        ("Important business service", "A service to an external user which, if disrupted, could cause intolerable harm or risk to the firm or the wider system."),
-        ("Impact tolerance", "The maximum tolerable level of disruption to an important business service, including a time metric."),
-        ("Self-assessment", "A firm's written record of compliance with the resilience rules, approved by its board."),
-        ("Critical third party (CTP)", "A provider designated by HM Treasury and overseen by the Bank of England, PRA and FCA."),
+        ("Important business service", "UK term: a service to an external user which, if disrupted, could cause intolerable harm or risk to the firm or the wider system."),
+        ("Impact tolerance", "UK term: the maximum tolerable level of disruption to an important business service, including a time metric."),
+        ("Tolerance for disruption", "The US sound practices term for the disruption a bank's board will accept for critical operations; the UAE uses disruption tolerance."),
+        ("Self-assessment", "UK term: a firm's written record of compliance with the resilience rules, approved by its board."),
+        ("Critical third party (CTP)", "UK term: a provider designated by HM Treasury and overseen by the Bank of England, PRA and FCA."),
         ("CTPP", "Critical ICT third-party service provider, designated by the European Supervisory Authorities under DORA."),
         ("DORA", "The EU Digital Operational Resilience Act, Regulation (EU) 2022/2554, applying from 17 January 2025."),
         ("Availability zone", "An isolated location within a cloud region with its own power, cooling and networking."),
         ("Control plane", "The systems that manage and route cloud workloads, as distinct from the workloads themselves."),
-        ("PLC", "Programmable logic controller: an industrial computer controlling equipment such as generators."),
-        ("Material third party arrangement", "A supplier arrangement that must be notified and registered under the 2027 UK reporting rules."),
+        ("Material third party arrangement", "UK term: a supplier arrangement to be notified and registered under the 2027 reporting rules."),
         ("Mapping", "Identifying the people, processes, technology, facilities and information behind each important business service."),
         ("Severe but plausible scenario", "A demanding but realistic disruption used to test whether a firm can stay within tolerance."),
-        ("Change management", "The controls around updates to systems, the leading driver of major incidents at retail banks in 2025."),
+        ("Change management", "The controls around updates to systems, the leading driver of major incidents at UK retail banks in 2025."),
         ("Register of information", "The DORA record of all contractual arrangements a financial entity has with ICT providers.")])
 
     b.mark("", "Sources")
@@ -162,12 +181,20 @@ def build():
         "cbi": "Central Bank of Ireland, Reporting major ICT-related incidents and significant cyber threats under DORA, accessed November 2026, https://www.centralbank.ie/regulation/digital-operational-resilience-act-dora/reporting-major-ict-related-incidents-and-significant-cyber-threats",
         "esas": "European Supervisory Authorities (EBA, EIOPA, ESMA), The ESAs designate critical ICT third-party providers under the Digital Operational Resilience Act, 18 November 2025, https://www.eba.europa.eu/publications-and-media/press-releases/european-supervisory-authorities-designate-critical-ict-third-party-providers-under-digital",
         "dora": "Regulation (EU) 2022/2554 on digital operational resilience for the financial sector (DORA), Article 14 Communication, OJ L 333, 27 December 2022, https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng",
+        "sound": "Board of Governors of the Federal Reserve System, OCC and FDIC, Sound Practices to Strengthen Operational Resilience, 30 October 2020 (SR 20-24), https://www.federalreserve.gov/supervisionreg/srletters/SR2024.htm",
+        "cbuae": "Central Bank of the UAE, Operational Risk Management Regulation, Circular 1/2026, issued 3 February 2026, effective 14 September 2026; summary by Trowers & Hamlins, September 2026, https://www.trowers.com/insights/2026/september/uae-central-bank-raises-the-bar-on-operational-risk",
+        "ffiec": "FFIEC, IT Examination Handbook, Business Continuity Management booklet, November 2019, https://ithandbook.ffiec.gov/it-booklets/business-continuity-management/",
+        "nydfs": "New York State Department of Financial Services, 23 NYCRR Part 500, sections 500.16 and 500.17, as amended November 2023, https://www.dfs.ny.gov/industry_guidance/cybersecurity",
+        "sama": "Saudi Central Bank (SAMA), Business Continuity Management Framework, Circular 381000058504, 27 February 2017, https://rulebook.sama.gov.sa/en/business-continuity-management-framework-1",
+        "dfsa": "Dubai Financial Services Authority, Consultation Paper 170: Strengthening operational resilience in the DIFC, 2026 (proposals), https://www.dfsa.ae/news/notice-consultation-paper-release-cp-170",
+        "cirn": "Federal Reserve, FDIC and OCC, Computer-security incident notification final rule, 18 November 2021, compliance from 1 May 2022, https://www.federalreserve.gov/newsevents/pressreleases/bcreg20211118a.htm",
+        "sec8k": "US Securities and Exchange Commission, SEC adopts rules on cybersecurity risk management, strategy, governance and incident disclosure, press release 2023-139, July 2023, https://www.sec.gov/newsroom/press-releases/2023-139",
         "which": "Which?, Banking IT outages: find out how often your bank has gone down, 25 September 2026, https://www.which.co.uk/news/article/banking-it-outages-find-out-how-often-your-bank-has-gone-down-anI2M6R5x8Fr",
     }
     assert set(order) == set(src), (set(src) - set(order), set(order) - set(src))
     items = [(f"{n:02d}", t) for n, t in sorted((order[k], t) for k, t in src.items())]
-    b.sources(items[:10])
-    b.sources(items[10:], "Sources continued. Secondary reporting is used only where primary sources were not available.")
-    b.rep_back("Ready for the<br>next six hours?", "Crises Control helps banks, insurers, payment and investment firms alert the right people in minutes, coordinate the response from one place and keep the evidence supervisors ask for.", "Request a demo",
+    b.sources(items[:14])
+    b.sources(items[14:], "Sources continued. Secondary reporting is used only where primary sources were not available.")
+    b.rep_back("Ready for the<br>next six hours?", "Most organisations can send alerts. Few can manage incidents end-to-end. Crises Control, an Operational Incident Coordination Platform, helps financial firms reach the right people, coordinate the response from one place and keep the evidence supervisors ask for.", "Request a demo",
         companion="Crisis playbook No. 01 · Within tolerance")
     return b

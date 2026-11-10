@@ -56,7 +56,7 @@ Category: Operational Incident Coordination Platform. Narrative: "Most organisat
 
 ## 6. Product accuracy
 Check EVERY mention of Crises Control, its modules and capabilities in both files against CAPABILITIES.md:
-- Distinguish standard functionality, capabilities that are configured (escalation rules, repeat notifications, groups, location targeting, templates and plans, location sharing where supported by device and settings) and third-party integrations (Microsoft Teams, Slack, directory sync, monitoring tools and other systems, only "where configured").
+- Distinguish standard functionality, capabilities that are configured (escalation rules and timings, cascading, groups and targeting, templates and plans) and third-party integrations (directory sync, single sign-on, the Microsoft Teams app, monitoring triggers, only "where configured"); location sharing is "where available".
 - Never imply the platform detects incidents by itself. Incidents are raised by people (SOS, app, web) or, where integrations are configured, by connected systems.
 - Never imply unconfigured automation ("automatically escalates" becomes "escalates on no response, under the rules you configure").
 - CRAiG: current capability only.

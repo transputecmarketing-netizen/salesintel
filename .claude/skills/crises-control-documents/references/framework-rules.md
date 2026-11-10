@@ -32,13 +32,13 @@ Detection → Alert → Coordination → Execution → Recovery → Closure → 
 
 | Order | Module | Role | What it does |
 |---|---|---|---|
-| 1 | SOS | Escalate | Frontline staff report an incident in one touch from a mobile device (location where supported). |
-| 2 | Ping | Start | Alerting and activation by push, SMS, voice and email; acknowledgements and responses; escalation on no response. |
+| 1 | SOS | Escalate | Frontline staff report an incident in one touch from a mobile device (press and hold in the app, location where available). |
+| 2 | Ping | Start | Alerting by push, SMS, voice, email and desktop; acknowledgements and responses; escalation on no response under rules you configure. |
 | 3 | Incident Manager | Coordinate | Activate the incident, assign roles, control communication, keep the timeline. |
 | 4 | Task Manager | Execute | Assign actions with owners and deadlines, track completion, escalate what stalls. |
 | 5 | Control Centre | Operate | Real-time view of incidents, timelines, task status and assets. |
 | 6 | Audit & Reporting | Prove | Incident records, response analysis and task accountability, ready to report. |
-| 7 | CRAiG | Assist | AI assistant that helps users interact with the platform, find information and work through the incident. |
+| 7 | CRAiG | Assist | AI assistant (beta) that answers questions and summarises incident data within each user's permissions. People make every decision. |
 
 - Use the name **Audit & Reporting** (the kit key "Audit Trail" is an alias).
 - Platform pages always follow this order. Product descriptions use only these words, never invented features.

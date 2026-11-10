@@ -26,7 +26,7 @@ def page(b):
     if not rows: return None
     n = len(rows); dense = n > 6
     cards = ""
-    for uc, trig, how, caps, ev in [(r[1], r[2], r[3], r[4], r[5]) for r in rows]:
+    for uc, trig, how, caps, ev in [(r[1], r[2], r[3].replace('where supported', 'where available'), r[4], r[5]) for r in rows]:
         lab, bg, fg = tag(ev)
         chips = "".join(f'<span style="display:inline-block;font-family:Roboto Mono;font-size:6.2pt;padding:.5mm 1.6mm;border:.25mm solid #1179BB55;border-radius:1mm;color:#1179BB;margin:0 1mm 1mm 0">{c.strip().replace("Audit Trail", "Audit &amp; Reporting")}</span>' for c in caps.split(";") if c.strip())
         cards += f'''<div style="border:.3mm solid #3A3A3A26;border-radius:2.6mm;padding:{2 if dense else 3.4}mm 3.2mm;break-inside:avoid;margin-bottom:{2 if dense else 3.4}mm">
@@ -36,7 +36,7 @@ def page(b):
           <div style="font-size:{7.3 if dense else 8.6}pt;line-height:1.35;color:#0B223C;margin-top:1.2mm">{how}</div>
           <div style="margin-top:1.6mm">{chips}</div></div>'''
     note = ("Customer examples are based on how customers use Crises Control today; customer names have been removed. Customer requirements describe needs raised by customers or in evaluations. "
-            "Intended, suggested and illustrative use cases show how the platform can be applied and are not presented as existing customer deployments. Capabilities marked 'where configured' or 'where supported' depend on each organisation's set-up.")
+            "Intended, suggested and illustrative use cases show how the platform can be applied and are not presented as existing customer deployments. Capabilities marked 'where configured' or 'where available' depend on each organisation's set-up.")
     body = b._hd("Use cases", f"How organisations use Crises Control in {b.industry.lower().replace('and insurance', 'and insurance')}",
                  "" if dense else "From the first alert to the final record: the incidents this platform is used for, and how the modules work together in each.") + \
         f'<div style="margin-top:{3 if dense else 5}mm;columns:2;column-gap:4mm">{cards}</div><div style="margin-top:1mm;font-size:{6.6 if dense else 7.2}pt;line-height:1.4;color:#3A3A3ABF">{note}</div>'

@@ -284,7 +284,7 @@ def build():
         ("NIS2", "The EU directive on cyber security risk management and incident reporting, which covers health."),
         ("Hot debrief", "A short review straight after an incident, usually within 48 hours of stand down.")])
     b.platform("How the modules work together in a hospital incident", "Crises Control is an Operational Incident Coordination Platform. Here one laboratory outage is followed through the platform. It supports your emergency plan, incident command structure and business continuity plans; it does not replace them.", [
-        ("A laboratory manager, or a lone community nurse, raises an alert in one touch from the app, with location where available, so the site team knows in seconds.", "SOS"),
+        ("A laboratory manager, or a lone community nurse, raises an alert in one touch from the app, with location where available, so the site team knows straight away.", "SOS"),
         ("On-call, clinical and digital leads are called in by role by push, SMS, voice and email; replies show who is coming, and no reply escalates to a deputy under the rules you configure.", "Ping"),
         ("An authorised user declares the incident and launches the response plan; roles are assigned, and the incident team, partner liaison and supplier work from one communication log.", "Incident Manager"),
         ("Downtime procedures, O type authorisation and results back-entry run as tasks with owners and deadlines, assigned when the plan is activated.", "Task Manager"),

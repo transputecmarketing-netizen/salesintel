@@ -42,6 +42,16 @@ The kits are built on a shared engine (pbkit, aikit, rkit). `CCBook.build()` re-
 - `b.form(ey, title, lede, cols, sec, rows=8, example=None, note="")`: fill-in template. cols `[(label, relative width number e.g. 1.4)]`; `example` one filled row (tuple of strings).
 - `b.depmap(ey, title, lede, centre, nodes, tolerance, sec, note="")`: dependency map. centre `(service, description)`; exactly 6 nodes `(category, items text)`; tolerance 3 to 4 `(label, value)`. Label tolerance values as illustrative.
 
+## 3b. Standard structure pages (round 3)
+
+- `b.execsum(title, challenges, risks, recs, good, support=None)`: one-page executive summary. Lists of short points: challenges 3, risks 4, recs 4 to 5, good 3 to 4 (each under ~22 words). `support` defaults to standard positioning lines.
+- `b.regions(ey, title, lede, items, sec, note="")`: regional notes page. items 4 x `(region, what applies, in practice)` with region "United Kingdom", "United States", "European Union", "Middle East" (or "Middle East (UAE)"). Adds a "not legal advice" line.
+- `b.toolkit_index(title=..., lede=None)`: index of the seven tools with live page numbers.
+- `b.readiness()`: Toolkit 01, filled in at build time with the industry readiness assessment.
+- `b.decisionlog(title, lede, example, rows=12, note="")`: Toolkit 03, standard columns Time, Decision, Options considered, Decided by, Rationale, Evidence or reference; `example` is one row tuple.
+- `tool=True` on `raci`, `escalation`, `messages`, `exercise`, `pir`: stamps the standard toolkit eyebrow and running header. Use once each, inside Part 04.
+- `b.platform(...)` now adds a third page, "What is standard, what is configured" (reports get it automatically).
+
 ## 4. Pages added automatically
 
 At build time, for industries in the tables, `ccextra.add_pages` inserts and fixes the contents numbering:

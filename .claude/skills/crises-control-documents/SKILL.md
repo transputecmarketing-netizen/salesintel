@@ -24,25 +24,36 @@ The documents have three jobs, and every page should serve at least one:
 
 For several industries at once, brief one writer agent per industry with `references/writer-brief.md`, then QA every result yourself.
 
-## Playbook recipe (34 to 40 pages)
+## Audience and evergreen rule
 
-art_cover, contents, foreword, intro, statement, three parts (each `mark` + `opener`, then a varied mix), questions, checklist, glossary, `platform()` (two pages, near the end), `mark("", "Sources")` + sources (one page), `art_back` (last call; becomes the demo CTA).
+Readers are in the **UK, US, Europe and the Middle East**. Write the operational guidance so it works anywhere; put law and regulation in clearly labelled regional material (`b.regions()` pages with United Kingdom, United States, European Union and Middle East cards, or short asides that start with the bold region name). Never imply that a UK regulation applies elsewhere; label UK material as UK. Every legal or regulatory claim is qualified (who it applies to, status: in force, proposed, guidance) and sourced. Healthcare is written for hospitals and health systems anywhere, with NHS terms only in UK-labelled text.
 
-Every playbook must include, written for its industry:
-- one `firsthour()` (realistic T+ timeline of the industry's worst day) and one `swimlane()` for the same scenario showing actions, decisions, where it goes wrong and how it is monitored
-- one `severity()` ladder with industry triggers and one `escalation()` workflow
-- one `raci()` roles and responsibilities matrix (decision rights: who closes, who switches to fallback, who speaks to media)
-- one `messages()` page: 4 to 6 ready-to-send templates for staff, customers/residents/passengers/patients/guests, regulators, suppliers, a media holding line
-- at least two industry checklists or fill-in `form()` templates
-- one `exercise()` tabletop, one `pir()` post-incident review, one `tracker()` outstanding actions board
-- at least one essay, one usecase page with 3 scenarios that name failure points, decision owners and monitoring, one table, and a week / month / quarter plan with owners
-- industry specifics (e.g. `depmap()` with impact tolerance for financial services; non-responders and assistance registers for housing; store / region / head office for retail; driver check-ins for transport; shift roles and multi-venue for hospitality; downtime procedures and clinical / digital / partner coordination for healthcare)
+Documents are **evergreen**: covers carry no dates (the kit handles this), the text avoids "this week", "this month's", seasonal hooks, and the back matter shows "Last reviewed: <month year>" (set `REVIEWED` in `ccprac.py` when you review the series). Dated events are fine as case studies. Cover titles must not depend on one country's law.
 
-The positioning page, use cases, readiness assessment and buyer's guide are **inserted automatically**; do not write them.
+## Playbook recipe (standard structure, 40 to 46 pages)
 
-## Report recipe (24 to 30 pages)
+Every playbook uses the same structure so the series feels like one product:
+1. art_cover, contents
+2. `mark("", "Foreword")` foreword
+3. `mark("", "Executive summary")` `execsum(title, challenges, risks, recs, good)`: one page covering the operational challenges, incidents and risks to prepare for, key recommendations, what effective incident coordination looks like, and how Crises Control supports the response
+4. `mark("", "Introduction")` intro + statement (carry the narrative: most organisations can send alerts, few can manage incidents end-to-end)
+5. `mark("01", <your title>)` context, regulation (`regions()` pages), industry analysis (e.g. `depmap()` for financial services)
+6. `mark("02", "Incident scenarios")` (fixed title): severity, firsthour, swimlane, a usecase page with 3 scenarios (failure point, who decides, how it is monitored), tracker
+7. `mark("03", <your title>)` response and recovery, the week / month / quarter plan with owners, at least two industry checklists or `form()` templates
+8. `mark("04", "Practical toolkit")` (fixed title), in this exact order: `toolkit_index()`, `readiness()`, `raci(..., tool=True)`, `decisionlog(title, lede, example)`, `escalation(..., tool=True)`, `messages(..., tool=True)`, `exercise(..., tool=True)`, `pir(..., tool=True)`. With `tool=True` the kit stamps the standard numbered names: Toolkit 01 Readiness assessment, 02 Roles and responsibilities matrix, 03 Incident decision log, 04 Escalation workflow, 05 Communication templates, 06 Tabletop exercise, 07 Post-incident review template. Use exactly these names in text; titles and content stay industry-specific.
+9. `mark("", "Questions, checklist and glossary")` questions, checklist, glossary
+10. `platform()` (now three pages: the lifecycle, the scenario through the modules, and "What is standard, what is configured")
+11. `mark("", "Sources")` sources (one page), then `art_back()` last (becomes the demo CTA)
 
-rep_cover, contents, summary (bottom line), findings (6 to 7), facts (6 sourced figures), timeline (6 to 9 dated events), 2 to 3 analysis parts (opener, essays with citations, tables, figpage, compare / matrix), "What it means for UK organisations in <industry>", recommendations, questions for the board, glossary, sources (15 to 30, two pages allowed), rep_back (becomes the demo CTA). Shared pages are inserted before Sources automatically.
+Positioning, use cases and buyer's guide are **inserted automatically**; the readiness assessment is filled in where `readiness()` is called. Do not write them yourself.
+
+## Report recipe (26 to 32 pages)
+
+rep_cover, contents, summary (bottom line), findings (6 to 7), facts (6 sourced figures), timeline (6 to 9 dated events), 2 to 3 analysis parts (opener, essays with citations, tables, figpage, compare / matrix) including at least one `regions()` page, "What it means for organisations in <industry>", recommendations, questions for the board, glossary, sources (15 to 40, two pages allowed; start the second note with "Sources continued"), rep_back (becomes the demo CTA). Positioning, the capability page, use cases, readiness assessment and buyer's guide are inserted before Sources automatically.
+
+## Positioning (use consistently)
+
+Category: **Operational Incident Coordination Platform**. Strategic narrative: **"Most organisations can send alerts. Few can manage incidents end-to-end."** Use both in introductions (narrative), product sections and closing pages; the kit already carries them on the positioning, platform, capability and CTA pages. Keep SEO terms where natural: incident management software, mass notification, emergency communication, business continuity.
 
 ## Brand (official brand sheet)
 
@@ -54,10 +65,10 @@ Ink `#0B223C`, panel navy `#0A3165`, blue `#1179BB`, sky `#16A1ED`, accent blue 
 
 1. **No em dashes or en dashes.** British spelling. Plain, confident, specific; not AI-sounding (avoid "in today's fast-paced world", "unlock", "delve", "game-changer", "revolutionise", "harness", "landscape is evolving", "navigate the complexities", "robust", "seamless").
 2. **Never invent** numbers, quotes, dates, names or legal duties. State legal requirements exactly as the law or regulator states them; label proposals, consultations and guidance as such. Label illustrative examples and tolerance values as illustrative.
-3. **Never invent Crises Control statistics, customers or features.** Product descriptions come only from `MODULES` / `LIFE` in the kits and the use-case register. Illustrative use cases are never presented as customer deployments (the evidence tags handle this on the use-case page; keep the same honesty in your own text).
-4. **CRAiG**: describe only current capability (helps users interact with the platform, retrieve information and assist with the incident). Never promise future features.
+3. **Never invent Crises Control statistics, customers or features.** Every product claim follows `references/capabilities.md`: distinguish standard functionality, configured capabilities (plans, groups, targeting, escalation rules and timings, cascading) and third-party integrations (directory sync, SSO, the Teams app, monitoring triggers "where configured"). Never imply the platform detects incidents by itself or escalates without configured rules. Do not name Slack, ServiceNow or an API, or claim offline app use, geofencing or conference bridges, unless the client confirms them. Illustrative use cases are never presented as customer deployments (the evidence tags handle this on the use-case page; keep the same honesty in your own text).
+4. **CRAiG** (beta): answers questions and summarises the customer's own incident data within each user's permissions. It does not decide, act, launch or detect incidents. Never promise future features.
 5. **No competitor names.** Never quote internal framework material (ICP tiers, pricing, packages, KPIs, competitor views).
-6. Crises Control appears as the helpful partner on the platform pages, the auto-inserted pages, the closing CTA and lightly in CTAs. Everything else is vendor-neutral expertise. Location features are described "where supported".
+6. Crises Control appears as the helpful partner on the platform pages, the auto-inserted pages, the closing CTA and lightly in CTAs. Everything else is vendor-neutral expertise. Location is described "where available".
 7. Do not name or blame individuals. Short, hooky two-line cover titles ("Within / tolerance.", "Keep it / moving.").
 
 ## Research
@@ -77,6 +88,8 @@ Edit these in the project copy; if the user wants the new industry kept for futu
 
 - `references/page-api.md`: every page method and argument shape.
 - `references/framework-rules.md`: positioning, lifecycle, pillars, failures, demo flow, language rules.
+- `references/capabilities.md`: what the product does (standard / configured / integration) and what never to claim.
+- `references/revision-brief-round3.md`: the brief used to bring the six playbooks to the current standard; reuse it as the writer brief.
 - `references/framework.txt`: the full Company Operating Framework V4 text (internal; read sections 1 to 4, 7, 9 and 11; never quote internal sections).
 - `references/use_cases.txt`: the use-case register in text form (the build reads `crises-control/use_cases.xlsx`).
 - `references/examples/`: cp01, cr01, cp06 as built and delivered.
