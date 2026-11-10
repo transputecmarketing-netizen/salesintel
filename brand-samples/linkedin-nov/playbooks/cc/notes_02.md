@@ -36,3 +36,25 @@ New pages (all illustrative, labelled as such; no new statistics or sources):
 - Part 03: outstanding actions tracker (morning after; note cites Awaab's Law 24 hours and the FSR 2022 lift fault rule); night-time tabletop exercise (6 injects); post-incident review template (8 boxes).
 Changed: use-case cards now show where it goes wrong, who decides, how it is monitored and the proof (existing citations kept); platform rows rewritten as seven outcomes in lifecycle order (SOS to CRAiG, "Audit & Reporting"); CRAiG row limited to retrieving information from the incident (current capability only). Part opener lists updated.
 Shared-file issue to report: on the second platform page (ccprac.platform), the background dial's red sector crosses the "ACCOUNTABILITY" box at bottom right. Not editable from cp02.
+
+## Round 3 revision (BRIEF3) · international, evergreen, standard toolkit
+Build: `python3 build_cc.py cp02 cr02` -> `CC-02-Playbook-Every-Resident-Reached.html` (44 pages), `CC-02-Report-Safe-Homes-Clear-Duties.html` (30 pages). `node check.js` OK on both; PDFs made; every page rendered and viewed. No retitles (titles are not tied to one country's law).
+
+Playbook structure: Foreword (3 paras) > Executive summary (execsum, custom support lines) > Introduction (narrative in intro lede) > 01 Know your building (essay, 2 regions pages: fire and evacuation duties; response clocks and resident communication; six emergencies; resident assistance register) > 02 Incident scenarios (severity, firsthour, swimlane, usecase, tracker) > 03 Reach, record, recover (strategy change, non-responders, acknowledgement log, out of hours, records, first week/month/quarter) > 04 Practical toolkit (index, readiness, raci, decisionlog, escalation, messages, exercise, pir, all tool=True) > questions, checklist, glossary > platform > sources (20, one page) > back.
+
+### Regional frameworks verified (playbook source numbers; report has its own numbering)
+- US: OSHA 29 CFR 1910.38 (osha.gov text read: written plan, reporting, evacuation, accounting for employees, alarm system, training, review); NFPA 101 (NFPA fact sheet: model code, used with or without a building code; adoption by jurisdiction); NFPA 1660 (2024, combines 1600, 1616, 1620; voluntary); HUD NSPIRE Smoke Alarm standard v3.0 (hud.gov PDF read: life-threatening, 24-hour correction).
+- EU: Regulation (EU) 2024/3110 (recitals 25 and 26 keep construction-works requirements with member states; main part applies 8 January 2026 per Commission page); Directive 89/391/EEC Art 8 (osha.europa.eu); EECC Art 110 (legislation.gov.uk copy of the directive text read: by 21 June 2022). EUR-Lex itself was blocked by a WAF challenge, so EU texts were read through these mirrors and Commission/Parliament summaries.
+- Middle East: UAE Fire and Life Safety Code of Practice (2018 edition listed by Dubai Civil Defence; official PDF not retrievable, so only described as the national fire code issued by Civil Defence); Dubai Law No. 4 of 2025 (full text read on dlp.dubai.gov.ae: Art 15 designated person keeps occupants informed; Art 17 owner duties; issued 7 April 2025, in force on Gazette publication, date not stated); Saudi SBC 801-CR-2024 (official sbc.gov.sa PDF, table of contents read: Ch 4 emergency planning, 404 evacuation plans, 405 drills, 406 employee training, 917 mass notification); NCEMA 7000:2021 (standard PDF read; report only, applicability left to sector).
+
+### Not stated (could not verify)
+- SBC 801 2024 effective date (secondary sources say 30 June or 1 July 2025). UAE code amendments after 2018. HUD NSPIRE voucher-programme compliance date (secondary sources only). Qatar requirements not researched to primary level, so not included.
+
+### Product claims changed
+- SOS row: press-and-hold, location where available (was "one touch, with the building and floor attached").
+- Ping: re-alerting "under the rules you configure" (was "silence is chased"). Task Manager: no automatic escalation of missed deadlines. Control Centre: acknowledgements by configured groups. CRAiG marked beta, answers questions about data the user can see.
+- Removed "alerted automatically" (first hour, escalation note, deputy) and "automatic resend". Back covers: "in seconds" removed; category named.
+
+### Kit issues to report (shared files, not edited)
+- Contents page overflows with the round 3 structure (11 entries; also on CC-01). Worked around in cp02 with a scoped style in `b.how` that reduces TOC row padding; remove it if the kit is fixed.
+- ccextra IND["Property, Housing and Facilities"] readiness "good looks like" row 5 says "Awaab's Law and fire safety actions run as tasks": UK-only wording on a toolkit page.
