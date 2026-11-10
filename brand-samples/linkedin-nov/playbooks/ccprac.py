@@ -94,7 +94,7 @@ def escalation(s, ey, title, lede, levels, sec, note=""):
     """levels: (level name, trigger, who is alerted, who decides, escalate-if condition or '')."""
     cards = ""
     for i, (lv, trig, who, dec, esc) in enumerate(levels):
-        col = [RED, NAVY2, BLUE, SKY, GREY][min(i, 4)]
+        col = [SKY, BLUE, NAVY2, RED][min(i, 3)] if len(levels) <= 4 else [SKY, BLUE, NAVY2, NAVY2, RED][min(i, 4)]
         cards += f'''<div style="display:grid;grid-template-columns:30mm 1fr 1fr 1fr;gap:5mm;border:.3mm solid {LINE};border-left:1.6mm solid {col};border-radius:2.4mm;padding:3.6mm 4.4mm;background:#fff">
           <div><div style="{MONO};font-size:6.8pt;letter-spacing:.12em;color:{col}">LEVEL {i+1}</div><div style="font-weight:700;font-size:10.6pt;margin-top:.8mm">{lv}</div></div>
           <div><div class="lab">Trigger</div><div style="font-size:8.8pt;line-height:1.4;margin-top:1mm;color:{INK}">{trig}</div></div>

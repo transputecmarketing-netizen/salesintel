@@ -23,9 +23,9 @@ MODULES = {"Ping": "Mass alerting by push, SMS, voice and email, with acknowledg
            "Incident Manager": "A workspace per incident: team coordination, a single communication log and message templates.",
            "Task Manager": "Digitised procedures: tasks assigned with owners, deadlines and escalation paths.",
            "Control Centre": "A live view of tasks, communications, locations and escalations.",
-           "Audit Trail": "Automatic timestamps and incident timelines, ready for the post-incident report.",
+           "Audit Trail": "Audit & Reporting: incident records, response analysis and task accountability, ready to report.",
            "SOS": "One-touch mobile escalation with GPS location for frontline staff.",
-           "CRAiG": "AI assistant (beta) that drafts role-specific messages, translates and summarises."}
+           "CRAiG": "AI assistant that helps users interact with the platform, find information and work through the incident."}
 
 def dial(size=520, ticks=60, arc=(200, 330), red=(330, 352), needle=338, dark=True, fig=None, figw=None):
     """The Crises Control dial: tick ring, a blue arc, a red sector and a needle. Angles in degrees, 0 = top, clockwise."""
