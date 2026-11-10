@@ -237,7 +237,7 @@ def build():
         ("RACI", "Responsible, accountable, consulted, informed: a way to show who does what, with one owner per decision."),
         ("Back-entry", "Entering results and notes recorded on paper during downtime into the system once it is safe.")])
     b.platform("How the modules work together in a healthcare incident", "One pathology outage, followed through the platform. Crises Control supports your incident response and business continuity plans; it does not replace them.", [
-        ("A laboratory manager, or a lone community nurse, raises the alarm in one touch, with location, so the site team knows in seconds.", "SOS"),
+        ("A laboratory manager, or a lone community nurse, raises the alarm in one touch, with location where supported, so the site team knows in seconds.", "SOS"),
         ("On-call, clinical and digital leads are called in by role; replies show who is coming, and silence escalates to a deputy.", "Ping"),
         ("The critical incident is declared, roles are assigned, and the incident team, ICB liaison and supplier work from one log.", "Incident Manager"),
         ("Downtime procedures, O type authorisation and results back-entry run as owned tasks with deadlines in every department.", "Task Manager"),

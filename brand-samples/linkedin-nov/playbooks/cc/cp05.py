@@ -48,7 +48,7 @@ def build():
         (3, "Moderate", "One site's tills or booking system failing. A guest collapse. An aggressive group removed. People trapped in a lift.", "Duty manager, general manager, service desk or facilities helpdesk.", "Radio · push · email"),
         (4, "Minor", "Suspicious behaviour reported and resolved. A near miss. A single device fault. Verbal abuse logged.", "Duty manager, recorded for the weekly review and trend reporting.", "App · email")], "Know the duty")
     b.escalation("Escalation", "How an incident climbs from the shift to head office", "Illustrative timings, to be set by each operator. Each level follows the severity ladder, and escalating never takes away the duty manager's authority to act at once on site.", [
-        ("On-shift report", "Suspicious behaviour, an unattended bag, a near miss or a guest unwell. Severity 4.", "The duty manager, by radio, the code phrase or a one-touch alert with location.", "Duty manager, after a quick check with the person who reported it.", "the item cannot be cleared within 5 minutes or anyone is at risk"),
+        ("On-shift report", "Suspicious behaviour, an unattended bag, a near miss or a guest unwell. Severity 4.", "The duty manager, by radio, the code phrase or a one-touch alert with location where supported.", "Duty manager, after a quick check with the person who reported it.", "the item cannot be cleared within 5 minutes or anyone is at risk"),
         ("Venue incident", "A guest collapse, an aggressive group, a lift entrapment or one site's tills down. Severity 3.", "Every member of staff on shift, and the on-call general manager.", "Duty manager. The general manager is informed, not asked for permission.", "the venue evacuates, invacuates or locks down, or 999 is called for a threat"),
         ("Major venue incident", "Full evacuation, lockdown, a suspicious item or a serious assault. Severity 2.", "On-call general manager, operations manager, off-duty staff and the next shift.", "Duty manager on site. Operations manager decides on closing and the next shift.", "another venue is affected, anyone is seriously hurt, or media arrive"),
         ("Group crisis", "An attack or credible threat, several venues affected, or a group-wide system outage. Severity 1.", "Head office crisis team, every duty manager nearby, security lead and communications.", "Head office incident lead for closures, statements and bookings; duty managers for safety on site.", "")], "Know the duty",
@@ -70,7 +70,7 @@ def build():
         ["22:15", "22:17", "22:20", "22:30", "22:45", "23:30"], [
         (0, 0, "Door team radios the code phrase", "act"), (0, 0, "Duty manager declares lockdown", "dec"),
         (1, 0, "Shouting outside; staff unsure who decides", "risk"),
-        (0, 1, "999 called; alert raised with location", "act"), (3, 1, "Alerted; warns every nearby venue", "act"),
+        (0, 1, "999 called; alert raised with location where supported", "act"), (3, 1, "Alerted; warns every nearby venue", "act"),
         (1, 1, "Duty manager locks doors and invacuates", "dec"),
         (0, 2, "Staff replies tracked area by area", "mon"), (1, 2, "Two agency staff missing from alert list", "risk"),
         (2, 2, "Staff first hear of it on social media", "risk"), (4, 2, "Crisis team activated, roles assigned", "act"),
@@ -223,7 +223,7 @@ def build():
         ("Acknowledgement", "A recipient's confirmation that an alert has been read and acted on."),
         ("Holding line", "A short, accurate statement used while facts are still being established.")])
     b.platform("How the modules work together in a hospitality incident", "The three-venue night in this playbook, from the first alarm to the review. Each step is an outcome, not a feature.", [
-        ("The door supervisor raises the alarm in one touch, with location, so the duty manager knows within seconds.", "SOS"),
+        ("The door supervisor raises the alarm in one touch, with location where supported, so the duty manager knows within seconds.", "SOS"),
         ("Every member of staff on shift, agency staff included, gets the lockdown alert and replies when their area is safe.", "Ping"),
         ("The duty manager activates the incident, assigns roles by area and keeps one log shared with head office.", "Incident Manager"),
         ("Locking doors, sweeping toilets and terraces, reaching bedrooms and the head count become owned tasks that escalate if they stall.", "Task Manager"),

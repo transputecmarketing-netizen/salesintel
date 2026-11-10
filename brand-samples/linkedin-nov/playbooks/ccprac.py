@@ -41,17 +41,17 @@ DEMO = {
    "The executive watches services, tasks and time remaining against tolerance.", "The timeline for the self-assessment and the regulator is produced.",
    "CRAiG helps the incident lead find information and work through the platform as the incident runs."]),
  "Property, Housing and Facilities": dict(title="Watch a night-time fire<br>run end to end.", steps=[
-   "A concierge raises a fire alarm alert from the building, with location.", "Residents, the duty manager and contractors are alerted; acknowledgements come back by flat.",
+   "A concierge raises a fire alarm alert from the building, with location where supported.", "Residents, the duty manager and contractors are alerted; acknowledgements come back by flat.",
    "The incident is activated, roles assigned and the evacuation decision logged.", "Welfare checks for residents with assistance needs become owned tasks.",
    "The duty manager sees buildings, residents reached and jobs outstanding.", "A defensible record of every message and decision is produced.",
    "CRAiG helps the duty manager find information and guidance in the platform."]),
  "Retail": dict(title="Watch a multi-store outage<br>run end to end.", steps=[
-   "A store manager reports tills down, with location.", "Store managers and regional managers are alerted; each store acknowledges.",
+   "A store manager reports tills down, with location where supported.", "Store managers and regional managers are alerted; each store acknowledges.",
    "Head office activates the incident and assigns store, regional and head office roles.", "Fallback, customer messaging and cash procedures become tasks in every store.",
    "Head office sees which stores are trading, closed or at risk.", "The incident timeline is produced for insurers and the review.",
    "CRAiG helps head office find information and guidance in the platform."]),
  "Transport and Logistics": dict(title="Watch a hub power loss<br>run end to end.", steps=[
-   "A depot supervisor reports a power loss, with location.", "Drivers, depots and partners are alerted; drivers check in.",
+   "A depot supervisor reports a power loss, with location where supported.", "Drivers, depots and partners are alerted; drivers check in.",
    "The duty manager activates the incident and assigns network roles.", "Rerouting, customer updates and welfare checks become owned tasks.",
    "Operations sees sites, drivers, vehicles and actions outstanding.", "The response record is produced for partners, insurers and regulators.",
    "CRAiG helps the duty manager find information and guidance in the platform."]),
@@ -61,7 +61,7 @@ DEMO = {
    "Head office sees every venue, area secured and staff accounted for.", "A timeline of the first fifteen minutes is produced.",
    "CRAiG helps the duty manager find information and guidance in the platform."]),
  "Healthcare": dict(title="Watch a pathology outage<br>run end to end.", steps=[
-   "A laboratory manager reports a system outage, with location.", "On-call, clinical and digital leads are alerted; call-in responses come back.",
+   "A laboratory manager reports a system outage, with location where supported.", "On-call, clinical and digital leads are alerted; call-in responses come back.",
    "The incident is declared, roles assigned and partners added.", "Downtime procedures in each department become owned tasks.",
    "The incident team sees services affected, staff mobilised and actions outstanding.", "The record for EPRR assurance and the after-action review is produced.",
    "CRAiG helps the incident team find information and guidance in the platform."]),

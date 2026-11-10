@@ -97,7 +97,7 @@ def build():
         (0, 4, "Rerouted to receiving hubs", "act"),
         (0, 5, "Drivers' hours checked before onward legs", "mon"),
         (1, 0, "Backup covers only some systems", "risk"),
-        (1, 1, "Duty manager raises the alarm, with location", "act"),
+        (1, 1, "Duty manager raises the alarm, with location where supported", "act"),
         (1, 2, "Roll call: staff, agency, visiting drivers", "act"),
         (1, 3, "Agency workers missing from the list", "risk"),
         (1, 4, "Roll call confirmed to incident manager", "mon"),
@@ -218,7 +218,7 @@ def build():
         ("Acknowledgement", "A recipient's confirmation that an alert has been read and acted on."),
         ("Incident manager", "The person who runs the response, keeps the log and sets the rhythm of updates.")])
     b.platform("How the modules work together in a transport incident", "The hub power loss from this playbook, followed through the platform from the first alarm to the review.", [
-        ("A depot duty manager or a driver on their own raises the alarm in one touch, with their location.", "SOS"),
+        ("A depot duty manager or a driver on their own raises the alarm in one touch, with their location where supported.", "SOS"),
         ("Drivers, depot staff and partners are alerted by push, SMS and voice; anyone silent is chased and escalated automatically.", "Ping"),
         ("The incident manager declares SEV 1, assigns network roles and keeps one log shared with partner sites and suppliers.", "Incident Manager"),
         ("Roll call, missed check-in escalation, diversion and customer updates run as owned tasks with deadlines.", "Task Manager"),

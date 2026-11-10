@@ -102,7 +102,7 @@ QS = [("Does it stop at the message?", "Ask what the platform does after the ale
       ("Does it run your procedures?", "Ask whether your plans become owned tasks with deadlines, or stay as documents."),
       ("Is there one shared picture?", "Ask what leaders see live, and whether it needs someone to update a spreadsheet."),
       ("Does it work when your systems do not?", "Ask how teams coordinate if email, chat or your network is down."),
-      ("Can frontline staff raise the alarm?", "Ask how a colleague on site escalates, with their location, in one action."),
+      ("Can frontline staff raise the alarm?", "Ask how a colleague on site escalates, with their location where supported, in one action."),
       ("What evidence does it leave behind?", "Ask for a sample timeline of the kind a regulator, insurer or inquiry would want."),
       ("Can you rehearse in it?", "Ask whether you can run exercises on the same platform you would use for real.")]
 
@@ -157,13 +157,16 @@ def add_pages(b):
     P.append(dict(body=s_hd(b, "Buyer's guide", "Eight questions to ask any incident platform supplier", "Many tools can send an alert. These questions separate a notification tool from a platform that coordinates the whole response.")
                   + f'<div style="margin-top:7mm;columns:2;column-gap:10mm">{q}</div>', dark=False, sec="Buyer's guide"))
     # placement: playbooks put positioning before the platform pages and the tools after them; reports put all before Sources
+    import ccuse
+    uc = ccuse.page(b)
+    if uc: P.insert(1, uc)
     plat = [i for i, p in enumerate(b.pages) if p[2] == "Where Crises Control fits"]
     src = next((t for t in b.toc if t[1] == "Sources"), None)
     if plat:
-        ins(b, plat[0], [P[0]]); ins(b, plat[-1] + 2, P[1:], ("", "Readiness assessment and buyer's guide"))
+        ins(b, plat[0], [P[0]]); ins(b, plat[-1] + 2, P[1:], ("", "Use cases, readiness assessment and buyer's guide"))
     else:
         at = src[2] - 1 if src else len(b.pages) - 1
-        ins(b, at, P, ("", "Coordination, readiness and buyer's guide"))
+        ins(b, at, P, ("", "Coordination, use cases, readiness and buyer's guide"))
 
 def s_hd(b, ey, title, lede): return b._hd(ey, title, lede)
 

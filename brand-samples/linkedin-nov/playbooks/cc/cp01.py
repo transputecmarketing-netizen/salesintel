@@ -215,7 +215,7 @@ def build():
         ("Material third party arrangement", "A supplier arrangement whose disruption could seriously affect a firm, which must be notified and registered under the 2027 regime.")])
 
     b.platform("How the modules work together in a financial services incident", "The cloud outage in this playbook, one module at a time, in the order the incident runs. Crises Control supports your plan; it does not replace it.", [
-        ("A branch colleague reports customers cannot pay by card, with their location, in one touch.", "SOS"),
+        ("A branch colleague reports customers cannot pay by card, with their location where supported, in one touch.", "SOS"),
         ("The incident team, executive on call and SMF holder are reached by SMS, voice and push; silence escalates to deputies.", "Ping"),
         ("Card payments is declared against its impact tolerance, with roles, the bridge and the decision log in one workspace.", "Incident Manager"),
         ("Failover, workarounds, customer messages and the supervisor call run as owned tasks with deadlines and escalation.", "Task Manager"),
