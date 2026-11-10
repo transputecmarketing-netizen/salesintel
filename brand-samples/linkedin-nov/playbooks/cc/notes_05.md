@@ -1,6 +1,6 @@
 # Notes 05: Hospitality (week of 7 December 2026)
 
-Playbook: CC-05-Playbook-Ready-for-Martyns-Law.html (25 pages, 13 sources)
+Playbook: CC-05-Playbook-Ready-for-Martyns-Law.html (39 pages after round 2 revision, 13 sources unchanged)
 Report: CC-05-Report-The-Protect-Duty.html (22 pages, 18 sources)
 Back pages point to each other.
 
@@ -51,3 +51,23 @@ Back pages point to each other.
 - The impact assessment cost figures (EANDCB and NPV). These are verified in the RPC opinion but not used, to keep the focus on duties.
 - The SIA qualification changes for door supervisors on spiking. These are a Home Office commitment from 2023, and their delivery was not verified.
 - Names of individuals at Manchester Arena (other than Martyn Hett, for the law's name), victims and staff. They are deliberately omitted under rule 2.
+
+## Round 2 revision (BRIEF2, 10 November 2026)
+The playbook grew from 29 to 39 pages, counting the shared pages that are now added automatically. No redesign was made, and no new sourced facts were added, so the sources page is unchanged. All new examples, timings and names are labelled illustrative.
+
+New pages:
+- **Part 01:** an escalation workflow ("How an incident climbs from the shift to head office"). It has four levels tied to the severity ladder, and silence for 5 minutes escalates the alert. The timings are illustrative.
+- **Part 02:**
+  - A swimlane, "One night, three venues and head office". The lanes are the hotel, a bar, a restaurant, the on-call operations manager and the head office crisis team. Its cards show risk points, decisions and monitoring.
+  - A shift responsibility matrix (RACI). The roles are Duty manager, Supervisor, Door and security, Front of house, Kitchen and Head office, across 11 activities.
+  - A guest communication table. It covers public areas, bedrooms, guests who do not speak English, guests who need help, outdoor areas, and what never to say.
+  - An outstanding actions tracker ("Sunday, 11:00"), with 9 rows.
+- **Part 03:** two fill-in templates, a shift safety briefing record and an area sweep and head count log.
+- **New Part 04, "Rehearse and review":**
+  - The existing scenarios, now rewritten around where it goes wrong, who decides and how it is monitored.
+  - A 90-minute tabletop exercise with 6 injects.
+  - A post-incident review template.
+  - The existing leadership questions.
+- **Platform rows:** rewritten as 7 lifecycle outcomes (SOS to CRAiG) under the title "How the modules work together in a hospitality incident". The name "Audit & Reporting" is used. CRAiG is described only as helping users find information in the incident.
+
+Existing pages kept: the first hour (its text now covers the failure points, tracking replies by area and the hand-off to the tracker), the roles steps, the comms flow, other emergencies, messages, the festive steps, the plan, the checklist and the glossary.
