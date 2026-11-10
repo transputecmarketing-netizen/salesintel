@@ -1,0 +1,2248 @@
+Crises Control
+Company Operating Framework V4
+
+
+Table of Contents
+Section 1: Executive Summary .............................................................................. 7
+  Purpose...................................................................................................................... 7
+  Strategic Shift ............................................................................................................ 7
+  Growth Thesis ............................................................................................................ 8
+  Long-Term Vision ....................................................................................................... 8
+
+Section 2: Mission, Vision & Purpose .................................................................... 8
+  Mission ...................................................................................................................... 8
+  Vision ......................................................................................................................... 8
+  Purpose...................................................................................................................... 8
+  Core Principles ........................................................................................................... 9
+
+Section 3: Market Category .................................................................................. 9
+  Existing Market Landscape.......................................................................................... 9
+  The Category We Intend To Own ................................................................................ 10
+  Category Deﬁnition ................................................................................................... 10
+  Category Narrative .................................................................................................... 10
+  Strategic Position ..................................................................................................... 11
+
+Section 4: Market Positioning ............................................................................. 11
+  Old Positioning ......................................................................................................... 11
+  New Positioning........................................................................................................ 11
+  Positioning Statement............................................................................................... 12
+  The Core Problem ..................................................................................................... 12
+  Core Value Pillars ..................................................................................................... 12
+  The Crises Control Story ........................................................................................... 13
+  Positioning Summary ................................................................................................ 13
+
+Section 5: Ideal Customer Proﬁle (ICP) Framework ............................................... 13
+  Strategic Principle .................................................................................................... 13
+  Master ICP ............................................................................................................... 14
+  Common Characteristics ........................................................................................... 14
+  Typical Organisation Size .......................................................................................... 15
+  ICP Tier Structure ..................................................................................................... 15
+     Tier 1 ICPs ................................................................................................................................ 15
+     Tier 2 ICPs ................................................................................................................................ 18
+     Tier 3 ICPs ................................................................................................................................ 19
+
+Section 6: Industry Prioritisation ......................................................................... 19
+  Strategic Principle .................................................................................................... 19
+     Priority 1 Industries ................................................................................................................... 19
+     Priority 2 Industries ................................................................................................................... 20
+     Priority 3 Industries ................................................................................................................... 20
+
+Section 7: Product Architecture .......................................................................... 21
+  Strategic Principle .................................................................................................... 21
+     Incident Lifecycle ...................................................................................................................... 21
+     SOS .......................................................................................................................................... 21
+     Ping .......................................................................................................................................... 21
+     Incident Manager ...................................................................................................................... 21
+     Task Manager ........................................................................................................................... 22
+     Control Centre .......................................................................................................................... 22
+     Audit & Reporting ...................................................................................................................... 22
+     CRAiG ....................................................................................................................................... 22
+
+Section 8: Customer Journey & Land-and-Expand Model ...................................... 22
+  Strategic Principle .................................................................................................... 22
+     Stage 1: Awareness .................................................................................................................. 23
+     Stage 2: Entry Point .................................................................................................................. 23
+     Stage 3: Adoption ..................................................................................................................... 23
+     Stage 4: Expansion ................................................................................................................... 23
+     Stage 5: Accountability ............................................................................................................. 23
+     Stage 6: Intelligence.................................................................................................................. 23
+
+  The Crises Control Expansion Narrative ..................................................................... 24
+
+Section 9: Sales Methodology ............................................................................. 24
+  Strategic Principle .................................................................................................... 24
+  The Sales Narrative................................................................................................... 24
+  Four-Stage Discovery Framework .............................................................................. 24
+     Stage 1: Activation .................................................................................................................... 24
+     Stage 2: Coordination ............................................................................................................... 24
+     Stage 3: Execution .................................................................................................................... 25
+     Stage 4: Assurance ................................................................................................................... 25
+
+  Demonstration Framework ........................................................................................ 25
+  Competitive Positioning ............................................................................................ 25
+     AlertMedia ................................................................................................................................ 25
+     Everbridge ................................................................................................................................ 25
+     FACT24 ..................................................................................................................................... 25
+     Noggin ...................................................................................................................................... 26
+     Crises Control ........................................................................................................................... 26
+
+Section 10: Marketing Operating System ............................................................. 26
+  Strategic Principle .................................................................................................... 26
+  Core Marketing Responsibilities ................................................................................ 26
+     1. Brand Positioning .................................................................................................................. 26
+     2. Demand Generation .............................................................................................................. 26
+     3. Education.............................................................................................................................. 26
+     4. Sales Enablement ................................................................................................................. 26
+
+  Marketing Messaging Hierarchy ................................................................................ 27
+     Level 1 ...................................................................................................................................... 27
+     Level 2 ...................................................................................................................................... 27
+     Level 3 ...................................................................................................................................... 27
+
+  Marketing Channels .................................................................................................. 27
+     Owned ...................................................................................................................................... 27
+     Social ....................................................................................................................................... 27
+     Third Party ................................................................................................................................ 27
+
+  Customer Proof Programme ...................................................................................... 27
+
+Section 11: Website Strategy .............................................................................. 28
+  Strategic Principle .................................................................................................... 28
+  Critical Insight .......................................................................................................... 28
+  Website Mission ....................................................................................................... 28
+  Strategic Website Narrative ....................................................................................... 28
+     Homepage ................................................................................................................................ 28
+     Platform Page........................................................................................................................... 28
+
+  How Customers Typically Start .................................................................................. 29
+  Proof & Accountability .............................................................................................. 29
+  Website Architecture................................................................................................. 29
+  Product Structure ..................................................................................................... 29
+
+Section 12: SEO & Search Strategy ...................................................................... 30
+  Strategic Principle .................................................................................................... 30
+     SEO Layer 1: Existing Revenue Keywords .................................................................................. 30
+     SEO Layer 2: Strategic Expansion Keywords .............................................................................. 30
+     SEO Layer 3: Enterprise & Governance Keywords ...................................................................... 30
+
+  Content Cluster Strategy ........................................................................................... 30
+  AI Search Strategy .................................................................................................... 31
+  Strategic SEO Model ................................................................................................. 31
+
+Section 13: Land-and-Expand Playbook ............................................................... 32
+  Strategic Principle .................................................................................................... 32
+  The Land-and-Expand Philosophy ............................................................................. 32
+  Typical Entry Points .................................................................................................. 32
+  Expansion Triggers ................................................................................................... 33
+     •      Coordination Trigger ......................................................................................................... 33
+     •      Execution Trigger.............................................................................................................. 33
+     •      Visibility Trigger ................................................................................................................ 33
+     •      Accountability Trigger....................................................................................................... 33
+     •      Intelligence Trigger ........................................................................................................... 33
+
+  Expansion Success Metrics ....................................................................................... 33
+
+Section 14: Competitive Positioning .................................................................... 34
+  Strategic Principle .................................................................................................... 34
+  Competitive Categories ............................................................................................. 34
+     Category 1: Alerting Platforms .................................................................................................. 34
+     Category 2: Enterprise Crisis Platforms ..................................................................................... 34
+     Category 3: Governance Platforms............................................................................................ 34
+     Category 4: IT Incident Platforms .............................................................................................. 35
+
+  Crises Control Position ............................................................................................. 35
+     Competitive Positioning Statement ........................................................................................... 35
+
+Section 15: Partner Strategy ............................................................................... 36
+  Strategic Principle .................................................................................................... 36
+  Partner Types ........................................................................................................... 36
+  Partner Value Proposition ......................................................................................... 37
+  Priority Partner Markets ............................................................................................ 37
+  Partner Success Metrics ........................................................................................... 37
+
+Section 16: Pricing & Packaging Strategy ............................................................ 37
+  Strategic Principle .................................................................................................... 37
+  Packaging Philosophy ............................................................................................... 37
+     •     Entry Package .................................................................................................................. 38
+     •     Professional Package ....................................................................................................... 38
+     •     Enterprise Package .......................................................................................................... 38
+     Strategic Add-Ons ..................................................................................................................... 38
+
+  Commercial Objectives ............................................................................................. 38
+  Strategic Value ......................................................................................................... 38
+  Pricing Narrative ....................................................................................................... 39
+Section 17: ARR Growth Model ........................................................................... 39
+  Strategic Principle .................................................................................................... 39
+  Revenue Growth Pillars ............................................................................................. 39
+     Pillar 1: New Customer Acquisition ........................................................................................... 39
+     Pillar 2: Customer Expansion .................................................................................................... 40
+     Pillar 3: Retention ...................................................................................................................... 40
+     Pillar 4: Geographic Expansion .................................................................................................. 40
+
+  ARR Targets Framework ............................................................................................ 41
+
+Section 18: Customer Success Framework .......................................................... 41
+  Strategic Principle .................................................................................................... 41
+  Customer Success Mission ....................................................................................... 41
+  Customer Success Lifecycle ...................................................................................... 41
+  Health Scoring Framework ........................................................................................ 42
+     Customer Success KPIs ............................................................................................................ 43
+
+Section 19: Product & Engineering Alignment ...................................................... 43
+  Strategic Principle .................................................................................................... 43
+  Product Mission........................................................................................................ 43
+  Product Design Principles ......................................................................................... 43
+  Product Architecture Strategy ................................................................................... 44
+  Product Roadmap Priorities....................................................................................... 44
+  Engineering Principles .............................................................................................. 44
+
+Section 20: CRAiG Strategy ................................................................................ 45
+  Strategic Principle .................................................................................................... 45
+  Current State ............................................................................................................ 45
+  Future State .............................................................................................................. 45
+  Strategic Role ........................................................................................................... 45
+     CRAiG Vision ............................................................................................................................ 46
+
+  Future Capabilities .................................................................................................... 46
+     Conversational Incident Management ....................................................................................... 46
+     Operational Analytics ................................................................................................................ 46
+     Predictive Intelligence ............................................................................................................... 46
+     Strategic Importance ................................................................................................................ 46
+
+  Long-Term Vision ..................................................................................................... 47
+
+Section 21: KPI & Success Metrics Framework ..................................................... 47
+  Strategic Principle .................................................................................................... 47
+  Company-Level Metrics ............................................................................................ 47
+     Marketing KPIs ......................................................................................................................... 47
+     Sales KPIs ................................................................................................................................ 48
+     Customer Success KPIs ............................................................................................................ 48
+     Product KPIs ............................................................................................................................. 49
+     Engineering KPIs....................................................................................................................... 49
+
+Section 22: Board-Level Strategic Objectives (2026–2028) ................................... 50
+     Strategic Objective 1 ................................................................................................................. 50
+     Strategic Objective 2 ................................................................................................................. 50
+     Strategic Objective 3 ................................................................................................................. 50
+     Strategic Objective 4 ................................................................................................................. 50
+     Strategic Objective 5 ................................................................................................................. 51
+     Strategic Objective 6 ................................................................................................................. 51
+     Strategic Objective 7 ................................................................................................................. 51
+     Strategic Objective 8 ................................................................................................................. 51
+     Strategic Objective 9 ................................................................................................................. 51
+
+Section 23: Long-Term Vision & Category Leadership Plan ................................... 52
+  Vision Statement ...................................................................................................... 52
+  The Evolution Roadmap............................................................................................. 52
+     Phase 1 .................................................................................................................................... 52
+     Phase 2 .................................................................................................................................... 52
+     Phase 3 .................................................................................................................................... 52
+     Phase 4 .................................................................................................................................... 52
+     Phase 5 .................................................................................................................................... 52
+
+  Category Leadership Strategy ................................................................................... 52
+     Thought Leadership .................................................................................................................. 52
+     Product Leadership................................................................................................................... 53
+     Customer Leadership................................................................................................................ 53
+     Partner Leadership ................................................................................................................... 53
+
+  The Strategic Narrative ............................................................................................. 53
+  The Company Mission In One Sentence ..................................................................... 53
+  The Future State ....................................................................................................... 53
+Section 1: Executive Summary
+Purpose
+This document deﬁnes how Crises Control operates as a company.
+
+It aligns Leadership, Marketing, Sales, Customer Success, Product, Engineering and
+Partnerships around a shared understanding of:
+
+   •   The category we operate in
+   •   The customers we serve
+   •   The problems we solve
+   •   How the platform creates value
+   •   How customers adopt and expand
+   •   How the company grows recurring revenue
+   •   How Crises Control becomes a category leader
+
+Every employee should be able to read this framework and understand:
+
+   •   What Crises Control does
+   •   Why customers buy the platform
+   •   Who our ideal customers are
+   •   How the product creates value
+   •   How their role contributes to growth
+
+Strategic Shift
+Historically, Crises Control has often been perceived as a mass notiﬁcation or
+emergency communication platform.
+
+While emergency communication remains an important capability and a major
+source of inbound demand, it is no longer the primary way we deﬁne the company.
+
+Our customers consistently demonstrate that sending alerts is only one part of the
+problem.
+
+The greater challenge is maintaining operational control during incidents.
+
+Organisations need to:
+
+   •   Coordinate multiple teams
+   •   Track actions and responsibilities
+   •   Maintain visibility of response progress
+   •   Document communications and decisions
+   •   Demonstrate accountability afterwards
+
+Crises Control therefore positions itself as an:
+
+Operational Incident Coordination Platform
+This category reﬂects the broader value delivered by the platform and aligns with
+how our most successful customers use the product.
+
+Growth Thesis
+Crises Control grows through a land-and-expand model.
+
+Many customers begin with a speciﬁc need, most commonly emergency
+notiﬁcations.
+
+Over time they expand into:
+
+   •   Incident coordination
+   •   Task execution
+   •   Operational visibility
+   •   Audit and reporting
+   •   AI-assisted incident intelligence
+
+The platform therefore supports customers throughout their operational resilience
+journey rather than solving a single communication problem.
+
+Long-Term Vision
+Crises Control becomes the platform organisations rely upon to coordinate response
+during critical incidents and demonstrate operational control before, during and after
+disruption.
+
+The company evolves through four strategic stages:
+
+Alerting → Coordination → Intelligence → Operational Resilience Platform
+
+
+
+
+Section 2: Mission, Vision & Purpose
+Mission
+To help organisations maintain control during critical incidents through structured
+communication, coordination, execution and accountability.
+
+Vision
+To become the global platform organisations trust to coordinate operational
+response during disruption and prove what happened afterwards.
+
+Purpose
+Operational disruption is inevitable.
+Poor coordination is optional.
+Crises Control exists to ensure organisations can:
+    • Activate response quickly
+   •   Coordinate teams effectively
+    • Execute critical actions
+    • Maintain operational visibility
+    • Demonstrate accountability
+When organisations lose control during incidents, the consequences can include:
+    • Financial loss
+    • Safety risks
+    • Reputational damage
+    • Regulatory scrutiny
+    • Operational disruption
+Crises Control exists to reduce these outcomes.
+
+Core Principles
+   •   Simplicity Under Pressure
+          o Incidents are stressful.
+          o The platform must remain intuitive and usable during high-pressure
+             situations.
+   •   Operational Focus
+          o The platform must solve real operational problems rather than
+             becoming a theoretical governance tool.
+   •   Accountability
+          o Every signiﬁcant communication, action and decision should be
+            traceable.
+   •   Scalability
+          o Customers should be able to start small and expand naturally as their
+             requirements mature.
+   •   Enterprise Capability Without Enterprise Complexity
+          o Crises Control should deliver enterprise-grade outcomes without
+             requiring enterprise-scale deployments.
+
+
+
+Section 3: Market Category
+Existing Market Landscape
+Crises Control operates within the broader Critical Event Management ecosystem.
+
+Adjacent categories include:
+
+   •   Emergency Notiﬁcation Systems (ENS)
+   •   Mass Notiﬁcation Platforms
+   •   Crisis Management Software
+   •   Incident Management Software
+   •   Business Continuity Platforms
+   •   Operational Resilience Platforms
+
+Most vendors focus on one of three areas:
+
+   1. Alerting
+   2. Governance
+   3. Enterprise-scale crisis management
+
+The Category We Intend To Own
+Crises Control aims to own the category:
+
+Operational Incident Coordination Platform
+
+This category sits between:
+
+   •   Alerting platforms
+   •   Governance platforms
+   •   Enterprise crisis suites
+
+and focuses on real-time operational response.
+
+Category Deﬁnition
+An Operational Incident Coordination Platform enables organisations to:
+
+   •   Activate response teams immediately
+   •   Coordinate actions across departments
+   •   Maintain real-time visibility
+   •   Track responsibilities and execution
+   •   Record decisions and communications
+   •   Generate defensible post-incident reports
+
+The emphasis is not on sending alerts alone.
+
+The emphasis is on maintaining operational control throughout the incident lifecycle.
+
+Category Narrative
+Most organisations can send alerts.
+
+Few can manage incidents end-to-end.
+
+Existing tools often support:
+
+   •   Email
+   •   Messaging
+   •   Monitoring
+   •   Ticketing
+However, they do not provide structured operational coordination during incidents.
+
+Crises Control structures:
+
+   •   Activation
+   •   Communication
+   •   Coordination
+   •   Execution
+   •   Accountability
+
+within a single connected platform.
+
+Strategic Position
+Crises Control is not attempting to become:
+
+   •   A pure mass notiﬁcation vendor
+   •   A business continuity planning system
+   •   A governance framework platform
+   •   An IT operations tool
+
+Instead, Crises Control occupies the operational layer where incidents are actively
+managed.
+
+
+
+
+Section 4: Market Positioning
+Old Positioning
+Historically, the company was frequently positioned as:
+
+   •   Emergency communication software
+   •   Crisis communication software
+   •   Mass notiﬁcation software
+   •   Critical event communication platform
+
+While these descriptions are accurate, they do not fully capture the value delivered by
+the platform.
+
+New Positioning
+Crises Control is an Operational Incident Coordination Platform.
+
+The platform helps organisations:
+
+   •   Coordinate response
+   •   Track actions
+   •   Maintain visibility
+   •   Demonstrate accountability
+during operational disruption.
+
+Positioning Statement
+Crises Control helps organisations maintain operational control during incidents by
+combining alerting, coordination, execution, visibility and accountability in one
+platform.
+
+The Core Problem
+Most organisations already possess communication tools.
+
+They have:
+
+   •   Email
+   •   Microsoft Teams
+   •   Mobile phones
+   •   Messaging platforms
+
+The challenge is not communication itself.
+
+The challenge is maintaining structured coordination when incidents occur.
+
+Common failures include:
+
+   •   Fragmented Information
+       Different teams operate from different information.
+   •   Delayed Decision Making
+       Leadership lacks visibility.
+   •   Uncoordinated Response
+       Multiple teams work independently.
+   •   Lack of Visibility
+       Critical actions become diﬃcult to track.
+   •   Lack of Accountability
+       Actions and decisions are poorly documented.
+
+These failures create:
+
+   •   Operational risk
+   •   Reputational risk
+   •   Regulatory risk
+   •   Financial risk
+
+Core Value Pillars
+   1. Alerting & Activation
+      Reach the right people immediately.
+   2. Operational Coordination
+      Structure communication and response activities.
+   3. Execution & Visibility
+      Track tasks, responsibilities and progress.
+   4. Proof & Accountability
+      Create a complete, defensible operational record.
+
+The Crises Control Story
+Most organisations start with alerting.
+
+That is often why they ﬁrst engage with Crises Control.
+
+However the real value emerges as organisations expand into:
+
+   •   Incident coordination
+   •   Task execution
+   •   Control Centre visibility
+   •   Audit and reporting
+   •   AI-assisted intelligence
+
+This allows customers to start with a speciﬁc need while growing into a complete
+incident coordination capability over time.
+
+Positioning Summary
+Crises Control is not deﬁned by alerting.
+
+Alerting is the beginning of the story.
+
+Crises Control is deﬁned by helping organisations coordinate response, maintain
+visibility, execute actions and prove what happened afterwards.
+
+
+
+
+Section 5: Ideal Customer Proﬁle (ICP)
+Framework
+Strategic Principle
+Crises Control deﬁnes customers primarily by operational problem, not industry.
+
+Historically, many software companies deﬁne ICPs using vertical markets alone.
+
+Crises Control takes a different approach.
+
+The most successful customers share similar operational challenges regardless of
+industry.
+
+The common requirement is the need to coordinate people, actions, decisions and
+communications during operational disruption.
+Industries become expressions of the same underlying operational challenge.
+
+Master ICP
+Deﬁnition
+
+Organisations where operational incidents require:
+
+   •   coordinated communication
+   •   action tracking
+   •   real-time visibility
+   •   accountability
+   •   evidence of response
+
+These organisations typically have:
+
+   •   multiple locations
+   •   distributed teams
+   •   operational risk exposure
+   •   compliance obligations
+   •   safety responsibilities
+   •   incident response requirements
+
+Common Characteristics
+Operational Complexity
+
+The organisation operates across:
+
+   •   multiple sites
+   •   regions
+   •   countries
+   •   departments
+
+Response Requirements
+
+Operational incidents require:
+
+   •   communication
+   •   coordination
+   •   execution
+   •   reporting
+
+rather than communication alone.
+
+Accountability Requirements
+
+Leadership, regulators, insurers or auditors may later ask:
+
+   •   What happened?
+   •   Who was informed?
+   •   What actions were taken?
+   •   What decisions were made?
+
+Existing Environment
+
+Most organisations already possess:
+
+   •   email
+   •   Teams
+   •   mobile phones
+   •   messaging systems
+
+The problem is coordination rather than communication.
+
+Typical Organisation Size
+Primary target:
+500 – 20,000 employees
+
+Secondary target:
+200 – 50,000+ employees
+
+The platform supports larger organisations but typically delivers strongest value
+within this range.
+
+ICP Tier Structure
+Tier 1 ICPs
+Highest strategic priority.
+Strongest product ﬁt.
+Largest expansion opportunity.
+ICP 1: Financial Services & Insurance
+Typical Organisations
+   • Banks
+   • Insurers
+   • Wealth managers
+   • Asset managers
+   • Financial services ﬁrms
+Why They Buy
+   • Operational resilience.
+   • Governance.
+   • Auditability.
+   • Accountability.
+Typical Incidents
+   • Cyber incidents
+   • Major IT outages
+   • Building evacuations
+   •   Regulatory events
+   • Operational disruptions
+Typical Buyers
+   • Operational Resilience Manager
+   • Head of Risk
+   • Business Continuity Manager
+   • COO
+   • IT Resilience Lead
+Typical Entry Point
+Ping
+Expansion Path
+Ping
+→ Incident Manager
+→ Audit & Reporting
+→ CRAiG
+Why This ICP Matters
+This sector aligns strongly with:
+   • accountability
+   • operational resilience
+   • proof & assurance
+which are among Crises Control's strongest differentiators.
+ICP 2: Aviation & Transportation
+Typical Organisations
+   • Airlines
+   • Airports
+   • Ground handlers
+   • Rail operators
+   • Ferry operators
+   • Transport networks
+Typical Incidents
+   • Weather disruption
+   • Safety incidents
+   • Operational failures
+   • Passenger disruption
+   • Security incidents
+Typical Buyers
+   • Head of Operations
+   • Safety Director
+   • Crisis Manager
+   • Emergency Planning Lead
+Entry Point
+Ping or Incident Manager
+Expansion Path
+Full platform adoption
+Why This ICP Matters
+These organisations naturally understand:
+    • command structures
+    • incident escalation
+    • operational coordination
+The platform narrative resonates strongly.
+ICP 3: Industrial, Energy & Utilities
+Typical Organisations
+   • Utilities
+   • Energy operators
+   • Oil & Gas
+   • Mining
+   • Manufacturing
+   • Infrastructure operators
+Typical Incidents
+   • Plant shutdowns
+   • Safety incidents
+   • Environmental incidents
+   • Infrastructure disruption
+   • Site emergencies
+Typical Buyers
+   • Operations Director
+   • HSE Director
+   • Emergency Response Manager
+   • Risk Manager
+Entry Point
+SOS or Ping
+Expansion Path
+SOS
+→ Ping
+→ Incident Manager
+→ Task Manager
+→ Control Centre
+→ Audit
+Why This ICP Matters
+Operational execution is critical.
+This aligns strongly with the platform's coordination capabilities.
+ICP 4: Existing Alerting Platform Users
+Typical Competitors
+   • Everbridge
+   •   AlertMedia
+   • FACT24
+   • Alertus
+   • RapidReach
+   • Internal systems
+Typical Problem
+The organisation can send alerts.
+However they struggle with:
+   • coordination
+   • visibility
+   • accountability
+Why They Switch
+They recognise:
+"Sending alerts is not the diﬃcult part."
+Expansion Potential
+Extremely high.
+These organisations already understand incident response challenges.
+
+Tier 2 ICPs
+Strong ﬁt but often lower urgency or slower procurement cycles.
+Healthcare
+Typical Organisations
+    • Hospitals
+    • Healthcare groups
+    • Care providers
+    • Medical institutions
+Typical Incidents
+    • Clinical emergencies
+    • Major outages
+    • Safety events
+Entry Point
+Ping
+Expansion
+Incident Manager
+Task Manager
+Multi-Site Operational Enterprises
+Typical Organisations
+   • Logistics
+   • Distribution
+   • Facilities Management
+   • Retail groups
+Typical Incidents
+   •   Site closures
+    • Operational disruptions
+    • Workforce incidents
+Entry Point
+Ping
+Expansion
+Full operational coordination.
+
+Tier 3 ICPs
+Strategic but lower commercial priority.
+Education
+Typical Organisations
+    • Universities
+    • Multi-academy trusts
+    • Independent schools
+    • International schools
+Typical Incidents
+    • Lockdowns
+    • Severe weather
+    • Safeguarding events
+Entry Point
+Ping
+Expansion
+Incident Manager
+
+
+
+
+Section 6: Industry Prioritisation
+Strategic Principle
+Not all industries should receive equal investment.
+
+Resources should be allocated according to:
+
+   •   product ﬁt
+   •   deal size
+   •   expansion potential
+   •   market accessibility
+
+Priority 1 Industries
+Financial Services & Insurance
+Strategic Objective
+Become recognised as a leading operational resilience platform within regulated
+ﬁnancial services.
+Marketing Focus
+   • Operational resilience
+   • DORA
+   • Accountability
+   • Incident audit trails
+
+Aviation & Transportation
+Strategic Objective
+Become a recognised operational coordination platform for transport operators.
+Marketing Focus
+   • disruption management
+   • operational coordination
+   • safety response
+
+Industrial, Energy & Utilities
+Strategic Objective
+Expand platform adoption among operationally critical organisations.
+Marketing Focus
+   • safety incidents
+   • ﬁeld escalation
+   • task execution
+
+Existing Alerting Tool Users
+Strategic Objective
+Capture organisations outgrowing alert-only solutions.
+Marketing Focus
+   • beyond alerting
+   • incident coordination
+   • operational control
+
+Priority 2 Industries
+   •   Healthcare
+   •   Multi-site operations
+
+Priority 3 Industries
+   •   Education
+   •   Hospitality
+   •   Government
+   •   Corporate Enterprise
+Section 7: Product Architecture
+Strategic Principle
+The platform should be understood as one connected system.
+Not a collection of disconnected modules.
+Customers may adopt modules independently.
+However the greatest value emerges when capabilities work together.
+
+Incident Lifecycle
+SOS
+→ Ping
+→ Incident Manager
+→ Task Manager
+→ Control Centre
+→ Audit & Reporting
+→ CRAiG
+
+SOS
+Purpose:
+Frontline incident escalation.
+Allows employees to instantly report incidents from mobile devices.
+
+Ping
+Purpose:
+Alerting and activation.
+Capabilities:
+   • mass notiﬁcation
+   • emergency communication
+   • acknowledgements
+   • response collection
+Most common entry point.
+
+Incident Manager
+Purpose:
+Structured incident coordination.
+Capabilities:
+   • incident activation
+   • role assignment
+   • communication control
+   • incident timeline
+Task Manager
+Purpose:
+Operational execution.
+Capabilities:
+   • task assignment
+   • accountability
+   • completion tracking
+   • escalation
+
+Control Centre
+Purpose:
+Real-time operational visibility.
+Capabilities:
+   • incident dashboard
+   • timeline visibility
+   • task status
+   • asset visibility
+
+Audit & Reporting
+Purpose:
+Proof and accountability.
+Capabilities:
+   • incident records
+   • response analysis
+   • task accountability
+   • reporting
+
+CRAiG
+Purpose:
+AI-driven operational intelligence.
+Current role:
+Assist users with platform interaction.
+Future role:
+Provide operational insight and decision support.
+
+
+
+
+Section 8: Customer Journey & Land-and-Expand
+Model
+Strategic Principle
+Customers rarely buy the full platform immediately.
+Most customers begin with a speciﬁc operational problem.
+The platform is designed to support progressive maturity.
+
+Stage 1: Awareness
+Customer recognises operational weakness.
+Typical concerns:
+   • communication
+   • incident response
+   • accountability
+
+Stage 2: Entry Point
+Most common:
+Ping
+Alternative entry points:
+   • SOS
+   • Incident Manager
+
+Stage 3: Adoption
+Customer successfully uses initial capability.
+Conﬁdence grows.
+
+Stage 4: Expansion
+Customer begins asking:
+   • How do we coordinate response?
+   • How do we track actions?
+   • How do we maintain visibility?
+This drives adoption of:
+   • Incident Manager
+   • Task Manager
+   • Control Centre
+
+Stage 5: Accountability
+Customer asks:
+   • How do we prove what happened?
+This drives adoption of:
+   • Audit & Reporting
+
+Stage 6: Intelligence
+Customer seeks optimisation.
+This drives adoption of:
+   • CRAiG
+   • advanced reporting
+   • operational insights
+The Crises Control Expansion Narrative
+   •   Customers typically start with alerting.
+   •   They stay because of coordination.
+   •   They expand because of visibility.
+   •   They renew because of accountability.
+   •   They grow because of intelligence.
+
+
+
+
+Section 9: Sales Methodology
+Strategic Principle
+Crises Control does not sell software features.
+Crises Control sells operational control during incidents.
+Sales conversations should focus on operational outcomes rather than product
+functionality.
+
+The Sales Narrative
+Historically, prospects often begin with a communication problem.
+Examples:
+   • "We need a mass notiﬁcation system."
+   • "We need emergency communications."
+   • "We need a replacement for AlertMedia."
+   • "We need a crisis communication platform."
+Sales should not stop at communication.
+The objective is to expand the conversation toward coordination, execution, visibility
+and accountability.
+
+Four-Stage Discovery Framework
+Stage 1: Activation
+Questions:
+   • How do you currently reach people during incidents?
+   • How quickly can you notify critical personnel?
+   • How do you know who has responded?
+Objective:
+Establish the alerting challenge.
+
+Stage 2: Coordination
+Questions:
+  • How do teams coordinate response?
+  • How do different departments share information?
+  • Who owns incident decisions?
+Objective:
+Expose coordination gaps.
+
+Stage 3: Execution
+Questions:
+   • How are actions assigned?
+   • How do you track completion?
+   • How do you manage escalation?
+Objective:
+Expose operational execution weaknesses.
+
+Stage 4: Assurance
+Questions:
+   • How do you prove what happened?
+   • How do you review incidents afterwards?
+   • What evidence exists for leadership, insurers or regulators?
+Objective:
+Expose accountability gaps.
+
+Demonstration Framework
+Demonstrations should follow the incident lifecycle.
+Never demonstrate modules in isolation.
+Recommended Flow
+   1. Incident begins (SOS)
+   2. Teams alerted (Ping)
+   3. Incident activated (Incident Manager)
+   4. Actions assigned (Task Manager)
+   5. Situation monitored (Control Centre)
+   6. Evidence generated (Audit & Reporting)
+   7. Insight provided (CRAiG)
+
+Competitive Positioning
+AlertMedia
+   •   Strong alerting.
+   •   Limited operational coordination.
+
+Everbridge
+   •   Enterprise scale.
+   •   Complex deployment.
+
+FACT24
+   •   Strong notiﬁcation capability.
+   •   Less operational execution.
+Noggin
+   •   Governance focused.
+   •   Less real-time response focused.
+
+Crises Control
+   •   Operational Incident Coordination Platform.
+   •   Alerting, coordination, execution, visibility and accountability in one platform.
+
+
+
+
+Section 10: Marketing Operating System
+Strategic Principle
+Marketing exists to create awareness, generate demand, educate prospects and
+support expansion.
+Marketing must align with the company positioning:
+Operational Incident Coordination Platform.
+
+Core Marketing Responsibilities
+1. Brand Positioning
+Maintain consistent market messaging.
+Core narrative:
+Most organisations can send alerts.
+Few can manage incidents end-to-end.
+
+2. Demand Generation
+Generate:
+  • inbound enquiries
+  • discovery calls
+  • qualiﬁed opportunities
+
+3. Education
+Help prospects understand:
+   • operational coordination
+   • visibility
+   • accountability
+   • resilience
+
+4. Sales Enablement
+Create:
+   • presentation templates
+   • case studies
+   • product explainers
+   •   proposal assets
+
+Marketing Messaging Hierarchy
+Level 1
+Operational Incident Coordination Platform
+
+Level 2
+Alerting
+Coordination
+Execution
+Visibility
+Accountability
+
+Level 3
+Speciﬁc product capabilities.
+
+Marketing Channels
+Owned
+   •   Website
+   •   Blog
+   •   Email Campaigns (Katie)
+   •   Customer community
+
+Social
+   •   LinkedIn
+   •   YouTube
+   •   X
+   •   Facebook
+   •   Instagram
+   •   Threads
+
+Third Party
+   •   G2
+   •   SoftwareReviews
+   •   Gartner ecosystem (Capterra, GetApp, SoftwareAdvice)
+
+Customer Proof Programme
+Strategic objective:
+Build evidence supporting:
+   • operational control
+   • coordination
+   • accountability
+Required assets:
+   •    case studies
+   •    testimonials
+   •    customer interviews
+   •    video stories
+
+
+
+
+Section 11: Website Strategy
+Strategic Principle
+The website must support:
+   1. Existing SEO demand
+   2. New platform positioning
+These objectives must coexist.
+
+Critical Insight
+Search intent is not the same as positioning.
+People search for:
+   • mass notiﬁcation software
+   • emergency notiﬁcation system
+   • crisis communication software
+However buyers ultimately need:
+   • coordination
+   • execution
+   • visibility
+   • accountability
+
+Website Mission
+Convert visitors from:
+Communication Buyers
+to
+Operational Coordination Buyers.
+
+Strategic Website Narrative
+Homepage
+Problem:
+Organisations lose control during incidents.
+Solution:
+Operational incident coordination.
+
+Platform Page
+Show:
+SOS
+→ Ping
+→ Incident Manager
+→ Task Manager
+→ Control Centre
+→ Audit
+
+How Customers Typically Start
+Purpose:
+Support land-and-expand model.
+Message:
+Start with the capability you need today.
+Expand as requirements mature.
+
+Proof & Accountability
+Purpose:
+Support enterprise and regulated buyers.
+Message:
+Know exactly what happened and prove it.
+
+Website Architecture
+Homepage
+Platform
+How It Works
+Products
+Solutions
+Proof & Accountability
+Resources
+Pricing
+Book Demo
+
+Product Structure
+Products are presented as:
+   • Start: Ping
+   • Coordinate: Incident Manager
+   • Execute: Task Manager
+   • Operate: Control Centre
+   • Prove: Audit & Reporting
+   • Escalate: SOS
+Section 12: SEO & Search Strategy
+Strategic Principle
+Preserve existing search demand while expanding into new strategic categories.
+We do not abandon mass notiﬁcation.
+We use it as an entry point.
+
+SEO Layer 1: Existing Revenue Keywords
+Maintain and strengthen rankings.
+Examples:
+   • mass notiﬁcation software
+   • emergency notiﬁcation system
+   • emergency communication platform
+   • crisis communication software
+   • employee alert system
+These remain critical acquisition channels.
+
+SEO Layer 2: Strategic Expansion Keywords
+Examples:
+   • incident coordination software
+   • incident response platform
+   • operational incident management
+   • emergency response software
+   • incident command software
+These support repositioning.
+
+SEO Layer 3: Enterprise & Governance Keywords
+Examples:
+   • operational resilience software
+   • incident audit trail software
+   • incident reporting platform
+   • accountability software
+   • post-incident review software
+These support enterprise buyers.
+
+Content Cluster Strategy
+Cluster 1
+Mass Notiﬁcation
+Supports:
+   • Ping
+Cluster 2
+Incident Management
+Supports:
+   •   Incident Manager
+Cluster 3
+Task Execution
+Supports:
+   • Task Manager
+Cluster 4
+Operational Resilience
+Supports:
+   • Control Centre
+   • Audit
+   • CRAiG
+
+AI Search Strategy
+Increasing numbers of buyers use AI assistants.
+Content should therefore be structured for:
+   • Google
+   • Bing
+   • ChatGPT
+   • Claude
+   • Perplexity
+Content must answer:
+   • What is the problem?
+   • Why does it matter?
+   • How does Crises Control solve it?
+
+Strategic SEO Model
+SEO Traﬃc
+↓
+Mass Notiﬁcation
+↓
+Emergency Communications
+↓
+Incident Coordination
+↓
+Operational Control
+↓
+Proof & Accountability
+The purpose of SEO is not simply traﬃc.
+The purpose is to move buyers up the value chain.
+Section 13: Land-and-Expand Playbook
+Strategic Principle
+Crises Control grows primarily through expansion.
+Most customers do not purchase the entire platform initially.
+Instead, customers typically enter through a speciﬁc operational problem and
+gradually expand platform adoption over time.
+The company's growth model therefore depends on:
+    • acquiring customers eﬃciently
+    • driving adoption successfully
+    • expanding capability usage systematically
+The objective is not merely customer acquisition.
+The objective is platform penetration.
+
+The Land-and-Expand Philosophy
+Customers buy solutions to immediate problems.
+They rarely buy future capabilities.
+Crises Control therefore focuses on:
+   • Land: Solve the customer's most urgent challenge.
+   • Expand: Expose adjacent operational challenges.
+   • Embed: Become part of operational resilience processes.
+   • Scale: Expand usage, departments and geographies.
+
+Typical Entry Points
+Entry Point 1: Ping
+Most common.
+Customer need:
+   • emergency notiﬁcations
+   • crisis communications
+   • employee alerting
+Expansion opportunities:
+   • Incident Manager
+   • Audit & Reporting
+
+Entry Point 2: Incident Manager
+Customer need:
+   • structured response
+   • major incident management
+Expansion opportunities:
+   • Task Manager
+   • Control Centre
+Entry Point 3: SOS
+Customer need:
+   • frontline reporting
+   • safety escalation
+Expansion opportunities:
+   • Incident Manager
+   • Task Manager
+
+Expansion Triggers
+Customer Success and Sales should actively identify:
+
+   • Coordination Trigger
+      Customer asks:
+      "How do we manage the incident after sending alerts?"
+      Opportunity: Incident Manager
+
+   • Execution Trigger
+      Customer asks:
+      "How do we ensure actions are completed?"
+      Opportunity: Task Manager
+
+   • Visibility Trigger
+      Customer asks:
+      "How do we see what is happening?"
+      Opportunity: Control Centre
+
+   • Accountability Trigger
+      Customer asks:
+      "How do we prove what happened?"
+      Opportunity: Audit & Reporting
+
+   • Intelligence Trigger
+      Customer asks:
+      "How do we improve response over time?"
+      Opportunity: CRAiG
+
+Expansion Success Metrics
+Monitor:
+  • modules adopted
+  • active users
+  • incident volume
+  • usage depth
+  • executive engagement
+Goal: Increase platform footprint within existing customers.
+Section 14: Competitive Positioning
+Strategic Principle
+Competitors should be positioned according to category.
+Not feature comparisons.
+Customers do not buy features.
+They buy outcomes.
+
+Competitive Categories
+Category 1: Alerting Platforms
+Primary focus: Sending messages.
+Examples:
+   • AlertMedia
+   • Alertus
+   • RapidReach
+   • Regroup
+Strengths:
+   • communication
+   • notiﬁcations
+Weaknesses:
+   • coordination
+   • execution
+   • accountability
+
+Category 2: Enterprise Crisis Platforms
+Primary focus: Large-scale crisis management.
+Examples:
+   • Everbridge
+   • FACT24
+Strengths:
+   • enterprise capability
+   • broad functionality
+Weaknesses:
+   • complexity
+   • implementation burden
+   • cost
+
+Category 3: Governance Platforms
+Primary focus: Compliance and resilience frameworks.
+Examples:
+   •  Noggin
+   • Castellan
+Strengths:
+   • governance
+   • policy management
+Weaknesses:
+   • less operationally focused
+   • weaker real-time coordination
+
+Category 4: IT Incident Platforms
+Primary focus: Technology incidents.
+Examples:
+   • PagerDuty
+   • OpsGenie
+   • xMatters
+   • ServiceNow
+Strengths:
+   • IT response
+Weaknesses:
+   • not designed for organisation-wide incidents
+
+Crises Control Position
+Operational Incident Coordination Platform.
+Differentiators:
+   •   End-to-End Lifecycle
+          o Alerting
+             → Coordination
+             → Execution
+             → Visibility
+             → Accountability
+   •   Enterprise Capability Without Enterprise Complexity
+          o Fast deployment.
+          o Operational usability.
+          o Lower implementation burden.
+   •   Operational Execution
+          o Many competitors focus on communication.
+          o Others focus on governance.
+          o Crises Control focuses on what happens during the incident.
+
+Competitive Positioning Statement
+   •   Everbridge: Enterprise-scale but complex.
+   •   AlertMedia: Strong alerting.
+   •   FACT24: Strong notiﬁcation.
+   •   Noggin: Strong governance.
+   •   Crises Control: Operational incident coordination without enterprise
+       complexity.
+
+
+
+
+Section 15: Partner Strategy
+Strategic Principle
+Partnerships accelerate growth by extending market reach, credibility and
+implementation capability.
+The objective is not simply referrals.
+The objective is ecosystem leverage.
+
+Partner Types
+   •   Operational Resilience Consultancies
+       Examples:
+          o Business Continuity specialists
+          o Resilience consultancies
+       Role:
+          o strategic advice
+          o lead generation
+          o platform recommendation
+   •   Security Consultancies
+       Examples:
+          o cyber security ﬁrms
+          o risk consultancies
+       Role:
+          o incident preparedness
+          o cyber response
+   •   Managed Service Providers
+       Role:
+          o customer introductions
+          o deployment support
+   •   System Integrators
+       Role:
+          o enterprise implementation
+          o integration projects
+   •   Referral Partners
+       Role:
+          o lead generation
+          o commercial partnerships
+
+Partner Value Proposition
+Partners should understand:
+Crises Control is not simply a notiﬁcation platform.
+It helps organisations:
+    • coordinate incidents
+    • maintain visibility
+    • execute response
+    • demonstrate accountability
+
+Priority Partner Markets
+   •   Tier 1
+          o Operational resilience consultancies
+          o Security consultancies
+   •   Tier 2
+          o MSPs
+          o System integrators
+   •   Tier 3
+          o Industry associations
+          o Training organisations
+
+Partner Success Metrics
+Measure:
+  • referrals
+  • opportunities
+  • ARR
+  • expansion revenue
+  • strategic introductions
+
+
+
+
+Section 16: Pricing & Packaging Strategy
+Strategic Principle
+Pricing should support land-and-expand growth.
+Customers should be able to start small.
+Expansion should feel natural.
+
+Packaging Philosophy
+The platform should be sold as:
+   • One connected system.
+  • Not disconnected products.
+However customers may adopt capabilities progressively.
+
+   • Entry Package
+       Alert & Activate
+       Primary Capability: Ping
+       Target Customer: Organisations focused on emergency communication.
+       Goal: Land account.
+
+   • Professional Package
+       Coordinate & Execute
+       Capabilities: Ping, Incident Manager, Task Manager
+       Target Customer: Operationally mature organisations.
+       Goal: Drive operational adoption.
+
+   • Enterprise Package
+       Operate & Prove
+       Capabilities: Ping, Incident Manager, Task Manager, Control Centre, Audit &
+       Reporting
+       Target Customer: Large enterprises and regulated organisations.
+       Goal: Platform standardisation.
+
+Strategic Add-Ons
+   •   SOS
+       Frontline escalation.
+   •   CRAiG
+       Operational intelligence.
+   •   Academy
+       Training and adoption.
+
+Commercial Objectives
+Packaging should support:
+   • Customer Acquisition
+     Easy entry.
+   • Expansion
+     Natural progression.
+   • Retention
+     Deep operational adoption.
+
+Strategic Value
+Move conversations away from:
+   • SMS volume
+   • message pricing
+Towards:
+   •   operational control
+   •   accountability
+   •   resilience
+
+Pricing Narrative
+Customers are not purchasing messages.
+Customers are investing in:
+   • operational coordination
+   • response effectiveness
+   • accountability
+   • organisational resilience
+This narrative should underpin all commercial discussions.
+
+
+
+
+Section 17: ARR Growth Model
+Strategic Principle
+Crises Control is a recurring revenue business.
+Long-term value is created through:
+    • customer acquisition
+    • customer retention
+    • customer expansion
+    • market penetration
+The objective is not simply to win customers.
+The objective is to maximise Customer Lifetime Value (CLTV).
+
+Revenue Growth Pillars
+Pillar 1: New Customer Acquisition
+Purpose:
+Acquire new logos that align with the ICP framework.
+Primary acquisition channels:
+   • Organic SEO
+   • Content marketing
+   • Referral partners
+   • Direct sales outreach
+   • Industry events
+   • Third-party software marketplaces
+Success metrics:
+   • New ARR
+   • SQL generation
+   • Win rate
+   •   CAC
+
+Pillar 2: Customer Expansion
+Purpose:
+Increase platform adoption within existing accounts.
+Expansion drivers:
+   • Incident Manager
+   • Task Manager
+   • Control Centre
+   • Audit & Reporting
+   • CRAiG
+Success metrics:
+   • Expansion ARR
+   • Modules adopted
+   • Account penetration
+
+Pillar 3: Retention
+Purpose:
+Protect existing ARR.
+Retention is achieved through:
+   • product adoption
+   • operational embedding
+   • executive sponsorship
+   • customer success engagement
+Success metrics:
+   • Gross Revenue Retention (GRR)
+   • Net Revenue Retention (NRR)
+   • Renewal Rate
+   • Churn Rate
+
+Pillar 4: Geographic Expansion
+Purpose:
+Increase international footprint.
+Priority regions:
+   • UK
+   • Europe
+   • Middle East
+   • North America
+   • APAC
+Success metrics:
+   • International ARR
+   • Regional pipeline
+   • Partner-generated revenue
+ARR Targets Framework
+Revenue should be tracked through:
+   • New ARR
+      Revenue from new customers.
+   • Expansion ARR
+      Revenue from:
+         o additional modules
+         o additional users
+         o additional regions
+   • Retained ARR
+      Existing recurring revenue retained.
+   • Net ARR Growth
+      New ARR + Expansion ARR
+      Churned ARR
+   • Long-Term Objective
+      Build a business where:
+         o Expansion ARR becomes a major contributor to annual growth.
+         o This aligns with the land-and-expand strategy and increases customer
+             lifetime value.
+
+
+
+
+Section 18: Customer Success Framework
+Strategic Principle
+Customer Success exists to ensure customers achieve operational outcomes.
+The goal is not support.
+The goal is adoption, expansion and retention.
+
+Customer Success Mission
+Help customers:
+   • adopt the platform
+   • embed operational processes
+   • expand capability usage
+   • achieve measurable value
+
+Customer Success Lifecycle
+   •   Stage 1: Onboarding
+       Objective: Successful implementation.
+       Activities:
+          o user import
+          o training
+          o conﬁguration
+          o launch
+       Success metric: Go-live completed.
+   •   Stage 2: Adoption
+       Objective: Build regular platform usage.
+       Activities:
+          o testing exercises
+          o incident simulations
+          o usage reviews
+       Success metric: Active utilisation.
+   •   Stage 3: Value Realisation
+       Objective: Customer recognises operational beneﬁts.
+       Examples:
+          o faster communication
+          o improved coordination
+          o better visibility
+       Success metric: Customer references platform value.
+   •   Stage 4: Expansion
+       Objective: Introduce additional capabilities.
+       Typical progression:
+          o Ping
+             → Incident Manager
+             → Task Manager
+             → Control Centre
+             → Audit
+       Success metric: Expansion ARR.
+   •   Stage 5: Renewal
+       Objective: Retain customer.
+       Success metric: Renewal achieved.
+
+Health Scoring Framework
+Monitor:
+  • Product Adoption
+         o active users
+         o incidents launched
+         o tests performed
+  • Executive Engagement
+         o stakeholder participation
+         o review attendance
+  • Expansion Potential
+         o coordination gaps
+          o reporting requirements
+          o visibility challenges
+   •   Risk Signals
+          o low usage
+          o low engagement
+          o unresolved issues
+
+Customer Success KPIs
+   •   GRR
+   •   NRR
+   •   Renewal Rate
+   •   Expansion ARR
+   •   Product Adoption Rate
+   •   Customer Health Score
+
+
+
+
+Section 19: Product & Engineering Alignment
+Strategic Principle
+Product and Engineering exist to support category leadership.
+Features should strengthen the platform's strategic position.
+Not simply satisfy individual customer requests.
+
+Product Mission
+Deliver operational coordination without enterprise complexity.
+
+Product Design Principles
+   •   Simplicity Under Pressure
+       Users operate during stressful situations.
+       Interfaces must remain:
+           o intuitive
+           o fast
+           o clear
+   •   Operational Usability
+       Every feature should support:
+           o activation
+           o coordination
+           o execution
+           o accountability
+   •   Visibility
+       Users should understand:
+           o what is happening
+          o who is responsible
+          o what remains outstanding
+   •   Accountability
+       The platform should automatically generate operational evidence.
+
+Product Architecture Strategy
+The platform evolves through:
+Alerting
+→ Coordination
+→ Visibility
+→ Intelligence
+→ Organisational Resilience
+
+Product Roadmap Priorities
+   •   Priority 1
+       Core platform adoption.
+       Improve:
+          o Ping
+          o Incident Manager
+          o Task Manager
+          o Control Centre
+   •   Priority 2
+       Proof & Accountability.
+       Enhance:
+          o reporting
+          o audit trails
+          o incident analytics
+   •   Priority 3
+       Intelligence Layer.
+       Expand:
+           o CRAiG
+           o AI assistance
+           o operational insights
+
+Engineering Principles
+   •   Reliability
+       The platform must remain available during critical incidents.
+   •   Security
+       Maintain enterprise-grade security standards.
+   •   Scalability
+       Support growth in:
+          o customers
+           o users
+           o incident volume
+   •   Integration
+       Enable connection with:
+           o Microsoft Teams
+           o Slack
+           o Active Directory
+           o Enterprise systems
+
+
+
+
+Section 20: CRAiG Strategy
+Strategic Principle
+CRAiG is not a chatbot.
+CRAiG is the intelligence layer of the Crises Control platform.
+Its purpose is to help organisations make better operational decisions during and
+after incidents.
+
+Current State
+Today CRAiG supports:
+   • platform interaction
+   • information retrieval
+   • incident assistance
+
+Future State
+CRAiG becomes an Operational Intelligence Engine.
+
+Strategic Role
+CRAiG supports three stages of maturity.
+   •   Stage 1: Assistance
+       Help users navigate the platform.
+       Examples:
+          o locating information
+          o answering questions
+          o guiding workﬂows
+   •   Stage 2: Insight
+       Analyse incident data.
+       Examples:
+          o identifying delays
+          o highlighting bottlenecks
+          o recognising response patterns
+   •   Stage 3: Intelligence
+       Provide operational recommendations.
+       Examples:
+          o escalation suggestions
+          o communication guidance
+          o response optimisation
+
+CRAiG Vision
+CRAiG becomes the operational companion for incident managers.
+It helps organisations:
+    • understand incidents
+    • coordinate response
+    • identify risks
+    • improve outcomes
+
+Future Capabilities
+Conversational Incident Management
+Ask questions about active incidents.
+Examples:
+   • What tasks are overdue?
+   • Who has not responded?
+   • What actions remain outstanding?
+
+Operational Analytics
+Identify:
+   • recurring failures
+   • response trends
+   • organisational weaknesses
+
+Predictive Intelligence
+Potential future capabilities:
+   • escalation prediction
+   • response forecasting
+   • operational risk indicators
+
+Strategic Importance
+  • CRAiG strengthens category leadership.
+  • Competitors can replicate messaging.
+  • Competitors can replicate workﬂows.
+  • Operational intelligence is signiﬁcantly harder to replicate.
+CRAiG therefore becomes a key differentiator in the evolution from:
+Operational Incident Coordination Platform to Operational Resilience Platform.
+Long-Term Vision
+The future platform evolves through:
+Alerting
+→ Coordination
+→ Visibility
+→ Accountability
+→ Intelligence
+→ Organisational Resilience
+CRAiG becomes the intelligence engine powering this evolution.
+
+
+
+
+Section 21: KPI & Success Metrics Framework
+Strategic Principle
+Every department must be measured against outcomes that support the company
+strategy.
+The purpose of KPIs is not reporting.
+The purpose of KPIs is alignment.
+Every team should understand:
+    • what success looks like
+    • how it is measured
+    • how their work contributes to company growth
+
+Company-Level Metrics
+   •   Annual Recurring Revenue (ARR)
+       Primary company growth metric.
+       Measures: Total recurring contracted revenue.
+   •   Net Revenue Retention (NRR)
+       Measures: Expansion and retention performance.
+       Target: Industry-leading NRR through land-and-expand growth.
+   •   Gross Revenue Retention (GRR)
+       Measures: Customer retention performance.
+   •   Customer Lifetime Value (CLTV)
+       Measures: Long-term customer value.
+   •   Customer Acquisition Cost (CAC)
+       Measures: Eﬃciency of customer acquisition.
+
+Marketing KPIs
+   •   Organic Traﬃc Growth
+       Measures: Growth in search visibility.
+    •   Search Visibility
+        Measures: Keyword rankings.
+        Priority keywords:
+•   mass notiﬁcation software
+•   emergency notiﬁcation system
+•   incident coordination software
+•   incident response platform
+•   operational resilience software
+    • AI Search Visibility
+        Measures: Presence within AI-generated search responses.
+        Examples:
+•   ChatGPT
+•   Claude
+•   Perplexity
+    • Marketing Qualiﬁed Leads (MQLs)
+        Measures: Lead generation effectiveness.
+    • Sales Qualiﬁed Leads (SQLs)
+        Measures: Pipeline contribution.
+    • Discovery Calls Generated
+        Measures: Marketing-to-sales effectiveness.
+    • Pipeline Contribution
+        Measures: Revenue opportunity generated by marketing.
+
+Sales KPIs
+    •   New ARR
+        Measures: Revenue from new customers.
+    •   Win Rate
+        Measures: Opportunity conversion.
+    •   Average Contract Value (ACV)
+        Measures: Commercial quality.
+    •   Pipeline Coverage
+        Measures: Future revenue predictability.
+    •   Sales Cycle Length
+        Measures: Commercial eﬃciency.
+    •   Expansion Revenue
+        Measures: Cross-sell and upsell effectiveness.
+
+Customer Success KPIs
+    •   Renewal Rate
+        Measures: Customer retention.
+    •   Gross Revenue Retention
+        Measures: Protection of ARR.
+    •   Net Revenue Retention
+        Measures: Growth within accounts.
+    •   Product Adoption
+        Measures: Platform utilisation.
+    •   Expansion ARR
+        Measures: Growth from existing customers.
+    •   Customer Health Score
+        Measures: Risk and opportunity.
+
+Product KPIs
+    •   Feature Adoption
+        Measures: Capability utilisation.
+    •   Module Adoption
+        Measures: Cross-platform expansion.
+    •   Active Usage
+        Measures: Customer engagement.
+    •   Customer Feedback
+        Measures: Product satisfaction.
+    •   Time-to-Value
+        Measures: How quickly customers achieve outcomes.
+
+Engineering KPIs
+    •   Platform Availability
+        Measures: Reliability.
+    • Security Compliance
+        Measures: Operational security.
+    • Release Quality
+        Measures: Deployment stability.
+    • Bug Resolution
+        Measures: Engineering responsiveness.
+    • Leadership KPIs
+        Leadership success is measured through:
+•   ARR growth
+•   NRR
+•   market positioning
+•   category leadership
+•   customer expansion
+•   strategic execution
+Section 22: Board-Level Strategic Objectives
+(2026–2028)
+Strategic Objective 1
+Own the Operational Incident Coordination Platform category.
+Success Looks Like
+• Prospects increasingly describe Crises Control as:
+   § incident coordination software
+   § incident response platform
+   § operational resilience platform
+• rather than simply: mass notiﬁcation software
+
+Strategic Objective 2
+Build a Repeatable Growth Engine
+Success Looks Like
+• Growth driven by:
+    § inbound demand
+    § partner ecosystem
+    § customer expansion
+    § rather than founder-led sales alone.
+
+Strategic Objective 3
+Increase Platform Penetration
+Success Looks Like
+   • Customers adopt multiple capabilities.
+   • Average modules per customer increases over time.
+•   Current Journey
+    Ping
+•   Future Journey
+    Ping
+    → Incident Manager
+    → Task Manager
+    → Control Centre
+    → Audit
+    → CRAiG
+
+Strategic Objective 4
+Become a Recognised Operational Resilience Platform
+Success Looks Like
+• Financial Services.
+• Insurance.
+•   Critical Infrastructure.
+•   Aviation.
+•   Healthcare.
+•   View Crises Control as a strategic resilience solution.
+
+Strategic Objective 5
+Build a Scalable Partner Ecosystem
+Success Looks Like
+Partners generate:
+   • opportunities
+   • inﬂuence
+   • market access
+without direct sales involvement.
+
+Strategic Objective 6
+Develop CRAiG Into A Strategic Differentiator
+Success Looks Like
+CRAiG becomes:
+   • visible
+   • useful
+   • differentiated
+within customer workﬂows.
+
+Strategic Objective 7
+Improve Operational Leverage
+Success Looks Like
+Revenue grows faster than headcount.
+Systems and processes scale eﬃciently.
+
+Strategic Objective 8
+Increase Strategic Enterprise Presence
+Success Looks Like
+Higher penetration in:
+   • Financial Services
+   • Insurance
+   • Aviation
+   • Energy
+   • Critical Infrastructure
+
+Strategic Objective 9
+Prepare for Strategic Exit Optionality
+The company should be built in a manner that supports:
+   • long-term independence
+   • private equity investment
+   •   strategic acquisition depending on future opportunities.
+
+
+
+Section 23: Long-Term Vision & Category
+Leadership Plan
+Vision Statement
+Crises Control becomes the platform organisations trust to coordinate response
+during operational disruption and prove what happened afterwards.
+
+The Evolution Roadmap
+Phase 1
+Alerting
+Primary capability: Communication.
+Market perception: Mass Notiﬁcation Platform.
+
+Phase 2
+Coordination
+Primary capability: Incident management.
+Market perception: Operational Incident Coordination Platform.
+
+Phase 3
+Visibility & Accountability
+Primary capability: Control Centre, Audit & Reporting.
+Market perception: Operational Response Platform.
+
+Phase 4
+Intelligence
+Primary capability: CRAiG.
+Market perception: Operational Intelligence Platform.
+
+Phase 5
+Organisational Resilience
+Primary capability: End-to-end resilience support.
+Market perception: Operational Resilience Platform.
+
+Category Leadership Strategy
+Thought Leadership
+Create market awareness around:
+   • incident coordination
+   • operational visibility
+   • accountability
+   •   resilience
+
+Product Leadership
+Deliver superior usability.
+Maintain simplicity under pressure.
+Avoid enterprise complexity.
+
+Customer Leadership
+Build a customer community that shares:
+   • best practice
+   • operational insight
+   • incident response knowledge
+
+Partner Leadership
+Develop trusted relationships with:
+   • resilience consultancies
+   • security specialists
+   • operational advisors
+
+The Strategic Narrative
+Most organisations can send alerts.
+Few can manage incidents end-to-end.
+Crises Control helps organisations:
+    • activate response
+    • coordinate teams
+    • execute actions
+    • maintain visibility
+    • demonstrate accountability
+    • improve resilience
+through one connected platform.
+
+The Company Mission In One Sentence
+Crises Control exists to help organisations maintain operational control during
+incidents and provide defensible evidence of response afterwards.
+
+The Future State
+The future Crises Control platform combines:
+Alerting + Coordination + Execution + Visibility + Accountability + Intelligence
+to become the operational system organisations rely upon during disruption.
+
