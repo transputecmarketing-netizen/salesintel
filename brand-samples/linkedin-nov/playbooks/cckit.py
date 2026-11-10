@@ -49,8 +49,13 @@ def dial(size=520, ticks=60, arc=(200, 330), red=(330, 352), needle=338, dark=Tr
     svg = f'<svg width="100%" viewBox="0 0 {size} {size}" style="display:block">{out}</svg>'
     if fig:
         fw = figw or 62
-        svg += f'<img src="{CC}hl/{"dark" if dark else "light"}/{fig}.png" style="position:absolute;left:50%;top:50%;width:{fw}%;transform:translate(-50%,-52%)">'
+        th = "dark" if dark else "light"
+        src = f"{CC}ind/{th}/{fig[4:]}.svg" if fig.startswith("ind:") else f"{CC}hl/{th}/{fig}.png"
+        svg += f'<img src="{src}" style="position:absolute;left:50%;top:50%;width:{fw}%;transform:translate(-50%,-52%)">'
     return f'<div style="position:relative">{svg}</div>'
+
+INDART = {"Financial Services and Insurance": "finance", "Property, Housing and Facilities": "property", "Retail": "retail",
+          "Transport and Logistics": "transport", "Hospitality": "hospitality", "Healthcare": "healthcare"}
 
 def strip(dark=True, labels=("T+00:00", "T+00:05", "T+00:15", "T+01:00", "T+04:00")):
     col = "rgba(255,255,255,.55)" if dark else "#3A3A3ABF"
@@ -69,6 +74,8 @@ class CCBook(RBook):
 
     # ------------------------------------------------------------- build: re-skin to the Crises Control palette
     def build(s, path):
+        import ccextra
+        if not getattr(s, '_extra', False): s._extra = True; ccextra.add_pages(s)
         super().build(path)
         h = open(path, encoding="utf8").read()
         for a, b in [("#0A0F1A", INK), ("#111A2B", PANEL), ("#2C72DB", BLUE), ("#3B8BFF", SKY), ("rgba(44,114,219", "rgba(17,121,187"), ("rgba(59,139,255", "rgba(22,161,237"), ("rgba(174,186,204", "rgba(247,246,248"),
@@ -80,13 +87,14 @@ class CCBook(RBook):
         h = h.replace('<img src="../../assets/logo-blue.svg" style="height:3.4mm">', wm(INK)).replace('<img src="../../assets/logo-white.svg" style="height:3.4mm">', wm("#FFFFFF"))
         h = h.replace("../../assets/logo-white.svg", LOGO).replace("../../assets/logo-blue.svg", LOGO)
         h = h.replace("<style>", "<style>" + MONO + ".run{top:9mm!important}.run span{font-family:JBM;letter-spacing:.12em!important}.folio span:first-child{font-family:JBM;letter-spacing:.04em}", 1)
+        h = h.replace("font-family:JBM", "font-family:'Roboto Mono'")
         h = h.replace("transputec.com", "crises-control.com").replace("Transputec Ltd", "Crises Control").replace("Transputec", "Crises Control")
         open(path, "w", encoding="utf8").write(h)
 
     # ------------------------------------------------------------- covers
     def art_cover(s, kicker, t1, t2, lede, tag=None):
         s._wrap(f'''<div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 80% 22%,#0A3165 0%,{INK} 58%)"></div>
-        <div style="position:absolute;right:-30mm;top:40mm;width:170mm">{dial(fig=s.fig, figw=64)}</div>
+        <div style="position:absolute;right:-30mm;top:40mm;width:170mm">{dial(fig=('ind:' + INDART[s.industry]) if s.industry in INDART else s.fig, figw=74)}</div>
         <div style="position:absolute;left:18mm;top:60mm;width:74mm;border-left:.4mm solid rgba(255,255,255,.16);padding-left:4mm;font-family:JBM;font-size:7pt;line-height:2.15;color:rgba(255,255,255,.7)">
           <div><span style="color:{RED}">●</span> T+00:00 &nbsp;Incident declared</div><div><span style="color:{SKY}">●</span> T+00:02 &nbsp;Alert sent · push, SMS, voice</div><div><span style="color:{AMBER}">●</span> T+01:30 &nbsp;Escalated · no response</div><div><span style="color:{GREEN}">●</span> T+04:10 &nbsp;Team acknowledged</div></div>
         <img src="{LOGO}" style="position:absolute;left:18mm;top:16mm;height:19mm">
@@ -111,7 +119,8 @@ class CCBook(RBook):
         <div style="position:absolute;left:18mm;right:18mm;top:96mm"><img src="{LOGO}" style="height:24mm">
         <div style="font-weight:600;font-size:34pt;line-height:1.05;letter-spacing:-.04em;margin-top:16mm">{title}</div>
         <div style="font-weight:300;font-size:12.5pt;line-height:1.55;color:rgba(255,255,255,.78);margin-top:7mm;width:150mm">{lede}</div>
-        <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">{cta}</span><span style="border:.3mm solid rgba(255,255,255,.4);border-radius:99px;padding:3.6mm 7mm;font-size:10pt">www.crises-control.com</span></div><div style="margin-top:7mm;font-family:JBM;font-size:7.6pt;letter-spacing:.06em;color:rgba(247,246,248,.75)">{CONTACT}</div>{nx}</div>
+        <div style="margin-top:6mm;width:150mm;font-size:10pt;line-height:1.5;color:#fff">Crises Control is an <b>Operational Incident Coordination Platform</b>: alert, coordinate, execute, see and prove, in one place.</div>
+        <div style="margin-top:9mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">Request a tailored demo</span><span style="border:.3mm solid rgba(255,255,255,.4);border-radius:99px;padding:3.6mm 7mm;font-size:10pt">www.crises-control.com</span></div><div style="margin-top:7mm;font-family:JBM;font-size:7.6pt;letter-spacing:.06em;color:rgba(247,246,248,.75)">{CONTACT}</div>{nx}</div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:14mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55)">Crises Control · {s.KIND} No. {s.num:02d}</div>''', True, folio=False)
 
     def opener(s, num, word, line, items):
@@ -164,7 +173,7 @@ class CCReport(CCBook):
         s._wrap(f'''<div style="position:absolute;left:0;right:0;top:0;height:5mm;background:linear-gradient(90deg,{NAVY_CC},{BLUE} 70%,{RED} 70%,{RED})"></div>
         <img src="{LOGO}" style="position:absolute;left:18mm;top:15mm;height:19mm">
         <div style="position:absolute;right:18mm;top:17mm;text-align:right;font-family:JBM;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">{s.KIND} · No. {s.num:02d}<div style="margin-top:1.6mm;color:{RED}">Week of {s.week}</div></div>
-        <div style="position:absolute;left:30mm;right:30mm;top:38mm">{dial(dark=False, fig=s.fig, figw=74)}</div>
+        <div style="position:absolute;left:30mm;right:30mm;top:38mm">{dial(dark=False, fig=('ind:' + INDART[s.industry]) if s.industry in INDART else s.fig, figw=80)}</div>
         <div style="position:absolute;left:18mm;right:18mm;top:192mm"><span style="font-family:JBM;font-size:7.4pt;letter-spacing:.16em;text-transform:uppercase;color:{BLUE}">{s.industry} · {kicker}</span>
         <div style="font-weight:600;font-size:38pt;line-height:1.03;letter-spacing:-.045em;margin-top:5mm;color:{INK}">{title}</div>
         <div class="lede" style="margin-top:6mm;width:165mm;font-size:12pt">{sub}</div></div>
@@ -176,6 +185,7 @@ class CCReport(CCBook):
         <div style="position:absolute;left:18mm;right:18mm;top:120mm"><img src="{LOGO}" style="height:22mm">
         <div style="font-weight:600;font-size:32pt;line-height:1.06;letter-spacing:-.04em;margin-top:12mm;color:{INK}">{title}</div>
         <div class="lede" style="margin-top:7mm;width:150mm">{lede}</div>
-        <div style="margin-top:11mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">{cta}</span><span style="border:.3mm solid #C9D3E3;border-radius:99px;padding:3.6mm 7mm;font-size:10pt">www.crises-control.com</span></div><div style="margin-top:7mm;font-family:JBM;font-size:7.6pt;letter-spacing:.06em;color:#3A3A3A">{CONTACT}</div>{cp}</div>
+        <div style="margin-top:6mm;width:150mm;font-size:10pt;line-height:1.5;color:#0B223C">Crises Control is an <b>Operational Incident Coordination Platform</b>: alert, coordinate, execute, see and prove, in one place.</div>
+        <div style="margin-top:9mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">Request a tailored demo</span><span style="border:.3mm solid #C9D3E3;border-radius:99px;padding:3.6mm 7mm;font-size:10pt">www.crises-control.com</span></div><div style="margin-top:7mm;font-family:JBM;font-size:7.6pt;letter-spacing:.06em;color:#3A3A3A">{CONTACT}</div>{cp}</div>
         <div style="position:absolute;left:0;right:0;bottom:0;height:5mm;background:linear-gradient(90deg,{NAVY_CC},{BLUE} 70%,{RED} 70%,{RED})"></div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">Crises Control · {s.KIND} No. {s.num:02d}</div>''', folio=False)
