@@ -119,61 +119,51 @@ VS = [("Sends a message", "Runs the response, from first alert to recovery"),
       ("Gives leaders a list of recipients", "Gives leaders a live picture of what is happening")]
 
 
+STAGE = ["ACTIVATION", "ACTIVATION", "COORDINATION", "COORDINATION", "EXECUTION", "EXECUTION", "ASSURANCE", "ASSURANCE"]
+
 def add_pages(b):
     from cckit import INK, SKY, BLUE, RED, MUTE, LOGO, CONTACT, dial
     d = IND.get(b.industry)
     if not d: return
     R, P = len(b.pages), []
-    # 1 positioning (dark)
-    st = "".join(f'''<div style="flex:1;position:relative;padding-top:7mm"><div style="position:absolute;left:0;right:0;top:1.6mm;border-top:.4mm solid {RED if i==0 else 'rgba(247,246,248,.25)'}"></div>
-      <div style="position:absolute;left:0;top:0;width:3.6mm;height:3.6mm;border-radius:50%;background:{RED if i==0 else SKY}"></div>
-      <div style="font-family:'Roboto Mono';font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:{SKY}">0{i+1} · {a}</div>
-      <div style="font-weight:700;font-size:11pt;margin-top:2mm">{m}</div><div style="font-size:8.4pt;line-height:1.45;color:rgba(247,246,248,.75);margin-top:1.4mm;padding-right:4mm">{t}</div></div>''' for i, (a, m, t) in enumerate(STAGES))
-    vs = "".join(f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8mm;padding:3.4mm 0;border-top:.25mm solid rgba(247,246,248,.16);font-size:9.6pt"><div style="color:rgba(247,246,248,.7)">{a}</div><div>{c}</div></div>' for a, c in VS)
+    # 1 positioning (dark): framework sections 3 and 4
+    FAIL = [("Fragmented information", "Different teams work from different information."), ("Delayed decision making", "Leadership lacks visibility, so decisions wait."),
+            ("Uncoordinated response", "Several teams work independently on the same problem."), ("Lack of visibility", "Critical actions become difficult to track."),
+            ("Lack of accountability", "Actions and decisions are poorly documented.")]
+    fl = "".join(f'<div style="display:grid;grid-template-columns:8mm 52mm 1fr;gap:3mm;padding:2.8mm 0;border-top:.25mm solid rgba(247,246,248,.16);font-size:9.4pt"><span style="font-family:Roboto Mono;font-size:7.6pt;color:{RED}">0{i+1}</span><span style="font-weight:700">{a}</span><span style="color:rgba(247,246,248,.78)">{t}</span></div>' for i, (a, t) in enumerate(FAIL))
+    LC = ["Detection", "Alert", "Coordination", "Execution", "Recovery", "Closure", "Reporting"]
+    lc = "".join(f'<div style="flex:1;text-align:center;position:relative"><div style="width:4mm;height:4mm;border-radius:50%;margin:0 auto;background:{RED if i==0 else SKY};position:relative;z-index:1"></div><div style="font-family:Roboto Mono;font-size:7pt;letter-spacing:.06em;margin-top:2mm;color:{"#fff" if i else RED}">{x.upper()}</div></div>' for i, x in enumerate(LC))
     P.append(dict(body=f'''<div class="ey">Why coordination, not just notification</div>
-      <h1 style="margin-top:4mm;width:172mm;font-size:30pt">Alerting is minute one.<br><span style="color:{SKY}">Coordination is everything after.</span></h1>
-      <div class="lede" style="margin-top:5mm;width:168mm;font-size:11pt">{d["example"]}</div>
-      <div style="display:flex;margin-top:10mm">{st}</div>
-      <div style="margin-top:10mm;display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-family:'Roboto Mono';font-size:7pt;letter-spacing:.14em;text-transform:uppercase"><div style="color:rgba(247,246,248,.6)">A mass notification tool</div><div style="color:{RED}">An Operational Incident Coordination Platform</div></div>
-      <div style="margin-top:2mm;border-bottom:.25mm solid rgba(247,246,248,.16)">{vs}</div>
-      <div style="margin-top:7mm;font-size:10pt;line-height:1.5;color:rgba(247,246,248,.85)">Crises Control is an <b style="color:#fff">Operational Incident Coordination Platform</b>. Mass alerting is where it starts, not where it ends.</div>''',
+      <h1 style="margin-top:4mm;width:172mm;font-size:29pt">Most organisations can send alerts.<br><span style="color:{SKY}">Few can manage incidents end-to-end.</span></h1>
+      <div class="lede" style="margin-top:5mm;width:168mm;font-size:10.8pt">{d["example"]}</div>
+      <div style="margin-top:8mm;font-family:Roboto Mono;font-size:7pt;letter-spacing:.16em;color:{RED};text-transform:uppercase">Where incidents go wrong</div>
+      <div style="margin-top:2mm;border-bottom:.25mm solid rgba(247,246,248,.16)">{fl}</div>
+      <div style="margin-top:9mm;font-family:Roboto Mono;font-size:7pt;letter-spacing:.16em;color:{SKY};text-transform:uppercase">The whole incident, in one platform</div>
+      <div style="position:relative;display:flex;margin-top:4mm"><div style="position:absolute;left:7%;right:7%;top:2mm;border-top:.4mm solid rgba(22,161,237,.6)"></div>{lc}</div>
+      <div style="margin-top:9mm;padding:5mm 6mm;border-left:1.2mm solid {RED};background:rgba(247,246,248,.05);font-size:10.6pt;line-height:1.55">Crises Control is an <b>Operational Incident Coordination Platform</b>. It helps organisations maintain operational control during incidents by combining alerting, coordination, execution, visibility and accountability in one platform.</div>''',
       dark=True, sec="Coordination, not just notification", bg=f'<div style="position:absolute;right:-78mm;top:-78mm;width:170mm;opacity:.35">{dial()}</div>'))
     # 2 scorecard (light)
     rows = "".join(f'''<div style="display:grid;grid-template-columns:24mm 1fr 30mm;gap:5mm;padding:2.4mm 0;border-top:.25mm solid #3A3A3A26;align-items:start">
-      <div><div style="font-family:'Roboto Mono';font-size:7pt;color:{RED}">0{i+1}</div><div style="font-weight:700;font-size:10.4pt;margin-top:.6mm">{n}</div></div>
+      <div><div style="font-family:'Roboto Mono';font-size:6.6pt;letter-spacing:.08em;color:{RED}">0{i+1} · {STAGE[i]}</div><div style="font-weight:700;font-size:10.4pt;margin-top:.6mm">{n}</div></div>
       <div><div style="font-size:8.8pt;line-height:1.35;color:#0B223C">{q}</div><div style="font-size:7.9pt;line-height:1.35;color:#3A3A3A;margin-top:1mm"><span style="font-family:'Roboto Mono';font-size:6.6pt;letter-spacing:.1em;color:{BLUE}">GOOD LOOKS LIKE </span>{g}</div></div>
       <div style="display:flex;gap:2mm;padding-top:1mm">{"".join(f'<div style="width:5.6mm;height:5.6mm;border:.35mm solid #0B223C;border-radius:1.2mm;font-family:Roboto Mono;font-size:7pt;display:flex;align-items:center;justify-content:center;color:#3A3A3A">{k}</div>' for k in range(4))}</div></div>''' for i, ((n, q), g) in enumerate(zip(DIMS, d["good"])))
     bands = "".join(f'<div style="flex:1;padding:2.6mm 3.6mm;border-radius:2.4mm;background:{bg};color:{fg}"><div style="font-family:Roboto Mono;font-size:7.6pt;font-weight:500">{r}</div><div style="font-weight:700;font-size:9.8pt;margin-top:.8mm">{t}</div><div style="font-size:8pt;line-height:1.35;margin-top:.6mm;opacity:.85">{x}</div></div>'
                     for r, t, x, bg, fg in [("0 to 8", "Alerting only", "You can send messages. The response still depends on people and luck.", "#F7F6F8", "#0B223C"), ("9 to 16", "Coordinating in parts", "Some steps work. Gaps appear at night, at scale or when systems fail.", "#1179BB", "#FFFFFF"), ("17 to 24", "Coordinated and provable", "You can run the response and show exactly what happened.", "#0B223C", "#FFFFFF")])
-    P.append(dict(body=s_hd(b, "Self-assessment", f"How coordinated is your response?", f"Score each area from 0 (not in place) to 3 (fully in place) for your {d['short']} organisation, then add up the total.")
+    P.append(dict(body=s_hd(b, "Readiness assessment", f"How ready is your response?", f"Score each area from 0 (not in place) to 3 (fully in place) for your {d['short']} organisation, then add up the total.")
                   + f'<div style="margin-top:4mm;display:grid;grid-template-columns:24mm 1fr 30mm;gap:5mm" class="lab"><span>Area</span><span>The question</span><span>Score 0 to 3</span></div><div style="border-bottom:.25mm solid #3A3A3A26">{rows}</div><div style="display:flex;gap:3mm;margin-top:3.5mm">{bands}</div>',
-                  dark=False, sec="Self-assessment"))
+                  dark=False, sec="Readiness assessment"))
     # 3 buyer's questions (light)
     q = "".join(f'<div style="padding:4.6mm 0;border-top:.25mm solid #3A3A3A26;display:grid;grid-template-columns:10mm 1fr;gap:3mm"><div style="font-family:Roboto Mono;font-size:9pt;color:{RED}">0{i+1}</div><div><div style="font-weight:700;font-size:11pt">{a}</div><div style="font-size:9.2pt;line-height:1.45;color:#3A3A3A;margin-top:1.2mm">{t}</div></div></div>' for i, (a, t) in enumerate(QS))
     P.append(dict(body=s_hd(b, "Buyer's guide", "Eight questions to ask any incident platform supplier", "Many tools can send an alert. These questions separate a notification tool from a platform that coordinates the whole response.")
                   + f'<div style="margin-top:7mm;columns:2;column-gap:10mm">{q}</div>', dark=False, sec="Buyer's guide"))
-    # 4 tailored demo (dark)
-    br = "".join(f'<div style="display:flex;gap:4mm;padding:3.6mm 0;border-top:.25mm solid rgba(247,246,248,.16);font-size:10pt;line-height:1.45"><span style="font-family:Roboto Mono;color:{RED}">0{i+1}</span><span>{t}</span></div>' for i, t in enumerate(d["bring"]))
-    sh = "".join(f'<div style="display:flex;gap:4mm;padding:3.6mm 0;border-top:.25mm solid rgba(247,246,248,.16);font-size:10pt;line-height:1.45"><span style="font-family:Roboto Mono;color:{SKY}">{m}</span><span>{t}</span></div>' for m, t in [
-        ("05 min", "We agree your scenario and the people involved."), ("10 min", "We run your first hour live: alert, acknowledgement and escalation."),
-        ("10 min", "We turn your procedure into tasks and show the live picture leaders would see."), ("05 min", "We produce the timeline and talk through what it means for your plans.")])
-    P.append(dict(body=f'''<div class="ey">Your tailored demonstration</div>
-      <h1 style="margin-top:4mm;width:170mm;font-size:30pt">Bring your worst day.<br><span style="color:{SKY}">We will run it with you.</span></h1>
-      <div class="lede" style="margin-top:5mm;width:165mm;font-size:11pt">A 30-minute session built around your own {d["short"]} scenario, not a standard product tour. You leave with a clearer view of your gaps, whether or not you go on to use Crises Control.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:9mm"><div><div class="lab" style="color:{RED}">Bring a scenario like</div><div style="margin-top:2mm;border-bottom:.25mm solid rgba(247,246,248,.16)">{br}</div></div>
-      <div><div class="lab" style="color:{SKY}">What the 30 minutes covers</div><div style="margin-top:2mm;border-bottom:.25mm solid rgba(247,246,248,.16)">{sh}</div></div></div>
-      <div style="margin-top:10mm;border-radius:4mm;background:rgba(247,246,248,.06);border:.3mm solid rgba(247,246,248,.18);padding:7mm 8mm;display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-weight:700;font-size:15pt">Request your tailored demo</div><div style="font-family:Roboto Mono;font-size:8.6pt;color:rgba(247,246,248,.85);margin-top:2.6mm;line-height:1.9">+44 (0) 20 8584 1385<br>contactus@crises-control.com<br>www.crises-control.com</div></div>
-        <div style="background:{RED};color:#fff;border-radius:99px;padding:3.8mm 7mm;font-weight:700;font-size:10.5pt">Request a demo</div></div>''',
-      dark=True, sec="Your tailored demonstration", bg=f'<div style="position:absolute;right:-70mm;bottom:-70mm;width:170mm;opacity:.35">{dial()}</div>'))
-    # placement: playbooks put positioning before the platform page and the rest after it; reports put all four before Sources
-    idx_platform = next((i for i, p in enumerate(b.pages) if p[2] == "Where Crises Control fits" or "Where Crises Control fits" in str(p[0])[:4000]), None)
+    # placement: playbooks put positioning before the platform pages and the tools after them; reports put all before Sources
+    plat = [i for i, p in enumerate(b.pages) if p[2] == "Where Crises Control fits"]
     src = next((t for t in b.toc if t[1] == "Sources"), None)
-    if idx_platform is not None:
-        ins(b, idx_platform, [P[0]]); ins(b, idx_platform + 2, P[1:], ("", "Self-assessment and your demo"))
+    if plat:
+        ins(b, plat[0], [P[0]]); ins(b, plat[-1] + 2, P[1:], ("", "Readiness assessment and buyer's guide"))
     else:
         at = src[2] - 1 if src else len(b.pages) - 1
-        ins(b, at, P, ("", "Coordination, self-assessment and your demo"))
+        ins(b, at, P, ("", "Coordination, readiness and buyer's guide"))
 
 def s_hd(b, ey, title, lede): return b._hd(ey, title, lede)
 

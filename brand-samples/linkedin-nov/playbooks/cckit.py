@@ -189,3 +189,9 @@ class CCReport(CCBook):
         <div style="margin-top:9mm;display:flex;gap:4mm"><span style="background:{RED};color:#fff;border-radius:99px;padding:3.6mm 7mm;font-weight:600;font-size:10pt">Request a tailored demo</span><span style="border:.3mm solid #C9D3E3;border-radius:99px;padding:3.6mm 7mm;font-size:10pt">www.crises-control.com</span></div><div style="margin-top:7mm;font-family:JBM;font-size:7.6pt;letter-spacing:.06em;color:#3A3A3A">{CONTACT}</div>{cp}</div>
         <div style="position:absolute;left:0;right:0;bottom:0;height:5mm;background:linear-gradient(90deg,{NAVY_CC},{BLUE} 70%,{RED} 70%,{RED})"></div>
         <div style="position:absolute;left:18mm;right:18mm;bottom:12mm;font-family:JBM;font-size:6.6pt;letter-spacing:.16em;text-transform:uppercase;color:#6B7A90">Crises Control · {s.KIND} No. {s.num:02d}</div>''', folio=False)
+
+
+# Framework-aligned practical tools, platform pages and final call to action (see ccprac.py).
+import ccprac as _ccprac
+_ccprac.attach(CCBook)
+CCReport.rep_back = lambda s, title="", lede="", cta="", companion="": _ccprac.cta_page(s, False, companion)
