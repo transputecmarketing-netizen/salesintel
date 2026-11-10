@@ -1,7 +1,7 @@
-# Notes 04: Transport and Logistics (week of 30 November 2026)
+# Notes 04: Transport and Logistics
 
-Playbook: CC-04-Playbook-Keep-It-Moving.html (37 pages after round 2 revision, 14 sources)
-Report: CC-04-Report-The-Heathrow-Lesson.html (22 pages, 25 sources)
+Playbook: CC-04-Playbook-Keep-It-Moving.html (44 pages after round 3, 19 sources)
+Report: CC-04-Report-The-Heathrow-Lesson.html (28 pages after round 3, 30 sources)
 
 ## Key verified facts
 - North Hyde fire (NESO news, 1 Jul 2025):
@@ -55,3 +55,18 @@ Report: CC-04-Report-The-Heathrow-Lesson.html (22 pages, 25 sources)
 - Scenarios page rewritten around where it goes wrong, who decides and how it is monitored.
 - Platform rows rewritten as 7 lifecycle outcomes (SOS to CRAiG); "Audit & Reporting" used; CRAiG limited to current capability (finding information).
 - No new facts added; all 14 sources and citations unchanged. All times, roles and tracker items are labelled illustrative.
+
+## Round 3 revision (BRIEF3: international, evergreen, standard toolkit)
+- No retitles. "Keep it moving" and "The Heathrow lesson" are not tied to one country's law; Heathrow is labelled a UK case study.
+- Playbook restructured to the standard order: Foreword, Executive summary, Introduction (narrative in the lede), 01 Before it hits (essay, six disruptions, two regions pages, readiness steps), 02 Incident scenarios (severity, first hour, swimlane, three scenarios, tracker), 03 Respond and recover (missed check-in escalation as an extra tool with tool=False, driver check-in log, rerouting, partners, partner notification log, week/month/quarter plan), 04 Practical toolkit (index, readiness, RACI, decision log with a hub power loss example, network escalation, six messages, tabletop exercise, PIR), questions/checklist/glossary, platform, sources.
+- Contents has eleven entries, which overflowed the kit's TOC page; cp04 tightens row padding on its own instance only (kit not edited).
+- Neutral wording: 999 replaced by "emergency services"; Met Office by "official weather warnings"; HSE line labelled "United Kingdom"; regulator message note points to the regional notes; time-bound "before winter" wording removed.
+- Dropped from the playbook to keep sources on one page: Transport Scotland (Storm Eowyn) and HSE fatal injury statistics (both still in the report).
+
+### Verified regional facts (primary sources read)
+- UK: GOV.UK responder guidance: category 2 responders ("co-operating bodies", e.g. transport companies) have a lesser set of duties centred on co-operating and sharing information; local resilience forums. CCA 2004 Sch 1 Part 3 lists rail licence holders, TfL/LU, airport operators, harbour authorities, strategic highways company (read, not cited). NIS Regs Sch 1: competent authority for transport is the Secretary of State for Transport (air jointly with the CAA) (read, not cited).
+- US: 49 CFR 390.23 (eCFR, 1 Oct 2026 version): HOS relief for direct emergency assistance (30 days presidential, 14 days regional, 5 days local); driver who needs immediate rest gets at least 10 consecutive hours off duty. TSA SD 1580-21-01E and 1582-21-01E (memo 9 Jan 2026): effective 16 Jan 2026 to 15 Jan 2027; report cyber incidents to CISA no later than 72 hours after identification (NOT 24 hours, as older secondary sources say); 24/7 cybersecurity coordinator; incident response plan exercised at least annually.
+- EU: NIS2 Annex I transport (air, rail, water, road); Art 23: early warning 24 h, notification 72 h, final report one month; Art 41 apply from 18 Oct 2024. CER Annex transport (air, rail, water, road, public transport); Art 6: identify critical entities by 17 Jul 2026; Art 12 risk assessment within nine months of notification; Art 13 measures incl. crisis management and alert routines; Art 15 initial notification 24 h, detailed report within one month.
+- UAE: AE/SCNS/NCEMA 7000:2021 clause 1.6 "applicable to all UAE entities"; 8.5.2 response structure (command and control, detection and immediate response, communication during disruptions...); 8.6.2 exercises at planned intervals.
+- Saudi Arabia: NCA ECC-2:2024 scope: government entities and private entities owning, operating or hosting CNI; 2-13 incident response plans, escalation, classification, reporting to the NCA.
+- Not included (not verified): GCAA and Saudi TGA incident rules, Qatar, CIRCIA final rule status, ORR-specific duties.

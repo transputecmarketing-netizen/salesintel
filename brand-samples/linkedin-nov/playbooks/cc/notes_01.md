@@ -38,3 +38,23 @@ New pages in the playbook (all illustrative, no new statistics, no new sources):
 - Tools section: supervisor, supplier and scheme notification log form (cites PS26/2 for the 4-hour PSP and 2027 24-hour clocks).
 Changed: scenario cards now cover where it goes wrong, who decides, and monitor and test; opener item lists; platform rows rewritten as seven lifecycle outcomes (SOS to CRAiG, "Audit & Reporting"; CRAiG described only as helping find who has not responded and what is outstanding); "mass notification service" in the out-of-band essay changed to "alerting service".
 SMF holder is described generically ("the senior manager responsible for operational resilience in your firm"); no SMF number is stated, as it was not verified for this round.
+
+## Round 3 revision (BRIEF3, 10 November 2026)
+Playbook CC-01-Playbook-Within-Tolerance.html: 44 pages, 19 sources (one page). Report CC-01-Report-Resilience-Regulated.html: 30 pages, 27 sources (two pages). Titles unchanged.
+
+Structure: foreword, execsum, intro (narrative in lede and statement), Part 01 Know your limits (essay on impact tolerance and equivalents, regions page "One idea, four rulebooks", services table, depmap, concentration), Part 02 Incident scenarios (severity, first hour, swimlane, usecase x3, tracker), Part 03 Respond and prove it (out-of-band essay, compare, regions page "Reporting clocks by region", notification log, testing steps, week/month/quarter plan), Part 04 toolkit (decision rights RACI, decision log with tolerance in rationale, tolerance-clock escalation, six messages, payday tabletop, PIR). Contents rows tightened with the same inline style as cp02 (kit contents page cannot hold 11 entries).
+
+Verified for regional notes:
+- US Sound Practices (Fed/OCC/FDIC, 30 Oct 2020, SR 20-24): directed at largest banks; board sets "tolerance for disruption" for critical operations and core business lines; does not revise rules (paper PDF and press release).
+- FFIEC BCM booklet, 14 Nov 2019, replaces 2015 BCP booklet; examiner guidance (NCUA/OCC releases).
+- Bank computer-security incident notification rule: 36 hours; compliance 1 May 2022 (Fed press release 18 Nov 2021).
+- SEC Form 8-K Item 1.05: four business days after determining materiality; 8-K compliance from 18 Dec 2023 (SEC release 2023-139).
+- NYDFS 500.17: 72 hours; extortion payment notice 24 hours. 500.16: IR and BCDR plans, tested at least annually, communication plan for employees, regulators, third parties (Cornell LII text).
+- DORA applies 17 Jan 2025 (existing sources); DR 2025/301 clocks.
+- CBUAE Operational Risk Management Regulation, Circular 1/2026, 3 Feb 2026, effective 14 Sep 2026; critical operations, mapping, board-approved disruption tolerances; notify within 4h, summary within 24h. Rulebook site blocked (403): taken from Trowers & Hamlins summary (Sept 2026), corroborated by Pinsent Masons (four-hour notification, tolerance for disruption). Cited as secondary summary.
+- SAMA BCM Framework, Circular 381000058504, 27 Feb 2017, in force; applies to banks and other member organisations; RTO/RPO/maximum acceptable outage; annual testing; medium/high incidents reported promptly; post-incident report (SAMA rulebook).
+- DFSA CP 170 (2026): proposed impact tolerances and notification; not yet final as far as found.
+Not used: SAMA Cyber Security Framework (verified exists, May 2017) left out for space; ADGM FSRA specifics not verified, not stated; Qatar not covered.
+
+Product: platform rows rewritten to CAPABILITIES.md (SOS press-and-hold, location where available; escalation "under the rules you configure"; Incident Manager "single communication log", no bridge or decision-log claim; Control Centre no longer shows "time left against tolerance"; CRAiG (beta) answers questions only).
+Kit issue (not edited): ccprac DEMO line for this industry says the executive "watches ... time remaining against tolerance", which Control Centre does not track as a standard capability.

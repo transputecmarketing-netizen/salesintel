@@ -102,7 +102,7 @@ QS = [("Does it stop at the message?", "Ask what the platform does after the ale
       ("Does it run your procedures?", "Ask whether your plans become owned tasks with deadlines, or stay as documents."),
       ("Is there one shared picture?", "Ask what leaders see live, and whether it needs someone to update a spreadsheet."),
       ("Does it work when your systems do not?", "Ask how teams coordinate if email, chat or your network is down."),
-      ("Can frontline staff raise the alarm?", "Ask how a colleague on site escalates, with their location where supported, in one action."),
+      ("Can frontline staff raise the alarm?", "Ask how a colleague on site escalates, with their location where available, in one action."),
       ("What evidence does it leave behind?", "Ask for a sample timeline of the kind a regulator, insurer or inquiry would want."),
       ("Can you rehearse in it?", "Ask whether you can run exercises on the same platform you would use for real.")]
 
