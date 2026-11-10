@@ -7,10 +7,13 @@ def build():
     def R(*n):
         for x in n: order.setdefault(x, len(order) + 1)
         return S(*sorted(order[x] for x in n))
-    b.how = "A practical playbook for retail resilience leaders in the UK, the US, Europe and the Middle East: how stores, regions and head office work as one when tills, systems, fridges or people are under threat, with a plan for every peak."
+    b.how = "A practical playbook for retail resilience leaders: how stores, regions and head office work as one when tills, systems, fridges or people are under threat, wherever they trade."
     b.art_cover("Crisis playbook · Retail", "Keep the", "shutters up.",
         "Payment outages, cyber attacks, abuse on the shop floor, lockdowns and warm freezers. How to keep stores trading and colleagues safe when it goes wrong at peak.")
     b.contents()
+    # Shim for a kit bug (reported): cckit prefixes a <style> to "__TOC__", so pbkit no longer swaps in the contents. No-op once fixed.
+    _html0 = b.html
+    b.html = lambda offset=0, total=None: (lambda h: h.replace("__TOC__", b._toc()) if "__TOC__" in h else h)(_html0(offset, total))
 
     b.mark("", "Foreword")
     b.foreword("Retail crises rarely start at head office. They start at a till, a freezer or a shop door.", [

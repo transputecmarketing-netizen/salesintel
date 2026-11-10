@@ -14,8 +14,8 @@ def build():
 
     b.mark("", "Foreword")
     b.foreword("In healthcare, an IT incident becomes a patient safety incident within the hour.", [
-        f"In June 2024, in the UK, a ransomware attack on Synnovis, the pathology provider for major hospitals in south east London, stopped normal blood testing. NHS England later reported that 10,152 acute outpatient appointments and 1,710 elective procedures had been postponed at the two most affected hospital trusts.{R(1)} Because blood could not be matched in the usual way, the national blood service asked O type donors to book urgently.{R(4)} A year later one of the hospitals confirmed that a long wait for a blood test result, caused by the attack, was one of the factors in a patient's death.{R(2)}",
-        f"It is not only a UK story, and not only a cyber story. In May 2024, in the US, a cyber attack on Ascension, which operates 140 hospitals in 19 states, forced several hospitals to divert ambulances and moved staff onto paper records.{R(5)} In June 2026 English hospitals declared critical incidents when cooling plant failed in a heatwave.{R(6)} Almost two years after the Synnovis attack, one UK provider was still working in business continuity for pathology.{R(3)}",
+        f"In June 2024, in the UK, a ransomware attack on Synnovis, the pathology provider for major hospitals in south east London, stopped normal blood testing. NHS England later reported that 10,152 acute outpatient appointments and 1,710 elective procedures had been postponed at the two most affected hospital trusts.{R(1)} A year later one of the hospitals confirmed that a long wait for a blood test result, caused by the attack, was one of the factors in a patient's death.{R(2)}",
+        f"It is not only a UK story, and not only a cyber story. In May 2024, in the US, a cyber attack on Ascension, which operates 140 hospitals in 19 states, forced several hospitals to divert ambulances and moved staff onto paper records.{R(5)} In June 2026 an English hospital declared a critical incident when its cooling systems failed in a heatwave.{R(6)} Almost two years after the Synnovis attack, one UK provider was still working in business continuity for pathology.{R(3)}",
         "This playbook is for the people who carry the bleep when that happens, in hospitals and health systems in the UK, the US, Europe and the Middle East: emergency managers and business continuity leads, administrators and executives on call, clinical, nursing and digital leaders, and communications teams. It covers the first hour, the downtime that follows and the plan to be ready before the next one. The companion intelligence report sets out the evidence in full."],
         "The Crises Control team")
 
@@ -70,7 +70,7 @@ def build():
         ("European Union", f"Hospital preparedness is set nationally, and systems vary. The CER Directive (EU) 2022/2557 covers health among its sectors: Member States had to transpose it by 17 October 2024 and identify critical entities by 17 July 2026. Critical entities must take resilience measures and notify incidents.{R(15)}",
          "Ask your national authority whether your hospital is, or serves, a designated critical entity, and align your plan with national emergency arrangements."),
         ("Middle East (UAE and Saudi Arabia)", f"<b>Dubai:</b> the DHA framework for healthcare emergencies, effective 14 January 2025, requires licensed facilities to run an annual hazard vulnerability analysis, keep a 24/7 contact for DHA, give hospitals an emergency operations centre and hold at least one exercise a year.{R(16)} <b>Abu Dhabi</b> launched a healthcare business continuity standard in May 2025.{R(17)}",
-         f"The UAE national business continuity standard is AE/SCNS/NCEMA 7000:2021.{R(18)} <b>Saudi Arabia:</b> CBAHI accreditation is linked to hospital licence renewal.{R(19)} JCI surveys use its 8th edition hospital standards from 1 January 2025.{R(20)}")], "Declare and decide")
+         f"<b>Saudi Arabia:</b> CBAHI accreditation is linked to hospital licence renewal.{R(19)} JCI surveys use its 8th edition hospital standards from 1 January 2025.{R(20)}")], "Declare and decide")
     b.regions("Regional notes", "Reporting a cyber or data incident: the clocks differ", "A cyber attack on a clinical system is an operational incident and, often, a reportable one. Know which clock starts, who files and to whom, before the day.", [
         ("United Kingdom", f"<b>England:</b> NHS trusts, foundation trusts, integrated care boards and certain independent providers are operators of essential services under the NIS Regulations 2018. They report network and information system incidents through the Data Security and Protection Toolkit within 72 hours of becoming aware.{R(9)}",
          "Name who files the report and when the 72-hour clock starts. Personal data breaches can also need a separate report to the data protection regulator."),
@@ -133,7 +133,7 @@ def build():
     b.usecase("In practice", "Three scenarios, three first hours", [
         ("server", "Scenario 1 · Acute hospital, three sites", "Cyber attack at a laboratory partner", [("Where it fails", "The laboratory is run by a partner; nobody at the hospital was on its call list, so wards heard first."), ("Who decides", "The executive on call declares; the transfusion lead authorises O type use, agreed with the blood bank."), ("What happens", "A joint call-in list and shared incident log with the partner; downtime forms printed on every ward."), ("How it is monitored", "Time from first report to first paper result, measured in a joint exercise and again on the day.")]),
         ("truck", "Scenario 2 · Regional trauma centre", "Mass casualty incident at night", [("Where it fails", "The ambulance alert reaches the emergency department, but calling in theatres, critical care and the blood bank relies on a phone tree."), ("Who decides", "The emergency department lead and executive on call declare; the incident commander opens the command centre."), ("What happens", "Role-based call-in: coming, later, not available. Planned lists stood down; beds and theatres updated at set times."), ("How it is monitored", "Acknowledgements by role against the casualty estimate, staff arrival times and beds released.")]),
-        ("power", "Scenario 3 · Hospital with a shared plant room", "Cooling and power failure in a heatwave", [("Where it fails", f"Theatres, scanners and the server room shared one cooling plant, as English hospitals found in June 2026.{R(6)}"), ("Who decides", "The estates lead advises; the executive on call declares and decides whether to move lists and patients."), ("What happens", "Lists moved to a partner site; generator, fuel and medical gas checks run as tasks."), ("How it is monitored", "Temperatures, generator and gas supply checked at set times against triggers.")])], "Incident scenarios")
+        ("power", "Scenario 3 · Hospital with a shared plant room", "Cooling and power failure in a heatwave", [("Where it fails", f"Theatres, scanners and the server room shared one cooling plant, as one English hospital found in June 2026.{R(6)}"), ("Who decides", "The estates lead advises; the executive on call declares and decides whether to move lists and patients."), ("What happens", "Lists moved to a partner site; generator, fuel and medical gas checks run as tasks."), ("How it is monitored", "Temperatures, generator and gas supply checked at set times against triggers.")])], "Incident scenarios")
     b.steps("Call-in", "Five rules for calling staff in", "Most hospitals have a cascade. Few know, in real time, who has answered. It matters most in a mass casualty incident at 03:00.", [
         ("Alert by role, not by name", "Lists are built around roles and rotas: the on-call transfusion scientist, the theatre coordinator, the nurse in charge. People change; roles do not."),
         ("Ask for an answer, not a read receipt", "Every call-in asks a question: available now, available later, not available. Silence after the set time escalates to a deputy, under rules agreed in advance."),
@@ -159,7 +159,7 @@ def build():
     b.essay("Keep patients safe", "Downtime procedures: the plan you hope never to use", [
         "Most clinical areas have a downtime folder. The question is whether anyone has opened it this year. The test is simple: can a ward request an urgent blood test, receive the result and act on it safely with no computers at all? If the answer depends on one person who knows how, it is not a procedure.",
         f"Downtime can last far longer than plans assume. <b>United Kingdom:</b> after the Synnovis attack, one provider estimated in early 2026 that entering 161,560 pathology reports into patient records had been delayed, and it had recorded 122 patient safety incidents involving incorrect, unavailable or delayed results.{R(3)} <b>United States:</b> Ascension told patients it expected to rely on downtime procedures for some time.{R(5)} Recovery has its own risks: results back-entered weeks later, duplicate records and patients lost to follow-up.",
-        f"Blood is the sharpest edge. When hospitals cannot match blood in the usual way they rely on O type blood, which is safe for all patients; in the UK case the national blood service appealed for O type donors within a week.{R(4)} Every transfusion laboratory needs a downtime plan agreed with clinicians, including who authorises O type use.",
+        f"Blood is the sharpest edge. When blood cannot be matched in the usual way, transfusion falls back on O type blood, and stocks come under pressure. Every transfusion laboratory needs a downtime plan agreed with clinicians, including who authorises O type use.",
         "Good downtime procedures are short, printed and practised. They name the forms, the phone numbers, the runners and the order of priority: emergency department, critical care, maternity, theatres, then the rest. They say how results will be checked and entered when systems return. And they are tested with the people who will use them, not just the people who wrote them.",
         "Treat a cyber attack differently from a power cut in one way: you may not be able to trust the systems even when they come back. Keep digital and clinical leads in the same incident meeting, and decide your out-of-band channel now, before staff choose one for you."],
         "Keep patients safe", "Can a ward request an urgent blood test, get the result and act on it safely with no computers at all?")
@@ -184,7 +184,7 @@ def build():
         "Cyber incidents also start regulatory clocks: see the regional notes in Part 01 for who reports what, and how fast.")
     b.compare("Long incidents", "Heat, surge and the incident that does not end", "Many healthcare incidents are rising tides, not explosions. They need a different rhythm.", ["Pressure", "What often happens", "What good looks like"], [
         ("Seasonal surge", "Escalation drifts to the highest level without a declared incident or extra staff.", "Triggers that link your escalation levels to the severity ladder and call-in lists."),
-        ("Heat", "Chillers and server rooms fail together; theatres and scanners stop.", f"Temperature triggers, cooling checks and a plan for diagnostics, as English hospitals learned in June 2026.{R(6)}"),
+        ("Heat", "Chillers and server rooms fail together; theatres and scanners stop.", f"Temperature triggers, cooling checks and a plan for diagnostics, as one English hospital learned in June 2026.{R(6)}"),
         ("Long cyber recovery", "Staff run on paper for weeks with no rota change or welfare plan.", "A recovery cell, shift patterns, welfare checks and a plan for back-entering results."),
         ("Lone and community staff", "Visits continue with no way to raise an alarm if systems are down.", "Check-in times, one-touch alarms and visit lists printed before each shift."),
         ("Communication fatigue", "Updates stop once the crisis feels normal.", "Fixed update times for staff and patients until stand down.")], "Keep patients safe")
@@ -295,29 +295,29 @@ def build():
 
     b.mark("", "Sources")
     src = [
-        "NHS England London, Latest media statement on Synnovis cyber-attack, https://www.england.nhs.uk/london/synnovis-ransomware-cyber-attack/latest-media-statement-on-synnovis-cyber-attack/",
-        "The Record, Ransomware attack contributed to patient's death, 25 June 2025, https://therecord.media/ransomware-attack-contributed-patient-death-uk-nhs",
-        "The Record, Ransomware attack continues to disrupt healthcare in London, 17 April 2026, https://therecord.media/ransomware-nhs-cyberattack-disruption",
-        "NHS Blood and Transplant, O type donors asked to book urgently, 10 June 2024, https://www.nhsbt.nhs.uk/news/o-positive-and-o-negative-donors-asked-to-urgently-book-appointments-to-give-blood-following-london-hospitals-it-incident/",
-        "AP via News4JAX, Cyberattack forces US health system to divert ambulances, 10 May 2024, https://www.news4jax.com/health/2024/05/10/a-cyberattack-forces-a-big-us-health-system-to-divert-ambulances-and-take-records-offline/",
-        "ITV News Meridian, Hospital declares critical incident as heat causes cooling systems to fail, 24 June 2026, https://www.itv.com/news/meridian/2026-06-24/hospital-declares-critical-incident-as-heat-causes-cooling-systems-to-fail",
+        "NHS England London, Synnovis media statement, https://www.england.nhs.uk/london/synnovis-ransomware-cyber-attack/latest-media-statement-on-synnovis-cyber-attack/",
+        "The Record, 25 June 2025, https://therecord.media/ransomware-attack-contributed-patient-death-uk-nhs",
+        "The Record, 17 April 2026, https://therecord.media/ransomware-nhs-cyberattack-disruption",
+        "(unused)",
+        "AP via News4JAX, 10 May 2024, https://www.news4jax.com/health/2024/05/10/a-cyberattack-forces-a-big-us-health-system-to-divert-ambulances-and-take-records-offline/",
+        "ITV News Meridian, 24 June 2026, https://www.itv.com/news/meridian/2026-06-24/hospital-declares-critical-incident-as-heat-causes-cooling-systems-to-fail",
         "NHS England, EPRR Framework v3, July 2022, https://www.england.nhs.uk/wp-content/uploads/2022/07/B0900-NHS-Emergency-Preparedness-Resilience-and-Response-Framework-version-3.pdf",
         "Civil Contingencies Act 2004, Schedule 1, https://www.legislation.gov.uk/ukpga/2004/36/schedule/1",
-        "DHSC, NIS Regulations 2018: health sector guide, updated 27 September 2023, https://www.gov.uk/government/publications/network-and-information-systems-regulations-2018-health-sector-guide",
-        "42 CFR 482.15, Emergency preparedness (Cornell LII), https://www.law.cornell.edu/cfr/text/42/482.15",
-        "ASPR TRACIE, New and revised Joint Commission Emergency Management standards, https://asprtracie.hhs.gov/technical-resources/resource/10609/new-and-revised-emncy-management-standards",
-        "ASPR TRACIE, HICS Guidebook, 5th edition, May 2014, https://asprtracie.hhs.gov/technical-resources/resource/2735/hospital-incident-command-system-hics-guidebook-fifth-edition-may-2014",
-        "45 CFR 164.404 and 164.408, HIPAA breach notification (Cornell LII), https://www.law.cornell.edu/cfr/text/45/164.404",
-        "European Commission, NIS2 Directive FAQs, https://digital-strategy.ec.europa.eu/en/faqs/directive-measures-high-common-level-cybersecurity-across-union-nis2-directive-faqs",
-        "European Commission, Critical infrastructure resilience (CER), https://home-affairs.ec.europa.eu/policies/internal-security/counter-terrorism-and-radicalisation/protection/critical-infrastructure-resilience_en",
-        "DHA, Healthcare Emergencies, Crises and Disasters Management Framework, effective 14 January 2025, https://www.dha.gov.ae/uploads/112024/DHA%20Healthcare%20Emergencies%20Crises%20&%20Disasters%20Management%20Framework2024112683.pdf",
-        "Abu Dhabi Media Office, Business continuity standard for healthcare, 8 May 2025, https://www.mediaoffice.abudhabi/en/health/emergencies-crises-and-disasters-management-centre-abu-dhabi-and-department-of-health-abu-dhabi-launch-business-continuity-management-standard-for-healthcare-activities/",
-        "ENEC, Business continuity management (NCEMA 7000:2021), https://www.enec.ae/about-us/leadership-and-governance/-business-continuity-management/",
-        "Alturbag and Alyahya, CBAHI in Saudi Arabia: a narrative review, Cureus, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC12635948/",
-        "JCI via PR Newswire (AAP), JCI publishes 8th edition standards, 1 July 2024, https://www.aap.com.au/aapreleases/cision20240701ae51644",
+        "DHSC, NIS Regulations 2018: health sector guide, https://www.gov.uk/government/publications/network-and-information-systems-regulations-2018-health-sector-guide",
+        "42 CFR 482.15 (Cornell LII), https://www.law.cornell.edu/cfr/text/42/482.15",
+        "ASPR TRACIE, Joint Commission EM standards, https://asprtracie.hhs.gov/technical-resources/resource/10609/new-and-revised-emncy-management-standards",
+        "ASPR TRACIE, HICS Guidebook, 5th edition, https://asprtracie.hhs.gov/technical-resources/resource/2735/hospital-incident-command-system-hics-guidebook-fifth-edition-may-2014",
+        "45 CFR 164.404 and 164.408 (Cornell LII), https://www.law.cornell.edu/cfr/text/45/164.404",
+        "European Commission, NIS2 FAQs, https://digital-strategy.ec.europa.eu/en/faqs/directive-measures-high-common-level-cybersecurity-across-union-nis2-directive-faqs",
+        "European Commission, CER Directive, https://home-affairs.ec.europa.eu/policies/internal-security/counter-terrorism-and-radicalisation/protection/critical-infrastructure-resilience_en",
+        "DHA, Healthcare Emergencies, Crises and Disasters Management Framework, https://www.dha.gov.ae/uploads/112024/DHA%20Healthcare%20Emergencies%20Crises%20&%20Disasters%20Management%20Framework2024112683.pdf",
+        "Abu Dhabi Media Office, 8 May 2025, https://www.mediaoffice.abudhabi/en/health/emergencies-crises-and-disasters-management-centre-abu-dhabi-and-department-of-health-abu-dhabi-launch-business-continuity-management-standard-for-healthcare-activities/",
+        "(unused)",
+        "Cureus, CBAHI narrative review, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC12635948/",
+        "JCI via PR Newswire, 1 July 2024, https://www.aap.com.au/aapreleases/cision20240701ae51644",
     ]
-    assert len(order) == len(src), (sorted(order), len(src))
-    items = sorted(((order[i+1], t) for i, t in enumerate(src)))
+    items = sorted((order[i+1], t) for i, t in enumerate(src) if i+1 in order)
+    assert len(items) == len(order) == len([t for t in src if t != "(unused)"]), (sorted(order), len(src))
     b.sources([(f"{n:02d}", t) for n, t in items])
     b.art_back("Every clinician<br>reached, every<br>patient safe.", "Crises Control helps hospitals and health systems call staff in by role, see who has acknowledged, run downtime procedures as tasks and keep a full record for the debrief.", "Request a demo",
         next_title="Intelligence report No. 06 · When the lab went dark")

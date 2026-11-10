@@ -198,12 +198,17 @@ _ccprac.attach3(CCBook)
 def _html(s, offset=0, total=None):
     keep = list(s.pages)
     s.pages = [((_ccprac.toolkit_body(s, offset),) + p[1:]) if p[0] == "__TOOLKIT__" else p for p in s.pages]
-    if len(s.toc) > 8: s.pages = [(('<style>div[style*="padding:8mm 0;border-bottom"]{padding:%smm 0!important}</style>' % (6.2 if len(s.toc) <= 11 else 4.8)) + p[0],) + p[1:] if p[0] == "__TOC__" else p for p in s.pages]
+    how = s.how
+    if len(s.toc) > 8: s.how = how + ('<style>div[style*="padding:8mm 0;border-bottom"]{padding:%smm 0!important}</style>' % (6.2 if len(s.toc) <= 11 else 4.8))
     try: return RBook.html(s, offset, total)
-    finally: s.pages = keep
+    finally: s.pages = keep; s.how = how
 CCBook.html = _html
 
 def _sources(s, items, note=None):
-    RBook.sources(s, items, note or ("Sources were accessed in November 2026. Where reports differ, we say so in the text. Regulatory summaries are for orientation, not legal advice. Last reviewed: " + _ccprac.REVIEWED + "."))
+    tail = "Regulatory summaries are for orientation, not legal advice. Last reviewed: " + _ccprac.REVIEWED + "."
+    note = note or "Sources were accessed in November 2026. Where reports differ, we say so in the text."
+    if "legal advice" not in note: note = note.rstrip() + " " + tail
+    elif "Last reviewed" not in note: note = note.rstrip() + " Last reviewed: " + _ccprac.REVIEWED + "."
+    RBook.sources(s, items, note)
 CCBook.sources = _sources
 CCReport.rep_back = lambda s, title="", lede="", cta="", companion="": _ccprac.cta_page(s, False, companion)
