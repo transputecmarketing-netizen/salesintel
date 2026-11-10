@@ -28,7 +28,7 @@ def build():
 
     # PART 01
     b.mark("01", "Declare and decide")
-    b.opener("01", "Declare and<br>decide.", "Agree the words, the thresholds and who can say them, before the day you need them.", [("01", "Three declarations, exact words"), ("02", "Why declaring early matters"), ("03", "A healthcare severity ladder")])
+    b.opener("01", "Declare and<br>decide.", "Agree the words, the thresholds and who can say them, before the day you need them.", [("01", "Three declarations, exact words"), ("02", "Why declaring early matters"), ("03", "A severity ladder and escalation workflow"), ("04", "Who does what: a responsibilities matrix")])
     b.table("Definitions", "Three declarations, in NHS England's words", f"From the NHS EPRR Framework, version 3, July 2022. Use them exactly, and always say who declared it.{R(8)}", ["Declaration", "Definition", "What it means in practice"], [
         ("Business continuity incident", "“an event or occurrence that disrupts, or might disrupt, an organisation’s normal service delivery, to below acceptable pre-defined levels. This would require special arrangements to be put in place until services can return to an acceptable level.”", "Your business continuity plan is running. Examples in the framework include a surge in demand, a utilities breakdown and significant equipment failure."),
         ("Critical incident", "“any localised incident where the level of disruption results in an organisation temporarily or permanently losing its ability to deliver critical services; or where patients and staff may be at risk of harm.”", "Principally an internal escalation. You need support from partners across the system to restore normal operating functions."),
@@ -47,18 +47,67 @@ def build():
         (2, "Critical in one service or site", "One site's emergency department, theatres or diagnostics unable to work safely; critical system down beyond the agreed time; OPEL 4 with patient safety risk.", "Director and manager on call, service and site leads, digital, comms.", "Push and SMS · ack in 10 min"),
         (3, "Business continuity incident", "Planned downtime overrunning; single system or equipment failure with a working fallback; staffing gap in one area; supplier outage.", "Manager on call, service leads, EPRR lead.", "Push and email · ack in 30 min"),
         (4, "Watch and prepare", "Supplier warning, heat or cold alert, cyber advisory affecting your systems, rising pressure.", "EPRR lead, digital, site team.", "Email and app · no ack needed")], "Declare and decide")
+    b.escalation("Escalation", "How an incident climbs, and who decides at each step", "From the first report on a ward to a system-wide response. Times are illustrative: set your own and write them into the plan. Never wait at a level because the next one feels too big.", [
+        ("Department response", "A system is slow or failing in one service, with a working fallback. Patient care is not yet affected.", "Department lead, digital service desk, site manager.", "Department or site manager. Logs the fault as a possible incident, not a ticket.", "no fix in 30 minutes, care is affected or a cyber cause is possible"),
+        ("Business continuity incident", "A clinical system is down beyond the agreed time, or special arrangements are needed. SEV 3 on the ladder.", "Manager on call, service leads, digital, EPRR lead. Call-in by role, with acknowledgement.", "Manager on call declares and starts downtime procedures.", "critical services are lost, people are at risk or ransomware is suspected"),
+        ("Critical incident", "Loss of critical services or risk of harm; suspected cyber attack on a clinical system. SEV 2 or SEV 1.", "Executive on call, accountable emergency officer, incident team, clinical leads, comms; ICB on call told at once.", "Executive on call declares, in the standard words, and sets the meeting rhythm.", "other organisations are affected or help is needed beyond the trust"),
+        ("System response", "Several providers affected, mutual aid needed, ambulance redirection, or a major incident declared.", "ICB on call, who reports to NHS England through regional on-call; ambulance service; suppliers.", "Your executive still decides for your trust. The ICB coordinates the system and mutual aid.", "")], "Declare and decide",
+        f"Notify the ICB when you declare; it reports to NHS England through regional on-call.{R(8)} Step down as deliberately as you stepped up, with a message at each level.")
+    b.raci("Responsibilities", "Who does what in a critical incident", "One accountable owner for every decision. Adapt the roles to your own on-call structure; clinical leads include pathology, transfusion, ED, theatres and nursing.",
+        ["Executive on call", "Incident lead (manager on call)", "Clinical leads", "Digital and IT", "Comms", "ICB and partners"], [
+        ("Grade the incident and call staff in", ["I", "A", "C", "C", "I", ""]),
+        ("Declare a critical incident", ["A", "R", "C", "C", "I", "I"]),
+        ("Start downtime procedures in each department", ["I", "A", "R", "C", "", ""]),
+        ("Isolate systems and report a suspected cyber attack", ["I", "C", "I", "A", "", "I"]),
+        ("Prioritise care: what is cancelled, diverted or protected", ["A", "R", "R", "I", "I", "C"]),
+        ("Authorise O type blood use under downtime", ["I", "I", "A", "", "", "C"]),
+        ("Request mutual aid and ambulance redirection", ["A", "R", "C", "", "", "R"]),
+        ("Messages to staff, patients and the public", ["A", "C", "C", "I", "R", "I"]),
+        ("Decide when systems are safe to restore", ["A", "C", "C", "R", "I", "I"]),
+        ("Back-enter and check results recorded on paper", ["I", "A", "R", "R", "", ""]),
+        ("Stand down and hold the hot debrief", ["A", "R", "C", "C", "C", "I"])], "Declare and decide",
+        "Illustrative. Check that every row has exactly one A, that the A can be reached at 03:00, and that a named deputy is on the call-in list for each role.")
 
     # PART 02
     b.mark("02", "Mobilise")
-    b.opener("02", "Mobilise.", "Reach the right people, know who is coming, and say the same thing to everyone.", [("01", "The first hour, minute by minute"), ("02", "Call-in and acknowledgement"), ("03", "Messages ready to send"), ("04", "Three scenarios")])
+    b.opener("02", "Mobilise.", "Reach the right people, know who is coming, and say the same thing to everyone.", [("01", "The first hour, minute by minute"), ("02", "Who does what across teams, and where it breaks"), ("03", "Call-in and messages ready to send"), ("04", "Three scenarios")])
     b.firsthour("The first hour", "Monday, 08:10: the lab goes dark", "An illustrative acute trust. Treat it as a cyber attack until proved otherwise.", [
         ("T+00:00", "Laboratory staff report the system is down", "Lab manager calls the site manager and digital service desk. No results are going out.", "Lab manager", 1),
         ("T+00:05", "On-call manager grades it SEV 1", "Business continuity incident declared. Executive on call and AEO alerted. Digital isolates systems.", "Manager on call", 1),
-        ("T+00:10", "Call-in alert sent", "Incident team, pathology, transfusion, ED, theatres, critical care, comms. Reply with arrival time.", "Site manager", 1),
+        ("T+00:10", "Call-in alert sent", "Incident team, pathology, transfusion, ED, theatres, critical care, comms. Reply with arrival time; silence escalates to a deputy at 10 minutes.", "Site manager", 1),
         ("T+00:15", "Downtime procedures start", "Paper requests and phoned urgent results; transfusion to its downtime plan. Clinical leads review today's planned care.", "Pathology lead", 2),
         ("T+00:20", "Cyber reporting route", f"Digital lead calls the NHS England cyber security operations centre, which is monitored 24/7.{R(13)} NIS operators prepare a DSPT report within 72 hours.{R(10)}", "Chief digital officer", 2),
         ("T+00:30", "Critical incident declared", "“Critical Incident declared by (trust)”. ICB on call told; testing mutual aid requested.", "Executive on call", 1),
-        ("T+01:00", "Messages out, first meeting held", "Holding lines to staff, today's patients and ED. Facts in METHANE form; decisions logged.", "Incident director", 3)], "Mobilise")
+        ("T+01:00", "Messages out, first meeting held", "Holding lines to staff, today's patients and ED. Facts in METHANE form; decisions logged; open actions reviewed at each meeting.", "Incident director", 3)], "Mobilise")
+    b.swimlane("Across the teams", "The same hour, team by team: where it goes wrong", "Clinical teams, incident control, digital, partners and comms in the pathology outage. Red cards are the points where responses commonly break down; diamonds are decisions and their owners.",
+        ["Clinical teams", "Site management and incident control", "Digital and IT", "Partners: ICB, ambulance, supplier", "Comms"],
+        ["T+0", "T+10 min", "T+30 min", "T+1 hour", "T+4 hours", "Day 2 on"], [
+        (0, 0, "Lab reports results not flowing", "act"),
+        (0, 1, "Wards keep sending electronic requests", "risk"),
+        (0, 2, "Paper requests; urgent results phoned", "act"),
+        (0, 3, "Clinical leads triage today's planned care", "dec"),
+        (0, 4, "Results logged on paper for back-entry", "mon"),
+        (0, 5, "Same staff on paper for days, no rota change", "risk"),
+        (1, 0, "Manager on call grades SEV 1", "dec"),
+        (1, 1, "Call-in sent; acknowledgements tracked by role", "mon"),
+        (1, 2, "Executive on call declares critical incident", "dec"),
+        (1, 3, "One log; actions owned and timed", "mon"),
+        (1, 4, "Fixed meeting and sitrep times", "act"),
+        (1, 5, "Recovery cell and second shift planned", "act"),
+        (2, 0, "Service desk logs a fault, not an incident", "risk"),
+        (2, 1, "Systems isolated; cyber reporting started", "act"),
+        (2, 2, "Out-of-band channel confirmed for staff", "act"),
+        (2, 4, "Restore only when declared safe", "dec"),
+        (2, 5, "Back-entry checked against paper logs", "mon"),
+        (3, 0, "Supplier's incident call leaves out the trust", "risk"),
+        (3, 2, "ICB on call told; mutual aid asked", "act"),
+        (3, 3, "Ambulance service warned of possible diverts", "act"),
+        (3, 4, "Mutual aid turnaround tracked by batch", "mon"),
+        (4, 1, "Staff hear first on personal WhatsApp", "risk"),
+        (4, 2, "Holding line to staff and switchboard", "act"),
+        (4, 3, "Patients booked today sent SMS", "act"),
+        (4, 4, "Updates at fixed times until stand down", "mon")], "Mobilise",
+        f"Illustrative. Most failures sit at hand-offs between teams, not inside them. After WannaCry, staff shared information by personal phones and WhatsApp when email was lost.{R(12)} Give every lane the same incident, the same log and the same update times.")
     b.steps("Call-in", "Five rules for calling staff in", "Most trusts have a cascade. Few know, in real time, who has answered.", [
         ("Alert by role, not by name", "Lists are built around roles and rotas: the on-call transfusion scientist, the theatre coordinator, the matron on duty. People change; roles do not."),
         ("Ask for an answer, not a read receipt", "Every call-in asks a question: available now, available later, not available. Silence after the set time escalates to a deputy automatically."),
@@ -74,13 +123,13 @@ def build():
         ("Email", "ICB and partners", "Critical Incident declared by [trust] at [time]. METHANE summary attached. Requests: urgent testing mutual aid, ambulance awareness. Next sitrep [time].", "From the incident log, not from memory."),
         ("SMS", "Community and lone staff", "[Trust]: IT incident. Visits go ahead. Use paper notes, call [number] for results. Check in at 12:00 and on finishing.", "Ask for a reply to confirm they are safe.")], "Mobilise")
     b.usecase("In practice", "Three providers, three first hours", [
-        ("server", "Acute trust, three sites", "Ransomware at a pathology partner", [("The gap", "The lab is run by a partner; nobody at the trust was on its incident call list."), ("The fix", "Joint call-in list and shared incident log with the partner; downtime forms printed on every ward."), ("The check", "A joint exercise with the partner, timed from first report to first paper result."), ("Watch out", "Transfusion needs its own downtime plan; agree O type use with the blood bank.")]),
-        ("truck", "Community trust, 1,200 field staff", "EPR outage during a cold snap", [("The gap", "Visit lists live only in the electronic record; staff were already on the road."), ("The fix", "Daily offline visit lists, a check-in rule for lone workers and SMS updates that need no app login."), ("The check", "Every lone worker confirmed safe by the end of the shift."), ("Watch out", f"About one in seven NHS staff reported physical violence from patients or the public in the 2025 staff survey.{R(11)}")]),
-        ("shield", "Independent provider, NHS contract", "Cooling failure in a heatwave", [("The gap", "Theatres and the server room relied on the same chiller plant."), ("The fix", "A business continuity incident declared and the ICB told; lists moved to a partner site."), ("The check", "Temperature triggers written into the severity ladder."), ("Watch out", f"The NHS Standard Contract requires providers of NHS-funded services to comply with EPRR guidance.{R(8)}")])], "Mobilise")
+        ("server", "Acute trust, three sites", "Ransomware at a pathology partner", [("Where it fails", "The lab is run by a partner; nobody at the trust was on its incident call list, so wards heard first."), ("Who decides", "The executive on call declares; the transfusion lead authorises O type use, agreed with the blood bank."), ("What happens", "A joint call-in list and shared incident log with the partner; downtime forms printed on every ward."), ("How it is monitored", "Time from first report to first paper result, measured in a joint exercise and again on the day.")]),
+        ("truck", "Community trust, 1,200 field staff", "EPR outage during a cold snap", [("Where it fails", "Visit lists live only in the electronic record; staff were already on the road."), ("Who decides", "The community manager on call decides which visits go ahead and which are deferred."), ("What happens", "Offline visit lists, a lone worker check-in rule and SMS updates that need no app login."), ("How it is monitored", f"Check-ins tracked through the shift; a missed one escalates. About one in seven NHS staff reported physical violence from patients or the public in the 2025 staff survey.{R(11)}")]),
+        ("shield", "Independent provider, NHS contract", "Cooling failure in a heatwave", [("Where it fails", "Theatres and the server room relied on the same chiller plant, and nobody linked the two."), ("Who decides", f"The director on call declares a business continuity incident and tells the ICB. The NHS Standard Contract requires providers of NHS-funded services to comply with EPRR guidance.{R(8)}"), ("What happens", "Lists moved to a partner site; temperature triggers written into the severity ladder."), ("How it is monitored", "Theatre and server room temperatures checked against the triggers at set times.")])], "Mobilise")
 
     # PART 03
     b.mark("03", "Keep patients safe")
-    b.opener("03", "Keep patients<br>safe.", "Downtime, partners, patients and staff, from the first hour to the last debrief.", [("01", "Downtime that works"), ("02", "Working with system partners"), ("03", "Winter, heat and long incidents"), ("04", "Your plan")])
+    b.opener("03", "Keep patients<br>safe.", "Downtime, partners, patients and staff, from the first hour to the last debrief.", [("01", "Downtime that works, department by department"), ("02", "A results log for paper working"), ("03", "Partners, long incidents and outstanding actions")])
     b.essay("Keep patients safe", "Downtime procedures: the plan you hope never to use", [
         "Most clinical areas have a downtime folder. The question is whether anyone has opened it this year. The test is simple: can a ward request an urgent blood test, receive the result and act on it safely with no computers at all? If the answer depends on one person who knows how, it is not a procedure.",
         f"Synnovis showed how long downtime can last. NHS England reported that services in south east London were largely restored by the end of 2024, but in early 2026 one trust estimated that entering 161,560 pathology reports into patient records had been delayed, and it had recorded 122 patient safety incidents involving incorrect, unavailable or delayed results.{R(5)} Recovery has its own risks: results back-entered weeks later, duplicate records and patients lost to follow-up.",
@@ -88,6 +137,19 @@ def build():
         "Good downtime procedures are short, printed and practised. They name the forms, the phone numbers, the runners and the order of priority: emergency department, critical care, maternity, theatres, then the rest. They say how results will be checked and entered when systems return. And they are tested in exercises with the people who will use them, not just the people who wrote them.",
         f"Treat the cyber attack as different from the power cut in one way: you may not be able to trust the systems even when they come back. Keep digital and clinical leads in the same incident meeting. The 2017 WannaCry review found that local staff shared information by personal mobile phones and WhatsApp when email was lost.{R(12)} Decide your out-of-band channel now, before staff choose one for you."],
         "Keep patients safe", "Can a ward request an urgent blood test, get the result and act on it safely with no computers at all?")
+    b.table("Downtime checklist", "Downtime procedure checklist by department", "Check each folder before the day and use it as the switch-over list on the day, in this order.", ["Department", "On switching to downtime", "Before systems come back"], [
+        ("Emergency department", "Paper triage and requests; urgent results phoned to a named number.", "Every paper request matched to a result; discharges reviewed."),
+        ("Critical care", "Paper charts; blood gases and infusions logged by hand.", "Charts reconciled and entered, checked by a second person."),
+        ("Maternity", "Paper notes; urgent bloods phoned; transfusion route confirmed.", "Results confirmed in the record; babies linked to the right mother."),
+        ("Theatres", "Lists reviewed by clinical leads; cases needing blood held unless authorised.", "Cancelled patients rebooked by clinical priority."),
+        ("Pathology and transfusion", "Downtime plan started; manual reporting; O type use authorised by a named clinician.", "Results back-entered and validated; duplicates resolved."),
+        ("Pharmacy", "Paper prescribing and dispensing; high-risk medicines double-checked.", "Prescriptions and administration entered; allergies re-confirmed."),
+        ("Imaging", "Paper requests; urgent reports phoned; images held locally where safe.", "Reports matched to requests and to the right patient."),
+        ("Wards", "Downtime folder opened; result phone numbers on display.", "Paper records entered; results chased before discharge.")], "Keep patients safe", "40mm 1fr 1fr")
+    b.form("Results log", "Downtime results and back-entry log", "One sheet per department, kept by the nurse in charge. Every result received on paper or by phone is written here, then entered and checked when systems return.",
+        [("Time", 0.8), ("Patient (NHS no.)", 1.4), ("Test", 1.1), ("Result received from", 1.3), ("Given to and acted on by", 1.5), ("Entered on system (date, initials)", 1.4), ("Checked by", 1)], "Keep patients safe", rows=16,
+        example=["09:42", "999 000 0018", "Potassium", "Lab, ext. 4412, A.B.", "FY2 on Ward 7; repeat ordered", "Day 3, C.D.", "E.F."],
+        note="Illustrative example row; the number shown is in the NHS test range, not a real patient. Keep the log with the patient's paper notes. A result is only closed when it has been entered on the system and checked by a second person.")
     b.grid("System partners", "Who needs to hear from you, and when", "A declared incident is rarely yours alone. Agree these routes in advance and test them in exercises.", [
         ("bell", "ICB and NHS England", f"Tell your ICB on call when you declare. The ICB reports to NHS England through regional on-call, and coordinates mutual aid.{R(8)}"),
         ("truck", "Ambulance service", f"If you need diverts or redirection, say so early. The framework lists ambulance redirection as a reason to notify.{R(8)}"),
@@ -100,6 +162,42 @@ def build():
         ("Long cyber recovery", "Staff run on paper for weeks with no rota change or welfare plan.", "A recovery cell, shift patterns, welfare checks and a plan for back-entering results."),
         ("Lone and community staff", "Visits continue with no way to raise an alarm if systems are down.", "Check-in times, one-touch alarms and visit lists that work offline."),
         ("Communication fatigue", "Updates stop once the crisis feels normal.", "Fixed update times for staff and patients until stand down.")], "Keep patients safe")
+    b.tracker("Outstanding actions", "Day one, 16:00: the actions board", "Illustrative board for the pathology outage, reviewed at every incident meeting. Overdue and blocked items go straight to the executive on call.", [
+        ("Paper request forms on every ward", "Pathology lead", "Day 1 10:00", "Done", "Runner signs off each ward"),
+        ("O type authorisation rule confirmed", "Transfusion lead", "Day 1 09:00", "Done", "Decision and authoriser in the log"),
+        ("Patients booked today contacted", "Outpatients manager", "Day 1 11:00", "Done", "SMS delivery and call log"),
+        ("Mutual aid testing route agreed", "Incident lead", "Day 1 12:00", "In progress", "Samples sent against results back"),
+        ("Cyber incident reported and DSPT report drafted", "Chief digital officer", "Within 72 hours", "In progress", "Reference number in the log"),
+        ("Lone worker check-ins for community teams", "Community manager", "Each shift", "Overdue", "Missed check-ins escalated, not waited on"),
+        ("Second shift and welfare plan", "Incident lead", "Day 1 14:00", "Overdue", "Hours worked against the rota"),
+        ("Results back-entry plan", "Digital lead", "Day 3", "Blocked", "Waiting for assurance systems are clean"),
+        ("Sitrep to the ICB", "Incident director", "Daily 16:00", "Open", "Sent from the log, not from memory")], "Keep patients safe",
+        "Every action has one owner, a due time and a way to check it is done. If an action has no check, nobody will know it has stalled. The incident lead owns the board and reviews it at every meeting and every shift handover; closed actions stay visible for the debrief.")
+
+    # PART 04
+    b.mark("04", "Rehearse and review")
+    b.opener("04", "Rehearse<br>and review.", "Practise with the people who will do it, then learn from every incident and every exercise.", [("01", "A tabletop exercise, ready to run"), ("02", "A post-incident review template"), ("03", "Your plan, questions and checklist")])
+    b.exercise("Tabletop exercise", "Exercise: the lab goes dark", "A discussion exercise built on the scenario in this playbook. Read each inject aloud, give the room five minutes, and record decisions and gaps as you go.", [
+        ("Duration", "Two and a half hours, plus a 30-minute hot debrief"),
+        ("Participants", "Executive and manager on call, pathology, transfusion, ED, digital, comms, ICB liaison, supplier"),
+        ("Objective", "Test declaration, call-in and the first paper result with no clinical systems"),
+        ("Facilitator", "EPRR lead, with an observer timing each decision")], [
+        ("00:00", "Monday 08:10. The lab manager reports the pathology system is down. A ransom note is found on a server.", "Who grades it, and how? Who is called first? What do wards do right now?"),
+        ("00:15", "Ten minutes after the call-in, the transfusion on-call and the theatre coordinator have not replied.", "Who are the deputies? How do you know, now, who is coming in?"),
+        ("00:30", "Digital advise that trust email and Teams cannot be trusted.", "What is the out-of-band channel? How does the critical incident message reach the ICB?"),
+        ("00:50", "ED has a patient with major bleeding. Electronic crossmatch is unavailable.", "Who authorises O type blood, how quickly, and where is it recorded?"),
+        ("01:15", "A local journalist calls. Patients are posting about cancelled appointments.", "Who approves the holding line? What do today's patients hear, and from whom?"),
+        ("01:45", "The supplier says full restoration will take weeks.", "Who runs recovery? What changes for the second shift, mutual aid and results back-entry?")], "Rehearse and review",
+        "Measure three times: to grade the incident, to hear back from every key role, and to the first paper result. Put each gap on the actions board with an owner.")
+    b.pir("Post-incident review", "Post-incident review template", f"Use it for the hot debrief within 48 hours of stand down, then the structured debrief within 28 days and any multi-agency debrief within 8 weeks, as the EPRR framework expects.{R(8)} Facts first, from the log.", [
+        ("What happened, and when", "The timeline from first report to stand down, taken from the incident log, not from memory."),
+        ("Declaration and decisions", "Were the triggers clear? Who declared, at what time, and was it early enough? Who decided what?"),
+        ("Call-in and acknowledgement", "How long to reach, and hear back from, each key role? Who was not reached, and why?"),
+        ("Downtime procedures", "Did each department switch to paper safely? How long to the first paper result?"),
+        ("Patient safety", "Incidents reported, delays to care and results, harm reviews started, patients needing follow-up."),
+        ("Partners and suppliers", "Did the ICB, ambulance service and suppliers hear in time, in the agreed words?"),
+        ("Staff, patients and the public", "Were updates on time and consistent? Which channels worked? How were staff looked after?"),
+        ("Actions, owners, dates", "What changes, who owns each one and by when. Add them to the actions board and the board report.")], "Rehearse and review")
     b.table("Your plan", "This week, this month, this quarter", "Owners are suggestions. Adjust them to your structure.", ["When", "Actions", "Owner"], [
         ("This week", "Write declaration triggers and who can declare. Check call-in lists by role, with tested numbers for every on-call rota.", "Accountable emergency officer"),
         ("This week", "Confirm the out-of-band channel if email and Teams are lost. Print downtime forms for every clinical area.", "Chief digital officer"),
@@ -108,10 +206,10 @@ def build():
         ("This month", "Swap incident contacts with every clinical supplier. Agree how they will alert you and how you will alert them.", "Chief operating officer"),
         ("This quarter", "Link OPEL levels, heat and cold alerts to the severity ladder before winter peaks.", "EPRR lead"),
         ("This quarter", "Run a no-notice call-in test and a cyber downtime exercise with a key supplier. Time first paper result.", "EPRR lead"),
-        ("This quarter", "Report results, gaps and dated actions to the board alongside the annual EPRR core standards return.", "Accountable emergency officer")], "Keep patients safe", "30mm 1fr 44mm")
+        ("This quarter", "Report results, gaps and dated actions to the board alongside the annual EPRR core standards return.", "Accountable emergency officer")], "Rehearse and review", "30mm 1fr 44mm")
     b.questions("For leaders", "Questions for your executive team", "Ask them out loud. Vague answers are the finding.", [
         ("Readiness", ["Who can declare a critical incident tonight, and do they know the triggers?", "How long would it take to know who is coming in after a call-in?", "Could each ward get an urgent blood result with no computers?"]),
-        ("Partners and people", ["Are our pathology, imaging and EPR suppliers on our incident call lists, and are we on theirs?", "How would we reach community staff if the record system and email were both down?", "Who looks after the people who worked the first twelve hours?"])], "Keep patients safe")
+        ("Partners and people", ["Are our pathology, imaging and EPR suppliers on our incident call lists, and are we on theirs?", "How would we reach community staff if the record system and email were both down?", "Who looks after the people who worked the first twelve hours?"])], "Rehearse and review")
     b.checklist("Checklist", "Ready for minute one?", "Tick what is true today. Anything blank is your next action.", [
         ("Declaration triggers written and owned", "Using the EPRR definitions and standard formats."),
         ("Call-in lists by role, with acknowledgement", "Tested out of hours in the last quarter."),
@@ -120,7 +218,7 @@ def build():
         ("Suppliers on your incident lists", "And your team on theirs."),
         ("Message templates approved", "Staff, patients, partners, public and lone workers."),
         ("Lone worker check-in rule", "Works with no access to the record system."),
-        ("Hot debrief within 48 hours of stand down", "As the EPRR framework expects, with welfare support.")], "Keep patients safe")
+        ("Hot debrief within 48 hours of stand down", "As the EPRR framework expects, with welfare support.")], "Rehearse and review")
     b.glossary("Words worth knowing", [
         ("EPRR", "Emergency preparedness, resilience and response: the NHS England programme and framework for incidents and emergencies."),
         ("Accountable emergency officer", "The board-level executive responsible for EPRR in an NHS-funded organisation."),
@@ -135,14 +233,17 @@ def build():
         ("Hot debrief", "A short review straight after an incident, within 48 hours of stand down."),
         ("DSPT", "The Data Security and Protection Toolkit, used by health bodies to report security incidents."),
         ("ICB", "Integrated care board: plans and coordinates NHS services across a local area, with 24/7 on-call."),
-        ("Out-of-band channel", "A way to communicate that does not depend on the systems that may be compromised.")])
-    b.platform("Where Crises Control fits in a healthcare incident", "How the steps in this playbook map to Crises Control modules.", [
-        ("Call in on-call staff and clinical leads by role, see who has acknowledged and escalate non-responders to deputies automatically.", "Ping"),
-        ("Run the incident from one workspace with one log, shared by the incident team, digital, partners and the ICB liaison.", "Incident Manager"),
-        ("Turn downtime procedures, transfusion steps and results back-entry into tasks with owners and deadlines.", "Task Manager"),
-        ("See which sites and services are affected, what has been done and where escalations are waiting.", "Control Centre"),
-        ("Give community and lone staff a one-touch alarm with their location.", "SOS"),
-        ("Keep a timestamped record of every message and decision for the hot debrief and the post-incident report.", "Audit Trail"),
+        ("Out-of-band channel", "A way to communicate that does not depend on the systems that may be compromised."),
+        ("RACI", "Responsible, accountable, consulted, informed: a way to show who does what, with one owner per decision."),
+        ("Back-entry", "Entering results and notes recorded on paper during downtime into the system once it is safe.")])
+    b.platform("How the modules work together in a healthcare incident", "One pathology outage, followed through the platform. Crises Control supports your incident response and business continuity plans; it does not replace them.", [
+        ("A laboratory manager, or a lone community nurse, raises the alarm in one touch, with location, so the site team knows in seconds.", "SOS"),
+        ("On-call, clinical and digital leads are called in by role; replies show who is coming, and silence escalates to a deputy.", "Ping"),
+        ("The critical incident is declared, roles are assigned, and the incident team, ICB liaison and supplier work from one log.", "Incident Manager"),
+        ("Downtime procedures, O type authorisation and results back-entry run as owned tasks with deadlines in every department.", "Task Manager"),
+        ("The incident team sees services affected, staff mobilised and overdue actions, without chasing wards for updates.", "Control Centre"),
+        ("A timestamped record of messages, decisions and tasks supports the hot debrief, EPRR assurance and the post-incident review.", "Audit & Reporting"),
+        ("CRAiG helps the team find information in the platform and assists them as they work through the live incident.", "CRAiG"),
         ])
 
     b.mark("", "Sources")

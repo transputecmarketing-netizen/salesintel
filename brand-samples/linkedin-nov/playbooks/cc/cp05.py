@@ -47,18 +47,41 @@ def build():
         (2, "Major", "A full evacuation on a busy night. A suspicious item. A serious assault or suspected spiking needing hospital. Power lost in service. Booking or payment systems down across sites.", "Duty manager, general manager, area or operations manager, IT or facilities on call.", "Radio · SMS · push · escalate after 10 min"),
         (3, "Moderate", "One site's tills or booking system failing. A guest collapse. An aggressive group removed. People trapped in a lift.", "Duty manager, general manager, service desk or facilities helpdesk.", "Radio · push · email"),
         (4, "Minor", "Suspicious behaviour reported and resolved. A near miss. A single device fault. Verbal abuse logged.", "Duty manager, recorded for the weekly review and trend reporting.", "App · email")], "Know the duty")
+    b.escalation("Escalation", "How an incident climbs from the shift to head office", "Illustrative timings, to be set by each operator. Each level follows the severity ladder, and escalating never takes away the duty manager's authority to act at once on site.", [
+        ("On-shift report", "Suspicious behaviour, an unattended bag, a near miss or a guest unwell. Severity 4.", "The duty manager, by radio, the code phrase or a one-touch alert with location.", "Duty manager, after a quick check with the person who reported it.", "the item cannot be cleared within 5 minutes or anyone is at risk"),
+        ("Venue incident", "A guest collapse, an aggressive group, a lift entrapment or one site's tills down. Severity 3.", "Every member of staff on shift, and the on-call general manager.", "Duty manager. The general manager is informed, not asked for permission.", "the venue evacuates, invacuates or locks down, or 999 is called for a threat"),
+        ("Major venue incident", "Full evacuation, lockdown, a suspicious item or a serious assault. Severity 2.", "On-call general manager, operations manager, off-duty staff and the next shift.", "Duty manager on site. Operations manager decides on closing and the next shift.", "another venue is affected, anyone is seriously hurt, or media arrive"),
+        ("Group crisis", "An attack or credible threat, several venues affected, or a group-wide system outage. Severity 1.", "Head office crisis team, every duty manager nearby, security lead and communications.", "Head office incident lead for closures, statements and bookings; duty managers for safety on site.", "")], "Know the duty",
+        "Silence is a trigger too. If the person alerted at any level has not acknowledged within 5 minutes, the alert moves automatically to the next named person, and the gap is recorded for the review.")
 
     # PART 02
     b.mark("02", "On the night")
-    b.opener("02", "On the<br>night.", "The first hour of the worst night, the roles every shift needs, how to reach everyone, and the emergencies that are far more likely.", [("01", "The first hour"), ("02", "Roles on every shift"), ("03", "Reaching guests and staff fast"), ("04", "Other emergencies"), ("05", "Messages ready to send")])
+    b.opener("02", "On the<br>night.", "The first hour of the worst night, the roles every shift needs, how to reach everyone, and the emergencies that are far more likely.", [("01", "The first hour, and across three venues"), ("02", "Roles and the shift responsibility matrix"), ("03", "Reaching staff and guests fast"), ("04", "Other emergencies and messages ready to send"), ("05", "Tracking what is still outstanding")])
     b.firsthour("The first hour", "Saturday, 22:15: an attack outside", "Illustrative: a city-centre hotel with a bar and restaurant, around 550 people on site. Police instructions always come first.", [
         ("T+00:00", "Door team sees people running from the street", "Shouts of a knife attack nearby. The door supervisor radios the code phrase to the duty manager.", "Door supervisor", 1),
         ("T+00:01", "Lockdown and invacuation declared", "Doors locked, shutters down, music off. Guests moved away from glass to the function room.", "Duty manager", 1),
         ("T+00:02", "999 called, log started", "What, where, which direction, how many on site. Every decision from now is logged with a time.", "Reception", 1),
-        ("T+00:03", "Every member of staff alerted", "Code phrase on the PA, radio and an alert to every phone. Staff reply when their area is safe.", "Duty manager", 1),
+        ("T+00:03", "Every member of staff alerted", "Code phrase on the PA, radio and an alert to every phone. Staff reply when their area is safe, and replies are tracked by area.", "Duty manager", 1),
         ("T+00:06", "Guests in bedrooms told to stay put", "Room phones and text: stay in your room, lock the door, keep away from windows.", "Night manager", 2),
-        ("T+00:12", "Everyone accounted for, escalated", "Chase staff who have not replied, including smokers and anyone outside. On-call general manager and head office alerted.", "Shift managers", 2),
-        ("T+01:00", "Police briefed, people cared for", "Floor plans and numbers to police. Guests and staff stay inside until police advise otherwise.", "General manager", 3)], "On the night")
+        ("T+00:12", "Everyone accounted for, escalated", "This is where it often goes wrong: smokers, agency staff and anyone outside. Chase every gap by name. On-call general manager and head office alerted.", "Shift managers", 2),
+        ("T+01:00", "Police briefed, people cared for", "Floor plans and numbers to police. Guests and staff stay inside until police advise otherwise. Open actions move to a tracker with owners.", "General manager", 3)], "On the night")
+    b.swimlane("Across venues", "One night, three venues and head office", "Illustrative: a group with a hotel, a bar on the same street and a restaurant 1 km away. Red cards show where a multi-venue response breaks down; police instructions always come first.",
+        ["Hotel (on scene)", "Bar, same street", "Restaurant, 1 km away", "On-call operations manager", "Head office crisis team"],
+        ["22:15", "22:17", "22:20", "22:30", "22:45", "23:30"], [
+        (0, 0, "Door team radios the code phrase", "act"), (0, 0, "Duty manager declares lockdown", "dec"),
+        (1, 0, "Shouting outside; staff unsure who decides", "risk"),
+        (0, 1, "999 called; alert raised with location", "act"), (3, 1, "Alerted; warns every nearby venue", "act"),
+        (1, 1, "Duty manager locks doors and invacuates", "dec"),
+        (0, 2, "Staff replies tracked area by area", "mon"), (1, 2, "Two agency staff missing from alert list", "risk"),
+        (2, 2, "Staff first hear of it on social media", "risk"), (4, 2, "Crisis team activated, roles assigned", "act"),
+        (0, 3, "Three staff unaccounted for, chased by name", "mon"), (2, 3, "Guests held inside, away from the cordon", "act"),
+        (3, 3, "Decides restaurant takes no new guests", "dec"), (4, 3, "Live view of venues, replies and gaps", "mon"),
+        (0, 4, "Guests in bedrooms told to stay put", "act"), (1, 4, "Agency staff found; head count complete", "act"),
+        (2, 4, "Guests pushing to leave before police advice", "risk"), (3, 4, "Off-duty staff told not to travel in", "act"),
+        (4, 4, "Decides to close all city venues tonight", "dec"),
+        (0, 5, "Police briefed with floor plans and numbers", "act"), (2, 5, "Guests released only on police advice", "dec"),
+        (3, 5, "Open actions handed to named owners", "mon"), (4, 5, "Holding statement out; bookings contacted", "act")], "On the night",
+        "Three things decide how this night goes: every venue hears from the group, not from social media; every person on shift, agency staff included, is on the alert list; and each decision has one named owner who does not wait for someone more senior.")
     b.steps("Roles", "Who does what, on every shift", f"Name the people at the start of each shift. There is no statutory training requirement, but staff with a role in the procedures must know them and what they have to do.{R(2)}", [
         ("Duty manager: decides and declares", "Has authority to call evacuation, invacuation or lockdown at once, and to call 999. Does not wait for head office."),
         ("Door and security team: first eyes", "Spot and report early, lock doors, stop people entering, and give police clear information on arrival."),
@@ -66,6 +89,20 @@ def build():
         ("Reception or night manager: the hotel", "Calls 999, reaches guests in bedrooms and holds the guest list and today's function bookings."),
         ("Kitchen and back of house: the rear", "Secure the back doors and delivery yard, cut gas if instructed, and know which rooms can be used as safe areas."),
         ("Communicator: who has heard", "Sends the alert, tracks who has replied and chases the rest, and logs who was told what and when.")], "On the night")
+    b.raci("Shift matrix", "Shift responsibility matrix", "Who does what in a lockdown, invacuation or evacuation, by shift role. Write tonight's names against each column at the start of the shift.",
+        ["Duty manager", "Supervisor", "Door and security", "Front of house", "Kitchen", "Head office"], [
+        ("Spot and report a threat by code phrase or one-touch alert", ["A", "R", "R", "R", "R", ""]),
+        ("Declare evacuation, invacuation or lockdown", ["A", "I", "C", "I", "I", "I"]),
+        ("Call 999 and start the timed incident log", ["A", "R", "I", "R", "", "I"]),
+        ("Lock front doors and stop people entering", ["A", "I", "R", "C", "", ""]),
+        ("Secure rear doors, the delivery yard and gas", ["A", "I", "", "", "R", ""]),
+        ("Move guests from glass and doors to the safe area", ["A", "R", "C", "R", "I", ""]),
+        ("Reach guests in bedrooms, toilets and terraces", ["A", "R", "", "R", "", ""]),
+        ("Alert all staff, track replies and chase the silent", ["A", "R", "I", "I", "I", "I"]),
+        ("Head count of staff and guests by area", ["A", "R", "R", "R", "R", "I"]),
+        ("Brief police on arrival with plans and numbers", ["A", "C", "R", "C", "", "I"]),
+        ("Media, social media and tomorrow's bookings", ["C", "", "", "I", "", "A"])], "On the night",
+        "In a smaller venue one person may hold several columns. What matters is that every row has a name tonight, and that the duty manager never waits for head office to act on safety.")
     b.flow("Communication", "Reaching guests and staff in minutes", "Noise, music, bedrooms, outdoor areas and staff on breaks make hospitality hard to reach. Use more than one route, and confirm who has heard.", [
         ("bell", "A code phrase everyone knows", "A neutral phrase on the PA or radio that tells staff what is happening without alarming guests. Change it if it leaks."),
         ("power", "Stop the music, light the room", "Music off and house lights up so announcements can be heard, unless lockdown means lights off on police advice."),
@@ -73,6 +110,13 @@ def build():
         ("eye", "Guests you cannot see", "Bedrooms, toilets, terraces, smoking areas and private dining rooms each need a named person or route."),
         ("owner", "People off site", f"The next shift, off-duty staff and families. Tell them not to come in, and keep updates on a schedule. Counter Terrorism Policing's public advice is RUN, HIDE, TELL.{R(13)}")], "On the night",
         f"At Manchester Arena, a steward without a radio passed on a concern; a colleague with one tried to report it but someone else was talking, and it went no further.{R(8)} Never rely on a single channel.")
+    b.table("Guest communication", "Talking to guests: what to consider", "Guests do not know your code phrases, your layout or your staff. Plan how each group is reached, and agree what nobody says.", ["Guests", "How to reach them", "What to say, and what to avoid"], [
+        ("In bars, restaurants and function rooms", "Music off, lights up. Staff in each section give the same short instruction face to face.", "Say what to do, not why: \"Please come with me to the back room now.\" Do not shout words that cause panic."),
+        ("In bedrooms", "Room phone, a text to the mobile given at booking, and door knocks only where it is safe.", "\"Stay in your room, lock the door, keep away from windows. Next update by [time].\""),
+        ("Who do not speak English", "Short translated lines in the languages your guests most often speak, plus showing the way.", "Short sentences and plain words. No idioms, and never the staff code phrase."),
+        ("Who need help to move or to hear an alarm", "Ask at booking and check-in; name a member of staff for each guest on the shift.", "Tell them who is coming, where to wait and how they will be told it is safe."),
+        ("Outside: terraces, smoking areas, queues", "Bring them in or move them away, as the duty manager decides. In lockdown the door team controls entry.", "\"Come inside now\" or \"Move away from the building\", with a clear direction."),
+        ("Everyone, at every stage", "One approved message, repeated, with a time for the next update.", "Never guess the cause or casualties, name anyone involved or post on social media. Media get the holding line.")], "On the night", "52mm 1fr 1fr")
     b.table("Other emergencies", "The emergencies that are far more likely", "Terrorism is rare. Fire, medical emergencies, spiking, power and system failures are not. The same roles and alerts handle them all.", ["Emergency", "First action on site", "First action for managers"], [
         ("Fire alarm in a full venue", "Evacuate by the plan. Sweep sections and bedrooms. Do not let guests collect coats or go back in.", "Account for staff and guests from the booking and room lists. Meet the fire service with the plan."),
         ("Medical emergency", "Call 999, send for the defibrillator and a first aider, clear space and send someone to guide the ambulance.", "Look after witnesses and staff, record what happened and check first aid cover for the rest of the night."),
@@ -87,10 +131,21 @@ def build():
         ("Email", "Guests with bookings", "Because of an incident near [venue], we are closed this evening. Please do not travel to us. Your booking will be [moved or refunded] and we will contact you by [time].", "Send from the booking system so it reaches tonight's and tomorrow's bookings."),
         ("Email", "Suppliers and booking platforms", "Our booking and payment systems are offline while we investigate. Deliveries continue as booked. Do not act on any request to change bank details; call [known number].", "Attackers often follow an outage with fake payment requests."),
         ("Holding line", "Media", "We are aware of an incident near [venue] this evening. Our priority is the safety of our guests and team, and we are following police advice. We will share more when we can.", "")], "On the night")
+    b.tracker("Outstanding actions", "Sunday, 11:00: what is still open", "Illustrative, the morning after the three-venue incident. Every action has one owner, a time and a way of checking it is done, so nothing depends on memory.", [
+        ("Account for every member of staff at all three venues", "Operations manager", "Sat 22:45", "Done", "Replies on the alert, gaps called by name"),
+        ("Updated holding statement agreed", "Head office comms", "Sun 09:00", "Done", "Approved version saved in the log"),
+        ("Keep CCTV from all three venues for police", "Security lead", "Sun 09:00", "In progress", "Police reference recorded in the log"),
+        ("Contact guests booked today at closed venues", "Reservations", "Sun 10:00", "Overdue", "Send report from the booking system"),
+        ("Add the two missing agency staff to alert lists", "Operations manager", "Sun 10:00", "Overdue", "Test alert, reply received"),
+        ("Welfare call to staff who saw the incident", "General manager", "Sun 12:00", "In progress", "Named list, each call logged"),
+        ("Brief the next shift before any reopening", "Duty managers", "Sun 14:00", "Open", "Signed shift briefing record"),
+        ("Decide whether the hotel bar reopens tonight", "Head office incident lead", "Sun 15:00", "Blocked", "Waiting for police to lift the cordon"),
+        ("Notify the insurer and keep the timeline", "Finance", "Mon 12:00", "Open", "Insurer reference in the log")], "On the night",
+        "Review the board at a fixed time, not when someone remembers. Overdue and blocked actions go to the head office incident lead, and the board becomes the starting point for the post-incident review.")
 
     # PART 03
     b.mark("03", "Ready for December")
-    b.opener("03", "Ready for<br>December.", "What to do before the first Christmas party, three scenarios to rehearse, a dated plan, and the questions to ask.", [("01", "Festive season readiness"), ("02", "Three scenarios"), ("03", "Week, month, quarter"), ("04", "Questions and checklist")])
+    b.opener("03", "Ready for<br>December.", "What to do before the first Christmas party, two templates for every shift, a dated plan and a checklist.", [("01", "Festive season readiness"), ("02", "Shift briefing record"), ("03", "Area sweep and head count log"), ("04", "Week, month, quarter"), ("05", "Checklist")])
     b.steps("Festive readiness", "Six steps before the first Christmas party", "The weeks to New Year bring the biggest crowds, the most new staff and the longest nights. Finish these now.", [
         ("Count your peak nights", f"Work out how many people, including staff, can reasonably be expected on your busiest nights, function rooms and terraces included. It decides your tier.{R(1,5)}"),
         ("Name the duty manager for every night", "Publish who decides on each shift until 2 January, with an on-call general manager behind them."),
@@ -98,10 +153,14 @@ def build():
         ("Walk through a lockdown", "Ten minutes with the late shift: which doors lock, where guests go, who checks the toilets and terrace."),
         ("Load every contact, including agency staff", "Mobile numbers for everyone on the rota, tested with a short alert that asks for a reply."),
         ("Plan for the outage", "Paper booking lists, an offline payment or cash procedure and a known number for every supplier.")], "Ready for December")
-    b.usecase("Scenarios", "Three illustrative scenarios to rehearse", [
-        ("shield", "City-centre bar and nightclub, 900 capacity", "A fight spills inside, then reports of a weapon outside", [("The trigger", "Door staff see a crowd running towards the entrance at 01:00."), ("What helps", "A code phrase, doors that lock in seconds and staff who own sections."), ("What hurts", "Music still playing and nobody sure who decides."), ("Rehearse", "A five-minute lockdown drill before opening.")]),
-        ("owner", "Hotel, 140 bedrooms and a function suite", "A fire alarm during a 300-guest Christmas party", [("The trigger", "Smoke in the kitchen at 21:30 with the suite full and bedrooms occupied."), ("What helps", "Section sweeps, a guest list by room and a clear assembly point."), ("What hurts", "Party guests returning for coats and drivers blocking the fire lane."), ("Rehearse", "A walk-through with the events team and night porter.")]),
-        ("laptop", "Restaurant group, 12 sites", "Booking and payment systems fail on the last Saturday before Christmas", [("The trigger", "Card terminals and the booking platform fail at 18:00 across all sites."), ("What helps", "Printed booking lists, a cash procedure and one acknowledged instruction to every site."), ("What hurts", "Each manager calling IT separately and guests turned away at the door."), ("Rehearse", "One site running on paper for an hour.")])], "Ready for December")
+    b.form("Template", "Shift safety briefing record", "Complete at the start of every shift, in two minutes, and keep it with the incident log. Agency and new staff sign the same record as everyone else.",
+        [("Date and shift", 1.1), ("Duty manager (decides)", 1.3), ("Code phrase briefed", 1), ("Safe area and lockdown doors", 1.6), ("New or agency staff briefed", 1.4), ("Test alert replies", 1), ("Signed", 0.9)], "Ready for December", rows=9,
+        example=("Sat 20 Dec, late", "[Name], on-call GM [name]", "Yes, all sections", "Function room; front, side, yard doors", "3 agency, named, briefed", "41 of 42, 1 chased", "[Initials]"),
+        note="Illustrative template. If the test alert does not reach everyone on the rota, fix the contact list before service starts, not after the incident.")
+    b.form("Template", "Area sweep and head count log", "Used during an evacuation, invacuation or lockdown. Each area has one named person who sweeps it, counts who is there and reports back to the duty manager.",
+        [("Area", 1.3), ("Swept by", 1.1), ("Time clear", 0.8), ("Guests in area", 0.9), ("Staff in area", 0.9), ("Needs help or missing", 1.6), ("Reported to and time", 1.2)], "Ready for December", rows=10,
+        example=("Terrace and smoking area", "[Name], floor", "22:19", "14", "2", "1 guest in wheelchair, staff with her", "Duty manager 22:20"),
+        note="Illustrative template. List every area before the shift starts: bars, toilets, terraces, function rooms, kitchen, cellar, bedrooms by floor. An area with no name is an area nobody checks.")
     b.table("Your plan", "This week, this month, this quarter", "Owners are suggestions. Adjust them to your structure, and date every action.", ["When", "Actions", "Owner"], [
         ("This week", "Name a duty manager for every night to New Year. Brief the four procedures and the code phrase at every shift start.", "General manager"),
         ("This week", "Load every staff mobile, including agency and seasonal staff, and test an alert that asks for a reply.", "Operations manager"),
@@ -109,9 +168,6 @@ def build():
         ("This month", "Write one page per site: evacuation, invacuation, lockdown and communication. Walk through lockdown on a late shift.", "General manager"),
         ("This quarter", "Prepare for SIA notification within three months of commencement. Enhanced tier: designate a senior individual and start the compliance document.", "Chief operating officer"),
         ("This quarter", "Run a joint exercise with head office on an attack nearby and a system outage. Report gaps and dated fixes to the board.", "Head of security")], "Ready for December", "30mm 1fr 46mm")
-    b.questions("For leaders", "Questions for your leadership team", "Ask them out loud. Vague answers are the finding.", [
-        ("The duty", ["Which of our sites are likely to be standard tier, which enhanced, and who is the responsible person for each?", "Could every site evacuate, invacuate, lock down and communicate tonight, and when was it last practised?", "Who on tonight's rota can declare a lockdown without asking anyone?"]),
-        ("The people", ["How long would it take to reach every member of staff on duty, and to know who had not replied?", "How would we reach guests in bedrooms, on terraces and in private dining rooms?", "Are our seasonal and agency staff briefed to the same standard as the regulars?"])], "Ready for December")
     b.checklist("Checklist", "Are you ready for Martyn's Law?", "Tick what is true today. Anything blank is your next action.", [
         ("Peak numbers counted for every site", "Including staff, function rooms and outside areas."),
         ("Four procedures written for every site", "Evacuation, invacuation, lockdown and communication."),
@@ -121,6 +177,36 @@ def build():
         ("A way to reach guests in bedrooms", "And in toilets, terraces and private rooms."),
         ("Outage procedures for bookings and payments", "Tested on a real shift."),
         ("Ready to notify the SIA", "And, for enhanced tier, a senior individual named.")], "Ready for December")
+
+    # PART 04
+    b.mark("04", "Rehearse and review")
+    b.opener("04", "Rehearse and<br>review.", "Three scenarios to rehearse, a tabletop exercise for a late shift, a post-incident review template and the questions to ask.", [("01", "Three scenarios"), ("02", "A tabletop exercise"), ("03", "Post-incident review"), ("04", "Questions for leaders")])
+    b.usecase("Scenarios", "Three illustrative scenarios to rehearse", [
+        ("shield", "City-centre bar and nightclub, 900 capacity", "01:00: a fight spills inside, then reports of a weapon outside", [("Where it goes wrong", "Music still playing, doors open, and staff waiting for someone senior to decide."), ("Who decides", "The duty manager declares lockdown; the door supervisor controls who comes in."), ("How it is monitored", "Each section replies when secure; silent sections are chased by name within minutes."), ("Rehearse", "A five-minute lockdown drill before opening.")]),
+        ("owner", "Hotel, 140 bedrooms and a function suite", "21:30: a fire alarm during a 300-guest Christmas party", [("Where it goes wrong", "Party guests returning for coats, drivers blocking the fire lane and bedrooms missed."), ("Who decides", "The duty manager runs the evacuation; the night manager owns the bedrooms."), ("How it is monitored", "Area sweeps and the room list checked off at the assembly point."), ("Rehearse", "A walk-through with the events team and night porter.")]),
+        ("laptop", "Restaurant group, 12 sites", "18:00 on the last Saturday before Christmas: bookings and payments fail at every site", [("Where it goes wrong", "Each manager calls IT separately and sites get different instructions."), ("Who decides", "The head office incident lead decides on paper and cash; each manager runs their site."), ("How it is monitored", "Every site acknowledges one instruction; head office sees who is trading."), ("Rehearse", "One site running on paper for an hour.")])], "Rehearse and review")
+    b.exercise("Tabletop exercise", "Ninety minutes with the late shift", "An illustrative exercise to run in a quiet afternoon slot. Read each inject aloud, give the room three minutes, and record the answers and the gaps.", [
+        ("Duration", "90 minutes, including a 20-minute debrief"), ("Participants", "Duty managers, a supervisor, door team lead, reception and head office operations"),
+        ("Objective", "Test the lockdown decision, reaching every member of staff and guest, and the handover to head office"), ("Facilitator", "Head of security, or an outside facilitator who does not take part")], [
+        ("00:00", "Friday, 21:40. During a 300-guest Christmas party, a bar supervisor reports an unattended bag in the function suite cloakroom.", "Who decides what happens next? What is the first instruction, on which channel, and who hears it?"),
+        ("00:15", "The duty manager moves guests out of the suite. The usual assembly point is next to the outside wall of the cloakroom.", "Where do guests go instead? How do staff in other areas know the plan has changed?"),
+        ("00:30", "Twelve of 40 staff have not replied to the alert, including four agency staff and the night porter.", "Who chases them, and how? Do we know their names and numbers tonight?"),
+        ("00:45", "Guests in bedrooms above the suite are calling reception, and a video of the evacuation is spreading online.", "What do we tell guests in rooms? Who speaks for the venue, and what do staff post?"),
+        ("01:00", "Police confirm the bag is lost property. The party organiser asks to carry on.", "Who decides to stand down? How is the stand-down sent, and what is recorded?"),
+        ("01:15", "Monday. Head office asks for a timeline of the first fifteen minutes.", "Could we produce it from our records? What is missing, and who fixes it by when?")], "Rehearse and review",
+        "Run it with the late shift as it really is, agency staff and new starters included. The answer \"I would ring the general manager\" is a finding: decide who acts without asking.")
+    b.pir("Post-incident review", "Post-incident review template", "Hold it within a week, with the people who were on shift. The aim is to fix the system, not to blame the person. Use the incident log and the actions tracker as the record.", [
+        ("What happened, and when", "The timeline from the first report to stand-down, taken from the log, not from memory."),
+        ("How we found out", "Who spotted it, how it was reported and how long it took to reach the duty manager."),
+        ("The decision", "Who declared what, and when. Did anyone wait for permission they did not need?"),
+        ("Reaching staff", "How many replied, how fast, and who was missed: agency, breaks, off-site, new starters."),
+        ("Reaching guests", "Bedrooms, toilets, terraces, other languages and guests who needed help."),
+        ("Venues and head office", "How other venues and head office heard, and any conflicting instructions."),
+        ("People affected", "Welfare of guests and staff, first aid given and the support offered afterwards."),
+        ("Actions and checks", "Each fix with one owner and a date, and how the next drill will prove it works.")], "Rehearse and review")
+    b.questions("For leaders", "Questions for your leadership team", "Ask them out loud. Vague answers are the finding.", [
+        ("The duty", ["Which of our sites are likely to be standard tier, which enhanced, and who is the responsible person for each?", "Could every site evacuate, invacuate, lock down and communicate tonight, and when was it last practised?", "Who on tonight's rota can declare a lockdown without asking anyone?"]),
+        ("The people", ["How long would it take to reach every member of staff on duty, and to know who had not replied?", "How would we reach guests in bedrooms, on terraces and in private dining rooms?", "Are our seasonal and agency staff briefed to the same standard as the regulars?"])], "Rehearse and review")
     b.glossary("Words worth knowing", [
         ("Martyn's Law", "The Terrorism (Protection of Premises) Act 2025, named after Martyn Hett, who was killed at Manchester Arena."),
         ("Responsible person", "The person or organisation in control of qualifying premises for the use that brings them into scope."),
@@ -136,13 +222,14 @@ def build():
         ("Senior individual", "The person an organisation must designate for enhanced tier premises."),
         ("Acknowledgement", "A recipient's confirmation that an alert has been read and acted on."),
         ("Holding line", "A short, accurate statement used while facts are still being established.")])
-    b.platform("Where Crises Control fits on the night", "How the steps in this playbook map to Crises Control modules.", [
-        ("Send one lockdown or evacuation alert to every member of staff on duty by SMS, push and voice, and see who has replied.", "Ping"),
-        ("Give door staff and duty managers a one-touch way to raise the alarm, with their location.", "SOS"),
-        ("Turn the four procedures and each shift role into tasks with owners, so nothing depends on memory.", "Task Manager"),
-        ("Run the incident from one workspace with one log, shared by the site, the on-call manager and head office.", "Incident Manager"),
-        ("See which sites are affected, who has acknowledged and where escalations are waiting.", "Control Centre"),
-        ("Keep a timestamped record of every alert and decision for the review, the insurer and the regulator.", "Audit Trail")])
+    b.platform("How the modules work together in a hospitality incident", "The three-venue night in this playbook, from the first alarm to the review. Each step is an outcome, not a feature.", [
+        ("The door supervisor raises the alarm in one touch, with location, so the duty manager knows within seconds.", "SOS"),
+        ("Every member of staff on shift, agency staff included, gets the lockdown alert and replies when their area is safe.", "Ping"),
+        ("The duty manager activates the incident, assigns roles by area and keeps one log shared with head office.", "Incident Manager"),
+        ("Locking doors, sweeping toilets and terraces, reaching bedrooms and the head count become owned tasks that escalate if they stall.", "Task Manager"),
+        ("Head office sees every venue, areas secured, staff accounted for and decisions waiting, without phoning each site.", "Control Centre"),
+        ("A timestamped record of every alert, reply and decision is ready for the review, the insurer and the regulator.", "Audit & Reporting"),
+        ("CRAiG helps the duty manager find information in the incident quickly, such as which areas have not confirmed they are secure.", "CRAiG")])
 
     b.mark("", "Sources")
     src = [

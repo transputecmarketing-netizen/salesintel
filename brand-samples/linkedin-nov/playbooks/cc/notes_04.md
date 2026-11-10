@@ -1,6 +1,6 @@
 # Notes 04: Transport and Logistics (week of 30 November 2026)
 
-Playbook: CC-04-Playbook-Keep-It-Moving.html (25 pages, 14 sources)
+Playbook: CC-04-Playbook-Keep-It-Moving.html (37 pages after round 2 revision, 14 sources)
 Report: CC-04-Report-The-Heathrow-Lesson.html (22 pages, 25 sources)
 
 ## Key verified facts
@@ -49,3 +49,9 @@ Report: CC-04-Report-The-Heathrow-Lesson.html (22 pages, 25 sources)
 - Attribution of the Collins attack to a named group, and the ransomware strain.
 - CSRB Commons stage and Royal Assent timing (Parliament site blocked).
 - NATS 2026 cancellation totals beyond the CAA's "more than 2,000 flights".
+
+## Round 2 revision (BRIEF2)
+- New pages: network escalation levels (escalation), roles matrix with 6 roles and 11 rows (raci), hub power loss swimlane (Drivers, Hub and depots, Network control, Suppliers and partners, Customers and passengers), missed check-in escalation with times T+0/10/20/30 (escalation, replaces the old welfare flow page; HSE citations kept), driver and lone worker check-in log (form), partner and supplier notification log (form), tabletop exercise (planning system supplier cyber attack at night), outstanding actions tracker (morning after the hub power loss), post-incident review template (pir).
+- Scenarios page rewritten around where it goes wrong, who decides and how it is monitored.
+- Platform rows rewritten as 7 lifecycle outcomes (SOS to CRAiG); "Audit & Reporting" used; CRAiG limited to current capability (finding information).
+- No new facts added; all 14 sources and citations unchanged. All times, roles and tracker items are labelled illustrative.

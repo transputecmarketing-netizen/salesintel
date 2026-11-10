@@ -29,7 +29,7 @@ def build():
 
     # ------------------------------------------------------------------ PART 01
     b.mark("01", "Know your limits")
-    b.opener("01", "Know your<br>limits.", "Before a crisis, decide which services matter most and how much disruption is too much.", [("01", "Services, tolerances and mapping"), ("02", "Important business services by firm type"), ("03", "A severity ladder for financial services")])
+    b.opener("01", "Know your<br>limits.", "Before a crisis, decide which services matter most and how much disruption is too much.", [("01", "Services, tolerances and a dependency map"), ("02", "Severity and escalation on the tolerance clock"), ("03", "Who decides: roles and decision rights")])
     b.essay("Know your limits", "Important business services and impact tolerances, in plain terms", [
         f"The UK operational resilience rules, set out by the FCA in PS21/3 and by the PRA in SS1/21, ask a firm to look at itself from the outside in. An important business service is one that, if disrupted, could cause intolerable harm to customers or risk to market integrity, or for the PRA threaten the firm's safety and soundness or financial stability.{R('ps213', 'ss121')}",
         f"For each one, the firm sets an impact tolerance: the maximum tolerable level of disruption. The PRA requires every tolerance to include a time metric, says it applies at peak times as well as normal ones, and expects firms to stay within it in severe but plausible scenarios, whether or not a third party delivers part of the service.{R('ss121')}",
@@ -44,15 +44,45 @@ def build():
         ("Payments and e-money", "Card authorisation and access to funds", "Minutes of failed authorisations, share of transactions declined", "Scheme connection, issuer processor, single hosting zone"),
         ("Investment firm", "Placing and settling client orders", "Orders missed or delayed in market hours, settlement fails", "Order management SaaS, market data, custodian links"),
         ("Building society", "Mortgage completion on the agreed day", "Completions missed, with tolerance tightest at month end", "Payment scheme access, conveyancer portal")], "Know your limits", "32mm 1fr 1fr 1fr")
+    b.depmap("Dependency map", "One service, mapped before you need it", "An illustrative map for retail card payments: the people, technology, suppliers, sites, information and processes the service relies on, and the limits that apply.",
+        ("Retail card payments", "Customers pay in shops and online by debit card, and see the payment in their account."), [
+        ("People", "Payments operations, fraud team, contact centre, technology on call, executive on call and their deputies."),
+        ("Technology", "Card authorisation platform, core ledger, fraud engine, mobile app and the identity service staff sign in with."),
+        ("Third parties", "Card scheme connection, issuer processor, cloud provider and the region and zones used, telephony supplier."),
+        ("Facilities", "Operations centre, contact centre sites, data centres and the cloud zones each component runs in."),
+        ("Information", "Card and account data, fraud rules, customer contact details, payment and authorisation logs."),
+        ("Processes", "Authorisation, fallback processing, disputes and refunds, customer messages and supervisor contact.")],
+        [("Recovery target · illustrative", "2 hours"), ("Volume metric · illustrative", "5% declined at peak"), ("Customer metric · illustrative", "Urgent cases helped same day"), ("Impact tolerance · illustrative", "4 hours at peak")], "Know your limits",
+        note=f"All values are illustrative. Each firm sets and justifies its own tolerances, approved by its board. The PRA expects every tolerance to include a time metric and to hold at peak times.{R('ss121')} Recovery targets sit well inside the tolerance.")
     b.severity("Severity", "A severity ladder for financial services", "Agree the triggers in advance so nobody debates the level while customers wait. If in doubt, declare higher and step down.", [
         (1, "Critical", "An important business service is down or badly degraded and its impact tolerance is at risk. Customers cannot pay, be paid, reach cash or make a claim. Data integrity in doubt, or a suspected cyber attack on core systems.", "Crisis team, executive on call, regulatory lead and communications lead. Board chair informed.", "Push, SMS, voice call · escalate after 5 minutes"),
         (2, "Major", "An important business service is degraded but a tested workaround is holding. One channel is down, such as the app but not cards. A material supplier declares an incident.", "Incident team, service owners, supplier manager. Communications lead on standby.", "Push and SMS · bridge opened"),
         (3, "Moderate", "Internal system failure with little or no customer impact. Failover worked as designed. Elevated error rates under investigation.", "Technology on call and the service owner.", "Push and email"),
         (4, "Watch", "Supplier advisory, risky change window, severe weather warning or a peak day such as payday or month end ahead.", "Duty manager logs it and briefs the next shift.", "Email and incident log")], "Know your limits")
+    b.escalation("Escalation", "Escalate on the tolerance clock", "Severity says how bad it is. Escalation says who must decide next, and it runs on time remaining against tolerance for card payments, not on how the room feels.", [
+        ("Service degraded", "Authorisation errors above normal. A workaround is holding and customers can still pay.", "Technology on call, card payments service owner.", "Incident lead, with the service owner.", "no fix in 30 minutes or customers cannot pay"),
+        ("Tolerance clock running", "Customers cannot pay or be paid. The clock started when the harm began, not when it was declared.", "Incident team, communications lead, compliance lead.", "Incident lead declares SEV1 and owns the response.", "forecast recovery passes half the tolerance"),
+        ("Tolerance at risk", "Recovery within tolerance is no longer assured. Failover is untested or has failed.", "Executive on call, SMF holder, supplier executive contact.", "Executive on call, on options set out by the incident lead.", "a breach is likely before recovery"),
+        ("Breach likely or confirmed", "The service will exceed, or has exceeded, its impact tolerance.", "Executive committee, board chair, supervisors through the regulatory lead.", "SMF holder and executive committee: remediation, redress and reporting.", "")], "Know your limits",
+        note="Illustrative thresholds for a 4-hour tolerance. Set yours as fractions of each service's tolerance, so the same rule works for a 2-hour and a 2-day service. If in doubt, escalate.")
+    b.raci("Decision rights", "Who decides, who acts, who is told", "Most delay in a crisis is waiting for someone to decide. Agree decision rights in advance and name a deputy for every accountable role.",
+        ["Executive on call", "Incident lead", "IT and technology", "Comms", "Compliance", "SMF holder"], [
+        ("Declare SEV1 and start the tolerance clock", ["I", "A", "C", "I", "I", "I"]),
+        ("Engage the cloud provider and card processor", ["", "A", "R", "", "I", ""]),
+        ("Decide failover or manual workaround", ["I", "A", "R", "I", "C", "I"]),
+        ("Approve the first customer message", ["I", "A", "C", "R", "C", ""]),
+        ("Early call to FCA and PRA supervisors", ["I", "C", "", "I", "R", "A"]),
+        ("Escalate when tolerance is at risk", ["A", "R", "C", "I", "C", "C"]),
+        ("Accept a likely breach and set remediation", ["R", "C", "C", "C", "C", "A"]),
+        ("Media statement and spokesperson", ["A", "C", "", "R", "C", "I"]),
+        ("Redress for customers who lost out", ["A", "C", "", "C", "R", "I"]),
+        ("Formal incident reports to supervisors", ["I", "C", "C", "", "R", "A"]),
+        ("Post-incident review and self-assessment", ["I", "R", "C", "C", "C", "A"])], "Know your limits",
+        note="Illustrative. The executive on call leads the crisis team. The SMF holder is the senior manager responsible for operational resilience in your firm. One A per row, and every A has a named deputy who can act without waiting.")
 
     # ------------------------------------------------------------------ PART 02
     b.mark("02", "The first hour")
-    b.opener("02", "The first<br>hour.", "What happens in the first sixty minutes decides whether you stay within tolerance.", [("01", "A T+ timeline for a cloud outage"), ("02", "When email and chat are down too"), ("03", "Messages for customers, staff and regulators")])
+    b.opener("02", "The first<br>hour.", "What happens in the first sixty minutes decides whether you stay within tolerance.", [("01", "A T+ timeline and where it goes wrong"), ("02", "When email and chat are down too"), ("03", "Messages, outstanding actions and a decision log")])
     b.firsthour("First hour", "Cloud outage at 07:00", "A bank or payment firm whose app and cards depend on one cloud region. Owners are roles.", [
         ("T+00:00", "Alarms and complaints arrive together", "Monitoring shows failed card authorisations and app logins as the contact centre and social channels light up.", "Duty incident manager", 1),
         ("T+00:05", "Declare and page out of band", "Declare SEV1 provisionally. Page the team by SMS and voice, not email or chat, which may share the failed dependency.", "Duty incident manager", 1),
@@ -61,10 +91,20 @@ def build():
         ("T+00:30", "First word to customers", "Holding message on the website, app and social channels. Contact centre script live. Flag customers who need urgent help.", "Communications lead", 2),
         ("T+00:45", "Decide on failover", "Invoke the tested move to another zone or region, or manual workarounds. Protect data integrity above speed.", "Technology lead", 1),
         ("T+01:00", "Tell the supervisor", f"Early call to FCA and PRA supervisors. Payment firms must report a major incident within 4 hours of detecting it.{R('ps262')}", "Regulatory lead", 2)], "The first hour")
+    b.swimlane("Swimlane", "The same morning, lane by lane", "Who acts, who decides, where it goes wrong and how progress is watched, from the first failed payment to the second hour.",
+        ["Executive and SMF holder", "Incident lead", "Technology and suppliers", "Comms and customers", "Compliance and regulators"],
+        ["07:00", "07:05", "07:15", "07:30", "08:00", "09:00"], [
+        (2, 0, "Card and app failures spike", "act"), (3, 0, "Contact centre calls surge", "mon"), (1, 0, "First page sent by chat, which is down", "risk"),
+        (1, 1, "Declares SEV1, starts tolerance clock", "dec"), (1, 1, "Acknowledgements tracked; silence goes to deputies", "mon"), (0, 1, "Executive on call acknowledges by SMS", "act"),
+        (2, 2, "Priority case raised with provider", "act"), (2, 2, "Team waits for the provider status page", "risk"), (4, 2, "Logs services hit and start times", "act"),
+        (3, 3, "Holding message on web, social, phone line", "act"), (3, 3, "App banner used while the app is down", "risk"), (0, 3, "Briefed from the live task board", "mon"),
+        (1, 4, "Approves failover to second region", "dec"), (2, 4, "Failover tasks timed against recovery target", "mon"), (0, 4, "Tolerance at risk: takes the escalation", "dec"), (4, 4, "Early call to FCA and PRA", "act"),
+        (0, 5, "Executive sets the redress approach", "dec"), (2, 5, "Rerouted payments trip fraud rules", "risk"), (3, 5, "Hourly update, even with no news", "mon"), (4, 5, "Next supervisor update logged and due", "mon")], "The first hour",
+        note="Illustrative. Each red box is a common failure point: coordination over a channel that shares the outage, waiting on a supplier, the wrong customer channel and an untested route. Plan the alternative before the day.")
     b.essay("Out of band", "When email and chat go down with everything else", [
         f"The FCA's March 2026 review found firms often had not considered in detail the alternatives or workarounds when their usual communication channels are unavailable, and little evidence that communications strategies are tested in scenario exercises.{R('fca1y')}",
         "In a cloud or identity outage, the tools a firm uses to coordinate may be the first casualties. If email, chat, the intranet and the incident ticketing system all sign in through the same identity provider or sit in the same cloud region, the response team cannot reach each other at the moment they most need to.",
-        "Out-of-band means a route that shares no critical dependency with the systems that have failed. In practice that is a combination: a mass notification service hosted separately from your estate, SMS and voice to personal and work mobiles, a fixed conference bridge with numbers printed in the plan, and an offline copy of contact lists and runbooks.",
+        "Out-of-band means a route that shares no critical dependency with the systems that have failed. In practice that is a combination: an alerting service hosted separately from your estate, SMS and voice to personal and work mobiles, a fixed conference bridge with numbers printed in the plan, and an offline copy of contact lists and runbooks.",
         "Test it the way it would fail. Run an exercise in which email and chat are declared unavailable for the first two hours. Measure how long it takes to reach the full response team, how many acknowledge, and who you could not reach at all.",
         "The same thinking applies to customers. If the app is the channel that is down, the app banner cannot carry the message. Agree in advance which channels carry customer updates when the main one fails: the website status page, social accounts, SMS, branch staff, and the contact centre's recorded message.",
         "Finally, keep the regulator's contact details outside your normal systems. A supervisor's mobile number in a locked mailbox helps nobody."],
@@ -83,10 +123,25 @@ def build():
         ("Cause", "Early speculation, or blaming a supplier.", "Say what you know and what customers should do. Name the cause only when confirmed."),
         ("Updates", "Irregular, and only when there is news.", "A fixed cadence, such as every 60 minutes, even when nothing has changed."),
         ("Afterwards", "Close quietly and move on.", "Explain what happened, put right any financial loss and share the lessons.")], "The first hour")
+    b.tracker("Outstanding actions", "Services back. The work is not finished.", "An illustrative board at 13:30, after recovery. Every open action has one owner, a time and a way to check it is really done.", [
+        ("Customer update: services restored", "Communications lead", "13:30", "Done", "Published on web, app, social and phone line"),
+        ("Confirm card authorisations are back to normal", "Technology lead", "14:00", "In progress", "Success rate against the normal baseline"),
+        ("Update supervisors: recovery confirmed", "Regulatory lead", "14:30", "In progress", "Entry and reference in the notification log"),
+        ("Call customers flagged as needing urgent help", "Contact centre lead", "13:00", "Overdue", "Call list ticked off; anyone unreached escalated"),
+        ("Brief board chair and executive committee", "Executive on call", "16:00", "Open", "Briefing note filed with the incident record"),
+        ("Preserve logs and timeline for the report", "Incident lead", "17:00", "In progress", "Timeline checked against the decision log"),
+        ("Reconcile failed and duplicate payments", "Payments operations", "18:00", "Open", "Sample of reconciled accounts signed off"),
+        ("Refund fees and charges caused by the outage", "Remediation lead", "Day 2", "Open", "Redress log reviewed by compliance"),
+        ("Root cause and fix in writing from the provider", "Supplier lead", "Day 3", "Blocked", "Awaiting provider report; chased daily")], "The first hour",
+        note="Review the board at a fixed time, such as every two hours, until every row is done or handed to the post-incident review. An overdue row escalates to the executive on call.")
+    b.form("Decision log", "Decision log: write it down as you go", "Every material decision, in one place, with the time left against tolerance. It is the backbone of the timeline your board and supervisor will ask for.",
+        [("Time", 0.8), ("Decision", 2.2), ("Options considered", 2), ("Decided by", 1.4), ("Time left to tolerance", 1.1), ("Evidence or reference", 1.3)], "The first hour", rows=14,
+        example=("07:52", "Fail card authorisation over to the second region", "Wait for provider fix; manual fallback only", "Incident lead, advised by technology lead", "3h 08m", "Bridge note 4; task 14"),
+        note="Illustrative example row, against a 4-hour tolerance. Record decisions not to act as well as decisions to act. The scribe keeps the log; the decision owner confirms each entry.")
 
     # ------------------------------------------------------------------ PART 03
     b.mark("03", "Prove it")
-    b.opener("03", "Prove<br>it.", "Map what you depend on, test the severe days and keep the evidence a board can rely on.", [("01", "Where concentration hides"), ("02", "Three scenarios to test"), ("03", "Evidence and your 90-day plan")])
+    b.opener("03", "Prove<br>it.", "Map what you depend on, test the severe days and keep the evidence a board can rely on.", [("01", "Where concentration hides"), ("02", "Three scenarios and a tabletop exercise"), ("03", "Post-incident review and your 90-day plan")])
     b.figpage("Concentration", "Four places concentration hides", f"The UK designated four cloud providers as critical third parties in July 2026. Regulated firms remain responsible for managing their own third-party arrangements.{R('hmt', 'boe')}", "hub", [
         ("One region, one zone", "Services described as resilient may still run in a single zone, or rely on regional control systems that a zone failure can disrupt."),
         ("Shared tooling", "Email, chat, identity and incident tooling often sit with the same provider as production. One outage removes both the service and the means to coordinate."),
@@ -94,9 +149,9 @@ def build():
         ("Payments chains and people", "Processors, scheme connections and fraud engines need tested alternatives. So do key teams working from a single site."),
         ], "Prove it")
     b.usecase("Scenarios", "Three severe days to rehearse", [
-        ("server", "Retail bank", "A cloud zone fails at 07:00 on payday", [("The disruption", "App, card payments and online transfers degrade across the region, not just the failed zone."), ("The first hour", "SEV1 by SMS and voice, bridge open, customer holding message by T+00:30, supervisor called by T+01:00."), ("The test", "Fail over to another region in a live-like environment and time it against the tolerance."), ("Watch out", "Corporate email and chat run in the same region. Run the exercise without them.")]),
-        ("transfer", "Payments and e-money firm", "Card processor outage on Black Friday", [("The disruption", "Authorisations fail for 40 minutes at peak, leaving customers stuck at tills."), ("The first hour", "Switch to the standby route, push in-app guidance, report within 4 hours."), ("The test", "Prove the standby route carries peak volume, not just a test transaction."), ("Watch out", "Fraud rules may block legitimate payments once traffic moves.")]),
-        ("shield", "General insurer", "Claims supplier hit by ransomware during a storm", [("The disruption", "The claims platform is offline as storm claims peak."), ("The first hour", "Manual intake script, longer contact centre hours, brokers and supervisor told."), ("The test", "Run a week of claims by hand in a tabletop and count what breaks."), ("Watch out", "A data breach brings separate notification duties.")])], "Prove it")
+        ("server", "Retail bank", "A cloud zone fails at 07:00 on payday", [("The disruption", "App, card payments and online transfers degrade across the region, not just the failed zone."), ("Where it goes wrong", "Corporate email and chat run in the same region, so the first page never arrives."), ("Who decides", "The incident lead declares and approves failover. The executive on call owns escalation as tolerance nears."), ("Monitor and test", "One live board of acknowledgements, tasks and time left. Rehearse failover to another region without email and chat.")]),
+        ("transfer", "Payments and e-money firm", "Card processor outage on Black Friday", [("The disruption", "Authorisations fail for 40 minutes at peak, leaving customers stuck at tills."), ("Where it goes wrong", "Traffic moves to the standby route and fraud rules block legitimate payments."), ("Who decides", "The incident lead switches route and reports within 4 hours. The head of fraud owns rule changes."), ("Monitor and test", "Success rate by route every five minutes. Prove the standby route carries peak volume, not a test transaction.")]),
+        ("shield", "General insurer", "Claims supplier hit by ransomware during a storm", [("The disruption", "The claims platform is offline as storm claims peak. Brokers and the supervisor need telling early."), ("Where it goes wrong", "Claims taken by hand go missing, and vulnerable customers wait in the same queue."), ("Who decides", "The claims director invokes manual intake. Compliance leads on any data breach, which brings separate duties."), ("Monitor and test", "Manual claims logged centrally and reconciled daily. Rehearse a week of claims by hand and count what breaks.")])], "Prove it")
     b.steps("Testing and evidence", "Test the severe days, then write it down", "What the FCA's review of 2025 self-assessments rewards, turned into six steps.", [
         ("Choose scenarios that could break you", f"Vary the nature, severity and duration. The FCA questions self-assessments that claim no scenario could defeat the firm without severe testing to show it.{R('fca1y')}"),
         ("Include communications in every test", "Declare email and chat unavailable. Time how long it takes to reach the team, the customer channels and the supervisor."),
@@ -104,6 +159,24 @@ def build():
         ("Plan for a breach", f"Where a scenario would breach a tolerance, document the longer-term remediation plan, with owners and dates.{R('fca1y')}"),
         ("Make the self-assessment decision-ready", f"Add confidence ratings, second and third line input, and a clear ask of the board, which must review and approve it.{R('fca1y', 'ss121')}"),
         ("Learn from real incidents", "Use 20 October as a case study. Map which of your services would have been hit, and how you would have known.")], "Prove it")
+    b.exercise("Tabletop exercise", "Region down on payday: a three-hour tabletop", "A ready-to-run exercise built on the scenario in this playbook. Run it with the people who would really be called, and keep email and chat out of the room.",
+        [("Duration", "Three hours, including a 30-minute debrief"), ("Participants", "Executive on call, SMF holder, incident, IT, comms, compliance, supplier leads"), ("Objective", "Keep card payments within tolerance without email or chat"), ("Facilitator", "Head of resilience, with an independent observer")], [
+        ("07:00", "Card authorisations and app logins fail. Email and chat are declared unavailable for two hours.", "How do we reach the team? Who declares, and when did the tolerance clock start?"),
+        ("07:20", "The provider status page still shows no incident. Contact centre waits pass 30 minutes.", "What do customers hear now, on which channels, and who approves it?"),
+        ("07:50", "Failover to the second region is ready, but has never been run at peak volume.", "Who decides? What is the risk to data integrity, and who is told?"),
+        ("08:30", "Rerouted payments start failing fraud checks. A journalist asks if customer data is affected.", "Who can change fraud rules? What can we say, and what must we not say?"),
+        ("09:30", "Forecast recovery for card payments now runs past the impact tolerance.", "Who escalates to the executive and the SMF holder? What does the supervisor hear, and when?"),
+        ("11:00", "Services are back. Many customers missed payments or were charged twice.", "How do we find them, put it right and record it for the review?")], "Prove it",
+        note="Measure four things: time to reach the full team, time to the first customer message, time to the supervisor call, and decisions logged with an owner. Put the results and the gaps into the self-assessment.")
+    b.pir("Post-incident review", "Post-incident review template", "Hold it soon, ideally within two weeks, while memories and logs are fresh. Blame-free, evidence-led and measured against the tolerance.", [
+        ("The tolerance timeline", "When did harm start for customers, and when was it detected, declared and recovered? How close did each service come to its tolerance?"),
+        ("Detection and declaration", "What told us first: monitoring, customers or the supplier? How long from first signal to declaration?"),
+        ("Decisions and decision rights", "Which decisions were made, by whom, on what information? Did any wait for someone with authority?"),
+        ("Reaching people", "How long to reach the response team out of band? Who could not be reached, and why?"),
+        ("Customers and vulnerability", "What were customers told, when and where? Who needed urgent help, and did they get it?"),
+        ("Third parties", "When did suppliers tell us, and what did they give us? Did a supplier's own supplier play a part?"),
+        ("Regulatory reporting", "Which notifications were made, to whom, and were the clocks met? What follow-up is due?"),
+        ("Actions and self-assessment", "What changes, who owns it and by when? What does this mean for our tolerances and self-assessment?")], "Prove it")
     b.table("Your plan", "This week, this month, this quarter", "Owners are suggestions. Adjust them to your structure.", ["When", "Actions", "Owner"], [
         ("This week", "Check that the response team can be reached without corporate email or chat. Print the bridge number and supervisor contacts into the plan.", "Head of resilience"),
         ("This week", "List every important business service that depends on a single cloud region or zone, including through suppliers.", "CIO or CTO"),
@@ -113,10 +186,10 @@ def build():
         ("This quarter", "Map incident reporting to the FCA and PRA rules that apply from 18 March 2027, and to DORA for EU entities.", "Chief risk officer, compliance")], "Prove it", "30mm 1fr 46mm")
 
     # ------------------------------------------------------------------ tools
-    b.mark("", "Questions and checklist")
+    b.mark("", "Questions, checklist and templates")
     b.questions("For leaders", "Questions for your executive committee", "Ask them out loud. Vague answers are the finding.", [
         ("Readiness", ["If our cloud region failed at 07:00 tomorrow, which important business services would breach tolerance first?", "Could we reach the whole response team in ten minutes without email or chat?", "Who is authorised to send the first customer message, and how fast?"]),
-        ("Evidence", ["Which scenario in our last test came closest to breaching a tolerance, and what are we doing about it?", "Did our last test include communications, suppliers and the supervisor call?", "Would our self-assessment convince a sceptical board member?"])], "Questions and checklist")
+        ("Evidence", ["Which scenario in our last test came closest to breaching a tolerance, and what are we doing about it?", "Did our last test include communications, suppliers and the supervisor call?", "Would our self-assessment convince a sceptical board member?"])], "Tools and templates")
     b.checklist("Checklist", "Are you ready to stay within tolerance?", "Tick what is true today. Anything blank is your next action.", [
         ("Important business services and tolerances approved by the board", "Reviewed in the last twelve months or after material change."),
         ("Every service mapped to people, systems and suppliers", "Including the cloud region and zone, and key fourth parties."),
@@ -124,7 +197,11 @@ def build():
         ("Message templates loaded", "For customers, staff, supervisors, suppliers and the media, with sign-off rules."),
         ("Regulatory reporting clocks known", "Current rules, PSP four-hour reports, the 2027 regime and DORA where relevant."),
         ("Severe scenario tested this year", "With communications included and timings recorded against tolerance."),
-        ("Self-assessment evidence ready", "Confidence ratings, remediation owners and second line challenge.")], "Questions and checklist")
+        ("Self-assessment evidence ready", "Confidence ratings, remediation owners and second line challenge.")], "Tools and templates")
+    b.form("Notification log", "Supervisor, supplier and scheme notification log", "One line for every notification made or received during the incident, so nobody has to rebuild who was told what from inboxes afterwards.",
+        [("Time", 0.8), ("To or from", 1.4), ("Channel", 1), ("What was said", 2.6), ("Reference", 1), ("Next update due", 1), ("By", 1)], "Tools and templates", rows=11,
+        example=("08:00", "FCA and PRA supervisors", "Phone, then email", "Card payments disrupted since 07:00; about [n] customers; cause under investigation", "Call note 3", "09:00", "Regulatory lead"),
+        note=f"Illustrative example row. Formal reports follow the rules that apply to your firm: payment firms report a major incident within 4 hours of detecting it, and from 18 March 2027 most firms report within 24 hours of determining that a threshold is met.{R('ps262')} EU entities also follow DORA.")
     b.glossary("Words worth knowing", [
         ("Important business service", "A service provided to an external user which, if disrupted, could cause intolerable harm or risk to the firm or the wider system."),
         ("Impact tolerance", "The maximum tolerable level of disruption to an important business service, always including a time metric."),
@@ -137,14 +214,14 @@ def build():
         ("DORA", "The EU Digital Operational Resilience Act, applying to EU financial entities from 17 January 2025."),
         ("Material third party arrangement", "A supplier arrangement whose disruption could seriously affect a firm, which must be notified and registered under the 2027 regime.")])
 
-    b.platform("Where Crises Control fits", "Seven steps in this playbook, and the modules that support them. Crises Control supports your plan; it does not replace it.", [
-        ("Page the response team by SMS, voice and push when email and chat are down, and escalate to deputies when nobody acknowledges.", "Ping"),
-        ("Run one workspace per incident, with the bridge, decision log and approved message templates in one place.", "Incident Manager"),
-        ("Turn failover and manual workaround runbooks into tasks with owners, deadlines and escalation.", "Task Manager"),
-        ("Watch tasks, communications and escalations live against the tolerance clock for each affected service.", "Control Centre"),
-        ("Keep timestamped timelines as evidence for supervisors, the post-incident review and the self-assessment.", "Audit Trail"),
-        ("Let branch and frontline staff raise an urgent issue with their location in one touch.", "SOS"),
-        ("Draft role-specific updates for customers, staff and supervisors, then review before sending.", "CRAiG")])
+    b.platform("How the modules work together in a financial services incident", "The cloud outage in this playbook, one module at a time, in the order the incident runs. Crises Control supports your plan; it does not replace it.", [
+        ("A branch colleague reports customers cannot pay by card, with their location, in one touch.", "SOS"),
+        ("The incident team, executive on call and SMF holder are reached by SMS, voice and push; silence escalates to deputies.", "Ping"),
+        ("Card payments is declared against its impact tolerance, with roles, the bridge and the decision log in one workspace.", "Incident Manager"),
+        ("Failover, workarounds, customer messages and the supervisor call run as owned tasks with deadlines and escalation.", "Task Manager"),
+        ("The executive sees tasks, acknowledgements and time left against tolerance without asking for a briefing.", "Control Centre"),
+        ("A timestamped record of decisions and messages supports the incident report, the review and the self-assessment.", "Audit & Reporting"),
+        ("CRAiG helps the incident lead find who has not responded and which tasks are still outstanding.", "CRAiG")])
 
     b.mark("", "Sources")
     src = {

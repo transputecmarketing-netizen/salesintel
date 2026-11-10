@@ -16,7 +16,7 @@ def build():
     b.foreword("Retail crises rarely start at head office. They start at a till, a freezer or a shop door.", [
         f"In April 2025 a cyber attack forced Marks and Spencer to pause online orders for 46 days, and the retailer estimated the hit to operating profit at around £300m before mitigation.{R(1,7)} The Co-op shut down systems to contain a parallel attack, lost an estimated £206m of sales in six months and later confirmed that data on all 6.5 million members had been taken.{R(2,14)} In October 2026 an incident at Ahold Delhaize took online grocery services offline in the Benelux and the US; the group now expects fourth-quarter sales to be €200m to €250m lower.{R(3)}",
         f"The same month, attackers switched supermarket refrigeration into defrost from the internet. France's CERT-FR reported numerous compromised controllers, and on 2 November a second wave reached stores in Ireland, Belgium and Sweden and food suppliers in the UK.{R(4,5)} Meanwhile, the BRC counts more than 1,600 incidents of violence and abuse against retail staff every day.{R(6)}",
-        "This playbook is for the people who have to hold it all together: resilience, security, store operations, IT and communications leaders. It sets out how a store and head office should work as one team on the worst day of the year, what to have ready before Black Friday, and the messages to send in the first hour. The companion intelligence report sets out the evidence in full."],
+        "This playbook is for the people who have to hold it all together: resilience, security, store operations, IT and communications leaders. It sets out how a store and head office should work as one team on the worst day of the year, who decides what, what to have ready before Black Friday and the messages to send in the first hour. It also gives you tools to use straight away: a roles matrix, an escalation workflow, store logs, a tabletop exercise and a review template. The companion intelligence report sets out the evidence in full."],
         "The Crises Control team")
 
     b.mark("", "Introduction")
@@ -28,7 +28,7 @@ def build():
 
     # PART 01
     b.mark("01", "Ready for peak")
-    b.opener("01", "Ready for<br>peak.", "Decide now how stores and head office will work together, how you will grade an incident and what must be true before Black Friday.", [("01", "Store and head office as one team"), ("02", "Six threats, first actions"), ("03", "A retail severity ladder"), ("04", "Peak readiness in six steps")])
+    b.opener("01", "Ready for<br>peak.", "Decide now how stores and head office will work together, how you will grade an incident and what must be true before Black Friday.", [("01", "Store and head office as one team"), ("02", "Six threats, first actions"), ("03", "A retail severity ladder"), ("04", "Who does what, and who decides"), ("05", "Escalating from store to head office"), ("06", "Peak readiness in six steps")])
     b.essay("Ready for peak", "One incident, two worlds: the store and head office", [
         "A retail incident is lived in two places at once. At head office, it is a dashboard turning red, a bridge call and a decision about which systems to switch off. In the store, it is a queue that will not move, a customer who wants to know why and a manager who has heard nothing.",
         f"The 2025 attacks showed how quickly the two worlds connect. M&S first disclosed a cyber incident after problems with contactless payments and click and collect over the Easter weekend, and stopped taking online orders three days later.{R(7)} The Co-op said it kept trading while it contained its attack, but had to deal with payment problems and empty shelves along the way.{R(2)}",
@@ -49,6 +49,34 @@ def build():
         (2, "Major", "Outage in one region or one channel. Serious assault on a colleague. Fridge or freezer failure with stock at risk. A credible threat to a store.", "Incident manager, area and regional managers, IT or facilities on call, communications on standby.", "SMS · push · escalate after 10 min"),
         (3, "Moderate", "Problem at a single store: tills failing, a violent incident without injury, one fridge alarm, an evacuation for a false alarm.", "Store manager, area manager, service desk or facilities helpdesk.", "Push · email"),
         (4, "Minor", "Verbal abuse logged, a single device fault, a near miss or a suspicious approach to staff.", "Store manager, recorded for trend reporting and weekly review.", "App · email")], "Ready for peak")
+    b.raci("Roles and responsibilities", "Who does what: store, region and head office", "A suggested matrix for a multi-store incident. Agree it before peak and adjust it to your structure.",
+        ["Store<br>manager", "Regional<br>manager", "Head office<br>incident lead", "IT and<br>security", "Comms", "Loss<br>prevention"], [
+        ("Raise the first report", ["A", "I", "I", "I", "", "I"]),
+        ("Declare and set the severity", ["C", "C", "A", "C", "I", "I"]),
+        ("Switch to cash and offline", ["R", "R", "A", "C", "I", "I"]),
+        ("Close one store for safety", ["A", "I", "I", "", "I", "C"]),
+        ("Close stores across a region", ["R", "A", "C", "", "I", "I"]),
+        ("Contain systems, keep evidence", ["I", "I", "A", "R", "", "C"]),
+        ("Chase silent stores", ["R", "A", "I", "", "", ""]),
+        ("Customer and media statements", ["I", "I", "C", "C", "A", "I"]),
+        ("Colleague safety and lockdown", ["A", "C", "I", "", "I", "R"]),
+        ("Keep CCTV, report to police", ["R", "I", "I", "", "", "A"]),
+        ("Reopen and return to normal", ["R", "R", "A", "C", "I", "I"])], "Ready for peak",
+        "One rule overrides the matrix: a store manager never needs permission to act on safety. Closing a door, pausing entry or calling 999 is theirs to decide; head office is told straight after.")
+    b.table("Decision rights", "Who closes a store, who goes to cash, who speaks to the media", "Name each owner and a deputy before peak. If the owner cannot be reached in ten minutes, the deputy decides.", ["Decision", "Who decides", "Who can act first", "Who must be told"], [
+        ("Close a store or pause entry", "Store manager for safety; regional manager for trading.", "The most senior colleague on the floor.", "Regional manager, then the incident lead."),
+        ("Switch to cash only", "Incident lead for the estate; store manager for one store.", "Store manager, using the cash procedure.", "Regional manager and cash office."),
+        ("Take systems offline", "Incident lead, on IT and security advice.", "IT security, only to stop an active attack.", "Every store, with what it means for them."),
+        ("Speak to the media", "Communications lead, with the incident lead.", "Nobody else. Stores use the holding line.", "Regional managers and stores."),
+        ("Evacuate or lock down", "Store manager, or police on arrival.", "Any colleague facing an immediate threat.", "Regional manager, loss prevention."),
+        ("Take chilled stock off sale", "Store manager, on probe readings.", "Any trained colleague.", "Facilities and food safety."),
+        ("Notify regulators and insurers", "Incident lead, with legal.", "Nobody until it is logged with reasons.", "Executive team.")], "Ready for peak", "38mm 1fr 1fr 1fr")
+    b.escalation("Escalation", "Escalating from store to region to head office", "Four levels that match the severity ladder. The times are suggested starting points; set your own and write them into your alerting rules, so escalation does not depend on someone remembering.", [
+        ("Store", "One store: tills failing, an aggressive customer, a single fridge alarm, a false fire alarm.", "Store manager, colleagues on shift, the service desk or facilities helpdesk.", "Store manager: pause entry, go cash only, take stock off sale, call 999.", "two or more stores are hit, anyone is hurt, or there is no fix in 30 minutes"),
+        ("Region", "The same fault in several stores in one region, a serious assault, stock at risk or a credible threat.", "Regional manager, area managers, IT or facilities on call, loss prevention.", "Regional manager: close stores in the region, move colleagues, ask head office for support.", "more than one region or online is hit, or any store is silent after 10 minutes"),
+        ("Head office", "Payments, tills or core systems down across regions or online, a suspected cyber attack, a lockdown or life-safety incident.", "Head office incident lead, IT and security, communications, loss prevention, every affected regional manager.", "Head office incident lead: estate-wide cash procedure, systems offline, customer messages.", "trading cannot resume by the next update, or data or media are involved"),
+        ("Executive crisis team", "Business-wide disruption, a data breach, serious injury or death, sustained media attention.", "Executive team, legal, communications director, insurer and incident response provider.", "Executive lead: closing the estate or online, public statements, regulator and insurer notifications.", "")], "Ready for peak",
+        "Silence is a signal. A store that has not acknowledged within ten minutes is chased by its regional manager; a regional manager who has not acknowledged is replaced by their deputy and the head office incident lead is told.")
     b.steps("Before Black Friday", "Peak readiness in six steps", "Black Friday falls on 27 November this year. Finish these before then, and repeat the checks before the last trading weekend before Christmas.", [
         ("Freeze change and name the on-call team", "No non-essential changes to payments, tills, e-commerce or networks over peak. Publish who is on call for every day, including weekends."),
         ("Test the offline and cash procedure", "Confirm what each till and terminal can do offline, how much cash float stores hold and who decides to go cash only."),
@@ -59,15 +87,60 @@ def build():
 
     # PART 02
     b.mark("02", "When it happens")
-    b.opener("02", "When it<br>happens.", "The first hour on the worst day, and the procedures for violence, lockdown and a cold chain you cannot trust.", [("01", "The first hour of a peak outage"), ("02", "After an assault on a colleague"), ("03", "Evacuate, invacuate, lock down, communicate"), ("04", "A cold-chain incident"), ("05", "Messages ready to send")])
-    b.firsthour("The first hour", "Black Friday, 07:40: card payments fail", "An illustrative timeline. The cause is not yet known. Act on what you can see.", [
+    b.opener("02", "When it<br>happens.", "The first hour on the worst day, and the procedures for violence, lockdown and a cold chain you cannot trust.", [("01", "The first hour of a peak outage"), ("02", "Across stores, region and head office"), ("03", "Tracking what is still outstanding"), ("04", "After an assault on a colleague"), ("05", "Evacuate, invacuate, lock down, communicate"), ("06", "A cold-chain incident"), ("07", "Messages ready to send")])
+    b.firsthour("The first hour", "Black Friday, 07:40: card payments fail", "An illustrative timeline. The cause is not yet known. Act on what you can see, name who decides at each step and watch for the stores that go quiet.", [
         ("T+00:00", "First reports reach the service desk", "Dozens of stores report card terminals declining. Online checkout errors climb.", "Service desk", 2),
         ("T+00:05", "Incident declared at SEV 1", "Several regions and online are hit. The bridge opens and the log starts.", "Incident manager", 1),
-        ("T+00:10", "First instruction to every store", "Go to the cash and offline procedure, stop restarting terminals, acknowledge. Next update 08:30.", "Retail operations", 1),
+        ("T+00:10", "First instruction to every store", "Go to the cash and offline procedure, stop restarting terminals, acknowledge. Stores silent after ten minutes go to their regional manager. Next update 08:30.", "Retail operations", 1),
         ("T+00:15", "Find the cause, keep the evidence", "Check provider status and internal systems for intrusion. Nothing is switched off without a decision.", "Security lead", 1),
         ("T+00:20", "Protect people, tell customers", "Managers may pause entry if queues become unsafe. Banner, social posts and store announcement: open, cash accepted, next update time.", "Security · Comms", 2),
         ("T+00:45", "Decide on containment", f"If attack is suspected: isolate, call the response provider and insurer, assess whether personal data is involved.", "Security lead · Legal", 1),
         ("T+01:00", "First update to the crisis team", "Stores affected, cash position, customer impact, likely duration, decisions needed, next update.", "Incident manager", 3)], "When it happens")
+    b.swimlane("Multi-store scenario", "Black Friday across stores, region and head office", "The same illustrative outage, seen lane by lane. Red marks where it usually goes wrong, navy marks who decides, and pale blue marks how progress is watched.",
+        ["Affected stores", "Regional managers", "Head office incident lead", "IT and payments", "Communications"],
+        ["07:40", "07:50", "08:00", "08:30", "09:30", "11:00"], [
+        (0, 0, "Cards declined at tills in many stores", "act"),
+        (3, 0, "Service desk sees failures in every region", "mon"),
+        (0, 1, "Managers keep restarting terminals; queues build", "risk"),
+        (1, 1, "Alerted by app and SMS; acknowledge", "act"),
+        (2, 1, "Declares SEV 1 and opens the bridge", "dec"),
+        (4, 1, "Colleagues post online before any statement", "risk"),
+        (0, 2, "Stores acknowledge and start the cash procedure", "act"),
+        (1, 2, "Silent stores chased after ten minutes", "mon"),
+        (2, 2, "Estate-wide switch to cash and offline", "dec"),
+        (3, 2, "Provider fault or attack? Evidence kept", "act"),
+        (4, 2, "Holding line and web banner live", "act"),
+        (0, 3, "Cash floats run low in busy stores", "risk"),
+        (1, 3, "Closes two stores with unsafe queues", "dec"),
+        (2, 3, "Approves isolating systems on security advice", "dec"),
+        (4, 3, "One spokesperson takes media calls", "dec"),
+        (2, 4, "Store status board reviewed every 30 minutes", "mon"),
+        (0, 4, "Each store confirms cards work again", "mon"),
+        (3, 3, "Pressure to restart before the cause is known", "risk"),
+        (1, 5, "Checks every store reopened and staffed", "mon"),
+        (3, 4, "Payments restored region by region", "act"),
+        (1, 4, "Reopens stores once terminals are tested", "dec"),
+        (4, 4, "Update runs late; stores fill the gap", "risk"),
+        (0, 5, "Cash banked, losses and incidents logged", "act"),
+        (2, 5, "Stands down; open actions tracked to closure", "mon"),
+        (3, 5, "Root cause and evidence passed to review", "act"),
+        (4, 5, "Customer update and thanks to colleagues", "act")], "When it happens",
+        "Most failures sit between the lanes: a decision made at head office that nobody tells stores about, or a store problem that never reaches head office. Give each handover an owner and a time.")
+    b.tracker("Outstanding actions", "Saturday 11:00: what is still open", "An illustrative actions board three hours in. Every action has one owner, a due time and a way of checking it is done. Review it at every update until it is empty.", [
+        ("Confirm every store is taking cards again", "Regional managers", "11:30", "In progress", "Store status board, store by store"),
+        ("Reopen the two stores closed for queue safety", "Regional manager", "12:00", "Open", "Terminals tested; reopening logged"),
+        ("Collect cash from stores over their float limit", "Cash office", "13:00", "Open", "Collection booked and confirmed"),
+        ("Customer FAQ and social media update", "Communications", "10:45", "Overdue", "Escalated to the incident lead at due time"),
+        ("Root cause statement from the payment provider", "IT lead", "17:00", "Blocked", "Chased at every update; waiting on provider"),
+        ("Reconcile offline and failed card transactions", "Finance and IT", "Sun 10:00", "In progress", "Matched against the provider report"),
+        ("Aftercare for the colleague pushed in a queue", "Loss prevention", "Today", "Done", "Call logged; incident report filed"),
+        ("Decide whether to notify the ICO and the insurer", "Incident lead, legal", "Sun 12:00", "Open", "Decision and reasons recorded in the log"),
+        ("Book the post-incident review", "Incident lead", "Mon", "Done", "Invite sent with the review template")], "When it happens",
+        "Overdue and blocked actions are raised at the next update, not left on the board. The incident lead decides whether to chase, reassign or escalate, and the decision goes in the log. The board closes only when every action is done or handed to the post-incident review.")
+    b.form("Store status log", "Store status log: one line per store, every update", "Regional managers keep this for their stores during a multi-store incident, or head office keeps it for the estate. It shows at a glance who has heard, who is trading and who needs help.",
+        [("Store", 1.1), ("Alerted", .8), ("Acknowledged", 1), ("Trading status", 1.3), ("Safety or queue issue", 1.5), ("Stock at risk", 1.1), ("Next check", .8), ("Initials", .7)], "When it happens", rows=11,
+        example=["Store 0147, North", "07:52", "07:58, manager", "Open, cash only", "Long queue, entry paused 08:20", "None", "08:30", "RM"],
+        note="Trading status: open, cash only, closed for safety, closed for trading. A store with no acknowledgement after ten minutes is chased and marked in red at the next update.")
     b.steps("Violence and abuse", "After an assault on a colleague: six steps that matter", f"The BRC estimates over 1,600 incidents of violence and abuse against retail staff a day, 118 of them physically violent.{R(6)}", [
         ("Make safe and get help", "Call 999 if anyone is hurt or in danger. Do not detain or follow the offender."),
         ("Look after the colleague", "First aid, a quiet room, someone with them, a safe way home. Not back on the till."),
@@ -88,6 +161,10 @@ def build():
         ("power", "Cut the remote link", f"With the contractor, take controllers off the internet and allow access only through a secure VPN. CERT-FR warns a factory reset alone is not enough for end-of-life kit.{R(4)}"),
         ("check", "Restore and check every site", f"Reconfigure, check defrost schedules, then look for the same controllers at every other store and depot.{R(4,11)}")], "When it happens",
         f"Check your insurance conditions before cutting data links to the refrigeration contractor, as CERT-FR advises.{R(4)}")
+    b.form("Cold-chain record", "Cold-chain quarantine record", f"Fill one line for every case or unit you check after an unexplained defrost or alarm. Chilled food must be kept at 8°C or below in England, Wales and Northern Ireland.{R(9)} The record supports the insurer, the food safety team and the review.",
+        [("Case or unit", 1), ("Product or section", 1.3), ("Probe reading and time", 1.2), ("Display reading", .9), ("Action taken", 1.4), ("Quantity and value", 1), ("Checked by", .8)], "When it happens", rows=11,
+        example=["Freezer 3, aisle 9", "Frozen desserts", "-4°C at 06:15", "-18°C", "Off sale, held for insurer", "42 units", "Duty manager"],
+        note="Probe the food, not the display: the display reading comes from the controller you may not be able to trust. Do not reset the controller or restock until remote access has been cut and the contractor has checked it.")
     b.messages("Messages", "Six messages ready to send", "Short, specific and honest. Fill the brackets, never guess the cause, and always give the time of the next update.", [
         ("SMS", "Store managers", "SEV1: Card payments down in many stores. Switch to cash and offline procedure now. Do not restart terminals. Reply 1 when done. Next update 08:30.", "Keep it under 160 characters so it arrives as one message."),
         ("Push", "All store colleagues", "Some payment systems are down. Your safety comes first. Stay calm, use the till script, call security if anyone becomes aggressive. Please do not post about this online.", ""),
@@ -98,11 +175,20 @@ def build():
 
     # PART 03
     b.mark("03", "Recover and rehearse")
-    b.opener("03", "Recover and<br>rehearse.", "Three scenarios to test your plan, a dated plan with owners and the questions to put to your leadership team.", [("01", "Three scenarios"), ("02", "This week, this month, this quarter"), ("03", "Questions and checklist")])
+    b.opener("03", "Recover and<br>rehearse.", "Three scenarios to test your plan, a tabletop exercise, a dated plan with owners, the questions to put to your leadership team and a review template.", [("01", "Three scenarios"), ("02", "A tabletop exercise"), ("03", "This week, this month, this quarter"), ("04", "Questions and checklist"), ("05", "The post-incident review")])
     b.usecase("Scenarios", "Three illustrative scenarios to rehearse before peak", [
-        ("laptop", "Grocer, 400 stores", "Card terminals fail on the last Saturday before Christmas", [("The trigger", "A provider outage hits two regions at 10am. Queues build and answers vary."), ("What helps", "One acknowledged instruction to every store within ten minutes."), ("What hurts", "Waiting for certainty before saying anything."), ("Rehearse", "Run one store on cash only for 30 minutes.")]),
-        ("truck", "Convenience chain, franchise and company stores", "Freezers defrost overnight in a dozen stores", [("The trigger", "Opening staff find warm freezers in defrost. The common link is remote access."), ("What helps", "A probe-and-quarantine routine and a list of controllers by site."), ("What hurts", "Restocking before anyone has cut remote access."), ("Rehearse", "Ask area managers to name their controller models.")]),
-        ("shield", "Fashion retailer, flagship store", "An aggressive group, then a call to lock down", [("The trigger", "A group threatens colleagues, then police advise of an incident nearby."), ("What helps", "Colleagues who know the safe room and which doors lock."), ("What hurts", "A tannoy nobody hears upstairs, no list of who is on shift."), ("Rehearse", "A ten-minute lockdown walk-through each quarter.")])], "Recover and rehearse")
+        ("laptop", "Grocer, 400 stores", "Card terminals fail on the last Saturday before Christmas", [("Where it goes wrong", "A provider outage hits two regions at 10am. Stores wait for certainty and give customers different answers."), ("Who decides", "The head office incident lead calls the estate-wide cash switch; regional managers close unsafe stores."), ("How it is monitored", "Acknowledgement per store, chased at ten minutes, and a status board reviewed every 30 minutes."), ("Rehearse", "Run one store on cash only for 30 minutes.")]),
+        ("truck", "Convenience chain, franchise and company stores", "Freezers defrost overnight in a dozen stores", [("Where it goes wrong", "Opening staff reset controllers and restock before anyone cuts the remote access they share."), ("Who decides", "Store managers take stock off sale; the head office lead orders controllers offline at every site."), ("How it is monitored", "A quarantine record per store and a site list of controllers, ticked off as each is checked."), ("Rehearse", "Ask area managers to name their controller models.")]),
+        ("shield", "Fashion retailer, flagship store", "An aggressive group, then a call to lock down", [("Where it goes wrong", "A tannoy nobody hears upstairs, and no list of who is on shift or who locks which door."), ("Who decides", "The store manager locks down without waiting; police take over on arrival; head office supports."), ("How it is monitored", "Each floor confirms it is secure and every colleague is accounted for against the shift list."), ("Rehearse", "A ten-minute lockdown walk-through each quarter.")])], "Recover and rehearse")
+    b.exercise("Tabletop exercise", "Exercise: tills down on Super Saturday", "An illustrative 90-minute exercise for store, regional and head office leads. Read each inject aloud, give the room five minutes, and record every decision, owner and gap.", [
+        ("Duration", "90 minutes, six injects"), ("Participants", "Store and regional managers, head office lead, IT, comms, loss prevention"), ("Objective", "Test decision rights and store acknowledgement across many stores"), ("Facilitator", "Head of resilience or an external facilitator")], [
+        ("09:55", "Card payments fail in 120 stores across three regions. Online checkout is slow.", "Who declares, at what level? What is the first instruction to stores, and by when?"),
+        ("10:10", "Eighteen stores have not acknowledged. Two regional managers are on leave.", "How do you know who is silent? Who covers for the absent regional managers?"),
+        ("10:30", "A queue in a large store turns hostile and a colleague is pushed.", "Who decides to pause entry or close? What support does the colleague get, and who checks?"),
+        ("10:50", "IT finds signs of intrusion and wants to take the store network offline.", "Who approves? What will stores lose, and who tells them before it happens?"),
+        ("11:15", "A journalist calls a store directly. A video of the queue is spreading online.", "Who speaks for the business? What does the store say, word for word?"),
+        ("13:00", "Freezer alarms in six stores. They share the same controller model.", "Is it connected? Who decides on stock, and who checks every other site?")], "Recover and rehearse",
+        "Afterwards, score yourselves on the readiness assessment, put every gap on the outstanding actions board with an owner and a date, and run the exercise again before the last trading weekend before Christmas.")
     b.table("Your plan", "This week, this month, this quarter", "Owners are suggestions. Adjust them to your structure, and date every action.", ["When", "Actions", "Owner"], [
         ("This week", "Publish the peak on-call rota and change freeze. Send the severity ladder and the six message templates to every store.", "Head of resilience"),
         ("This week", "Test the cash and offline procedure in one store per region. Confirm payment provider escalation contacts.", "Retail operations director"),
@@ -122,6 +208,15 @@ def build():
         ("Every assault reported and followed up", "With aftercare for the colleague and a store risk review."),
         ("Evacuation, invacuation and lockdown briefed", "And walked through in large stores."),
         ("Every store acknowledges alerts", "And non-responders are chased automatically.")], "Recover and rehearse")
+    b.pir("Post-incident review", "Post-incident review template", "Hold the review within two weeks, with stores in the room as well as head office. Look for causes, not culprits, and turn every finding into a dated action.", [
+        ("What happened", "A timeline from the first store report to stand down, built from the incident log, not from memory."),
+        ("Detection and first report", "How was it first spotted in store? How long until head office knew, and how?"),
+        ("Alerting and acknowledgement", "Which stores acknowledged, and how fast? Who stayed silent, and why?"),
+        ("Decisions and decision rights", "Who decided to close stores, go to cash or take systems offline? Were they the right people?"),
+        ("Stores and colleagues", "Trading lost, stores closed, colleagues hurt or abused, aftercare given and still needed."),
+        ("Customers, media and suppliers", "What was said, when and by whom? Was it accurate, and did stores know first?"),
+        ("What worked and what did not", "Procedures, tools, contact lists and handovers between store, region and head office."),
+        ("Actions, owners and dates", "Every finding becomes an action with one owner and a due date, tracked to closure and reported.")], "Recover and rehearse")
     b.glossary("Words worth knowing", [
         ("Severity level", "A shared grade (SEV 1 to SEV 4) that sets who is alerted, how fast and how often."),
         ("Offline payment mode", "A terminal setting that stores some card transactions for later authorisation when the network is down."),
@@ -139,13 +234,14 @@ def build():
         ("Responsible person", "Under Martyn's Law, the person or organisation in control of qualifying premises."),
         ("Remote access", "A route for suppliers or engineers to manage systems from outside the store."),
         ("End of life", "When a manufacturer stops issuing security fixes for a product.")])
-    b.platform("Where Crises Control fits in a retail incident", "How the steps in this playbook map to Crises Control modules.", [
-        ("Send the first instruction to every store manager and see who has acknowledged, with automatic escalation to area managers.", "Ping"),
-        ("Run the incident from one workspace with one log, shared by stores, head office and suppliers.", "Incident Manager"),
-        ("Turn the cash procedure, cold-chain checks and lockdown steps into tasks with owners and deadlines.", "Task Manager"),
-        ("See which stores are affected, what has been done and where escalations are waiting.", "Control Centre"),
-        ("Give colleagues a one-touch way to raise an alarm with their location.", "SOS"),
-        ("Keep a timestamped record of every message and decision for the post-incident review and insurer.", "Audit Trail")])
+    b.platform("How the modules work together in a retail incident", "The Black Friday outage from this playbook, step by step, from the first report in a store to the record for insurers and the review.", [
+        ("A store manager reports tills down in one touch, with the store location, instead of queuing for the service desk.", "SOS"),
+        ("Every store manager receives the cash procedure on more than one channel; silent stores escalate to their regional manager.", "Ping"),
+        ("Head office declares SEV 1, assigns store, regional and head office roles and keeps one log of every decision.", "Incident Manager"),
+        ("The cash procedure, queue safety and reopening checks become owned tasks in every store, with deadlines and escalation.", "Task Manager"),
+        ("Head office and regional managers see which stores are trading, cash only, closed or behind on tasks, live.", "Control Centre"),
+        ("A timestamped record of messages, acknowledgements and decisions is ready for insurers, the ICO and the review.", "Audit & Reporting"),
+        ("CRAiG helps the incident team find which stores have not acknowledged or have overdue tasks.", "CRAiG")])
 
     b.mark("", "Sources")
     src = [
