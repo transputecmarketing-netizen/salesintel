@@ -1,7 +1,7 @@
 # Writer 03 notes: Retail, week of 23 November 2026
 
 Outputs
-- Playbook: CC-03-Playbook-Keep-the-Shutters-Up.html (25 pages), source cc/cp03.py, 14 sources
+- Playbook: CC-03-Playbook-Keep-the-Shutters-Up.html (38 pages after round 2), source cc/cp03.py, 14 sources
 - Report: CC-03-Report-When-the-Tills-Go-Dark.html (24 pages), source cc/cr03.py, 27 sources over two pages
 - Back pages cross-reference each other. check.js prints OK for both; every page rendered and inspected.
 - No Transputec mentions; no en or em dashes.
@@ -26,3 +26,10 @@ Left out as unverifiable or conflicting
 
 Illustrative content
 - The first-hour timeline and the three usecase scenarios are labelled illustrative; they are not real customers or events.
+
+Round 2 revision (BRIEF2, 10 November 2026)
+- Playbook now 38 pages; check.js OK; every page rendered and inspected. No redesign, no existing sourced fact changed, no new sources.
+- New pages: RACI (Store manager, Regional manager, Head office incident lead, IT and security, Comms, Loss prevention); decision rights table (close a store, switch to cash, take systems offline, speak to media, evacuate or lock down, take chilled stock off sale, notify regulators and insurers); four-level escalation workflow (store, region, head office, executive crisis team); multi-store swimlane for the Black Friday scenario (stores, regional managers, head office lead, IT and payments, comms; risk, decision and monitoring marked); outstanding actions tracker at 11:00; store status log form; cold-chain quarantine record form (reuses the FSA 8°C citation); tabletop exercise (six injects); post-incident review template.
+- Platform rows rewritten as seven lifecycle outcomes (SOS to CRAiG), using "Audit & Reporting"; CRAiG described only as helping the team find information.
+- Scenario cards now explain where it goes wrong, who decides and how it is monitored; first-hour lede and the T+00:10 row name escalation of silent stores.
+- Escalation times (10 and 30 minutes), the exercise, tracker, swimlane and form examples are suggestions or illustrative and labelled as such; no new statistics.

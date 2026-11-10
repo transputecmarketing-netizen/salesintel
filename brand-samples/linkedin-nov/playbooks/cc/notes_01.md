@@ -1,6 +1,6 @@
 # Notes 01: Financial Services and Insurance (week of 9 November 2026)
 
-Playbook: CC-01-Playbook-Within-Tolerance.html (25 pages, 9 sources)
+Playbook: CC-01-Playbook-Within-Tolerance.html (38 pages after round 2, 9 sources)
 Report: CC-01-Report-Resilience-Regulated.html (23 pages, 19 sources)
 
 ## Key verified facts
@@ -29,3 +29,12 @@ Report: CC-01-Report-Resilience-Regulated.html (23 pages, 19 sources)
 - Halifax and other non-bank firms named by some outlets.
 - Lloyds app outages in June and July 2026, and the Lloyds data exposure in March 2026. These were not checked against primary sources, or were off-angle.
 - PRA-specific report timings under PS7/26. Not checked in the primary text, so not stated.
+
+## Round 2 revision (BRIEF2, 10 November 2026)
+New pages in the playbook (all illustrative, no new statistics, no new sources):
+- Part 01: dependency map for retail card payments (depmap; tolerance values labelled illustrative, set by the firm; cites SS1/21 for time metric and peak); escalation workflow tied to time left against a 4-hour illustrative tolerance; decision rights RACI (Executive on call, Incident lead, IT and technology, Comms, Compliance, SMF holder).
+- Part 02: swimlane of the 07:00 cloud outage (risk, decision, monitoring boxes); outstanding actions tracker at 13:30; decision log fill-in form.
+- Part 03: tabletop exercise (Region down on payday, six injects); post-incident review template.
+- Tools section: supervisor, supplier and scheme notification log form (cites PS26/2 for the 4-hour PSP and 2027 24-hour clocks).
+Changed: scenario cards now cover where it goes wrong, who decides, and monitor and test; opener item lists; platform rows rewritten as seven lifecycle outcomes (SOS to CRAiG, "Audit & Reporting"; CRAiG described only as helping find who has not responded and what is outstanding); "mass notification service" in the out-of-band essay changed to "alerting service".
+SMF holder is described generically ("the senior manager responsible for operational resilience in your firm"); no SMF number is stated, as it was not verified for this round.

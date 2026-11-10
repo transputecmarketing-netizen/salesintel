@@ -26,3 +26,13 @@ Files: `cc/cp02.py` -> `CC-02-Playbook-Every-Resident-Reached.html` (25 pages); 
 - Named individuals avoided; NCSC officials referred to by role.
 - Building, landlord and street names in playbook templates and timeline are fictional (stated in the sources note).
 - No Transputec references.
+
+## Round 2 revision (BRIEF2) · playbook now 38 pages
+Build: `python3 build_cc.py cp02` -> `CC-02-Playbook-Every-Resident-Reached.html`, 38 pages, `node check.js` OK; PDF rendered and every page viewed.
+
+New pages (all illustrative, labelled as such; no new statistics or sources):
+- Part 01: escalation route tied to the severity ladder (4 levels, decision owner per level, timed escalate-if conditions); resident assistance register (form, cites SI 2025/797); roles and responsibilities matrix (raci: duty manager, building safety lead, head of housing, welfare lead, comms, contractors; 11 activities).
+- Part 02: handling non-responders (timed table T+0 to stand-down); acknowledgement and follow-up log (form); multi-building, out-of-hours swimlane (three blocks on one estate at night, with risk, decision and monitoring points).
+- Part 03: outstanding actions tracker (morning after; note cites Awaab's Law 24 hours and the FSR 2022 lift fault rule); night-time tabletop exercise (6 injects); post-incident review template (8 boxes).
+Changed: use-case cards now show where it goes wrong, who decides, how it is monitored and the proof (existing citations kept); platform rows rewritten as seven outcomes in lifecycle order (SOS to CRAiG, "Audit & Reporting"); CRAiG row limited to retrieving information from the incident (current capability only). Part opener lists updated.
+Shared-file issue to report: on the second platform page (ccprac.platform), the background dial's red sector crosses the "ACCOUNTABILITY" box at bottom right. Not editable from cp02.

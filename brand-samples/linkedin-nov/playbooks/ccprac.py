@@ -204,7 +204,7 @@ def platform(s, title, lede, rows, sec="Where Crises Control fits"):
       <div style="margin-top:5mm;width:168mm;font-weight:300;font-size:10.6pt;line-height:1.55;color:rgba(247,246,248,.82)">{lede}</div>
       <div style="position:relative;margin-top:8mm"><div style="position:absolute;left:5mm;top:6mm;bottom:6mm;border-left:.4mm dashed rgba(22,161,237,.5)"></div>{st}</div>
       <div style="margin-top:7mm;display:grid;grid-template-columns:repeat(4,1fr);gap:4mm">{"".join(f'<div style="border:.3mm solid {LINE_D};border-radius:2.4mm;padding:3mm 3.6mm"><div style="{MONO};font-size:6.6pt;letter-spacing:.12em;color:{RED}">{k}</div><div style="font-size:8.6pt;line-height:1.4;margin-top:1.2mm">{v}</div></div>' for k, v in [("COORDINATION", "Everyone works from the same incident, roles and log."), ("VISIBILITY", "Leaders see progress without chasing for updates."), ("EXECUTION", "Every action has an owner, a deadline and an escalation."), ("ACCOUNTABILITY", "The record of what happened builds itself as you go.")])}</div>''',
-      True, sec, bg=f'<div style="position:absolute;right:-78mm;bottom:-78mm;width:170mm;opacity:.3">{__import__("cckit").dial()}</div>')
+      True, sec, bg=f'<div style="position:absolute;right:-96mm;top:-96mm;width:170mm;opacity:.3">{__import__("cckit").dial()}</div>')
 
 
 # ---------------------------------------------------------------- the final page: book an industry demonstration

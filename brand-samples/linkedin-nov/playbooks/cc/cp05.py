@@ -27,7 +27,7 @@ def build():
 
     # PART 01
     b.mark("01", "Know the duty")
-    b.opener("01", "Know the<br>duty.", "What the Act requires of hotels, bars, pubs, restaurants and venues, the four procedures, and a severity scale every shift can use.", [("01", "What the law says, exactly"), ("02", "Four procedures for every venue"), ("03", "A hospitality severity ladder")])
+    b.opener("01", "Know the<br>duty.", "What the Act requires of hotels, bars, pubs, restaurants and venues, the four procedures, a severity scale every shift can use and how incidents escalate.", [("01", "What the law says, exactly"), ("02", "Four procedures for every venue"), ("03", "A hospitality severity ladder"), ("04", "Escalation from the shift to head office")])
     b.essay("Know the duty", "What Martyn's Law asks of hospitality", [
         f"The Terrorism (Protection of Premises) Act 2025 received Royal Assent on 3 April 2025. The Home Office expects an implementation period of at least 24 months, and there is no legal requirement to comply until the duties come into force.{R(1)} The SIA, which will regulate the Act, says it expects the Act to come into force in spring 2027 and will confirm the exact date ahead of time.{R(6)}",
         f"The Act covers premises wholly or mainly used for purposes listed in Schedule 1. Statutory guidance says the \"food and drink\" use \"includes bars, pubs, restaurants, cafés and food halls\"; \"hotels etc\" also covers hostels and holiday parks; and nightclubs fall under entertainment and leisure.{R(5)}",
@@ -154,11 +154,11 @@ def build():
         ("Load every contact, including agency staff", "Mobile numbers for everyone on the rota, tested with a short alert that asks for a reply."),
         ("Plan for the outage", "Paper booking lists, an offline payment or cash procedure and a known number for every supplier.")], "Ready for December")
     b.form("Template", "Shift safety briefing record", "Complete at the start of every shift, in two minutes, and keep it with the incident log. Agency and new staff sign the same record as everyone else.",
-        [("Date and shift", 1.1), ("Duty manager (decides)", 1.3), ("Code phrase briefed", 1), ("Safe area and lockdown doors", 1.6), ("New or agency staff briefed", 1.4), ("Test alert replies", 1), ("Signed", 0.9)], "Ready for December", rows=9,
+        [("Date and shift", 1.1), ("Duty manager (decides)", 1.3), ("Code phrase briefed", 1), ("Safe area and lockdown doors", 1.6), ("New or agency staff briefed", 1.4), ("Test alert replies", 1), ("Signed", 0.9)], "Ready for December", rows=15,
         example=("Sat 20 Dec, late", "[Name], on-call GM [name]", "Yes, all sections", "Function room; front, side, yard doors", "3 agency, named, briefed", "41 of 42, 1 chased", "[Initials]"),
         note="Illustrative template. If the test alert does not reach everyone on the rota, fix the contact list before service starts, not after the incident.")
     b.form("Template", "Area sweep and head count log", "Used during an evacuation, invacuation or lockdown. Each area has one named person who sweeps it, counts who is there and reports back to the duty manager.",
-        [("Area", 1.3), ("Swept by", 1.1), ("Time clear", 0.8), ("Guests in area", 0.9), ("Staff in area", 0.9), ("Needs help or missing", 1.6), ("Reported to and time", 1.2)], "Ready for December", rows=10,
+        [("Area", 1.3), ("Swept by", 1.1), ("Time clear", 0.8), ("Guests in area", 0.9), ("Staff in area", 0.9), ("Needs help or missing", 1.6), ("Reported to and time", 1.2)], "Ready for December", rows=14,
         example=("Terrace and smoking area", "[Name], floor", "22:19", "14", "2", "1 guest in wheelchair, staff with her", "Duty manager 22:20"),
         note="Illustrative template. List every area before the shift starts: bars, toilets, terraces, function rooms, kitchen, cellar, bedrooms by floor. An area with no name is an area nobody checks.")
     b.table("Your plan", "This week, this month, this quarter", "Owners are suggestions. Adjust them to your structure, and date every action.", ["When", "Actions", "Owner"], [
