@@ -53,7 +53,7 @@ def strip(dark=True, labels=("T+00:00", "T+00:05", "T+00:15", "T+01:00", "T+04:0
     col = "rgba(255,255,255,.55)" if dark else MUTE
     line = "rgba(255,255,255,.18)" if dark else "#D5DEE8"
     n = len(labels)
-    marks = "".join(f'<div style="position:absolute;left:{i/(n-1)*100}%;top:0;transform:translateX(-50%);text-align:center"><div style="width:{3.2 if i==0 else 2.2}mm;height:{3.2 if i==0 else 2.2}mm;border-radius:50%;margin:{0 if i==0 else .5}mm auto 0;background:{RED if i==0 else (SKY if dark else BLUE)}"></div><div style="font-family:JBM;font-size:6.6pt;color:{RED if i==0 else col};margin-top:2mm;letter-spacing:.04em">{l}</div></div>' for i, l in enumerate(labels))
+    marks = "".join(f'<div style="position:absolute;left:{i/(n-1)*100}%;top:0;transform:translateX(-50%);text-align:center"><div style="width:{3.2 if i==0 else 2.2}mm;height:{3.2 if i==0 else 2.2}mm;border-radius:50%;margin:{0 if i==0 else .5}mm auto 0;background:{RED if i==0 else (SKY if dark else BLUE)}"></div><div style="font-family:JBM;font-size:6.6pt;color:{RED if i==0 else col};margin-top:2mm;letter-spacing:.04em;white-space:nowrap">{l}</div></div>' for i, l in enumerate(labels))
     return f'<div style="position:relative;height:11mm"><div style="position:absolute;left:0;right:0;top:1.5mm;border-top:.35mm solid {line}"></div>{marks}</div>'
 
 
