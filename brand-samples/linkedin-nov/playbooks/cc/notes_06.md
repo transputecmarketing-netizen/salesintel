@@ -1,6 +1,6 @@
 # Notes 06: Healthcare (week of 14 December 2026)
 
-Playbook: CC-06-Playbook-Major-Incident-Minute-One.html (25 pages, 13 sources)
+Playbook: CC-06-Playbook-Major-Incident-Minute-One.html (38 pages after round 2, 13 sources)
 Report: CC-06-Report-When-the-Lab-Went-Dark.html (23 pages, 24 sources)
 Back pages cross-refer: playbook -> "Intelligence report No. 06 · When the lab went dark"; report -> "Crisis playbook No. 06 · Major incident, minute one".
 
@@ -48,3 +48,11 @@ Back pages cross-refer: playbook -> "Intelligence report No. 06 · When the lab 
 - The cause of the East Kent incident, which was not disclosed.
 - Wording on the NHS England cyber operations phone line beyond "monitored 24/7", which was verified only via search snippets of digital.nhs.uk.
 - The WannaCry £92m cost estimate, which was not checked.
+
+## Round 2 revision (BRIEF2)
+New pages in cp06.py (no new facts or sources; all practical content is labelled illustrative):
+- Part 01: escalation workflow (department, business continuity, critical, system response; tied to the SEV ladder and the ICB notification route, S8) and a RACI (executive on call, incident lead, clinical leads, digital, comms, ICB and partners; 11 rows).
+- Part 02: swimlane across clinical teams, site management/incident control, digital, partners (ICB, ambulance, supplier) and comms, with risk/decision/monitoring cards (WannaCry WhatsApp point re-cites S12). First-hour rows now name escalation and action review; the three use cases now read where it fails / who decides / what happens / how it is monitored.
+- Part 03: downtime procedure checklist by department (table) and a downtime results and back-entry log (form; example row uses an NHS test-range number); outstanding actions tracker (day one, 16:00).
+- New Part 04 "Rehearse and review": tabletop exercise (6 injects), post-incident review template (hot debrief 48 h, structured 28 days, multi-agency 8 weeks, S8), then the existing plan, questions and checklist.
+- Platform rows rewritten in lifecycle order (SOS to CRAiG, current CRAiG capability only); "Audit & Reporting" name used. Glossary adds RACI and back-entry.
