@@ -24,6 +24,15 @@ The documents have three jobs, and every page should serve at least one:
 
 For several industries at once, brief one writer agent per industry with `references/writer-brief.md`, then QA every result yourself.
 
+## The published series (rebuild or edit the six industry packs)
+
+`series/` holds the source for the twelve published documents, exactly as delivered:
+- `series/content/cp01.py` to `cp06.py` (playbooks) and `cr01.py` to `cr06.py` (reports): 01 Financial Services and Insurance, 02 Property, Housing and Facilities, 03 Retail, 04 Transport and Logistics, 05 Hospitality, 06 Healthcare
+- `series/notes/notes_01.md` to `notes_06.md`: research notes with source URLs
+- `series/series_front.py`: the series cover and contents for the complete edition
+
+Rebuild everything: `bash <this skill>/scripts/build_series.sh <project folder>`; it builds, checks and renders all twelve plus the 445-page complete edition into `<project folder>/studio/docs/pdf`. To change one document, edit `content/cpNN.py` or `crNN.py` in the project folder and run `bash build_series.sh <project folder> cpNN` (existing content files are kept, not overwritten), then QA with `qa.py --brand cc` and look at every page. When the user wants the change kept for future work, copy the edited module back into `series/content/`.
+
 ## Audience and evergreen rule
 
 Readers are in the **UK, US, Europe and the Middle East**. Write the operational guidance so it works anywhere; put law and regulation in clearly labelled regional material (`b.regions()` pages with United Kingdom, United States, European Union and Middle East cards, or short asides that start with the bold region name). Never imply that a UK regulation applies elsewhere; label UK material as UK. Every legal or regulatory claim is qualified (who it applies to, status: in force, proposed, guidance) and sourced. Healthcare is written for hospitals and health systems anywhere, with NHS terms only in UK-labelled text.
