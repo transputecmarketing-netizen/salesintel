@@ -1,0 +1,640 @@
+{
+ "_doc": "Every figure the skill can draw. kind: hairline = one of the 33 package figures (export_figures.js), iso = an isoart.py subject. depicts = what is literally drawn in the exported pose. topics = business themes it suits. avoid = themes it looks like it suits but does not.",
+ "figures": [
+  {
+   "name": "basket",
+   "kind": "hairline",
+   "depicts": "An empty wire shopping basket with a bail handle, tilted",
+   "topics": [
+    "retail",
+    "ecommerce",
+    "shopping",
+    "procurement",
+    "purchasing",
+    "basket abandonment",
+    "consumer",
+    "checkout"
+   ],
+   "avoid": "full or stocked shelves (it is empty)"
+  },
+  {
+   "name": "branches",
+   "kind": "hairline",
+   "depicts": "A commit graph on a board: a line of commits with a branch rising off it",
+   "topics": [
+    "software development",
+    "devops",
+    "version control",
+    "git",
+    "release management",
+    "change management",
+    "audit trail",
+    "history"
+   ]
+  },
+  {
+   "name": "cabinet",
+   "kind": "hairline",
+   "depicts": "A server rack of twelve blades, one pulled out on its rails",
+   "topics": [
+    "data centre",
+    "servers",
+    "infrastructure",
+    "hosting",
+    "on-premises",
+    "capacity",
+    "hardware",
+    "colocation",
+    "backup"
+   ]
+  },
+  {
+   "name": "dish",
+   "kind": "hairline",
+   "depicts": "A parabolic satellite dish on a two-axis gimbal",
+   "topics": [
+    "satellite",
+    "communications",
+    "broadcast",
+    "remote sites",
+    "connectivity",
+    "signals",
+    "monitoring",
+    "listening",
+    "threat intelligence",
+    "telecoms"
+   ]
+  },
+  {
+   "name": "drawer",
+   "kind": "hairline",
+   "depicts": "A three-drawer filing cabinet with one drawer open, empty inside",
+   "topics": [
+    "records management",
+    "document management",
+    "archiving",
+    "data retention",
+    "filing",
+    "paperwork",
+    "compliance records",
+    "GDPR subject access"
+   ]
+  },
+  {
+   "name": "elevator",
+   "kind": "hairline",
+   "depicts": "Four floors beside an open lift shaft, with the car between floors",
+   "topics": [
+    "buildings",
+    "facilities",
+    "property",
+    "escalation",
+    "levels",
+    "tiers",
+    "progression",
+    "maturity model",
+    "scaling up"
+   ]
+  },
+  {
+   "name": "exploded",
+   "kind": "hairline",
+   "depicts": "An app window pulled apart into four stacked layers",
+   "topics": [
+    "software architecture",
+    "application",
+    "user interface",
+    "layers",
+    "full stack",
+    "SaaS",
+    "platform",
+    "product design",
+    "defence in depth"
+   ]
+  },
+  {
+   "name": "format",
+   "kind": "hairline",
+   "depicts": "A file of crooked lines being snapped square to their indent",
+   "topics": [
+    "code quality",
+    "standards",
+    "tidying up",
+    "data cleansing",
+    "consistency",
+    "governance",
+    "policy",
+    "order from chaos"
+   ]
+  },
+  {
+   "name": "hub",
+   "kind": "hairline",
+   "depicts": "A central hub tile linked to eight tiles on a grid, one raised",
+   "topics": [
+    "integration",
+    "hub and spoke",
+    "central management",
+    "MDM",
+    "endpoint management",
+    "network",
+    "orchestration",
+    "single pane of glass",
+    "API"
+   ]
+  },
+  {
+   "name": "keyboard",
+   "kind": "hairline",
+   "depicts": "A sixty-key keyboard with one key pressed down",
+   "topics": [
+    "end users",
+    "workstation",
+    "productivity",
+    "input",
+    "typing",
+    "phishing click",
+    "user awareness",
+    "helpdesk",
+    "office IT"
+   ]
+  },
+  {
+   "name": "laptop",
+   "kind": "hairline",
+   "depicts": "A thin laptop with the lid open",
+   "topics": [
+    "remote work",
+    "hybrid work",
+    "endpoints",
+    "devices",
+    "Microsoft 365",
+    "modern workplace",
+    "user experience",
+    "laptop refresh",
+    "device management"
+   ]
+  },
+  {
+   "name": "lockers",
+   "kind": "hairline",
+   "depicts": "A bank of twelve lockers with one door ajar",
+   "topics": [
+    "access control",
+    "permissions",
+    "least privilege",
+    "secure storage",
+    "segregation",
+    "tenancy",
+    "identity",
+    "data exposure",
+    "one weak point"
+   ]
+  },
+  {
+   "name": "loupe",
+   "kind": "hairline",
+   "depicts": "A stand magnifier over a blank ruled sheet",
+   "topics": [
+    "audit",
+    "inspection",
+    "assessment",
+    "review",
+    "due diligence",
+    "investigation",
+    "forensics",
+    "scrutiny",
+    "gap analysis",
+    "penetration test"
+   ]
+  },
+  {
+   "name": "padlock",
+   "kind": "hairline",
+   "depicts": "A padlock with its shackle sprung open",
+   "topics": [
+    "cyber security",
+    "security",
+    "encryption",
+    "data protection",
+    "breach",
+    "vulnerability",
+    "unlocking",
+    "access",
+    "zero trust",
+    "ransomware"
+   ],
+   "avoid": "the shackle is OPEN in every exported pose (rest included): it reads as unlocked, breached or access. For 'secured' prefer vault or lockers"
+  },
+  {
+   "name": "patch",
+   "kind": "hairline",
+   "depicts": "A patch panel of twenty-four ports with cables, one lifted",
+   "topics": [
+    "networking",
+    "cabling",
+    "LAN",
+    "connectivity",
+    "infrastructure",
+    "network refresh",
+    "data centre",
+    "comms room",
+    "structured cabling"
+   ]
+  },
+  {
+   "name": "phone",
+   "kind": "hairline",
+   "depicts": "A smartphone separated into layers: glass, board, battery, shell",
+   "topics": [
+    "mobile",
+    "mobile device management",
+    "BYOD",
+    "apps",
+    "mass notification",
+    "alerts",
+    "teardown",
+    "hardware",
+    "communication"
+   ]
+  },
+  {
+   "name": "phosphor",
+   "kind": "hairline",
+   "depicts": "A seven by seven dot matrix on a plinth, some dots lit",
+   "topics": [
+    "displays",
+    "signals",
+    "status dashboard",
+    "alerting",
+    "patterns",
+    "data",
+    "monitoring",
+    "AI",
+    "pixels",
+    "telemetry"
+   ]
+  },
+  {
+   "name": "plot",
+   "kind": "hairline",
+   "depicts": "A bar chart with seven flat tabs before a grid, no data",
+   "topics": [
+    "analytics",
+    "reporting",
+    "KPIs",
+    "metrics",
+    "dashboards",
+    "business intelligence",
+    "benchmarking",
+    "baseline",
+    "measurement"
+   ],
+   "avoid": "growth or results claims (the bars are empty)"
+  },
+  {
+   "name": "plug",
+   "kind": "hairline",
+   "depicts": "A wall socket with a plug on its cord stopping just short of it",
+   "topics": [
+    "power",
+    "outage",
+    "disconnection",
+    "integration gap",
+    "almost connected",
+    "energy",
+    "utilities",
+    "dependency",
+    "single point of failure",
+    "onboarding"
+   ]
+  },
+  {
+   "name": "query",
+   "kind": "hairline",
+   "depicts": "A solid question mark on a plinth, its dot a loose ball",
+   "topics": [
+    "questions",
+    "FAQ",
+    "uncertainty",
+    "unknowns",
+    "discovery",
+    "help",
+    "support",
+    "decision making",
+    "what if"
+   ]
+  },
+  {
+   "name": "rail",
+   "kind": "hairline",
+   "depicts": "A garment rail with seven bare hangers",
+   "topics": [
+    "retail",
+    "fashion",
+    "inventory",
+    "stock",
+    "empty shelves",
+    "supply shortage",
+    "options",
+    "choice",
+    "capacity"
+   ]
+  },
+  {
+   "name": "rebuild",
+   "kind": "hairline",
+   "depicts": "A tree of package tiles linked by dashed lines, one tile touched",
+   "topics": [
+    "dependencies",
+    "supply chain",
+    "third-party risk",
+    "software supply chain",
+    "impact analysis",
+    "knock-on effects",
+    "rebuild",
+    "recovery",
+    "cascade"
+   ]
+  },
+  {
+   "name": "relay",
+   "kind": "hairline",
+   "depicts": "A hub with four branches of tiles, a path lit hop by hop",
+   "topics": [
+    "escalation path",
+    "communication cascade",
+    "routing",
+    "workflow",
+    "call tree",
+    "notification chain",
+    "handover",
+    "network path",
+    "incident coordination"
+   ]
+  },
+  {
+   "name": "riffle",
+   "kind": "hairline",
+   "depicts": "A tray of eight cards or files, one standing up",
+   "topics": [
+    "records",
+    "case files",
+    "playbooks",
+    "choosing",
+    "catalogue",
+    "options",
+    "documents",
+    "templates",
+    "selection",
+    "library"
+   ]
+  },
+  {
+   "name": "router",
+   "kind": "hairline",
+   "depicts": "A wifi router with four antennas leaning",
+   "topics": [
+    "wifi",
+    "network edge",
+    "connectivity",
+    "internet",
+    "branch office",
+    "SD-WAN",
+    "broadband",
+    "wireless",
+    "home working",
+    "IoT"
+   ]
+  },
+  {
+   "name": "settle",
+   "kind": "hairline",
+   "depicts": "Twelve tiles lying scattered round a central hub",
+   "topics": [
+    "chaos",
+    "disorder",
+    "before and after",
+    "transformation",
+    "consolidation",
+    "restructure",
+    "fragmented estate",
+    "sprawl",
+    "bringing order"
+   ]
+  },
+  {
+   "name": "sieve",
+   "kind": "hairline",
+   "depicts": "Three stacked test sieves over a pan",
+   "topics": [
+    "filtering",
+    "email filtering",
+    "spam",
+    "screening",
+    "triage",
+    "vetting",
+    "quality control",
+    "data loss prevention",
+    "layers of defence"
+   ]
+  },
+  {
+   "name": "slow",
+   "kind": "hairline",
+   "depicts": "Crates riding a conveyor belt through a gate",
+   "topics": [
+    "process",
+    "throughput",
+    "logistics",
+    "automation",
+    "pipeline",
+    "workflow",
+    "supply chain",
+    "operations",
+    "bottleneck",
+    "CI/CD"
+   ]
+  },
+  {
+   "name": "stack",
+   "kind": "hairline",
+   "depicts": "A call stack of five stacked frames, the top ones lifted",
+   "topics": [
+    "technology stack",
+    "layers",
+    "architecture",
+    "platform",
+    "cloud stack",
+    "frameworks",
+    "maturity layers",
+    "integration layers"
+   ]
+  },
+  {
+   "name": "terminal",
+   "kind": "hairline",
+   "depicts": "A terminal window of command lines, one line lifted off the screen",
+   "topics": [
+    "code",
+    "command line",
+    "scripting",
+    "logs",
+    "SOC",
+    "operations",
+    "engineering",
+    "automation",
+    "sysadmin",
+    "incident logs"
+   ]
+  },
+  {
+   "name": "terrain",
+   "kind": "hairline",
+   "depicts": "Eighty-one pillars on a plinth, a patch of them raised",
+   "topics": [
+    "heatmap",
+    "risk landscape",
+    "data volume",
+    "peaks",
+    "load",
+    "attack surface",
+    "market",
+    "big data",
+    "hotspots"
+   ]
+  },
+  {
+   "name": "turntable",
+   "kind": "hairline",
+   "depicts": "Building blocks of different heights on a round turntable",
+   "topics": [
+    "perspective",
+    "360 view",
+    "modular",
+    "components",
+    "rotation",
+    "shift rota",
+    "options",
+    "change",
+    "viewpoint"
+   ]
+  },
+  {
+   "name": "vault",
+   "kind": "hairline",
+   "depicts": "A vault door with a combination dial and three bolts",
+   "topics": [
+    "backup",
+    "disaster recovery",
+    "secure storage",
+    "banking",
+    "finance",
+    "data protection",
+    "immutable backup",
+    "secrets",
+    "resilience",
+    "privileged access"
+   ]
+  },
+  {
+   "name": "finance",
+   "kind": "iso",
+   "depicts": "A classical bank with columns and pediment, and stacks of coins",
+   "topics": [
+    "financial services",
+    "banking",
+    "insurance",
+    "payments",
+    "fintech",
+    "cost",
+    "budget",
+    "ROI"
+   ]
+  },
+  {
+   "name": "property",
+   "kind": "iso",
+   "depicts": "A residential tower with one lit window, a low-rise block and a house",
+   "topics": [
+    "property",
+    "housing",
+    "real estate",
+    "facilities",
+    "social housing",
+    "estates",
+    "buildings"
+   ]
+  },
+  {
+   "name": "retail",
+   "kind": "iso",
+   "depicts": "A shopfront with a striped awning, and stacked crates",
+   "topics": [
+    "retail",
+    "high street",
+    "stores",
+    "consumer",
+    "point of sale",
+    "stock"
+   ]
+  },
+  {
+   "name": "transport",
+   "kind": "iso",
+   "depicts": "An articulated lorry on a marked road, with shipping containers behind",
+   "topics": [
+    "transport",
+    "logistics",
+    "haulage",
+    "supply chain",
+    "freight",
+    "distribution",
+    "fleet"
+   ]
+  },
+  {
+   "name": "hospitality",
+   "kind": "iso",
+   "depicts": "A hotel with balconies and an entrance canopy, and a cloche on a table",
+   "topics": [
+    "hospitality",
+    "hotels",
+    "restaurants",
+    "leisure",
+    "events",
+    "venues",
+    "guests"
+   ]
+  },
+  {
+   "name": "healthcare",
+   "kind": "iso",
+   "depicts": "A hospital with a red cross, and an ambulance",
+   "topics": [
+    "healthcare",
+    "hospitals",
+    "NHS",
+    "clinical",
+    "patients",
+    "emergency services",
+    "life sciences"
+   ]
+  },
+  {
+   "name": "energy",
+   "kind": "iso",
+   "depicts": "A wind turbine, a bank of solar panels and a substation with a warning lamp (subjects/energy.py)",
+   "topics": [
+    "energy",
+    "utilities",
+    "renewables",
+    "power generation",
+    "grid",
+    "critical national infrastructure",
+    "net zero",
+    "OT security"
+   ]
+  }
+ ]
+}

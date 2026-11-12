@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><style>
+html,body{margin:0;background:transparent}
+.f{width:800px}
+</style><body><div id="f" class="f"></div>
+<script type="module">
+// Mounts one hairline figure. Query: n=name, th=dark|light, i=intensity, t=seconds to play before capture, rest=1 for the rest pose.
+import * as H from './hairline/index.js';
+const q = new URLSearchParams(location.search), name = q.get('n'), th = q.get('th') || 'dark';
+const t = +(q.get('t') || 1.2), rest = q.get('rest') === '1';
+document.body.className = th;
+if (!H[name]) { window.__err = 'unknown figure ' + name; window.__done = true; }
+else { H[name](document.getElementById('f'), { theme: th, intensity: +(q.get('i') || .7), play: !rest });
+  setTimeout(() => { window.__done = true }, rest ? 300 : t * 1000); }
+</script>
