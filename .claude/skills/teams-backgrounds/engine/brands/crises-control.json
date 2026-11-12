@@ -1,0 +1,32 @@
+{
+  "name": "Crises Control",
+  "slug": "crises-control",
+  "logo": "assets/crises-control/cc-logo.svg",
+  "logo_height": 54,
+  "wordmark": "CRISES CONTROL",
+  "font": "Roboto",
+  "font_files": {"300": "fonts/roboto-300.woff2", "500": "fonts/roboto-500.woff2", "700": "fonts/roboto-700.woff2"},
+  "mono": "Roboto Mono",
+  "mono_file": "fonts/robotomono-500.woff2",
+  "colors": {
+    "ink":     "#040C16",
+    "base":    "#0B223C",
+    "deep":    "#0A3165",
+    "primary": "#1179BB",
+    "vivid":   "#0F5FA8",
+    "bright":  "#2D9CFA",
+    "cyan":    "#16A1ED",
+    "pale":    "#9FD6F7",
+    "glow":    "#EAF6FE",
+    "muted":   "#A7B6C6",
+    "alert":   "#FF0000"
+  },
+  "gradients": {
+    "G1 Command":   ["base", "deep", "primary"],
+    "G2 Signal":    ["primary", "cyan", "pale"],
+    "G3 Dial":      ["ink", "deep", "cyan"],
+    "G4 Alert":     ["base", "deep", "alert"]
+  },
+  "tags": ["Critical event management", "Ready for the moment it matters"],
+  "hud_place": "INCIDENT ROOM"
+}

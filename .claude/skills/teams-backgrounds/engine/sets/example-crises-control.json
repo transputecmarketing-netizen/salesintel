@@ -1,0 +1,12 @@
+{"brand": "crises-control", "prefix": "cc-teams",
+ "backgrounds": [
+  {"id": "00-gradient-system", "family": "gradient", "design": "system"},
+  {"id": "01-studio", "family": "office", "design": "studio"},
+  {"id": "02-brand-wall", "family": "office", "design": "brandwall"},
+  {"id": "03-incident-globe", "family": "hud", "design": "globe",
+   "readouts": [["ALERTS", "READY", null], ["TEAMS", "ON CALL", 0.8], ["PLANS", "CURRENT", 0.65], ["STATUS", "NORMAL", null]]},
+  {"id": "04-visor", "family": "hud", "design": "visor", "side": "left"},
+  {"id": "05-mesh", "family": "gradient", "design": "mesh", "tag": "Ready when it matters"},
+  {"id": "06-orbit-left", "family": "keynote", "design": "orbit", "side": "left"},
+  {"id": "07-silk", "family": "keynote", "design": "silk"}
+ ]}

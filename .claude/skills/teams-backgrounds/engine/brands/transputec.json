@@ -1,0 +1,32 @@
+{
+  "name": "Transputec",
+  "slug": "transputec",
+  "logo": "assets/transputec/logo-white.svg",
+  "logo_height": 30,
+  "wordmark": "",
+  "font": "Poppins",
+  "font_files": {"300": "fonts/poppins-300.woff2", "500": "fonts/poppins-500.woff2", "600": "fonts/poppins-600.woff2", "700": "fonts/poppins-700.woff2"},
+  "mono": "JetBrains Mono",
+  "mono_file": "fonts/jbm-500.woff2",
+  "colors": {
+    "ink":     "#05070C",
+    "base":    "#0A0F1A",
+    "deep":    "#16336E",
+    "primary": "#2C72DB",
+    "vivid":   "#155DFC",
+    "bright":  "#3B8BFF",
+    "cyan":    "#00B8DB",
+    "pale":    "#A9CBFF",
+    "glow":    "#E6F0FF",
+    "muted":   "#AEBACC",
+    "alert":   ""
+  },
+  "gradients": {
+    "G1 Midnight":       ["base", "deep", "primary"],
+    "G2 Signal":         ["primary", "bright", "pale"],
+    "G3 Deep current":   ["base", "#0B2A55", "cyan"],
+    "G4 Brand spectrum": ["base", "vivid", "cyan"]
+  },
+  "tags": ["Technology that works for you", "Managed IT · Cloud · Security"],
+  "hud_place": "LONDON · UK"
+}
