@@ -1,0 +1,33 @@
+<!doctype html><meta charset="utf-8"><style>
+@font-face{font-family:P;font-weight:300;src:url(../assets/fonts/poppins-300.woff2)}@font-face{font-family:P;font-weight:500;src:url(../assets/fonts/poppins-500.woff2)}@font-face{font-family:P;font-weight:600;src:url(../assets/fonts/poppins-600.woff2)}@font-face{font-family:M;font-weight:400;src:url(../assets/fonts/jbm-400.woff2)}@font-face{font-family:M;font-weight:500;src:url(../assets/fonts/jbm-500.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}body{width:560px;height:150px;overflow:hidden;font-family:P,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;position:relative}
+#logo{position:absolute;left:26px;top:24px;height:10px}.web{position:absolute;left:26px;bottom:20px;font-family:M;font-weight:500;font-size:8.6px;letter-spacing:.14em;color:#fff}.web span{color:#3B8BFF}
+#top{position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,rgba(59,139,255,0),rgba(59,139,255,.9) 30%,rgba(59,139,255,.15) 80%,rgba(59,139,255,0))}
+body{background:#03050A}
+#glow{position:absolute;left:300px;top:-60px;width:320px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(44,114,219,.22),rgba(44,114,219,0) 65%)}
+.kw,#end{position:absolute;left:26px;top:48px;font-weight:600;font-size:34px;letter-spacing:-.045em;line-height:1.1;white-space:nowrap}
+.kw{background:linear-gradient(90deg,#FFFFFF 0%,#FFFFFF 40%,#3B8BFF 60%,#7FB6FF 100%);background-size:250% 100%;-webkit-background-clip:text;color:transparent;opacity:0}
+#end{top:44px;font-size:30px;line-height:1.08}#end span{background:linear-gradient(90deg,#5AA2FF,#3B8BFF);-webkit-background-clip:text;color:transparent}
+#line{position:absolute;left:26px;top:100px;height:1px;width:0;background:linear-gradient(90deg,#3B8BFF,rgba(59,139,255,0))}
+#idx{position:absolute;right:26px;top:36px;display:flex;flex-direction:column;gap:9px}.ix{display:flex;align-items:center;gap:8px;font-family:M;font-size:7px;letter-spacing:.12em;color:rgba(174,186,204,.45)}.ix i{display:block;width:60px;height:1px;background:rgba(174,186,204,.18)}
+#cap{position:absolute;right:26px;bottom:20px;font-family:M;font-size:7px;letter-spacing:.14em;color:rgba(174,186,204,.6)}
+</style><div id="glow"></div><div id="top"></div><img id="logo" src="../assets/logo-white.svg">
+<div class="kw" id="k0">Managed IT.</div><div class="kw" id="k1">Cloud.</div><div class="kw" id="k2">Cybersecurity.</div><div class="kw" id="k3">AI.</div><div id="end">One partner.<br><span>All of it.</span></div><div id="line"></div><div id="idx"><div class="ix" id="x0"><span>01</span><i></i></div><div class="ix" id="x1"><span>02</span><i></i></div><div class="ix" id="x2"><span>03</span><i></i></div><div class="ix" id="x3"><span>04</span><i></i></div></div>
+<div class="web">TRANSPUTEC<span>.</span>COM</div><div id="cap">MANAGED IT · CLOUD · CYBER · AI</div>
+<script>const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3), inout = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2, clamp = x => Math.max(0, Math.min(1, x));
+window.DUR = 8.0; const A = 1.9, STEP = 1.3;
+window.render = t => {
+  const endv = t < A ? (t < A - .35 ? 1 : 1 - ease((t - (A - .35)) / .35)) : ease((t - (A + 4 * STEP)) / .45);
+  const e = document.getElementById('end'); e.style.opacity = endv; e.style.transform = `translateY(${(1 - endv) * 8}px)`;
+  for (let i = 0; i < 4; i++) {
+    const a = A + i * STEP, u = t - a, v = u < 0 || u > STEP ? 0 : Math.min(ease(u / .3), 1 - ease((u - STEP + .3) / .3));
+    const k = document.getElementById('k' + i); k.style.opacity = v; k.style.transform = `translateY(${u < STEP / 2 ? (1 - v) * 10 : -(1 - v) * 10}px)`;
+    k.style.backgroundPosition = `${100 - 100 * inout(u / (STEP * .9))}% 0`;
+    const on = u >= 0 && u < STEP ? 1 : 0, x = document.getElementById('x' + i);
+    x.style.color = on ? '#fff' : 'rgba(174,186,204,.45)'; x.querySelector('i').style.background = on ? '#3B8BFF' : 'rgba(174,186,204,.18)';
+    x.querySelector('i').style.width = on ? (30 + 30 * ease(u / .5)) + 'px' : '60px';
+  }
+  const lw = t >= A && t < A + 4 * STEP ? 120 * ease(((t - A) % STEP) / .6) : 0;
+  document.getElementById('line').style.width = lw + 'px';
+};
+render(0);</script>

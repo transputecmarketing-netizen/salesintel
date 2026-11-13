@@ -1,0 +1,44 @@
+<!doctype html><meta charset="utf-8"><style>
+@font-face{font-family:P;font-weight:300;src:url(../assets/fonts/poppins-300.woff2)}@font-face{font-family:P;font-weight:500;src:url(../assets/fonts/poppins-500.woff2)}@font-face{font-family:P;font-weight:600;src:url(../assets/fonts/poppins-600.woff2)}@font-face{font-family:M;font-weight:400;src:url(../assets/fonts/jbm-400.woff2)}@font-face{font-family:M;font-weight:500;src:url(../assets/fonts/jbm-500.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}body{width:560px;height:150px;overflow:hidden;font-family:P,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;position:relative}
+#logo{position:absolute;left:26px;top:24px;height:10px}.web{position:absolute;left:26px;bottom:20px;font-family:M;font-weight:500;font-size:8.6px;letter-spacing:.14em;color:#fff}.web span{color:#3B8BFF}
+#top{position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,rgba(59,139,255,0),rgba(59,139,255,.9) 30%,rgba(59,139,255,.15) 80%,rgba(59,139,255,0))}
+body{background:#070B14}
+#bg{position:absolute;inset:0;background:radial-gradient(40% 110% at 79% 52%,rgba(44,114,219,.28),rgba(44,114,219,0) 70%),linear-gradient(100deg,#060912,#0A0F1A 50%,#0B1424)}
+#h{position:absolute;left:26px;top:42px;font-weight:600;font-size:22px;letter-spacing:-.035em;line-height:1.08}#h span{background:linear-gradient(90deg,#5AA2FF,#3B8BFF);-webkit-background-clip:text;color:transparent}
+.sub{position:absolute;left:26px;top:95px;font-weight:300;font-size:10.5px;color:#AEBACC;white-space:nowrap;opacity:0}.sub b{font-weight:500;color:#fff}
+#orb{position:absolute;left:330px;top:0;width:230px;height:150px}
+#ring{position:absolute;left:0;top:0}
+#core{position:absolute;left:96px;top:58px;width:34px;height:34px;border-radius:9px}#cg{position:absolute;left:73px;top:35px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(59,139,255,.5),rgba(59,139,255,0) 65%)}
+.node{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px}.nt{width:30px;height:30px;border-radius:9px;background:#0E1A30;border:1px solid rgba(59,139,255,.55);display:flex;align-items:center;justify-content:center}
+.nl{position:absolute;top:33px;left:50%;transform:translateX(-50%);font-family:M;font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;color:#AEBACC}
+.web{bottom:18px}
+</style><div id="bg"></div><div id="top"></div><img id="logo" src="../assets/logo-white.svg">
+<div id="h">One partner.<br><span>Every layer of your IT.</span></div><div class="sub" id="s0"><b>Managed IT</b>&nbsp;&nbsp;Support, devices and networks.</div><div class="sub" id="s1"><b>Cloud</b>&nbsp;&nbsp;Moved, run and kept cost-efficient.</div><div class="sub" id="s2"><b>Cybersecurity</b>&nbsp;&nbsp;Protected, monitored and ready.</div><div class="sub" id="s3"><b>AI</b>&nbsp;&nbsp;Put to work in your business, safely.</div>
+<div id="orb"><svg id="ring" width="230" height="150"><ellipse cx="113" cy="75" rx="78" ry="40" fill="none" stroke="rgba(59,139,255,.35)" stroke-width="1"/>
+<ellipse id="dash" cx="113" cy="75" rx="78" ry="40" fill="none" stroke="#3B8BFF" stroke-width="1.4" stroke-dasharray="40 360" stroke-linecap="round"/>
+<line id="beam" x1="113" y1="75" x2="113" y2="115" stroke="#3B8BFF" stroke-width="1.2" stroke-dasharray="2 3" opacity=".9"/></svg>
+<div id="cg"></div><img id="core" src="../assets/mark.png"><div class="node" id="n0"><div class="nt"><svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#3B8BFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="14" width="36" height="24" rx="3"/><path d="M8 46h48l-4 6H12z"/></svg></div><div class="nl">Managed IT</div></div><div class="node" id="n1"><div class="nt"><svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#3B8BFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 46h26a10 10 0 0 0 1-20 14 14 0 0 0-27-3 11 11 0 0 0 0 23z"/></svg></div><div class="nl">Cloud</div></div><div class="node" id="n2"><div class="nt"><svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#3B8BFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 8l20 8v14c0 13-9 22-20 26-11-4-20-13-20-26V16z"/><path d="M24 32l6 6 12-12"/></svg></div><div class="nl">Cybersecurity</div></div><div class="node" id="n3"><div class="nt"><svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#3B8BFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M28 12l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/><path d="M46 38l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></div><div class="nl">AI</div></div></div>
+<div class="web">TRANSPUTEC<span>.</span>COM</div>
+<script>const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3), inout = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2, clamp = x => Math.max(0, Math.min(1, x));
+window.DUR = 8.8; const N = 4, OFF = 0;
+window.render = t => {
+  const turn = (t / DUR) * 2 * Math.PI;                // one full orbit per loop
+  let best = -1, bz = -9;
+  for (let i = 0; i < N; i++) {
+    const a = Math.PI / 2 - turn + i * Math.PI / 2;    // node 0 starts at the front
+    const x = 113 + 78 * Math.cos(a), y = 75 + 40 * Math.sin(a), z = Math.sin(a);   // z: 1 front, -1 back
+    const e = document.getElementById('n' + i), sc = .78 + .22 * (z + 1) / 2;
+    e.style.left = x + 'px'; e.style.top = y + 'px'; e.style.transform = `scale(${sc})`; e.style.zIndex = z > 0 ? 3 : 1;
+    const act = clamp((z - .55) / .4); e.style.opacity = .45 + .55 * ((z + 1) / 2);
+    e.querySelector('.nt').style.background = `rgba(${14 + 30 * act},${26 + 80 * act},${48 + 160 * act},1)`;
+    e.querySelector('.nt').style.borderColor = `rgba(127,182,255,${.55 + .45 * act})`;
+    e.querySelector('.nl').style.color = act > .5 ? '#fff' : 'rgba(174,186,204,.7)'; e.querySelector('.nl').style.opacity = clamp((z + .2) / .6);
+    if (z > bz) { bz = z; best = i; }
+    const s = document.getElementById('s' + i); s.style.opacity = act; s.style.transform = `translateY(${(1 - act) * 4}px)`;
+    if (act > .01) { const b = document.getElementById('beam'); b.setAttribute('x2', x); b.setAttribute('y2', y); b.style.opacity = .9 * act; }
+  }
+  document.getElementById('dash').style.strokeDashoffset = -((t / DUR) * 4 * 400) % 400;
+  document.getElementById('core').style.zIndex = 2;
+};
+render(0);</script>
