@@ -1,0 +1,100 @@
+<!doctype html><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1120px;height:880px;background:#F4F1EA;font-family:Inter,system-ui,sans-serif;color:#1F1B16;-webkit-font-smoothing:antialiased;overflow:hidden}
+#card{position:absolute;left:0;top:34px;right:0;bottom:0;background:#FBFAF6;border-radius:56px 56px 0 0}
+svg{position:absolute;left:0;top:0}
+#panel{position:absolute;left:612px;top:232px;width:416px;border:1.5px solid #E2DDD2;border-radius:26px;background:#FBFAF6;padding:8px 38px}
+.row{display:flex;gap:30px;align-items:center;padding:26px 0;border-bottom:1.5px solid #ECE7DC}.row:last-of-type{border-bottom:0}
+.ck{width:72px;height:72px;flex:none;border-radius:50%;border:3px solid #D79B2B;display:flex;align-items:center;justify-content:center;transition:none}
+.ck svg{position:static}
+.t{font-size:27px;font-weight:500;letter-spacing:-.01em}.s{font-size:22px;color:#7A746A;margin-top:4px}
+#read{position:absolute;left:612px;top:812px;width:416px;display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:.06em;color:#7A746A}
+#read b{color:#1F1B16;font-weight:500}
+</style>
+<div id="card"></div>
+<svg id="fig" width="1120" height="880" viewBox="0 0 1120 880"></svg>
+<div id="panel"></div>
+<div id="read"></div>
+<script src="pose.js"></script>
+<script>
+
+const INK = "#1F1B16", GOLD = "#D79B2B", BG = "#FBFAF6", FAR = "#8E877B";
+const CHECKS = [
+  ["Spine neutral", "Back flat, chest up", () => true],
+  ["Knees over toes", "Tracking with the feet", () => true],
+  ["Depth", "Hip below knee", p => p.P[1] > p.K[1] + 2],
+  ["Weight centred", "Over mid-foot, heels down", () => true]];
+const TICK = '<svg width="34" height="34" viewBox="0 0 34 34"><path d="M8 17.5l6.5 6.5L27 11" fill="none" stroke="#D79B2B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+document.getElementById('panel').innerHTML = CHECKS.map((c, i) => `<div class="row"><div class="ck" id="ck${i}">${TICK}</div><div><div class="t">${c[0]}</div><div class="s" id="st${i}">Great</div></div></div>`).join("");
+
+const ln = (a, b, w, c, cap = "round") => `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="${w}" stroke-linecap="${cap}"/>`;
+const ci = (p, r, fill, stroke = "none", sw = 0) => `<circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+const add = (p, v) => [p[0] + v[0], p[1] + v[1]];
+const along = (a, b, f) => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+// a body part drawn as an outlined union: ink pass then paper pass
+function part(shapes, ink = INK, sw = 2.6) {
+  const pass = (grow, col) => shapes.map(s => s.t === "l" ? ln(s.a, s.b, s.w + grow, col) : s.t === "c" ? ci(s.p, s.r + grow / 2, col) : `<path d="${s.d}" fill="${col}" stroke="${col}" stroke-width="${grow}" stroke-linejoin="round"/>`).join("");
+  return `<g>${pass(sw * 2, ink)}${pass(0, BG)}</g>`;
+}
+function shoe(p, dx = 0) {
+  const h = p.heel[0] + dx - 4, t = p.toe[0] + dx + 6, g = G, a = p.A[0] + dx;
+  return `M${h} ${g - 3} C${h - 4} ${g - 20} ${h + 2} ${g - 34} ${a - 6} ${g - 36} L${a + 16} ${g - 34} C${a + 30} ${g - 30} ${t - 30} ${g - 22} ${t - 12} ${g - 17} C${t + 2} ${g - 13} ${t + 4} ${g - 4} ${t - 2} ${g} L${h + 5} ${g} C${h + 1} ${g} ${h} ${g - 1} ${h} ${g - 3}Z`;
+}
+// smooth closed outline around an axis chain: pts [[x,y], halfFront, halfBack] ; "back" side = normal with x<0 (behind the body)
+function body(chain) {
+  const L2 = [], R2 = [];
+  chain.forEach((c, i) => {
+    const a = chain[Math.max(0, i - 1)][0], b = chain[Math.min(chain.length - 1, i + 1)][0];
+    let dx = b[0] - a[0], dy = b[1] - a[1]; const n = Math.hypot(dx, dy); dx /= n; dy /= n;
+    let nx = -dy, ny = dx; if (nx > 0 || (Math.abs(nx) < 1e-6 && ny < 0)) { nx = -nx; ny = -ny; }   // nx<0: back
+    R2.push([c[0][0] + nx * c[2], c[0][1] + ny * c[2]]); L2.push([c[0][0] - nx * c[1], c[0][1] - ny * c[1]]);
+  });
+  const pts = [...L2, ...R2.reverse()];
+  const m = (u, v) => [(u[0] + v[0]) / 2, (u[1] + v[1]) / 2];
+  let d = `M${m(pts[pts.length - 1], pts[0]).join(" ")}`;
+  for (let i = 0; i < pts.length; i++) { const q = pts[i], r = m(q, pts[(i + 1) % pts.length]); d += ` Q${q[0].toFixed(1)} ${q[1].toFixed(1)} ${r[0].toFixed(1)} ${r[1].toFixed(1)}`; }
+  return d + "Z";
+}
+const sh = (q, dx) => [q[0] + dx, q[1]];
+function render(s) {
+  const p = solve(s), k = L.shank / (.246 * 640), w = (a, b) => [a * k, b * k];
+  const legs = (dx, ink) => part([
+    {t: "path", d: shoe(p, dx)},
+    {t: "path", d: body([[sh(p.A, dx), 9 * k, 10 * k], [sh(along(p.A, p.K, .45), dx), 13 * k, 19 * k], [sh(along(p.A, p.K, .72), dx), 15 * k, 22 * k], [sh(p.K, dx), 17 * k, 18 * k],
+                          [sh(along(p.K, p.P, .45), dx), 27 * k, 25 * k], [sh(p.P, dx), 32 * k, 32 * k]])},
+    {t: "c", p: sh(p.K, dx), r: 16 * k}], ink, 2.4);
+  const torso = part([
+    {t: "path", d: body([[along(p.P, p.S, -.05), 30 * k, 40 * k], [along(p.P, p.S, .22), 27 * k, 34 * k], [along(p.P, p.S, .47), 25 * k, 27 * k], [along(p.P, p.S, .7), 40 * k, 29 * k], [along(p.P, p.S, .88), 34 * k, 30 * k], [along(p.P, p.S, 1.03), 18 * k, 25 * k]])},
+    {t: "c", p: add(along(p.P, p.S, .06), [-6 * k, 4 * k]), r: 37 * k},
+    {t: "path", d: body([[along(p.S, p.N, -.3), 13 * k, 13 * k], [along(p.N, p.Hc, .3), 11 * k, 11 * k]])},
+    {t: "c", p: p.Hc, r: L.headR * .92},
+    {t: "path", d: `M${p.Hc[0] + L.headR * .78} ${p.Hc[1] - 6} l9 12 l-8 4 Z`}]);
+  const arm = part([
+    {t: "path", d: body([[p.S, 13 * k, 13 * k], [p.E, 9.5 * k, 9.5 * k], [p.W, 7.5 * k, 7.5 * k]])}, {t: "c", p: p.Hd, r: 12 * k}, {t: "c", p: p.S, r: 14 * k}]);
+  // overlay
+  const dash = (a, b) => `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${GOLD}" stroke-width="3" stroke-dasharray="9 7" stroke-linecap="round"/>`;
+  const ring = q => ci(q, 10, BG, GOLD, 4.5);
+  const topY = p.Hc[1] - L.headR - 26;
+  const depthLine = p.P[1] > p.K[1] + 2 ? `<line x1="${p.P[0] - 40}" y1="${p.K[1]}" x2="${p.K[0] + 40}" y2="${p.K[1]}" stroke="${GOLD}" stroke-width="1.6" stroke-dasharray="3 5" opacity=".8"/>` : "";
+  const ov = `
+    <line x1="${p.mid}" y1="${topY}" x2="${p.mid}" y2="${G + 4}" stroke="${GOLD}" stroke-width="2.6" stroke-dasharray="9 7"/>
+    ${ci([p.mid, topY], 6, GOLD)}${ci([p.mid, G + 4], 6, GOLD)}
+    ${depthLine}
+    ${dash(p.A, p.K)}${dash(p.K, p.P)}${dash(p.P, p.S)}
+    ${ring(p.A)}${ring(p.K)}${ring(p.P)}${ring(p.S)}`;
+  document.getElementById('fig').innerHTML = `<line x1="120" y1="${G}" x2="560" y2="${G}" stroke="#E2DDD2" stroke-width="2"/>` + legs(-14, FAR) + torso + legs(0, INK) + arm + ov;
+  CHECKS.forEach((c, i) => { const ok = c[2](p); const k = document.getElementById('ck' + i);
+    k.style.borderColor = ok ? GOLD : "#D9D3C7"; k.querySelector('svg').style.opacity = ok ? 1 : 0;
+    document.getElementById('st' + i).textContent = ok ? "Great" : "In progress"; });
+  document.getElementById('read').innerHTML = `<span>KNEE <b>${Math.round(180 - p.knee)}°</b></span><span>HIP <b>${Math.round(180 - p.hip)}°</b></span><span>SHIN <b>${Math.round(p.shin)}°</b></span><span>TORSO <b>${Math.round(p.lean)}°</b></span>`;
+}
+// timeline: frame 0 = bottom position, rise, stand, controlled descent
+window.DUR = 5.0;
+const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+window.renderT = t => { let s;
+  if (t < 1.0) s = 1; else if (t < 2.2) s = 1 - ease((t - 1.0) / 1.2); else if (t < 2.8) s = 0; else if (t < 4.6) s = ease((t - 2.8) / 1.8); else s = 1;
+  render(s); };
+renderT(0);
+</script>
