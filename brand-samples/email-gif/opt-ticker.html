@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><style>
+@font-face{font-family:P;font-weight:300;src:url(../assets/fonts/poppins-300.woff2)}@font-face{font-family:P;font-weight:500;src:url(../assets/fonts/poppins-500.woff2)}@font-face{font-family:P;font-weight:600;src:url(../assets/fonts/poppins-600.woff2)}@font-face{font-family:M;font-weight:400;src:url(../assets/fonts/jbm-400.woff2)}@font-face{font-family:M;font-weight:500;src:url(../assets/fonts/jbm-500.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}body{width:560px;height:150px;overflow:hidden;font-family:P,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;position:relative}
+#logo{position:absolute;left:26px;top:24px;height:10px}.web{position:absolute;left:26px;bottom:20px;font-family:M;font-weight:500;font-size:8.6px;letter-spacing:.14em;color:#fff}.web span{color:#3B8BFF}
+#top{position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,rgba(59,139,255,0),rgba(59,139,255,.9) 30%,rgba(59,139,255,.15) 80%,rgba(59,139,255,0))}
+body{background:#070B14}
+#bg{position:absolute;inset:0;background:radial-gradient(45% 120% at 78% 40%,rgba(44,114,219,.22),rgba(44,114,219,0) 70%),linear-gradient(100deg,#060912,#0A0F1A 50%,#0B1424)}
+#h{position:absolute;left:26px;top:44px;font-weight:600;font-size:23px;letter-spacing:-.035em;line-height:1.06}#h span{background:linear-gradient(90deg,#5AA2FF,#3B8BFF);-webkit-background-clip:text;color:transparent}
+.sl{position:absolute;left:26px;top:100px;font-weight:300;font-size:10px;color:#AEBACC}
+#h{top:40px;font-size:26px}
+#tag{position:absolute;right:24px;top:26px;font-family:M;font-size:7px;letter-spacing:.16em;color:rgba(174,186,204,.6)}
+#band{position:absolute;left:0;right:0;bottom:0;height:34px;background:rgba(59,139,255,.10);border-top:1px solid rgba(59,139,255,.35);overflow:hidden}
+#live{position:absolute;left:0;top:0;bottom:0;width:96px;z-index:2;display:flex;align-items:center;justify-content:center;gap:5px;background:#2C72DB;font-family:M;font-weight:500;font-size:7.4px;letter-spacing:.14em;color:#fff}#live b{width:5px;height:5px;border-radius:50%;background:#fff}
+#run{position:absolute;left:96px;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;will-change:transform}
+.it{font-family:M;font-weight:500;font-size:9.5px;letter-spacing:.16em;color:#fff;padding:0 16px}.dot{color:#3B8BFF;font-size:6px}
+#fade{position:absolute;right:0;top:0;bottom:0;width:60px;background:linear-gradient(90deg,rgba(7,11,20,0),#0B1424);z-index:2}
+.web{bottom:auto;top:auto;left:auto;right:24px;bottom:48px}
+</style><div id="bg"></div><div id="top"></div><img id="logo" src="../assets/logo-white.svg"><div id="tag">MANAGED IT · CLOUD · CYBER · AI</div>
+<div id="h">Your IT, <span>handled.</span></div><div class="sl" style="top:78px">One partner for managed IT, cloud, cybersecurity and AI.</div>
+<div class="web">TRANSPUTEC<span>.</span>COM</div>
+<div id="band"><div id="live"><b></b>TRANSPUTEC</div><div id="run"><span class="it">MANAGED IT</span><span class="dot">●</span><span class="it">CLOUD</span><span class="dot">●</span><span class="it">CYBERSECURITY</span><span class="dot">●</span><span class="it">AI</span><span class="dot">●</span><span class="it">ONE PARTNER</span><span class="dot">●</span><span class="it">MANAGED IT</span><span class="dot">●</span><span class="it">CLOUD</span><span class="dot">●</span><span class="it">CYBERSECURITY</span><span class="dot">●</span><span class="it">AI</span><span class="dot">●</span><span class="it">ONE PARTNER</span><span class="dot">●</span><span class="it">MANAGED IT</span><span class="dot">●</span><span class="it">CLOUD</span><span class="dot">●</span><span class="it">CYBERSECURITY</span><span class="dot">●</span><span class="it">AI</span><span class="dot">●</span><span class="it">ONE PARTNER</span><span class="dot">●</span></div><div id="fade"></div></div>
+<script>const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3), inout = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2, clamp = x => Math.max(0, Math.min(1, x));
+window.DUR = 6.0; let P = 0;
+window.render = t => {
+  const run = document.getElementById('run'); if (!P) P = run.scrollWidth / 3;   // one sequence width = loop period
+  run.style.transform = `translateX(${-(t / DUR) * P}px)`;
+  document.querySelector('#live b').style.opacity = Math.floor(t * 2) % 2 ? .35 : 1;
+};
+render(0);</script>

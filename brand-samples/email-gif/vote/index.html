@@ -64,7 +64,7 @@ footer a{color:var(--accent)}
   <header>
     <img class="logo lt" src="logo-blue.svg" alt="Transputec"><img class="logo dk" src="logo-white.svg" alt="">
     <h1>Pick our <span>email signature.</span></h1>
-    <p class="lede">Six animated signatures for Outlook. Each one is shown in a light and a dark inbox. Give it a thumbs up or down: everyone sees the totals as they come in, and you can change your vote at any time.</p>
+    <p class="lede">Nine animated signatures for Outlook. Each one is shown in a light and a dark inbox. Give it a thumbs up or down: everyone sees the totals as they come in, and you can change your vote at any time.</p>
     <div class="summary"><span>Leading <b id="leader">No votes yet</b></span><span>Voters <b id="voters">0</b></span><span class="status" id="status">Loading votes…</span></div>
   </header>
   <section class="list" id="list"></section>
@@ -81,7 +81,10 @@ const OPTS = [
   {k:"orbit", name:"Orbit", desc:"The four services orbit the Transputec mark.", src:"gifs/orbit.gif"},
   {k:"status", name:"Status", desc:"A live board where each service checks in as Handled.", src:"gifs/status.gif"},
   {k:"keynote", name:"Keynote", desc:"Minimal black with big kinetic type.", src:"gifs/keynote.gif"},
-  {k:"classic", name:"Classic", desc:"The first, simpler version with service tiles.", src:"gifs/classic.gif"}
+  {k:"classic", name:"Classic", desc:"The first, simpler version with service tiles.", src:"gifs/classic.gif"},
+  {k:"pulse", name:"Pulse", desc:"A monitoring trace draws itself, one blip per service: Steady IT. Quietly handled.", src:"gifs/pulse.gif"},
+  {k:"terminal", name:"Terminal", desc:"A command line types out each service as handled.", src:"gifs/terminal.gif"},
+  {k:"ticker", name:"Ticker", desc:"A news-ticker band of services under the headline.", src:"gifs/ticker.gif"}
 ];
 const UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3zm0 0 4-8a2.5 2.5 0 0 1 2.5 2.5V8h5.3a2 2 0 0 1 2 2.3l-1.3 8a2 2 0 0 1-2 1.7H7"/></svg>';
 const DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:scaleY(-1)"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3zm0 0 4-8a2.5 2.5 0 0 1 2.5 2.5V8h5.3a2 2 0 0 1 2 2.3l-1.3 8a2 2 0 0 1-2 1.7H7"/></svg>';

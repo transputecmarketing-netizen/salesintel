@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><style>
+@font-face{font-family:P;font-weight:300;src:url(../assets/fonts/poppins-300.woff2)}@font-face{font-family:P;font-weight:500;src:url(../assets/fonts/poppins-500.woff2)}@font-face{font-family:P;font-weight:600;src:url(../assets/fonts/poppins-600.woff2)}@font-face{font-family:M;font-weight:400;src:url(../assets/fonts/jbm-400.woff2)}@font-face{font-family:M;font-weight:500;src:url(../assets/fonts/jbm-500.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}body{width:560px;height:150px;overflow:hidden;font-family:P,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;position:relative}
+#logo{position:absolute;left:26px;top:24px;height:10px}.web{position:absolute;left:26px;bottom:20px;font-family:M;font-weight:500;font-size:8.6px;letter-spacing:.14em;color:#fff}.web span{color:#3B8BFF}
+#top{position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,rgba(59,139,255,0),rgba(59,139,255,.9) 30%,rgba(59,139,255,.15) 80%,rgba(59,139,255,0))}
+body{background:#070B14}
+#bg{position:absolute;inset:0;background:radial-gradient(45% 120% at 78% 40%,rgba(44,114,219,.22),rgba(44,114,219,0) 70%),linear-gradient(100deg,#060912,#0A0F1A 50%,#0B1424)}
+#h{position:absolute;left:26px;top:44px;font-weight:600;font-size:23px;letter-spacing:-.035em;line-height:1.06}#h span{background:linear-gradient(90deg,#5AA2FF,#3B8BFF);-webkit-background-clip:text;color:transparent}
+.sl{position:absolute;left:26px;top:100px;font-weight:300;font-size:10px;color:#AEBACC}
+#tr{position:absolute;left:238px;top:22px}
+.lb{position:absolute;font-family:M;font-size:6.6px;letter-spacing:.12em;color:#fff;opacity:0;white-space:nowrap;transform:translateX(-50%)}.lb b{color:#3B8BFF;font-weight:500}
+#ok{position:absolute;right:22px;bottom:18px;font-family:M;font-size:7px;letter-spacing:.14em;color:#3B8BFF}
+</style><div id="bg"></div><div id="top"></div><img id="logo" src="../assets/logo-white.svg">
+<div id="h">Steady IT.<br><span>Quietly handled.</span></div><div class="sl">Managed IT, cloud, cyber and AI.</div>
+<svg id="tr" width="304" height="96" viewBox="0 0 304 96">
+  <defs><linearGradient id="fadeL" x1="0" x2="1"><stop offset="0" stop-color="#3B8BFF" stop-opacity=".15"/><stop offset=".25" stop-color="#3B8BFF"/></linearGradient></defs>
+  <line x1="0" y1="62" x2="304" y2="62" stroke="rgba(174,186,204,.14)" stroke-dasharray="2 4"/>
+  <path id="p" fill="none" stroke="url(#fadeL)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle id="hd" r="3.2" fill="#fff"/><circle id="hg" r="9" fill="rgba(59,139,255,.35)"/>
+</svg><div class="lb" id="l0">MANAGED IT <b>· OK</b></div><div class="lb" id="l1">CLOUD <b>· OK</b></div><div class="lb" id="l2">CYBER <b>· OK</b></div><div class="lb" id="l3">AI <b>· OK</b></div>
+<div id="ok">ALL HANDLED</div><div class="web">TRANSPUTEC<span>.</span>COM</div>
+<script>const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3), inout = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2, clamp = x => Math.max(0, Math.min(1, x));
+window.DUR = 7.2;
+const X = [44, 112, 180, 248], W = 304, B = 62;
+function y(x) { let v = 0; X.forEach(c => { const d = x - c; if (d > -14 && d < 14) v += (d < -6 ? (d + 14) * .9 : d < 0 ? 7 - (d + 6) * 6.5 : d < 5 ? -32 + d * 9.5 : 13 - (d - 5) * 1.45); }); return B - v; }
+const pts = []; for (let x = 0; x <= W; x += 1) pts.push([x, y(x)]);
+const path = document.getElementById('p'); path.setAttribute('d', 'M' + pts.map(p => p[0] + ' ' + p[1].toFixed(1)).join('L'));
+const L = path.getTotalLength(); path.style.strokeDasharray = L;
+window.render = t => {
+  // 0-1.2 complete trace (first frame), 1.2-1.6 fade, 1.6-6.0 draw, 6.0-7.2 hold complete
+  let draw, op = 1;
+  if (t < 1.2) draw = 1; else if (t < 1.6) { draw = 1; op = 1 - ease((t - 1.2) / .4); } else if (t < 6.0) draw = inout((t - 1.6) / 4.4); else draw = 1;
+  if (t >= 1.6 && t < 1.8) op = ease((t - 1.6) / .2);
+  path.style.strokeDashoffset = L * (1 - draw); path.style.opacity = op;
+  const hx = W * draw, hy = y(hx), r = document.getElementById('tr').getBoundingClientRect();
+  ['hd', 'hg'].forEach(id => { const c = document.getElementById(id); c.setAttribute('cx', hx); c.setAttribute('cy', hy); c.style.opacity = (t >= 1.6 && t < 6.2) ? 1 : 0; });
+  X.forEach((c, i) => { const shown = (t < 1.6 ? op : draw * W >= c + 4 ? ease((draw * W - c - 4) / 30) : 0) * (t >= 1.2 && t < 1.6 ? op : 1);
+    const l = document.getElementById('l' + i); l.style.left = (238 + c) + 'px'; l.style.top = (22 + B - 46) + 'px'; l.style.opacity = shown; });
+  document.getElementById('ok').style.opacity = t < 1.2 ? 1 : t < 1.6 ? op : ease((t - 5.9) / .4);
+};
+render(0);</script>
