@@ -1,0 +1,177 @@
+<title>Signature Vote</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column of wide signature cards, each a preview strip over a vote bar; a live summary on top. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --ink:#0A0F1A; --muted:#5A6577; --line:#E1E6EE;
+  --accent:#2C72DB; --accent-soft:rgba(44,114,219,.10); --down:#C2410C; --down-soft:rgba(194,65,12,.10);
+  --stage-light:#FFFFFF; --stage-dark:#1E1F22;
+  --display:"Poppins",system-ui,sans-serif; --body:"Poppins",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#070B14; --surface:#0E1524; --ink:#E8EDF5; --muted:#93A0B4; --line:#1C2638;
+  --accent:#3B8BFF; --accent-soft:rgba(59,139,255,.14); --down:#FB923C; --down-soft:rgba(251,146,60,.14); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#070B14; --surface:#0E1524; --ink:#E8EDF5; --muted:#93A0B4; --line:#1C2638;
+  --accent:#3B8BFF; --accent-soft:rgba(59,139,255,.14); --down:#FB923C; --down-soft:rgba(251,146,60,.14); color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:300;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding-block:36px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
+.logo{height:12px;width:auto}.logo.dk{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .logo.lt{display:none}:root:not([data-theme="light"]) .logo.dk{display:block}}
+:root[data-theme="dark"] .logo.lt{display:none}:root[data-theme="dark"] .logo.dk{display:block}
+header{display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.4vw,40px);letter-spacing:-.03em;line-height:1.08;margin:0;text-wrap:balance}
+h1 span{color:var(--accent)}
+.lede{max-width:62ch;color:var(--muted);font-size:15px;margin:0}
+.summary{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-block:12px}
+.summary b{color:var(--ink);font-weight:500}
+.status{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:13px}
+.list{display:flex;flex-direction:column;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card.lead{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.stage{display:grid;grid-template-columns:1fr 1fr;min-width:0}
+.stage figure{margin:0;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.stage figure.l{background:var(--stage-light)}.stage figure.d{background:var(--stage-dark)}
+.stage figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.stage .l figcaption{color:#6B7280}.stage .d figcaption{color:#9CA3AF}
+.stage img{width:100%;max-width:560px;height:auto;aspect-ratio:560/150;display:block;border-radius:2px}
+.body{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 24px;align-items:center;padding:16px 20px 18px;border-top:1px solid var(--line)}
+.name{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.name h2{font-family:var(--display);font-weight:500;font-size:18px;letter-spacing:-.01em;margin:0}
+.idx{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--accent);color:#fff}
+.desc{color:var(--muted);font-size:13.5px;margin:4px 0 0}
+.who{font-size:12px;color:var(--muted);margin-top:6px;min-height:18px}
+.votes{display:flex;gap:8px;align-items:center}
+.vb{display:inline-flex;align-items:center;gap:8px;font:500 14px var(--body);color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s}
+.vb svg{width:18px;height:18px}
+.vb:hover:not(:disabled){border-color:var(--accent)}
+.vb.up[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.vb.down[aria-pressed="true"]{background:var(--down-soft);border-color:var(--down);color:var(--down)}
+.vb:disabled{cursor:default;opacity:.75}
+.vb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.meter{grid-column:1/-1;height:4px;border-radius:4px;background:var(--line);overflow:hidden;display:flex}
+.meter i{display:block;height:100%}.meter .u{background:var(--accent)}.meter .dn{background:var(--down)}
+footer{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+footer a{color:var(--accent)}
+@media (max-width:720px){.stage{grid-template-columns:1fr}.body{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <img class="logo lt" src="logo-blue.svg" alt="Transputec"><img class="logo dk" src="logo-white.svg" alt="">
+    <h1>Pick our <span>email signature.</span></h1>
+    <p class="lede">Six animated signatures for Outlook. Each one is shown in a light and a dark inbox. Give it a thumbs up or down: everyone sees the totals as they come in, and you can change your vote at any time.</p>
+    <div class="summary"><span>Leading <b id="leader">No votes yet</b></span><span>Voters <b id="voters">0</b></span><span class="status" id="status">Loading votes…</span></div>
+  </header>
+  <section class="list" id="list"></section>
+  <footer>
+    <span>Download every file, including lighter versions: <a href="https://drive.google.com/drive/folders/1Sg911jtN8T7YVglysuNfFw6pFnPoexj2" target="_blank" rel="noopener">Transputec Email Signature GIFs on Google Drive</a></span>
+    <span>Each GIF loops through Managed IT, Cloud, Cybersecurity and AI. Set it to 560 × 150 in your Outlook signature.</span>
+  </footer>
+</div>
+
+<script>
+const OPTS = [
+  {k:"premium", name:"Premium", desc:"Rolling headline, line art that draws itself, dark navy card.", src:"gifs/premium.gif"},
+  {k:"premium-light", name:"Premium Light", desc:"The premium design on a pearl-white card.", src:"gifs/premium-light.gif"},
+  {k:"orbit", name:"Orbit", desc:"The four services orbit the Transputec mark.", src:"gifs/orbit.gif"},
+  {k:"status", name:"Status", desc:"A live board where each service checks in as Handled.", src:"gifs/status.gif"},
+  {k:"keynote", name:"Keynote", desc:"Minimal black with big kinetic type.", src:"gifs/keynote.gif"},
+  {k:"classic", name:"Classic", desc:"The first, simpler version with service tiles.", src:"gifs/classic.gif"}
+];
+const UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3zm0 0 4-8a2.5 2.5 0 0 1 2.5 2.5V8h5.3a2 2 0 0 1 2 2.3l-1.3 8a2 2 0 0 1-2 1.7H7"/></svg>';
+const DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:scaleY(-1)"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3zm0 0 4-8a2.5 2.5 0 0 1 2.5 2.5V8h5.3a2 2 0 0 1 2 2.3l-1.3 8a2 2 0 0 1-2 1.7H7"/></svg>';
+
+let rows = [], uid = null, user = null, db = null, canVote = false, mine = {}, writing = Promise.resolve(), names = {};
+const $ = id => document.getElementById(id);
+
+function build() {
+  $("list").innerHTML = OPTS.map((o, i) => `
+    <article class="card" id="c-${o.k}">
+      <div class="stage">
+        <figure class="l"><figcaption>Light inbox</figcaption><img src="${o.src}" alt="${o.name} signature in a light inbox" width="560" height="150" loading="lazy"></figure>
+        <figure class="d"><figcaption>Dark inbox</figcaption><img src="${o.src}" alt="${o.name} signature in a dark inbox" width="560" height="150" loading="lazy"></figure>
+      </div>
+      <div class="body">
+        <div style="min-width:0">
+          <div class="name"><span class="idx">0${i + 1}</span><h2>${o.name}</h2><span class="pill" hidden>Leading</span></div>
+          <p class="desc">${o.desc}</p>
+          <div class="who"></div>
+        </div>
+        <div class="votes">
+          <button class="vb up" id="up-${o.k}" aria-pressed="false" aria-label="Thumbs up for ${o.name}">${UP}<span>0</span></button>
+          <button class="vb down" id="down-${o.k}" aria-pressed="false" aria-label="Thumbs down for ${o.name}">${DOWN}<span>0</span></button>
+        </div>
+        <div class="meter"><i class="u"></i><i class="dn"></i></div>
+      </div>
+    </article>`).join("");
+  OPTS.forEach(o => {
+    $("up-" + o.k).addEventListener("click", () => vote(o.k, 1));
+    $("down-" + o.k).addEventListener("click", () => vote(o.k, -1));
+  });
+}
+
+function tally() {
+  const t = {}; OPTS.forEach(o => t[o.k] = {up: [], down: []});
+  rows.forEach(r => { const v = (r.id === uid ? mine : (r.v || {})); for (const k in t) { if (v[k] === 1) t[k].up.push(r.id); if (v[k] === -1) t[k].down.push(r.id); } });
+  return t;
+}
+
+async function render() {
+  const t = tally();
+  let best = null, bestScore = 0;
+  OPTS.forEach(o => { const s = t[o.k].up.length - t[o.k].down.length; if (s > bestScore) { bestScore = s; best = o; } });
+  const voters = new Set(rows.filter(r => Object.values(r.id === uid ? mine : (r.v || {})).some(x => x === 1 || x === -1)).map(r => r.id));
+  if (uid && Object.values(mine).some(x => x)) voters.add(uid);
+  $("voters").textContent = voters.size;
+  $("leader").textContent = best ? `${best.name} (+${bestScore})` : "No votes yet";
+  const likerIds = [...new Set(OPTS.flatMap(o => t[o.k].up))];
+  if (user && likerIds.length) { try { names = await user.profiles(likerIds); } catch (e) {} }
+  OPTS.forEach(o => {
+    const c = $("c-" + o.k), u = t[o.k].up.length, d = t[o.k].down.length, tot = u + d;
+    c.classList.toggle("lead", best === o); c.querySelector(".pill").hidden = best !== o;
+    $("up-" + o.k).querySelector("span").textContent = u; $("down-" + o.k).querySelector("span").textContent = d;
+    $("up-" + o.k).setAttribute("aria-pressed", mine[o.k] === 1); $("down-" + o.k).setAttribute("aria-pressed", mine[o.k] === -1);
+    c.querySelector(".u").style.width = tot ? (u / tot * 100) + "%" : "0"; c.querySelector(".dn").style.width = tot ? (d / tot * 100) + "%" : "0";
+    const ns = t[o.k].up.map(id => id === uid ? "you" : ((names[id] && names[id].name) || "someone"));
+    const who = c.querySelector(".who");
+    who.textContent = ns.length ? "Liked by " + (ns.length <= 3 ? ns.join(", ") : ns.slice(0, 3).join(", ") + ` and ${ns.length - 3} more`) : "";
+  });
+}
+
+function setButtons(enabled) { OPTS.forEach(o => { $("up-" + o.k).disabled = !enabled; $("down-" + o.k).disabled = !enabled; }); }
+
+function vote(k, val) {
+  if (!canVote || !db || !uid) return;
+  mine = {...mine, [k]: mine[k] === val ? 0 : val};
+  render();
+  const body = {v: {...mine}, at: Date.now()};
+  writing = writing.then(() => db.doc("votes/" + uid).set(body)).catch(e => {
+    if (e && e.code === "invalid_argument") { canVote = false; setButtons(false); $("status").textContent = "You can see the votes. Ask the page owner for Contributor access to vote."; }
+    else $("status").textContent = "Your vote didn't save. Check your connection and try again.";
+  });
+}
+
+build(); render(); setButtons(false);
+
+(async () => {
+  db = await claude.use("db"); user = await claude.use("user");
+  if (!db) { $("status").textContent = "Sign in to claude.ai to see and cast votes."; return; }
+  uid = user ? await user.id() : null;
+  const w = user ? await user.can("data.write") : null;
+  canVote = !!uid && w !== false;
+  const timer = setTimeout(() => { $("status").textContent = "Votes are taking longer than usual to load."; }, 10000);
+  db.collection("votes").onSnapshot(snap => {
+    clearTimeout(timer);
+    rows = snap.docs.map(d => ({id: d.id, ...(d.data() || {})}));
+    const me = rows.find(r => r.id === uid);
+    if (me && me.v) mine = {...me.v};
+    $("status").textContent = canVote ? "Your vote counts. Click again to take it back." : "You can see the votes. Ask the page owner for Contributor access to vote.";
+    setButtons(canVote); render();
+  }, e => { clearTimeout(timer); $("status").textContent = "Votes couldn't load. Reload the page to try again."; });
+})();
+</script>
